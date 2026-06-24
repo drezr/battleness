@@ -1,0 +1,62 @@
+[
+  {
+    "id": "emberLoop",
+    "nameKey": "ring.emberLoop.name",
+    "element": "fire",
+    "rarity": "normal",
+    "baseDamage": 4,
+    "baseEnergyCost": 1,
+    "baseCooldown": 1,
+    "baseSpeed": 1
+  },
+  {
+    "id": "sparkBand",
+    "nameKey": "ring.sparkBand.name",
+    "element": "electric",
+    "rarity": "normal",
+    "baseDamage": 2,
+    "baseEnergyCost": 1,
+    "baseCooldown": 0,
+    "baseSpeed": 3
+  },
+  {
+    "id": "frostSeal",
+    "nameKey": "ring.frostSeal.name",
+    "element": "ice",
+    "rarity": "normal",
+    "baseDamage": 3,
+    "baseEnergyCost": 2,
+    "baseCooldown": 0,
+    "baseSpeed": 0
+  },
+  {
+    "id": "ironCircle",
+    "nameKey": "ring.ironCircle.name",
+    "element": "electric",
+    "rarity": "magic",
+    "baseDamage": 3,
+    "baseEnergyCost": 1,
+    "baseCooldown": 1,
+    "baseSpeed": 2
+  },
+  {
+    "id": "stormCoil",
+    "nameKey": "ring.stormCoil.name",
+    "element": "electric",
+    "rarity": "rare",
+    "baseDamage": 3,
+    "baseEnergyCost": 2,
+    "baseCooldown": 0,
+    "baseSpeed": 4
+  },
+  {
+    "id": "glacierRing",
+    "nameKey": "ring.glacierRing.name",
+    "element": "ice",
+    "rarity": "rare",
+    "baseDamage": 5,
+    "baseEnergyCost": 3,
+    "baseCooldown": 0,
+    "baseSpeed": 0
+  }
+]

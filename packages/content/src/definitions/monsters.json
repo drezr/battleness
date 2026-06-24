@@ -1,0 +1,68 @@
+[
+  {
+    "id": "iceGuardian",
+    "nameKey": "monster.iceGuardian.name",
+    "element": "ice",
+    "rarity": "normal",
+    "baseHealth": 7,
+    "baseDamage": 2,
+    "baseCooldown": 1,
+    "baseSpeed": 0,
+    "skills": ["taunt"]
+  },
+  {
+    "id": "emberImp",
+    "nameKey": "monster.emberImp.name",
+    "element": "fire",
+    "rarity": "normal",
+    "baseHealth": 3,
+    "baseDamage": 4,
+    "baseCooldown": 2,
+    "baseSpeed": 1,
+    "skills": ["rage"]
+  },
+  {
+    "id": "stormHound",
+    "nameKey": "monster.stormHound.name",
+    "element": "electric",
+    "rarity": "normal",
+    "baseHealth": 4,
+    "baseDamage": 2,
+    "baseCooldown": 1,
+    "baseSpeed": 3,
+    "skills": ["haste"]
+  },
+  {
+    "id": "frostBeetle",
+    "nameKey": "monster.frostBeetle.name",
+    "element": "ice",
+    "rarity": "magic",
+    "baseHealth": 8,
+    "baseDamage": 1,
+    "baseCooldown": 0,
+    "baseSpeed": 0,
+    "skills": ["shield"]
+  },
+  {
+    "id": "rageSprite",
+    "nameKey": "monster.rageSprite.name",
+    "element": "fire",
+    "rarity": "magic",
+    "baseHealth": 4,
+    "baseDamage": 5,
+    "baseCooldown": 2,
+    "baseSpeed": 1,
+    "skills": ["rage"]
+  },
+  {
+    "id": "shieldWisp",
+    "nameKey": "monster.shieldWisp.name",
+    "element": "ice",
+    "rarity": "rare",
+    "baseHealth": 9,
+    "baseDamage": 1,
+    "baseCooldown": 0,
+    "baseSpeed": 0,
+    "skills": [{ "type": "shield", "amount": 2 }]
+  }
+]

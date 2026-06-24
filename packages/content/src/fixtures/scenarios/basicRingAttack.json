@@ -1,0 +1,21 @@
+{
+  "id": "basicRingAttack",
+  "descriptionKey": "scenario.basicRingAttack.description",
+  "battleSetupId": "basicDuel",
+  "actions": [
+    {
+      "type": "endTurn",
+      "playerId": "playerOne"
+    },
+    {
+      "type": "useRing",
+      "playerId": "playerTwo",
+      "ringInstanceId": "playerTwo.ring.ironCircle",
+      "targetId": "playerOne.hero"
+    }
+  ],
+  "expect": {
+    "eventTypes": ["turnEnded", "turnStarted", "ringUsed", "energySpent", "damageDealt"],
+    "result": null
+  }
+}

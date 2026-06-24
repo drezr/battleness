@@ -1,0 +1,5 @@
+{
+  "id": "basicDuel",
+  "seed": "basic-duel-seed",
+  "playerIds": ["playerOne", "playerTwo"]
+}

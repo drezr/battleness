@@ -268,6 +268,35 @@ This section separates executable game rules from implementation decisions. It i
 - Scenario test fixtures should support both single-action expectations and multi-action sequences.
 - JSON content should be validated with a TypeScript-friendly schema validation library such as Zod.
 
+### Initial Implementation Contract
+
+- Definition files:
+  - `packages/content/src/definitions/rings.json`
+  - `packages/content/src/definitions/gems.json`
+  - `packages/content/src/definitions/monsters.json`
+  - `packages/content/src/definitions/spells.json`
+  - `packages/content/src/definitions/materials.json`
+- Fixture files:
+  - `packages/content/src/fixtures/players.json`
+  - `packages/content/src/fixtures/inventories.json`
+  - `packages/content/src/fixtures/battleSetups/*.json`
+  - `packages/content/src/fixtures/scenarios/*.json`
+- Locale files:
+  - `packages/content/src/locales/en.json`
+  - `packages/content/src/locales/fr.json`
+- Ring definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseDamage`, `baseEnergyCost`, `baseCooldown`, and `baseSpeed`.
+- Gem definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseDamage`, `baseEnergyPenalty`, and `baseCooldownPenalty`.
+- Monster definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseHealth`, `baseDamage`, `baseCooldown`, `baseSpeed`, and `skills`.
+- Spell definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseEnergyPenalty`, `baseCooldownPenalty`, and `effects`.
+- Spell `effects` should be an array of explicit typed effect objects. The first supported effect type is `dealDamage` with `amount` and `target` fields.
+- Player fixtures should use this initial shape: `id`, `username`, `level`, `experience`, and `equippedRingInstanceIds`.
+- Inventory fixtures should contain player-owned ring, gem, monster, and spell instances. Ring instances contain `id`, `definitionId`, `ownerId`, `level`, `quality`, `socketCount`, `socketedGemInstanceIds`, and `equipped`. Gem instances contain `id`, `definitionId`, `ownerId`, `level`, `quality`, and optional `enchantment`.
+- The initial `BattleSetup` should contain `id`, `seed`, two players, resolved combat stats, equipped ring instances, socketed gem instances, referenced definitions, and optional initial status for first-player element choice.
+- The initial `BattleAction` union should include `chooseElement`, `useRing`, `useMonster`, `endTurn`, and `concede`.
+- The initial event log should include `battleStarted`, `firstPlayerChosen`, `turnStarted`, `cooldownChanged`, `ringUsed`, `energySpent`, `damageDealt`, `spellCast`, `monsterSummoned`, `monsterUsed`, `monsterDestroyed`, `turnEnded`, and `battleEnded`.
+- Initial scenario fixtures should include `basicRingAttack`, `summonAndTaunt`, and `spellSelfTargeting`.
+- Scenario fixtures should support both full-state expectations and partial expectations for event types, health values, energy values, cooldown values, board state, and battle result.
+
 ### Damage And Targeting
 
 - Damage reduces the target's health.

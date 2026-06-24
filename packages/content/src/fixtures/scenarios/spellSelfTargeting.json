@@ -1,0 +1,23 @@
+{
+  "id": "spellSelfTargeting",
+  "descriptionKey": "scenario.spellSelfTargeting.description",
+  "battleSetupId": "basicDuel",
+  "actions": [
+    {
+      "type": "useRing",
+      "playerId": "playerOne",
+      "ringInstanceId": "playerOne.ring.sparkBand",
+      "targetId": "playerTwo.hero",
+      "enchantmentTargets": {
+        "playerOne.gem.sparkPrism": "playerOne.hero"
+      }
+    }
+  ],
+  "expect": {
+    "eventTypes": ["ringUsed", "spellCast", "damageDealt"],
+    "health": {
+      "playerOne.hero": 28
+    },
+    "result": null
+  }
+}

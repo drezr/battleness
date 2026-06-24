@@ -186,6 +186,10 @@ These questions are listed in `docs/PROJECT.md` and should be resolved before im
 - Randomness should be allowed only through deterministic seeded state. The initial rules do not require much randomness, but this protects future AI decisions, randomized rewards, shuffled/generated content, or random tie-breakers.
 - Scenario test fixtures should support both single-action expectations and multi-action sequences.
 - JSON content should be validated with a TypeScript-friendly schema validation library such as Zod.
+- Initial implementation files should include content definitions under `packages/content/src/definitions/`, prototype fixtures under `packages/content/src/fixtures/`, and locale files under `packages/content/src/locales/`.
+- Initial battle actions should include `chooseElement`, `useRing`, `useMonster`, `endTurn`, and `concede`.
+- Initial event log types should include battle start/end, first-player choice, turn start/end, cooldown changes, ring use, energy spend, damage, spell cast, monster summon/use/destruction, and battle result.
+- Initial scenario fixtures should include `basicRingAttack`, `summonAndTaunt`, and `spellSelfTargeting`.
 
 ## Elemental Design Direction
 

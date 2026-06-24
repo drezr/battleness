@@ -1,0 +1,30 @@
+{
+  "id": "summonAndTaunt",
+  "descriptionKey": "scenario.summonAndTaunt.description",
+  "battleSetupId": "basicDuel",
+  "actions": [
+    {
+      "type": "useRing",
+      "playerId": "playerOne",
+      "ringInstanceId": "playerOne.ring.sparkBand",
+      "targetId": "playerTwo.hero",
+      "enchantmentTargets": {
+        "playerOne.gem.sparkPrism": "playerOne.hero"
+      }
+    },
+    {
+      "type": "endTurn",
+      "playerId": "playerOne"
+    },
+    {
+      "type": "useRing",
+      "playerId": "playerTwo",
+      "ringInstanceId": "playerTwo.ring.ironCircle",
+      "targetId": "playerOne.monster.iceGuardian.1"
+    }
+  ],
+  "expect": {
+    "eventTypes": ["ringUsed", "monsterSummoned", "turnEnded", "turnStarted", "ringUsed"],
+    "result": null
+  }
+}

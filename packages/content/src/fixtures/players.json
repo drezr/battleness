@@ -1,0 +1,16 @@
+[
+  {
+    "id": "playerOne",
+    "username": "Player One",
+    "level": 1,
+    "experience": 0,
+    "equippedRingInstanceIds": ["playerOne.ring.emberLoop", "playerOne.ring.sparkBand"]
+  },
+  {
+    "id": "playerTwo",
+    "username": "Player Two",
+    "level": 1,
+    "experience": 0,
+    "equippedRingInstanceIds": ["playerTwo.ring.frostSeal", "playerTwo.ring.ironCircle"]
+  }
+]

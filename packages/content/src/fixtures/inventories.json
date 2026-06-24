@@ -1,0 +1,95 @@
+{
+  "rings": [
+    {
+      "id": "playerOne.ring.emberLoop",
+      "definitionId": "emberLoop",
+      "ownerId": "playerOne",
+      "level": 1,
+      "quality": 72,
+      "socketCount": 1,
+      "socketedGemInstanceIds": ["playerOne.gem.rubyShard"],
+      "equipped": true
+    },
+    {
+      "id": "playerOne.ring.sparkBand",
+      "definitionId": "sparkBand",
+      "ownerId": "playerOne",
+      "level": 1,
+      "quality": 66,
+      "socketCount": 2,
+      "socketedGemInstanceIds": ["playerOne.gem.sparkPrism", "playerOne.gem.frostChip"],
+      "equipped": true
+    },
+    {
+      "id": "playerTwo.ring.frostSeal",
+      "definitionId": "frostSeal",
+      "ownerId": "playerTwo",
+      "level": 1,
+      "quality": 70,
+      "socketCount": 2,
+      "socketedGemInstanceIds": ["playerTwo.gem.frostChip", "playerTwo.gem.staticPearl"],
+      "equipped": true
+    },
+    {
+      "id": "playerTwo.ring.ironCircle",
+      "definitionId": "ironCircle",
+      "ownerId": "playerTwo",
+      "level": 1,
+      "quality": 62,
+      "socketCount": 1,
+      "socketedGemInstanceIds": ["playerTwo.gem.plainQuartz"],
+      "equipped": true
+    }
+  ],
+  "gems": [
+    {
+      "id": "playerOne.gem.rubyShard",
+      "definitionId": "rubyShard",
+      "ownerId": "playerOne",
+      "level": 1,
+      "quality": 60,
+      "enchantment": { "type": "spell", "spellId": "firebolt" }
+    },
+    {
+      "id": "playerOne.gem.frostChip",
+      "definitionId": "frostChip",
+      "ownerId": "playerOne",
+      "level": 1,
+      "quality": 58,
+      "enchantment": { "type": "monster", "monsterId": "iceGuardian" }
+    },
+    {
+      "id": "playerOne.gem.sparkPrism",
+      "definitionId": "sparkPrism",
+      "ownerId": "playerOne",
+      "level": 1,
+      "quality": 64,
+      "enchantment": { "type": "spell", "spellId": "spark" }
+    },
+    {
+      "id": "playerTwo.gem.frostChip",
+      "definitionId": "frostChip",
+      "ownerId": "playerTwo",
+      "level": 1,
+      "quality": 63,
+      "enchantment": { "type": "spell", "spellId": "iceShard" }
+    },
+    {
+      "id": "playerTwo.gem.staticPearl",
+      "definitionId": "staticPearl",
+      "ownerId": "playerTwo",
+      "level": 1,
+      "quality": 65,
+      "enchantment": { "type": "monster", "monsterId": "stormHound" }
+    },
+    {
+      "id": "playerTwo.gem.plainQuartz",
+      "definitionId": "plainQuartz",
+      "ownerId": "playerTwo",
+      "level": 1,
+      "quality": 50
+    }
+  ],
+  "monsters": [],
+  "spells": []
+}

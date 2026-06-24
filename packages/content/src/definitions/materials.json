@@ -1,0 +1,17 @@
+[
+  {
+    "id": "ironDust",
+    "nameKey": "material.ironDust.name",
+    "rarity": "normal"
+  },
+  {
+    "id": "chargedCrystal",
+    "nameKey": "material.chargedCrystal.name",
+    "rarity": "magic"
+  },
+  {
+    "id": "frozenCore",
+    "nameKey": "material.frozenCore.name",
+    "rarity": "rare"
+  }
+]

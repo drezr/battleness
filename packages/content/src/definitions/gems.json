@@ -1,0 +1,56 @@
+[
+  {
+    "id": "rubyShard",
+    "nameKey": "gem.rubyShard.name",
+    "element": "fire",
+    "rarity": "normal",
+    "baseDamage": 2,
+    "baseEnergyPenalty": 0,
+    "baseCooldownPenalty": 0
+  },
+  {
+    "id": "sparkPrism",
+    "nameKey": "gem.sparkPrism.name",
+    "element": "electric",
+    "rarity": "normal",
+    "baseDamage": 1,
+    "baseEnergyPenalty": 0,
+    "baseCooldownPenalty": 0
+  },
+  {
+    "id": "frostChip",
+    "nameKey": "gem.frostChip.name",
+    "element": "ice",
+    "rarity": "normal",
+    "baseDamage": 1,
+    "baseEnergyPenalty": 0,
+    "baseCooldownPenalty": 0
+  },
+  {
+    "id": "plainQuartz",
+    "nameKey": "gem.plainQuartz.name",
+    "element": "electric",
+    "rarity": "normal",
+    "baseDamage": 1,
+    "baseEnergyPenalty": 0,
+    "baseCooldownPenalty": 0
+  },
+  {
+    "id": "emberCore",
+    "nameKey": "gem.emberCore.name",
+    "element": "fire",
+    "rarity": "magic",
+    "baseDamage": 3,
+    "baseEnergyPenalty": 1,
+    "baseCooldownPenalty": 1
+  },
+  {
+    "id": "staticPearl",
+    "nameKey": "gem.staticPearl.name",
+    "element": "electric",
+    "rarity": "magic",
+    "baseDamage": 1,
+    "baseEnergyPenalty": 0,
+    "baseCooldownPenalty": 0
+  }
+]

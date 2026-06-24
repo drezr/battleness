@@ -1,0 +1,29 @@
+[
+  {
+    "id": "spark",
+    "nameKey": "spell.spark.name",
+    "element": "electric",
+    "rarity": "normal",
+    "baseEnergyPenalty": 0,
+    "baseCooldownPenalty": 0,
+    "effects": [{ "type": "dealDamage", "amount": 2, "target": "any" }]
+  },
+  {
+    "id": "firebolt",
+    "nameKey": "spell.firebolt.name",
+    "element": "fire",
+    "rarity": "normal",
+    "baseEnergyPenalty": 1,
+    "baseCooldownPenalty": 0,
+    "effects": [{ "type": "dealDamage", "amount": 4, "target": "any" }]
+  },
+  {
+    "id": "iceShard",
+    "nameKey": "spell.iceShard.name",
+    "element": "ice",
+    "rarity": "normal",
+    "baseEnergyPenalty": 1,
+    "baseCooldownPenalty": 0,
+    "effects": [{ "type": "dealDamage", "amount": 3, "target": "any" }]
+  }
+]

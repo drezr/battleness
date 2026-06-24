@@ -1,0 +1,507 @@
+export * from "./types";
+
+import type {
+  BattleAction,
+  BattleActionResult,
+  BattleEvent,
+  BattleSetup,
+  BattleState,
+  BattlePlayer,
+  ElementType,
+  MonsterCombatInstance,
+  TargetId,
+} from "./types";
+
+export function createBattleState(setup: BattleSetup): BattleState {
+  assertValidBattleSetup(setup);
+
+  return {
+    ...structuredClone(setup),
+    log: createInitialLog(setup),
+    result: null,
+  };
+}
+
+export function applyBattleAction(state: BattleState, action: BattleAction): BattleActionResult {
+  if (state.status === "finished") {
+    throw new Error("Cannot apply an action to a finished battle.");
+  }
+
+  const next = structuredClone(state);
+  const events: BattleEvent[] = [];
+
+  switch (action.type) {
+    case "chooseElement":
+      throw new Error("Element choice resolution is not implemented yet.");
+    case "useRing":
+      events.push(...useRing(next, action));
+      finishBattleIfNeeded(next, events);
+      break;
+    case "useMonster":
+      events.push(...useMonster(next, action));
+      finishBattleIfNeeded(next, events);
+      break;
+    case "endTurn":
+      events.push(...endTurn(next, action.playerId));
+      break;
+    case "concede":
+      events.push(...concede(next, action.playerId));
+      break;
+  }
+
+  next.log.push(...events);
+
+  return { state: next, events };
+}
+
+export function assertValidBattleSetup(setup: BattleSetup): void {
+  if (setup.players.length !== 2) {
+    throw new Error("BattleSetup must include exactly two players.");
+  }
+
+  const playerIds = new Set(setup.players.map((player) => player.id));
+  if (playerIds.size !== 2) {
+    throw new Error("BattleSetup players must have distinct IDs.");
+  }
+
+  if (setup.activePlayerId !== null && !playerIds.has(setup.activePlayerId)) {
+    throw new Error("BattleSetup activePlayerId must reference one of the players.");
+  }
+
+  if (setup.startingPlayerId !== null && !playerIds.has(setup.startingPlayerId)) {
+    throw new Error("BattleSetup startingPlayerId must reference one of the players.");
+  }
+
+  for (const player of setup.players) {
+    for (const ring of player.rings) {
+      if (ring.ownerId !== player.id) {
+        throw new Error(`Ring ${ring.id} ownerId does not match player ${player.id}.`);
+      }
+
+      if (ring.gems.length > 3) {
+        throw new Error(`Ring ${ring.id} has more than 3 socketed gems.`);
+      }
+
+      for (const gem of ring.gems) {
+        if (gem.ownerId !== player.id) {
+          throw new Error(`Gem ${gem.id} ownerId does not match player ${player.id}.`);
+        }
+      }
+    }
+
+    if (player.monsters.length > 3) {
+      throw new Error(`Player ${player.id} controls more than 3 monsters.`);
+    }
+  }
+}
+
+function createInitialLog(setup: BattleSetup): BattleEvent[] {
+  const events: BattleEvent[] = [{ type: "battleStarted", battleId: setup.id }];
+
+  if (setup.activePlayerId) {
+    events.push({
+      type: "firstPlayerChosen",
+      playerId: setup.activePlayerId,
+      reason: "speed",
+    });
+
+    const activePlayer = setup.players.find((player) => player.id === setup.activePlayerId);
+    if (activePlayer) {
+      events.push({
+        type: "turnStarted",
+        playerId: activePlayer.id,
+        turnCount: activePlayer.energy.turnCount,
+        energy: activePlayer.energy.current,
+      });
+    }
+  }
+
+  return events;
+}
+
+function useRing(
+  state: BattleState,
+  action: Extract<BattleAction, { type: "useRing" }>,
+): BattleEvent[] {
+  const player = requireActivePlayer(state, action.playerId);
+  const ring = player.rings.find((candidate) => candidate.id === action.ringInstanceId);
+  if (!ring) {
+    throw new Error(`Ring ${action.ringInstanceId} was not found for player ${player.id}.`);
+  }
+
+  if (ring.currentCooldown > 0) {
+    throw new Error(`Ring ${ring.id} is on cooldown.`);
+  }
+
+  if (player.energy.current < ring.energyCost) {
+    throw new Error(`Player ${player.id} does not have enough energy to use ring ${ring.id}.`);
+  }
+
+  requireValidTarget(state, player.id, action.targetId);
+  assertTauntAllowsTarget(state, player.id, action.targetId);
+
+  player.energy.current -= ring.energyCost;
+  ring.currentCooldown = ring.cooldown;
+
+  const events: BattleEvent[] = [
+    {
+      type: "ringUsed",
+      playerId: player.id,
+      ringInstanceId: ring.id,
+      targetId: action.targetId,
+    },
+    {
+      type: "energySpent",
+      playerId: player.id,
+      amount: ring.energyCost,
+      remaining: player.energy.current,
+    },
+  ];
+
+  const ringDamage = ring.damage + ring.gems.reduce((sum, gem) => sum + gem.damage, 0);
+  events.push(
+    ...applyDamage(state, player.id, ring.id, action.targetId, ringDamage, ring.element, true),
+  );
+
+  for (const gem of ring.gems) {
+    if (!gem.enchantment) {
+      continue;
+    }
+
+    if (gem.enchantment.type === "monster") {
+      events.push(...summonMonster(state, player, gem.enchantment.monsterId));
+      continue;
+    }
+
+    const spell = state.definitions.spells[gem.enchantment.spellId];
+    if (!spell) {
+      throw new Error(`Spell definition ${gem.enchantment.spellId} was not found.`);
+    }
+
+    const spellTarget = action.enchantmentTargets?.[gem.id] ?? action.targetId;
+    requireValidTarget(state, player.id, spellTarget);
+    assertTauntAllowsTarget(state, player.id, spellTarget);
+
+    events.push({
+      type: "spellCast",
+      spellId: spell.id,
+      sourceGemId: gem.id,
+      targetId: spellTarget,
+    });
+
+    for (const effect of spell.effects) {
+      if (effect.type === "dealDamage") {
+        events.push(
+          ...applyDamage(
+            state,
+            player.id,
+            spell.id,
+            spellTarget,
+            effect.amount,
+            spell.element,
+            true,
+          ),
+        );
+      }
+    }
+  }
+
+  return events;
+}
+
+function useMonster(
+  state: BattleState,
+  action: Extract<BattleAction, { type: "useMonster" }>,
+): BattleEvent[] {
+  const player = requireActivePlayer(state, action.playerId);
+  const monster = player.monsters.find((candidate) => candidate.id === action.monsterInstanceId);
+  if (!monster) {
+    throw new Error(`Monster ${action.monsterInstanceId} was not found for player ${player.id}.`);
+  }
+
+  if (monster.currentCooldown > 0) {
+    throw new Error(`Monster ${monster.id} is on cooldown.`);
+  }
+
+  requireValidTarget(state, player.id, action.targetId);
+  assertTauntAllowsTarget(state, player.id, action.targetId);
+
+  monster.currentCooldown = monster.cooldown;
+
+  return [
+    {
+      type: "monsterUsed",
+      playerId: player.id,
+      monsterInstanceId: monster.id,
+      targetId: action.targetId,
+    },
+    ...applyDamage(
+      state,
+      player.id,
+      monster.id,
+      action.targetId,
+      monster.damage,
+      monster.element,
+      true,
+    ),
+  ];
+}
+
+function endTurn(state: BattleState, playerId: string): BattleEvent[] {
+  const player = requireActivePlayer(state, playerId);
+  const opponent = getOpponent(state, player.id);
+  const events: BattleEvent[] = [{ type: "turnEnded", playerId: player.id }];
+
+  state.activePlayerId = opponent.id;
+  opponent.energy.turnCount += 1;
+  opponent.energy.maxForTurn = Math.min(8, opponent.energy.turnCount);
+  opponent.energy.current = opponent.energy.maxForTurn;
+
+  for (const ring of opponent.rings) {
+    events.push(...decrementCooldown(ring.id, ring));
+  }
+
+  for (const monster of opponent.monsters) {
+    events.push(...decrementCooldown(monster.id, monster));
+  }
+
+  events.push({
+    type: "turnStarted",
+    playerId: opponent.id,
+    turnCount: opponent.energy.turnCount,
+    energy: opponent.energy.current,
+  });
+
+  return events;
+}
+
+function concede(state: BattleState, playerId: string): BattleEvent[] {
+  const player = getPlayer(state, playerId);
+  const opponent = getOpponent(state, player.id);
+  const result = { type: "winner" as const, winnerId: opponent.id, loserId: player.id };
+
+  state.status = "finished";
+  state.result = result;
+
+  return [{ type: "battleEnded", result }];
+}
+
+function summonMonster(state: BattleState, player: BattlePlayer, monsterId: string): BattleEvent[] {
+  if (player.monsters.length >= 3) {
+    return [];
+  }
+
+  const definition = state.definitions.monsters[monsterId];
+  if (!definition) {
+    throw new Error(`Monster definition ${monsterId} was not found.`);
+  }
+
+  const instanceNumber =
+    player.monsters.filter((monster) => monster.definitionId === monsterId).length + 1;
+  const monsterInstance: MonsterCombatInstance = {
+    id: `${player.id}.monster.${monsterId}.${instanceNumber}`,
+    definitionId: definition.id,
+    ownerId: player.id,
+    nameKey: definition.nameKey,
+    element: definition.element,
+    health: definition.baseHealth,
+    maxHealth: definition.baseHealth,
+    damage: definition.baseDamage,
+    cooldown: definition.baseCooldown,
+    currentCooldown: 1,
+    speed: definition.baseSpeed,
+    skills: structuredClone(definition.skills),
+  };
+
+  player.monsters.push(monsterInstance);
+
+  return [
+    {
+      type: "monsterSummoned",
+      playerId: player.id,
+      monsterInstanceId: monsterInstance.id,
+      monsterId,
+    },
+  ];
+}
+
+function applyDamage(
+  state: BattleState,
+  sourcePlayerId: string,
+  sourceId: string,
+  targetId: TargetId,
+  baseAmount: number,
+  element: ElementType,
+  blockFirstTurnHeroDamage: boolean,
+): BattleEvent[] {
+  const target = getTarget(state, targetId);
+  if (!target) {
+    return [];
+  }
+
+  if (
+    blockFirstTurnHeroDamage &&
+    target.kind === "hero" &&
+    target.player.id !== sourcePlayerId &&
+    sourcePlayerId === state.startingPlayerId &&
+    getPlayer(state, sourcePlayerId).energy.turnCount === 1
+  ) {
+    return [];
+  }
+
+  const amount =
+    target.kind === "monster" && hasElementalAdvantage(element, target.monster.element)
+      ? Math.floor(baseAmount * 1.1)
+      : baseAmount;
+
+  if (amount <= 0) {
+    return [];
+  }
+
+  const events: BattleEvent[] = [
+    {
+      type: "damageDealt",
+      sourceId,
+      targetId,
+      amount,
+      element,
+    },
+  ];
+
+  if (target.kind === "hero") {
+    target.player.hero.health = Math.max(0, target.player.hero.health - amount);
+    return events;
+  }
+
+  target.monster.health = Math.max(0, target.monster.health - amount);
+  if (target.monster.health === 0) {
+    target.player.monsters = target.player.monsters.filter(
+      (monster) => monster.id !== target.monster.id,
+    );
+    events.push({ type: "monsterDestroyed", monsterInstanceId: target.monster.id });
+  }
+
+  return events;
+}
+
+function finishBattleIfNeeded(state: BattleState, events: BattleEvent[]): void {
+  const defeatedPlayers = state.players.filter((player) => player.hero.health === 0);
+  if (defeatedPlayers.length === 0) {
+    return;
+  }
+
+  const result =
+    defeatedPlayers.length === 2
+      ? { type: "draw" as const }
+      : {
+          type: "winner" as const,
+          winnerId: getOpponent(state, defeatedPlayers[0]!.id).id,
+          loserId: defeatedPlayers[0]!.id,
+        };
+
+  state.status = "finished";
+  state.result = result;
+  events.push({ type: "battleEnded", result });
+}
+
+function decrementCooldown(targetId: string, target: { currentCooldown: number }): BattleEvent[] {
+  if (target.currentCooldown === 0) {
+    return [];
+  }
+
+  const from = target.currentCooldown;
+  target.currentCooldown = Math.max(0, target.currentCooldown - 1);
+
+  return [{ type: "cooldownChanged", targetId, from, to: target.currentCooldown }];
+}
+
+function requireActivePlayer(state: BattleState, playerId: string): BattlePlayer {
+  if (state.activePlayerId !== playerId) {
+    throw new Error(`Player ${playerId} is not the active player.`);
+  }
+
+  return getPlayer(state, playerId);
+}
+
+function getPlayer(state: BattleState, playerId: string): BattlePlayer {
+  const player = state.players.find((candidate) => candidate.id === playerId);
+  if (!player) {
+    throw new Error(`Player ${playerId} was not found.`);
+  }
+
+  return player;
+}
+
+function getOpponent(state: BattleState, playerId: string): BattlePlayer {
+  const opponent = state.players.find((candidate) => candidate.id !== playerId);
+  if (!opponent) {
+    throw new Error(`Opponent for player ${playerId} was not found.`);
+  }
+
+  return opponent;
+}
+
+function requireValidTarget(state: BattleState, sourcePlayerId: string, targetId: TargetId): void {
+  if (!getTarget(state, targetId)) {
+    throw new Error(`Target ${targetId} was not found for player ${sourcePlayerId}.`);
+  }
+}
+
+function getTarget(
+  state: BattleState,
+  targetId: TargetId,
+):
+  | { kind: "hero"; player: BattlePlayer }
+  | { kind: "monster"; player: BattlePlayer; monster: MonsterCombatInstance }
+  | null {
+  if (targetId.endsWith(".hero")) {
+    const playerId = targetId.slice(0, -".hero".length);
+    const player = state.players.find((candidate) => candidate.id === playerId);
+    return player ? { kind: "hero", player } : null;
+  }
+
+  const [playerId, monsterPart] = targetId.split(".monster.");
+  if (!playerId || !monsterPart) {
+    return null;
+  }
+
+  const player = state.players.find((candidate) => candidate.id === playerId);
+  const monster = player?.monsters.find((candidate) => candidate.id === targetId);
+  return player && monster ? { kind: "monster", player, monster } : null;
+}
+
+function assertTauntAllowsTarget(
+  state: BattleState,
+  sourcePlayerId: string,
+  targetId: TargetId,
+): void {
+  const target = getTarget(state, targetId);
+  if (!target || target.player.id === sourcePlayerId) {
+    return;
+  }
+
+  const tauntMonsters = target.player.monsters.filter(hasTaunt);
+  if (tauntMonsters.length === 0) {
+    return;
+  }
+
+  if (target.kind === "monster" && hasTaunt(target.monster)) {
+    return;
+  }
+
+  throw new Error(`Target ${targetId} is protected by Taunt.`);
+}
+
+function hasTaunt(monster: MonsterCombatInstance): boolean {
+  return monster.skills.some((skill) =>
+    typeof skill === "string" ? skill === "taunt" : skill.type === "taunt",
+  );
+}
+
+function hasElementalAdvantage(attacker: ElementType, defender: ElementType): boolean {
+  return (
+    (attacker === "electric" && defender === "fire") ||
+    (attacker === "fire" && defender === "ice") ||
+    (attacker === "ice" && defender === "electric")
+  );
+}
