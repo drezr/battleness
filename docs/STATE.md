@@ -12,6 +12,7 @@ This file records modifications made to the project during agent-assisted work.
 
 ### 2026-06-24
 
+- Added a documentation language rule to `docs/AGENT.md`: all new information added to files in `docs/` should be written in English.
 - Added `docs/RESUME.md` as a handoff document for continuing BattleNess planning and development on another computer or with another agent.
 - Rewrote `docs/RESUME.md` after the file was moved into the documentation directory.
 

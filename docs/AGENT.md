@@ -7,6 +7,7 @@ These instructions are persistent project context for future agents working on B
 - For all future discussions and implementation work, record project modifications in `docs/STATE.md`.
 - `docs/STATE.md` should track changes made to code, docs, configuration, data files, tests, and other project artifacts.
 - Keep `docs/STATE.md` concise and ordered by date, with newest entries easy to find.
+- Write all new information added to files in `docs/` in English.
 - Record persistent project instructions in `docs/AGENT.md`.
 - Record the project summary, game rules, and technical decisions in `docs/PROJECT.md`.
 - Update `docs/PROJECT.md` when framework, architecture, database, deployment, or gameplay-rule decisions are made.
