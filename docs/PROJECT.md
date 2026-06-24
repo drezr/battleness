@@ -118,6 +118,13 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - Electric is oriented toward low energy cost, high speed points, and low damage. Its associated special skills include Haste and MultiHit.
 - Ice is oriented toward high health, low cooldown time, high energy cost, and low speed points. Its associated special skills include Taunt and Shield.
 
+### Visual Color Reference
+
+- Object colors: Ring uses pink, Gem uses cyan, Monster uses green, Spell uses magenta, and Material uses blue.
+- Element colors: Electric uses yellow, Fire uses pink-red, and Ice uses light cyan.
+- Rarity colors: Normal uses white or light gray, Magic uses blue, Rare uses orange, and Legendary uses purple.
+- Stat colors: Damage uses pink-red, Health uses red, Energy uses green, Energy Penalty uses pale green, Cooldown uses light cyan, Cooldown Penalty uses cyan, Quality uses orange, Speed uses yellow, Skill uses magenta, and Rarity uses purple.
+
 ### Progression And Economy
 
 - Credit: The virtual currency used to buy, sell, craft, and improve items.
@@ -236,10 +243,30 @@ This section separates executable game rules from implementation decisions. It i
 
 ### Prototype Stats
 
-- For the first combat prototype, health, damage, energy cost, cooldown, and similar combat values should come directly from JSON content.
+- BattleNess does not have predefined hero classes. In combat, the hero is the logged-in player represented by account and progression data.
+- In production, player identity, experience, equipped rings, inventory item instances, socket counts, socketed gems, gem enchantments, item levels, and item quality should come from the database.
+- For the first combat prototype, fixture JSON files should simulate the database-owned player and inventory data.
+- Health, damage, energy cost, cooldown, and similar combat values should be resolved from content definitions plus player-owned item instances.
 - The engine should still keep a clear stat-input boundary so level, quality, and progression formulas can be added later without rewriting core combat resolution.
-- Initial content should be split across separate JSON files, such as heroes, rings, gems, monsters, and spells.
+- Initial content definitions should be split across separate JSON files under `packages/content/src/definitions/`, such as `rings.json`, `gems.json`, `monsters.json`, `spells.json`, and `materials.json`.
+- Prototype fixtures should live under `packages/content/src/fixtures/` and include simulated players, inventories, and battle setups.
 - Engine tests should include both focused unit tests and full combat scenario tests loaded from JSON fixtures.
+
+### Engine And Content Format
+
+- Content objects should use readable string IDs.
+- JSON content IDs should use camelCase slugs, such as `spark`, `firebolt`, and `iceShard`, to stay ergonomic in TypeScript and consistent with JSON field naming.
+- Ring definitions should describe the base ring type only. Socket count, socketed gems, item level, quality, ownership, and equipped state belong to player-owned ring instances.
+- Gem definitions should describe the base gem type only. Gem enchantments, item level, quality, and ownership belong to player-owned gem instances.
+- Monster and spell definitions describe reusable content. Player-owned monster or spell instances should be introduced only when those objects need to exist as owned inventory items.
+- The combat engine should not read JSON files directly. It should receive validated `BattleSetup` objects prepared from definitions, player fixtures or database rows, and inventory instances.
+- `BattleSetup` should contain the two players, resolved combat stats, equipped ring instances, socketed gem instances, referenced definitions, and any deterministic seed required for the battle.
+- Player actions sent to the combat engine should be represented as typed command objects, such as `{ type: "useRing", actorId, ringId, targetId }`.
+- The combat engine should produce a detailed event log after each action for debugging, UI rendering, and future replay support.
+- Randomness should be allowed only through deterministic seeded state, never through untracked runtime randomness such as direct `Math.random()` calls.
+- The initial rules do not require much randomness; this rule mainly protects future systems such as AI decisions, randomized rewards, shuffled/generated content, or random tie-breakers.
+- Scenario test fixtures should support both single-action expectations and multi-action sequences.
+- JSON content should be validated with a TypeScript-friendly schema validation library such as Zod.
 
 ### Damage And Targeting
 
@@ -283,9 +310,9 @@ This section separates executable game rules from implementation decisions. It i
 - Production database: PostgreSQL.
 - Multiplayer target: authoritative server with matchmaking and turn-based real-time interaction.
 - Data model: initial game content should be defined in JSON files.
-- Engine/framework: not decided yet.
-- Architecture: not decided yet.
-- Tooling: TypeScript is decided; bundler, tests, linting, and asset pipeline are not decided yet.
+- Engine/framework: Vite with a simple DOM UI for the first combat prototype; Nuxt and Phaser remain long-term options.
+- Architecture: TypeScript monorepo with separate engine, content, and prototype app workspaces.
+- Tooling: TypeScript, pnpm, Vitest, ESLint, Prettier, Zod-style validation, and Prisma are decided; asset pipeline is not decided yet.
 
 ## Technical Decisions
 
@@ -347,6 +374,153 @@ This section separates executable game rules from implementation decisions. It i
 - Reason: The combat model is the core risk. Proving turn flow, energy, cooldowns, rings, gems, summons, spells, and win conditions should come before accounts, economy, matchmaking, or production deployment.
 - Tradeoffs: This delays persistence, progression, visual polish, and networked multiplayer work, but reduces the chance of building surrounding systems around unclear combat rules.
 
+#### Monorepo Architecture
+
+- Status: decided.
+- Decision: Use a TypeScript monorepo with separate workspaces for the combat engine, game content, and the first prototype app.
+- Reason: The combat engine must stay independent from UI, framework, database, and networking concerns while still being easy to consume from a prototype UI.
+- Tradeoffs: A monorepo adds workspace setup up front, but it keeps boundaries explicit and should make later Nuxt, Phaser, backend, and testing work easier to integrate.
+
+#### First Prototype App
+
+- Status: decided.
+- Decision: Use Vite with a simple DOM interface for the first local combat prototype.
+- Reason: The first milestone focuses on engine behavior, not polished rendering. A small Vite app gives fast feedback without coupling combat rules to Nuxt or Phaser.
+- Tradeoffs: The first UI will be intentionally plain. If the combat presentation later needs canvas rendering, animations, or game-scene management, Phaser can be introduced for the combat view.
+
+#### Package Manager
+
+- Status: decided.
+- Decision: Use pnpm.
+- Reason: pnpm works well for TypeScript monorepos and keeps dependency installs efficient and strict.
+- Tradeoffs: Contributors need pnpm installed, and its strict dependency behavior can reveal missing package declarations that npm may allow accidentally.
+
+#### Test Framework
+
+- Status: decided.
+- Decision: Use Vitest for engine unit tests and JSON scenario tests.
+- Reason: Vitest fits TypeScript projects well and is a natural match for Vite-based tooling.
+- Tradeoffs: Jest has a larger legacy ecosystem, but Vitest should be simpler for this project shape.
+
+#### Linting And Formatting
+
+- Status: decided.
+- Decision: Use ESLint and Prettier.
+- Reason: The project will rely on generated and hand-edited TypeScript and JSON. Consistent linting and formatting should reduce noise and catch common mistakes.
+- Tradeoffs: This adds a small amount of configuration and CI work.
+
+#### First Milestone Backend Scope
+
+- Status: decided.
+- Decision: Do not build a backend for the first combat prototype.
+- Reason: The first milestone is local and engine-focused. Backend work becomes useful when accounts, persistence, matchmaking, or multiplayer are being implemented.
+- Tradeoffs: This delays API and persistence integration, but avoids distracting from combat rule correctness.
+
+#### ORM
+
+- Status: decided.
+- Decision: Use Prisma as the ORM/database migration tool when persistence work begins.
+- Reason: Prisma supports TypeScript workflows and the selected SQL direction, including SQLite for development and PostgreSQL for production.
+- Tradeoffs: Prisma introduces schema generation and migration tooling. It should be introduced when persistence starts, not as a dependency of the pure combat engine.
+
+#### Prototype Deployment
+
+- Status: decided.
+- Decision: The first combat prototype should be deployable as a simple static build after it becomes playable.
+- Reason: A static build is enough for a local engine-focused prototype and makes sharing early progress easier without committing to backend hosting.
+- Tradeoffs: This does not solve persistence, authentication, multiplayer, or server-side validation.
+
+#### Continuous Integration
+
+- Status: decided.
+- Decision: Use GitHub Actions for install, typecheck, lint, and tests.
+- Reason: The project will rely on generated JSON content, TypeScript packages, and deterministic combat rules. CI should catch regressions before they accumulate.
+- Tradeoffs: CI adds setup maintenance, but it gives quick feedback as the monorepo grows.
+
+#### Runtime Version Management
+
+- Status: decided.
+- Decision: Use the active Node.js LTS version at setup time and manage pnpm through Corepack.
+- Reason: Pinning the runtime family and package-manager activation should make development reproducible across machines.
+- Tradeoffs: Exact versions may need updates over time as Node LTS changes.
+
+#### Monorepo Layout
+
+- Status: decided.
+- Decision: Use `packages/engine`, `packages/content`, and `apps/prototype` as the initial workspace layout.
+- Reason: This layout separates reusable domain packages from runnable applications.
+- Tradeoffs: More folders exist from the beginning, but the structure keeps future apps and packages easier to add.
+
+#### Multiplayer Transport
+
+- Status: decided.
+- Decision: Use WebSocket as the primary future multiplayer transport.
+- Reason: Live turn-based PvP needs bidirectional communication for turn events, reconnects, timers, and match state updates.
+- Tradeoffs: WebSocket hosting and scaling are more involved than simple HTTP-only APIs.
+
+#### Multiplayer Mode Direction
+
+- Status: decided.
+- Decision: Build live synchronous PvP first when multiplayer work starts, with asynchronous play left as a possible later addition.
+- Reason: The intended combat experience is turn-based but interactive, and live play should validate server authority, reconnect behavior, timers, and match flow.
+- Tradeoffs: Live PvP requires stronger connection handling than asynchronous play.
+
+#### Reconnection
+
+- Status: decided.
+- Decision: Live matches should be preserved during disconnects and allow players to reconnect.
+- Reason: Mobile and browser sessions can be interrupted. Losing a match immediately on transient disconnect would be frustrating.
+- Tradeoffs: This requires server-side match state, reconnection tokens or session recovery, and abandonment timeout rules later.
+
+#### Initial PvP Entry Point
+
+- Status: decided.
+- Decision: The first future PvP mode should support private matches by code before automatic matchmaking.
+- Reason: Private codes are simpler than matchmaking and make early multiplayer testing easier.
+- Tradeoffs: This delays casual/ranked matchmaking. Ranked mode is still desired later, alongside solo/campaign.
+
+#### Authentication
+
+- Status: decided.
+- Decision: Prefer OAuth login first, especially Google and Facebook, then add email and password authentication.
+- Reason: Accounts should be persistent to avoid frustrating data loss. OAuth can reduce account creation friction while email/password remains useful as a fallback or later option.
+- Tradeoffs: OAuth adds provider setup and account-linking concerns. Email/password adds credential security and recovery flows.
+
+#### Localization
+
+- Status: decided.
+- Decision: Build a localization module from the beginning. User-facing text must not be hardcoded in application or engine code; it should resolve through localization keys and translation JSON files.
+- Reason: BattleNess needs multilingual support, even if additional languages are added later. Starting with localization keys avoids costly text extraction later.
+- Tradeoffs: Localization adds structure up front. It should include fallback behavior, validation for missing keys, support for interpolation/plurals, and English technical IDs for content and code.
+
+#### Asset Pipeline
+
+- Status: decided.
+- Decision: Set up an organized asset pipeline from the beginning, even if early assets are AI-generated templates that may be replaced later.
+- Reason: BattleNess will need visual assets, and early structure prevents scattered files and unclear asset ownership.
+- Tradeoffs: This adds project setup before final art exists, but template assets can validate UI and combat presentation needs early.
+
+#### Audio Direction
+
+- Status: decided.
+- Decision: Plan for sound and music later.
+- Reason: Audio is expected eventually, but it is not needed for the first combat-engine milestone.
+- Tradeoffs: The asset pipeline should leave room for audio without making it an immediate implementation task.
+
+#### Match History And Replay Data
+
+- Status: decided.
+- Decision: Persist actions, deterministic seed, and result for completed matches, similar in spirit to chess PGN as a compact record of what happened.
+- Reason: Action logs support replay, debugging, moderation, analytics, and deterministic verification.
+- Tradeoffs: Replay support requires stable action schemas and migration strategy as combat rules evolve.
+
+#### Content Source Of Truth
+
+- Status: decided.
+- Decision: Keep versioned JSON content definitions as the source of truth and import them into the database if runtime querying, admin tooling, or production operations require it. Player-owned instances and progression data belong in the database.
+- Reason: JSON definitions are easy to review, generate, diff, validate, and version. Database import can support production needs without making the database the design source.
+- Tradeoffs: This requires import tooling and content version tracking so saved player item instances and match records remain compatible with content changes.
+
 ### Proposed
 
 #### Authoritative Server For Multiplayer
@@ -356,28 +530,28 @@ This section separates executable game rules from implementation decisions. It i
 - Reason: Competitive turn-based games need consistent state, cheat resistance, reconnect support, and server-owned match outcomes.
 - Tradeoffs: Server authority increases backend complexity and requires clear action validation, latency handling, and match lifecycle management.
 
+#### Nuxt And Phaser Long-Term Application Shape
+
+- Status: proposed.
+- Decision: Keep Nuxt as the likely main application frontend/backend candidate and introduce Phaser for the combat presentation once the local combat engine works and if the combat view needs canvas rendering, animation-heavy interactions, or game-scene tooling.
+- Reason: Nuxt can cover application screens such as forge, shop, inventory, account, and server routes, while Phaser can be isolated to the combat experience if needed.
+- Tradeoffs: Combining Nuxt and Phaser is feasible, but it adds integration complexity. The combat engine should remain framework-independent so this decision can be delayed.
+
 ### Not Decided Yet
 
-- Browser game framework or rendering approach.
-- Frontend application framework.
-- Backend framework.
-- ORM/database migration tool.
-- Multiplayer transport.
-- Matchmaking design.
-- Data/content file format.
-- Asset pipeline.
-- Test framework.
-- Deployment platform.
+- Long-term deployment platform. A classic Node server or VPS is currently preferred if feasible, but this should be confirmed when backend and multiplayer requirements are clearer.
 - Combat UI direction beyond a simple prototype interface.
+- Long-term frontend/backend framework choice beyond the first Vite prototype.
+- Exact Phaser integration approach for the combat presentation.
 
 ## Open Technical Topics
 
 - Browser game framework or rendering approach.
 - Client/server architecture.
 - Authoritative game-state model.
-- Multiplayer transport and reconnection behavior.
-- Matchmaking scope.
-- Data schema for heroes, rings, gems, monsters, spells, materials, recipes, and rewards.
+- Multiplayer server architecture and scaling model.
+- Matchmaking implementation details.
+- Data schema for players, inventory item instances, rings, gems, monsters, spells, materials, recipes, and rewards.
 - Content authoring workflow.
 - Testing strategy for deterministic game rules.
 - Deployment strategy.
