@@ -18,6 +18,7 @@ Read these files before making changes:
 - No gameplay/application code has been implemented for the rebuild yet.
 - The user handles commits and pushes to GitHub themselves.
 - The `docs/` directory is currently untracked in git unless the user has staged it elsewhere.
+- The first milestone is a local deterministic combat prototype focused on the combat engine.
 
 ## Persistent Documentation Rules
 
@@ -67,16 +68,16 @@ The following are currently marked as decided in `docs/PROJECT.md`:
 - Persistence should use SQL.
 - Development database: SQLite.
 - Production database: PostgreSQL.
+- Use TypeScript across gameplay logic, frontend, backend, and tests where practical.
+- Keep the combat engine pure, deterministic, and independent from UI, database, sockets, and framework code.
+- Define early game content and test fixtures in JSON files.
+- First milestone: local browser combat prototype where one local user can control both sides through a simple UI.
 
 ## Proposed Technical Direction
 
 The following are proposals, not final decisions:
 
-- Use TypeScript across gameplay logic, frontend, backend, and tests.
-- Implement combat rules as a pure deterministic TypeScript engine independent from UI, database, sockets, and framework code.
 - Use an authoritative server for multiplayer.
-- Make game content config-driven, likely JSON or a typed structured format.
-- Make the first milestone a deterministic local combat prototype with hardcoded or minimal config content.
 
 ## Not Decided Yet
 
@@ -86,10 +87,10 @@ The following are proposals, not final decisions:
 - ORM/database migration tool.
 - Multiplayer transport.
 - Matchmaking design.
-- Data/content file format.
 - Asset pipeline.
 - Test framework.
 - Deployment platform.
+- Combat UI direction beyond a simple prototype interface.
 
 ## Recent Discussion Flow
 
@@ -107,25 +108,57 @@ Completed so far:
 - Point 1: added `Technical Decisions` to `docs/PROJECT.md`.
 - Point 2: added `Proposed Glossary` to `docs/PROJECT.md`.
 - Point 3: added `Proposed Game Rules Specification` to `docs/PROJECT.md`.
+- Point 4: decided that the first milestone is a local deterministic combat prototype.
+- Point 5: decided that the combat engine should stay pure, deterministic, and independent from UI/database/network concerns.
 
 Suggested next step:
 
-- Continue with point 4: decide the first milestone before choosing framework/tools. The current proposal is a local deterministic combat prototype.
+- Resolve the core combat rule questions before implementing the combat engine.
 
 ## Rule Questions Still Open
 
 These questions are listed in `docs/PROJECT.md` and should be resolved before implementing the combat engine:
 
-- How is starting-player speed tie resolved?
-- Is battle energy based on global turn number or each player's own turn count?
-- When exactly do cooldowns decrement?
-- Can monsters choose targets, and can they target heroes directly?
-- Is there a maximum monster board size?
-- Can duplicate monsters be in play from repeated enchantment triggers?
-- What is the exact resolution order for ring damage, gem damage, summons, spells, cooldown application, and win checks?
-- Does first-turn damage prevention block all damage to the opposing hero or only ring damage?
-- What is the elemental advantage formula?
 - What are the exact formulas for level, quality, damage, health, energy cost, cooldown, experience, and rewards?
+
+## Recent Combat Rule Decisions
+
+- Speed determines the starting player. If speed is tied, the lower-level hero starts. If speed and level are tied, an element choice duel decides the starting player.
+- Each player has their own energy progression: 1 on that player's first turn, then +1 per own turn, capped at 8.
+- Cooldowns decrement at the start of the controller's turn before actions.
+- Players can use as many ready rings and ready monsters as energy, cooldowns, and rules allow.
+- Rings and monsters can target heroes or monsters by default.
+- Taunt prevents the opponent from targeting non-Taunt targets controlled by the Taunt owner's side.
+- Taunt blocks opposing rings, monsters, and direct-damage spells unless a rule or effect explicitly allows otherwise.
+- Enemy Taunt does not restrict a player targeting their own hero or their own monsters.
+- Each side can control up to 3 monsters.
+- Monsters are removed immediately after the effect that reduces their health to 0.
+- Duplicate monster summons create new monster instances if the board is not full.
+- First-turn protection prevents all damage to the opposing hero during the starting player's first turn.
+- All rings begin battle ready.
+- Ring use resolves as: pay energy, put the ring on cooldown, apply ring and gem damage, trigger enchantments in socket order, then check win conditions.
+- If the starting-player element duel results in both players choosing the same element, the duel repeats until there is a winner.
+- Elemental advantage grants +10% damage, rounded down.
+- If a summon effect would exceed the 3-monster board limit, the summon fails without cancelling the rest of the action.
+- If the defending side has multiple Taunt monsters, the attacker may choose any Taunt monster as the target.
+- If ring damage kills its target before enchantments trigger, only enchantments that specifically require the dead target fail.
+- If both heroes reach 0 during the same resolution sequence, the battle result is a draw.
+- A ring's current energy cost cannot be lower than 1.
+- BattleNess should not include healing mechanics, to keep combat dynamic.
+- The initial combat engine should support explicit spell effects and include three direct-damage test spells: Spark, Firebolt, and Ice Shard.
+- The initial direct-damage spell can target heroes or monsters, allies or enemies, including self-damage or damaging allied monsters.
+- Spells do not directly add damage to their triggering ring; they resolve after ring and gem damage and apply their own effects afterward.
+- The first combat prototype should read health, damage, energy cost, cooldown, and similar combat values directly from JSON content.
+- Initial content should be split across separate JSON files, such as heroes, rings, gems, monsters, and spells.
+- The engine should keep a clear stat-input boundary so level, quality, and progression formulas can be added later without rewriting core combat resolution.
+- Engine tests should include both focused unit tests and full combat scenario tests loaded from JSON fixtures.
+- Win-condition checks happen after each complete action resolution. If a hero is at 0 health at that point, the battle ends immediately.
+
+## Elemental Design Direction
+
+- Fire is oriented toward high damage and high cooldown time. Its associated special skills include Pierce and Rage.
+- Electric is oriented toward low energy cost, high speed points, and low damage. Its associated special skills include Haste and MultiHit.
+- Ice is oriented toward high health, low cooldown time, high energy cost, and low speed points. Its associated special skills include Taunt and Shield.
 
 ## Important Agent Behavior
 

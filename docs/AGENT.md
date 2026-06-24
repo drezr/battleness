@@ -20,11 +20,18 @@ These instructions are persistent project context for future agents working on B
 - The game targets the browser with a mobile-first experience.
 - The game is a turn-based one-versus-one combat game inspired by Hearthstone.
 - Persistence should use SQL, with SQLite for development and PostgreSQL for production.
+- The first milestone is a local deterministic browser combat prototype focused on the combat engine.
+- The first prototype should let one local user control both combat sides through a simple UI.
+- Use TypeScript across gameplay logic, frontend, backend, and tests where practical.
+- Define early game content and test fixtures in JSON files.
+- Initial game content should be split across separate JSON files, such as heroes, rings, gems, monsters, and spells.
+- Engine tests should include focused unit tests and full combat scenario tests loaded from JSON fixtures.
 - Multiplayer should eventually use an authoritative server, matchmaking, and turn-based real-time interaction.
 
 ## Current Discussion Status
 
 - The framework/engine has not been selected yet.
 - The architecture has not been selected yet.
-- The data model approach has not been selected yet, though JSON/config-driven content is being considered.
-- Tooling choices such as TypeScript, bundler, tests, linting, and asset pipeline have not been finalized yet.
+- The frontend/backend framework choice has not been selected yet; Nuxt and a Phaser-based frontend are options to discuss later.
+- The combat UI direction has not been selected yet; a simple UI is enough for the first prototype.
+- Tooling choices such as bundler, tests, linting, and asset pipeline have not been finalized yet.

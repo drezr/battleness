@@ -112,6 +112,12 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - Ice: An elemental type that deals increased damage to electric.
 - Elemental Advantage: The relationship where electric beats fire, fire beats ice, and ice beats electric.
 
+### Elemental Design Direction
+
+- Fire is oriented toward high damage and high cooldown time. Its associated special skills include Pierce and Rage.
+- Electric is oriented toward low energy cost, high speed points, and low damage. Its associated special skills include Haste and MultiHit.
+- Ice is oriented toward high health, low cooldown time, high energy cost, and low speed points. Its associated special skills include Taunt and Shield.
+
 ### Progression And Economy
 
 - Credit: The virtual currency used to buy, sell, craft, and improve items.
@@ -137,25 +143,27 @@ This section separates executable game rules from implementation decisions. It i
 - Each gem may contain either no enchantment, one monster enchantment, or one spell enchantment.
 - A hero's battle speed is calculated from speed points on equipped items.
 - The side with the highest hero speed becomes the starting player.
-- If both heroes have equal speed, the tie-break rule is not defined yet.
+- If both heroes have equal speed, the lower-level hero starts.
+- If both heroes have equal speed and equal level, starting player is decided by an element choice duel at battle start using fire, ice, and electric. Electric beats fire, fire beats ice, and ice beats electric.
+- If both players choose the same element in the element choice duel, the duel repeats until there is a winner.
 - Both heroes begin battle with their computed maximum health.
-- All rings begin battle ready unless a later rule says otherwise.
+- All rings begin battle ready.
 - No monsters are in play at battle start unless a later rule adds pre-summoned monsters.
 
 ### Turn Structure
 
 - Players alternate turns.
 - At the start of each turn, the active player's available energy is restored for that turn.
-- Turn energy starts at 1 on the first turn of the battle, increases by 1 on each later turn, and caps at 8.
+- Each player has their own turn energy progression. A player's available energy starts at 1 on that player's first turn, increases by 1 on each later turn that player takes, and caps at 8.
 - The active player may perform legal actions while they have available actions and resources.
 - The active player may end their turn voluntarily.
 - When the active player ends their turn, the other player becomes active.
-- Exact timing for reducing cooldown counters is not final and must be decided before engine implementation.
+- At the start of the active player's turn, that player's cooldown counters decrement before actions are taken.
 
 ### Legal Player Actions
 
 - Use a ready ring if the active hero has enough energy to pay its current energy cost.
-- Use a ready monster controlled by the active player, if monster actions are allowed by the final rules.
+- Use any number of ready rings and ready monsters controlled by the active player, as long as action-specific rules, energy, cooldowns, targeting, and other restrictions allow them.
 - End the turn.
 - Other action types are not defined yet.
 
@@ -165,10 +173,10 @@ This section separates executable game rules from implementation decisions. It i
 - A ring can be used only if it is ready.
 - A ring can be used only if the active hero can pay its current energy cost.
 - Using a ring spends its energy cost.
+- Using a ring puts that ring on cooldown.
 - Using a ring applies the ring's damage and the damage from its gems to a legal target, unless damage is prevented by another rule.
 - Using a ring triggers the enchantments contained by its gems.
-- Using a ring puts that ring on cooldown.
-- The exact order between ring damage, gem damage, monster summons, spell effects, and win-condition checks is not final.
+- Ring use resolves in this order: pay energy, put the ring on cooldown, apply ring and gem damage, trigger enchantments in socket order, then check win conditions.
 
 ### Gems And Enchantments
 
@@ -177,46 +185,61 @@ This section separates executable game rules from implementation decisions. It i
 - When a ring is used, each gem's enchantment triggers.
 - A monster enchantment summons that monster to fight alongside the hero.
 - A spell enchantment applies that spell's effect.
-- The order in which multiple socketed gems trigger is not final.
-- The rule for what happens when a monster enchantment triggers while the same monster is already in play is not final.
+- Multiple socketed gems trigger in socket order.
+- If a monster enchantment summons a monster that is already in play, it creates a new monster instance as long as the controller's monster board is not full.
+- If a ring's damage kills its target before that ring's enchantments trigger, enchantments still trigger unless they specifically require the dead target.
 
 ### Monsters
 
 - A monster is controlled by the player who summoned it.
 - A monster has health, damage, cooldown, elemental type, and optionally a skill.
-- A monster is destroyed when its health reaches 0.
+- A monster is destroyed and removed immediately after the effect that reduces its health to 0.
 - A summoned monster enters play with cooldown 1.
 - Because summoned monsters enter with cooldown 1, they cannot act on the same turn they are summoned.
-- A monster can damage a legal target when it is ready and its controller uses it, if monster actions are confirmed.
+- A monster can damage a legal hero or monster target when it is ready and its controller uses it.
 - Using a monster puts that monster on cooldown.
-- The maximum number of monsters each side can control is not defined yet.
-- Targeting restrictions for monsters are not defined yet.
+- Each side can control up to 3 monsters.
+- If a monster enchantment summons a monster that is already in play, it creates a new monster instance as long as the controller's monster board is not full.
+- If a monster enchantment would summon a monster while the controller already has 3 monsters, the summon fails without cancelling the rest of the action.
+- Rings and monsters can target heroes or monsters by default.
+- Some monsters may have Taunt. If a player controls one or more monsters with Taunt, the opponent cannot target that player's non-Taunt targets with rings, monsters, or direct-damage spells unless a rule or effect explicitly allows it.
+- If a player controls multiple monsters with Taunt, the opponent may choose any of those Taunt monsters as the target.
+- Enemy Taunt does not restrict a player who targets their own hero or their own monsters.
 
 ### Spells
 
 - A spell has a specific effect.
+- BattleNess should not include healing mechanics, to keep combat dynamic.
 - Spell level reduces its energy penalty and cooldown penalty.
 - A spell triggers when the ring containing its gem is used.
-- Spell effects must eventually be specified as explicit engine effects, not free-form text.
-- Spell targeting rules are not defined yet.
-- Spell resolution order is not final.
+- The initial combat engine should support explicit spell effects and include three direct-damage test spells: Spark, Firebolt, and Ice Shard.
+- Spell effects must be specified as explicit engine effects, not free-form text.
+- The initial direct-damage spell can target heroes or monsters, allies or enemies. The player decides how to use it, including self-damage or damaging their own monsters.
+- Spells do not directly add damage to the ring that triggers them. They resolve after ring and gem damage and can apply their own effects afterward.
 
 ### Cooldowns
 
 - Rings and monsters can have cooldown values.
 - A ring or monster on cooldown cannot be used.
 - A newly summoned monster starts with cooldown 1.
-- The exact moment cooldown counters decrement is not final.
-- A proposed default is to decrement a player's cooldowns at the start of that player's turn, before actions are taken.
+- A player's cooldown counters decrement at the start of that player's turn, before actions are taken.
 - Cooldown values should not go below 0.
 
 ### Energy
 
 - Energy is restored at the start of each turn.
-- Turn energy follows the battle turn number: 1 on turn 1, 2 on turn 2, and so on until the cap of 8.
+- Energy follows each player's own turn count: 1 on that player's first turn, 2 on that player's second turn, and so on until the cap of 8.
 - Energy not spent during a turn does not carry over unless a later rule changes this.
 - A ring's current energy cost is based on its own energy value plus energy penalties from contained gems, monsters, and spells.
-- Exact rounding and minimum cost rules are not defined yet.
+- A ring's current energy cost cannot be lower than 1.
+- Exact rounding rules for future cost modifiers are not defined yet.
+
+### Prototype Stats
+
+- For the first combat prototype, health, damage, energy cost, cooldown, and similar combat values should come directly from JSON content.
+- The engine should still keep a clear stat-input boundary so level, quality, and progression formulas can be added later without rewriting core combat resolution.
+- Initial content should be split across separate JSON files, such as heroes, rings, gems, monsters, and spells.
+- Engine tests should include both focused unit tests and full combat scenario tests loaded from JSON fixtures.
 
 ### Damage And Targeting
 
@@ -224,17 +247,17 @@ This section separates executable game rules from implementation decisions. It i
 - A target can be a hero or monster if the acting object's targeting rules allow it.
 - Health should not go below 0 in displayed state.
 - Elemental advantage modifies damage between electric, fire, and ice.
-- The exact elemental damage multiplier or formula is not defined yet.
-- The starting player cannot damage the opposing hero during the first turn.
+- Elemental advantage increases damage by 10%, rounded down.
+- The starting player cannot deal any damage to the opposing hero during the starting player's first turn.
 - The starting player may still summon monsters and cast spells during the first turn.
-- It is not final whether first-turn damage prevention also prevents spell damage, monster damage, indirect damage, or damage to monsters.
+- This first-turn protection applies to all damage types against the opposing hero. Future mechanics that can create opposing monsters before the starting player's first turn may require additional targeting rules.
 
 ### Win And Loss
 
 - A player loses when their hero reaches 0 health.
 - The opposing player wins when a hero reaches 0 health.
-- If both heroes reach 0 health during the same resolution sequence, the result is not defined yet.
-- Win-condition checks should happen at deterministic points during action resolution.
+- If both heroes reach 0 health during the same resolution sequence, the battle result is a draw.
+- Win-condition checks happen after each complete action resolution. If a hero is at 0 health at that point, the battle ends immediately.
 
 ### Rewards
 
@@ -248,15 +271,6 @@ This section separates executable game rules from implementation decisions. It i
 
 ### Rule Questions To Resolve
 
-- How is starting-player speed tie resolved?
-- Is battle energy based on global turn number or each player's own turn count?
-- When exactly do cooldowns decrement?
-- Can monsters choose targets, and can they target heroes directly?
-- Is there a maximum monster board size?
-- Can duplicate monsters be in play from repeated enchantment triggers?
-- What is the exact resolution order for ring damage, gem damage, summons, spells, cooldown application, and win checks?
-- Does first-turn damage prevention block all damage to the opposing hero or only ring damage?
-- What is the elemental advantage formula?
 - What are the exact formulas for level, quality, damage, health, energy cost, cooldown, experience, and rewards?
 
 ## Technical Baseline
@@ -268,10 +282,10 @@ This section separates executable game rules from implementation decisions. It i
 - Development database: SQLite.
 - Production database: PostgreSQL.
 - Multiplayer target: authoritative server with matchmaking and turn-based real-time interaction.
-- Data model: JSON/config-driven content is being considered, but not decided.
+- Data model: initial game content should be defined in JSON files.
 - Engine/framework: not decided yet.
 - Architecture: not decided yet.
-- Tooling: TypeScript, bundler, tests, linting, and asset pipeline are expected topics, but not decided yet.
+- Tooling: TypeScript is decided; bundler, tests, linting, and asset pipeline are not decided yet.
 
 ## Technical Decisions
 
@@ -305,21 +319,35 @@ This section separates executable game rules from implementation decisions. It i
 - Reason: The user selected SQLite for development and PostgreSQL for production.
 - Tradeoffs: SQL gives strong relational modeling for accounts, inventory, matches, rewards, crafting, and progression. SQLite/PostgreSQL differences must be handled carefully in migrations, tests, concurrency assumptions, and production deployment.
 
-### Proposed
-
 #### TypeScript Across The Stack
 
-- Status: proposed.
+- Status: decided.
 - Decision: Use TypeScript for gameplay logic, frontend code, backend code, and tests where practical.
 - Reason: BattleNess has many deterministic rules and nested item interactions. Shared types reduce drift between client, server, rules tests, and content validation.
 - Tradeoffs: TypeScript adds build complexity and stricter modeling work up front, but should reduce long-term rule and API mistakes.
 
 #### Pure Deterministic Combat Engine
 
-- Status: proposed.
+- Status: decided.
 - Decision: Implement combat rules as a pure TypeScript engine independent from UI, database, sockets, and framework code.
-- Reason: Turn-based multiplayer needs authoritative validation, replay/debug support, and strong automated tests.
+- Reason: The first development focus is the combat engine. Turn-based multiplayer also needs authoritative validation, replay/debug support, and strong automated tests.
 - Tradeoffs: This adds an explicit boundary to maintain, but it lets the same rule engine power local prototypes, server validation, tests, bots, and simulations.
+
+#### JSON Game Content
+
+- Status: decided.
+- Decision: Define early game content, test fixtures, and prototype balance data in JSON files.
+- Reason: JSON is simple to generate, inspect, and revise during early development, including with AI-assisted test data generation.
+- Tradeoffs: JSON keeps early content lightweight, but schemas and validation will be needed before content grows too large or feeds production systems.
+
+#### First Milestone: Local Combat Prototype
+
+- Status: decided.
+- Decision: Build the first playable milestone as a deterministic local combat prototype in the browser. One local user should be able to control both combat sides. The UI can stay simple because the main goal is proving the combat engine.
+- Reason: The combat model is the core risk. Proving turn flow, energy, cooldowns, rings, gems, summons, spells, and win conditions should come before accounts, economy, matchmaking, or production deployment.
+- Tradeoffs: This delays persistence, progression, visual polish, and networked multiplayer work, but reduces the chance of building surrounding systems around unclear combat rules.
+
+### Proposed
 
 #### Authoritative Server For Multiplayer
 
@@ -327,20 +355,6 @@ This section separates executable game rules from implementation decisions. It i
 - Decision: Multiplayer matches should be resolved by an authoritative server, with clients sending intended actions instead of final state changes.
 - Reason: Competitive turn-based games need consistent state, cheat resistance, reconnect support, and server-owned match outcomes.
 - Tradeoffs: Server authority increases backend complexity and requires clear action validation, latency handling, and match lifecycle management.
-
-#### Config-Driven Game Content
-
-- Status: proposed.
-- Decision: Define heroes, rings, gems, monsters, spells, materials, recipes, rewards, and similar content in structured config files, likely JSON or a typed superset.
-- Reason: BattleNess has many item types and balance values that should be editable without changing engine code.
-- Tradeoffs: Config-driven content improves iteration, but requires validation, stable schemas, migrations for saved items, and tooling to avoid invalid content.
-
-#### First Milestone: Local Combat Prototype
-
-- Status: proposed.
-- Decision: Build the first playable milestone as a deterministic local combat prototype with hardcoded or minimal config content.
-- Reason: The combat model is the core risk. Proving turn flow, energy, cooldowns, rings, gems, summons, spells, and win conditions should come before accounts, economy, matchmaking, or production deployment.
-- Tradeoffs: This delays persistence and progression work, but reduces the chance of building backend/UI systems around unclear combat rules.
 
 ### Not Decided Yet
 
@@ -354,6 +368,7 @@ This section separates executable game rules from implementation decisions. It i
 - Asset pipeline.
 - Test framework.
 - Deployment platform.
+- Combat UI direction beyond a simple prototype interface.
 
 ## Open Technical Topics
 
