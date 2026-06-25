@@ -125,6 +125,13 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - Rarity colors: Normal uses white or light gray, Magic uses blue, Rare uses orange, and Legendary uses purple.
 - Stat colors: Damage uses pink-red, Health uses red, Energy uses green, Energy Penalty uses pale green, Cooldown uses light cyan, Cooldown Penalty uses cyan, Quality uses orange, Speed uses yellow, Skill uses magenta, and Rarity uses purple.
 
+### Battle Layout Direction
+
+- The battle screen should eventually follow the user's sketch direction: heroes anchored on the left, the monster battlefield occupying the center, rings arranged as a bottom hand or equipment row, and energy bars visible at the top and bottom.
+- Monster cards should expose skill, damage, and health zones clearly.
+- Ring cards should expose damage and energy/cost information, with socketed gems visible along the bottom of each ring.
+- The current prototype now includes a first sketch-inspired battle board, but it is still a functional prototype/debug interface rather than the final battle layout.
+
 ### Progression And Economy
 
 - Credit: The virtual currency used to buy, sell, craft, and improve items.
@@ -293,8 +300,8 @@ This section separates executable game rules from implementation decisions. It i
 - Inventory fixtures should contain player-owned ring, gem, monster, and spell instances. Ring instances contain `id`, `definitionId`, `ownerId`, `level`, `quality`, `socketCount`, `socketedGemInstanceIds`, and `equipped`. Gem instances contain `id`, `definitionId`, `ownerId`, `level`, `quality`, and optional `enchantment`.
 - The initial `BattleSetup` should contain `id`, `seed`, two players, resolved combat stats, equipped ring instances, socketed gem instances, referenced definitions, and optional initial status for first-player element choice.
 - The initial `BattleAction` union should include `chooseElement`, `useRing`, `useMonster`, `endTurn`, and `concede`.
-- The initial event log should include `battleStarted`, `firstPlayerChosen`, `turnStarted`, `cooldownChanged`, `ringUsed`, `energySpent`, `damageDealt`, `spellCast`, `monsterSummoned`, `monsterUsed`, `monsterDestroyed`, `turnEnded`, and `battleEnded`.
-- Initial scenario fixtures should include `basicRingAttack`, `summonAndTaunt`, and `spellSelfTargeting`.
+- The initial event log should include `battleStarted`, `firstPlayerChoiceRequested`, `elementChosen`, `elementDuelTied`, `firstPlayerChosen`, `turnStarted`, `cooldownChanged`, `ringUsed`, `energySpent`, `damageDealt`, `spellCast`, `monsterSummoned`, `monsterUsed`, `monsterDestroyed`, `turnEnded`, and `battleEnded`.
+- Initial scenario fixtures should include `basicRingAttack`, `summonAndTaunt`, `spellSelfTargeting`, `lowerLevelStart`, and `elementDuelStart`.
 - Scenario fixtures should support both full-state expectations and partial expectations for event types, health values, energy values, cooldown values, board state, and battle result.
 
 ### Damage And Targeting

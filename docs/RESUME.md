@@ -13,11 +13,11 @@ Read these files before making changes:
 ## Current Project State
 
 - Project name: BattleNess.
-- Current phase: planning and technical discussion before implementation.
+- Current phase: first local deterministic combat prototype implementation.
 - User intent: clean rebuild of an already-started game.
-- No gameplay/application code has been implemented for the rebuild yet.
+- A TypeScript monorepo is in place with `packages/engine`, `packages/content`, and `apps/prototype`.
+- The prototype includes deterministic combat state creation, ring and monster actions, direct-damage spells, summons, Taunt, first-turn protection, battle end checks, combat-start resolution, JSON scenarios, a battle setup screen, a first sketch-inspired battle board, manual browser controls, localized event-log rendering, and Taunt-aware target selection.
 - The user handles commits and pushes to GitHub themselves.
-- The `docs/` directory is currently untracked in git unless the user has staged it elsewhere.
 - The first milestone is a local deterministic combat prototype focused on the combat engine.
 
 ## Persistent Documentation Rules
@@ -188,8 +188,8 @@ These questions are listed in `docs/PROJECT.md` and should be resolved before im
 - JSON content should be validated with a TypeScript-friendly schema validation library such as Zod.
 - Initial implementation files should include content definitions under `packages/content/src/definitions/`, prototype fixtures under `packages/content/src/fixtures/`, and locale files under `packages/content/src/locales/`.
 - Initial battle actions should include `chooseElement`, `useRing`, `useMonster`, `endTurn`, and `concede`.
-- Initial event log types should include battle start/end, first-player choice, turn start/end, cooldown changes, ring use, energy spend, damage, spell cast, monster summon/use/destruction, and battle result.
-- Initial scenario fixtures should include `basicRingAttack`, `summonAndTaunt`, and `spellSelfTargeting`.
+- Initial event log types should include battle start/end, first-player choice request, element choices, tied element duels, final first-player choice, turn start/end, cooldown changes, ring use, energy spend, damage, spell cast, monster summon/use/destruction, and battle result.
+- Initial scenario fixtures should include `basicRingAttack`, `summonAndTaunt`, `spellSelfTargeting`, `lowerLevelStart`, and `elementDuelStart`.
 
 ## Elemental Design Direction
 
@@ -203,6 +203,13 @@ These questions are listed in `docs/PROJECT.md` and should be resolved before im
 - Element colors: Electric uses yellow, Fire uses pink-red, and Ice uses light cyan.
 - Rarity colors: Normal uses white or light gray, Magic uses blue, Rare uses orange, and Legendary uses purple.
 - Stat colors: Damage uses pink-red, Health uses red, Energy uses green, Energy Penalty uses pale green, Cooldown uses light cyan, Cooldown Penalty uses cyan, Quality uses orange, Speed uses yellow, Skill uses magenta, and Rarity uses purple.
+
+## Battle Layout Direction
+
+- The future battle screen should follow the user's sketch direction: heroes on the left, monster battlefield in the center, rings in a bottom row, and energy bars visible at top and bottom.
+- Monster cards should clearly expose skill, damage, and health zones.
+- Ring cards should clearly expose damage, energy/cost information, and socketed gems.
+- The current prototype has a first sketch-inspired battle board, but it remains an engine/debug interface until the combat flow is stable enough for a final battle view.
 
 ## Important Agent Behavior
 

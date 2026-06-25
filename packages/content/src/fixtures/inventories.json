@@ -39,6 +39,46 @@
       "socketCount": 1,
       "socketedGemInstanceIds": ["playerTwo.gem.plainQuartz"],
       "equipped": true
+    },
+    {
+      "id": "playerLowLevel.ring.stormCoil",
+      "definitionId": "stormCoil",
+      "ownerId": "playerLowLevel",
+      "level": 1,
+      "quality": 55,
+      "socketCount": 1,
+      "socketedGemInstanceIds": ["playerLowLevel.gem.staticPearl"],
+      "equipped": true
+    },
+    {
+      "id": "playerHighLevel.ring.stormCoil",
+      "definitionId": "stormCoil",
+      "ownerId": "playerHighLevel",
+      "level": 1,
+      "quality": 55,
+      "socketCount": 1,
+      "socketedGemInstanceIds": ["playerHighLevel.gem.plainQuartz"],
+      "equipped": true
+    },
+    {
+      "id": "playerElectric.ring.stormCoil",
+      "definitionId": "stormCoil",
+      "ownerId": "playerElectric",
+      "level": 1,
+      "quality": 68,
+      "socketCount": 1,
+      "socketedGemInstanceIds": ["playerElectric.gem.staticPearl"],
+      "equipped": true
+    },
+    {
+      "id": "playerFire.ring.trainingFlameBand",
+      "definitionId": "trainingFlameBand",
+      "ownerId": "playerFire",
+      "level": 1,
+      "quality": 68,
+      "socketCount": 1,
+      "socketedGemInstanceIds": ["playerFire.gem.rubyShard"],
+      "equipped": true
     }
   ],
   "gems": [
@@ -88,6 +128,36 @@
       "ownerId": "playerTwo",
       "level": 1,
       "quality": 50
+    },
+    {
+      "id": "playerLowLevel.gem.staticPearl",
+      "definitionId": "staticPearl",
+      "ownerId": "playerLowLevel",
+      "level": 1,
+      "quality": 52
+    },
+    {
+      "id": "playerHighLevel.gem.plainQuartz",
+      "definitionId": "plainQuartz",
+      "ownerId": "playerHighLevel",
+      "level": 1,
+      "quality": 50
+    },
+    {
+      "id": "playerElectric.gem.staticPearl",
+      "definitionId": "staticPearl",
+      "ownerId": "playerElectric",
+      "level": 1,
+      "quality": 66,
+      "enchantment": { "type": "monster", "monsterId": "stormHound" }
+    },
+    {
+      "id": "playerFire.gem.rubyShard",
+      "definitionId": "rubyShard",
+      "ownerId": "playerFire",
+      "level": 1,
+      "quality": 66,
+      "enchantment": { "type": "spell", "spellId": "firebolt" }
     }
   ],
   "monsters": [],

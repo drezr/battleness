@@ -13,6 +13,8 @@ import ringsJson from "./definitions/rings.json";
 import spellsJson from "./definitions/spells.json";
 import inventoriesJson from "./fixtures/inventories.json";
 import basicDuelJson from "./fixtures/battleSetups/basicDuel.json";
+import elementDuelStartJson from "./fixtures/battleSetups/elementDuelStart.json";
+import lowerLevelStartJson from "./fixtures/battleSetups/lowerLevelStart.json";
 import playersJson from "./fixtures/players.json";
 import type {
   BattleSetupFixture,
@@ -45,7 +47,11 @@ const definitionData = {
 const fixtureData = {
   players: playerFixtureSchema.array().parse(playersJson),
   inventories: inventoryFixtureSchema.parse(inventoriesJson),
-  battleSetups: [battleSetupFixtureSchema.parse(basicDuelJson)],
+  battleSetups: [
+    battleSetupFixtureSchema.parse(basicDuelJson),
+    battleSetupFixtureSchema.parse(lowerLevelStartJson),
+    battleSetupFixtureSchema.parse(elementDuelStartJson),
+  ],
 };
 
 export function createBattleSetupFromFixture(setupId: string): BattleSetup {
@@ -71,14 +77,13 @@ export function createBattleSetup(
     return createBattlePlayer(player, inventory);
   }) as [BattlePlayer, BattlePlayer];
 
-  const startingPlayer = chooseStartingPlayer(battlePlayers);
-
   return {
     id: setup.id,
     seed: setup.seed,
-    status: "active",
-    activePlayerId: startingPlayer.id,
-    startingPlayerId: startingPlayer.id,
+    status: "choosingFirstPlayer",
+    activePlayerId: null,
+    startingPlayerId: null,
+    firstPlayerChoices: {},
     definitions: {
       monsters: Object.fromEntries(
         definitionData.monsters.map((monster) => [monster.id, toEngineMonsterDefinition(monster)]),
@@ -87,13 +92,7 @@ export function createBattleSetup(
         definitionData.spells.map((spell) => [spell.id, toEngineSpellDefinition(spell)]),
       ),
     },
-    players: battlePlayers.map((player) => ({
-      ...player,
-      energy:
-        player.id === startingPlayer.id
-          ? { current: 1, maxForTurn: 1, turnCount: 1 }
-          : { current: 0, maxForTurn: 0, turnCount: 0 },
-    })) as [BattlePlayer, BattlePlayer],
+    players: battlePlayers,
   };
 }
 
@@ -187,19 +186,6 @@ function createGemCombatInstance(
     cooldownPenalty,
     enchantment,
   };
-}
-
-function chooseStartingPlayer(players: [BattlePlayer, BattlePlayer]): BattlePlayer {
-  const [first, second] = players;
-  if (first.hero.speed !== second.hero.speed) {
-    return first.hero.speed > second.hero.speed ? first : second;
-  }
-
-  if (first.level !== second.level) {
-    return first.level < second.level ? first : second;
-  }
-
-  return first;
 }
 
 function findRingDefinition(id: string): RingDefinition {

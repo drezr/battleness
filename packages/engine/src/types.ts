@@ -4,6 +4,7 @@ export type Rarity = "normal" | "magic" | "rare" | "legendary";
 export type TargetId = `${string}.hero` | `${string}.monster.${string}.${number}`;
 
 export type BattleStatus = "choosingFirstPlayer" | "active" | "finished";
+export type FirstPlayerChoiceReason = "speed" | "level" | "elementDuel";
 
 export type SpellEffect = {
   type: "dealDamage";
@@ -120,6 +121,7 @@ export type BattleSetup = {
   status: BattleStatus;
   activePlayerId: string | null;
   startingPlayerId: string | null;
+  firstPlayerChoices?: Partial<Record<string, ElementType>>;
   definitions: {
     monsters: Record<string, MonsterDefinition>;
     spells: Record<string, SpellDefinition>;
@@ -167,7 +169,10 @@ export type BattleResult =
 
 export type BattleEvent =
   | { type: "battleStarted"; battleId: string }
-  | { type: "firstPlayerChosen"; playerId: string; reason: string }
+  | { type: "firstPlayerChoiceRequested"; playerIds: [string, string]; reason: "speedAndLevelTie" }
+  | { type: "elementChosen"; playerId: string; element: ElementType }
+  | { type: "elementDuelTied"; element: ElementType }
+  | { type: "firstPlayerChosen"; playerId: string; reason: FirstPlayerChoiceReason }
   | { type: "turnStarted"; playerId: string; turnCount: number; energy: number }
   | { type: "cooldownChanged"; targetId: string; from: number; to: number }
   | { type: "ringUsed"; playerId: string; ringInstanceId: string; targetId: TargetId }

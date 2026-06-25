@@ -1,0 +1,27 @@
+{
+  "id": "elementDuelStart",
+  "descriptionKey": "scenario.elementDuelStart.description",
+  "battleSetupId": "elementDuelStart",
+  "actions": [
+    {
+      "type": "chooseElement",
+      "playerId": "playerElectric",
+      "element": "electric"
+    },
+    {
+      "type": "chooseElement",
+      "playerId": "playerFire",
+      "element": "fire"
+    }
+  ],
+  "expect": {
+    "eventTypes": [
+      "battleStarted",
+      "firstPlayerChoiceRequested",
+      "elementChosen",
+      "firstPlayerChosen",
+      "turnStarted"
+    ],
+    "result": null
+  }
+}

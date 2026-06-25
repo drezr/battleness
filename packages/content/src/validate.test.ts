@@ -21,7 +21,13 @@ describe("content package", () => {
 
   it("includes the initial scenario fixtures and locale files", () => {
     expect(fixtures.scenarios.map((scenario) => scenario.id)).toEqual(
-      expect.arrayContaining(["basicRingAttack", "summonAndTaunt", "spellSelfTargeting"]),
+      expect.arrayContaining([
+        "basicRingAttack",
+        "summonAndTaunt",
+        "spellSelfTargeting",
+        "lowerLevelStart",
+        "elementDuelStart",
+      ]),
     );
     expect(locales.en["spell.firebolt.name"]).toBe("Firebolt");
     expect(locales.fr["spell.firebolt.name"]).toBe("Boule de feu");
@@ -32,11 +38,38 @@ describe("content package", () => {
     const sparkBand = setup.players[0].rings.find((ring) => ring.definitionId === "sparkBand");
 
     expect(setup.players).toHaveLength(2);
-    expect(setup.activePlayerId).toBe("playerOne");
+    expect(setup.activePlayerId).toBeNull();
     expect(sparkBand?.gems.length).toBe(2);
     expect(Object.keys(setup.definitions.spells)).toEqual(
       expect.arrayContaining(["spark", "firebolt", "iceShard"]),
     );
+
+    const state = createBattleState(setup);
+    expect(state.activePlayerId).toBe("playerOne");
+    expect(state.log).toContainEqual({
+      type: "firstPlayerChosen",
+      playerId: "playerOne",
+      reason: "speed",
+    });
+  });
+
+  it("creates battle setup fixtures for level and element-duel start rules", () => {
+    const lowerLevelState = createBattleState(createBattleSetupFromFixture("lowerLevelStart"));
+    expect(lowerLevelState.activePlayerId).toBe("playerLowLevel");
+    expect(lowerLevelState.log).toContainEqual({
+      type: "firstPlayerChosen",
+      playerId: "playerLowLevel",
+      reason: "level",
+    });
+
+    const elementDuelState = createBattleState(createBattleSetupFromFixture("elementDuelStart"));
+    expect(elementDuelState.status).toBe("choosingFirstPlayer");
+    expect(elementDuelState.activePlayerId).toBeNull();
+    expect(elementDuelState.log).toContainEqual({
+      type: "firstPlayerChoiceRequested",
+      playerIds: ["playerElectric", "playerFire"],
+      reason: "speedAndLevelTie",
+    });
   });
 
   it("executes the initial JSON scenario fixtures through the engine", () => {

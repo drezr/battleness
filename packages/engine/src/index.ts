@@ -8,6 +8,7 @@ import type {
   BattleState,
   BattlePlayer,
   ElementType,
+  FirstPlayerChoiceReason,
   MonsterCombatInstance,
   TargetId,
 } from "./types";
@@ -15,11 +16,16 @@ import type {
 export function createBattleState(setup: BattleSetup): BattleState {
   assertValidBattleSetup(setup);
 
-  return {
+  const state: BattleState = {
     ...structuredClone(setup),
-    log: createInitialLog(setup),
+    firstPlayerChoices: structuredClone(setup.firstPlayerChoices ?? {}),
+    log: [{ type: "battleStarted", battleId: setup.id }],
     result: null,
   };
+
+  state.log.push(...initializeBattleStart(state));
+
+  return state;
 }
 
 export function applyBattleAction(state: BattleState, action: BattleAction): BattleActionResult {
@@ -32,7 +38,8 @@ export function applyBattleAction(state: BattleState, action: BattleAction): Bat
 
   switch (action.type) {
     case "chooseElement":
-      throw new Error("Element choice resolution is not implemented yet.");
+      events.push(...chooseElement(next, action));
+      break;
     case "useRing":
       events.push(...useRing(next, action));
       finishBattleIfNeeded(next, events);
@@ -72,6 +79,12 @@ export function assertValidBattleSetup(setup: BattleSetup): void {
     throw new Error("BattleSetup startingPlayerId must reference one of the players.");
   }
 
+  for (const playerId of Object.keys(setup.firstPlayerChoices ?? {})) {
+    if (!playerIds.has(playerId)) {
+      throw new Error("BattleSetup firstPlayerChoices must reference setup players.");
+    }
+  }
+
   for (const player of setup.players) {
     for (const ring of player.rings) {
       if (ring.ownerId !== player.id) {
@@ -95,26 +108,129 @@ export function assertValidBattleSetup(setup: BattleSetup): void {
   }
 }
 
-function createInitialLog(setup: BattleSetup): BattleEvent[] {
-  const events: BattleEvent[] = [{ type: "battleStarted", battleId: setup.id }];
-
-  if (setup.activePlayerId) {
-    events.push({
-      type: "firstPlayerChosen",
-      playerId: setup.activePlayerId,
-      reason: "speed",
-    });
-
-    const activePlayer = setup.players.find((player) => player.id === setup.activePlayerId);
-    if (activePlayer) {
-      events.push({
-        type: "turnStarted",
-        playerId: activePlayer.id,
-        turnCount: activePlayer.energy.turnCount,
-        energy: activePlayer.energy.current,
-      });
-    }
+function initializeBattleStart(state: BattleState): BattleEvent[] {
+  const resolved = resolveStartingPlayerByStats(state.players);
+  if (resolved) {
+    return startBattleForPlayer(state, resolved.player.id, resolved.reason);
   }
+
+  resetTurnEnergy(state);
+  state.status = "choosingFirstPlayer";
+  state.activePlayerId = null;
+  state.startingPlayerId = null;
+  state.firstPlayerChoices = {};
+
+  return [
+    {
+      type: "firstPlayerChoiceRequested",
+      playerIds: [state.players[0].id, state.players[1].id],
+      reason: "speedAndLevelTie",
+    },
+  ];
+}
+
+function resolveStartingPlayerByStats(
+  players: [BattlePlayer, BattlePlayer],
+): { player: BattlePlayer; reason: Exclude<FirstPlayerChoiceReason, "elementDuel"> } | null {
+  const [first, second] = players;
+  if (first.hero.speed !== second.hero.speed) {
+    return {
+      player: first.hero.speed > second.hero.speed ? first : second,
+      reason: "speed",
+    };
+  }
+
+  if (first.level !== second.level) {
+    return {
+      player: first.level < second.level ? first : second,
+      reason: "level",
+    };
+  }
+
+  return null;
+}
+
+function startBattleForPlayer(
+  state: BattleState,
+  playerId: string,
+  reason: FirstPlayerChoiceReason,
+): BattleEvent[] {
+  resetTurnEnergy(state);
+
+  const startingPlayer = getPlayer(state, playerId);
+  startingPlayer.energy.turnCount = 1;
+  startingPlayer.energy.maxForTurn = 1;
+  startingPlayer.energy.current = 1;
+
+  state.status = "active";
+  state.activePlayerId = startingPlayer.id;
+  state.startingPlayerId = startingPlayer.id;
+  state.firstPlayerChoices = {};
+
+  return [
+    {
+      type: "firstPlayerChosen",
+      playerId: startingPlayer.id,
+      reason,
+    },
+    {
+      type: "turnStarted",
+      playerId: startingPlayer.id,
+      turnCount: startingPlayer.energy.turnCount,
+      energy: startingPlayer.energy.current,
+    },
+  ];
+}
+
+function resetTurnEnergy(state: BattleState): void {
+  for (const player of state.players) {
+    player.energy.current = 0;
+    player.energy.maxForTurn = 0;
+    player.energy.turnCount = 0;
+  }
+}
+
+function chooseElement(
+  state: BattleState,
+  action: Extract<BattleAction, { type: "chooseElement" }>,
+): BattleEvent[] {
+  if (state.status !== "choosingFirstPlayer") {
+    throw new Error("Element choices can only be made while choosing the first player.");
+  }
+
+  const player = getPlayer(state, action.playerId);
+  state.firstPlayerChoices ??= {};
+
+  if (state.firstPlayerChoices[player.id]) {
+    throw new Error(`Player ${player.id} already chose an element for this duel.`);
+  }
+
+  state.firstPlayerChoices[player.id] = action.element;
+
+  const events: BattleEvent[] = [
+    {
+      type: "elementChosen",
+      playerId: player.id,
+      element: action.element,
+    },
+  ];
+
+  const [first, second] = state.players;
+  const firstChoice = state.firstPlayerChoices[first.id];
+  const secondChoice = state.firstPlayerChoices[second.id];
+
+  if (!firstChoice || !secondChoice) {
+    return events;
+  }
+
+  if (firstChoice === secondChoice) {
+    state.firstPlayerChoices = {};
+    events.push({ type: "elementDuelTied", element: firstChoice });
+    return events;
+  }
+
+  const winnerId = hasElementalAdvantage(firstChoice, secondChoice) ? first.id : second.id;
+  events.push(...startBattleForPlayer(state, winnerId, "elementDuel"));
 
   return events;
 }

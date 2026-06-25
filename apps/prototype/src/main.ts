@@ -8,7 +8,10 @@ import {
   applyBattleAction,
   createBattleState,
   type BattleAction,
+  type BattleEvent,
+  type BattleResult,
   type BattleState,
+  type ElementType,
   type TargetId,
 } from "@battleness/engine";
 import "./styles.css";
@@ -16,6 +19,17 @@ import "./styles.css";
 validateContent();
 
 type Scenario = (typeof fixtures.scenarios)[number];
+type BattlePlayerView = BattleState["players"][number];
+type RingView = BattlePlayerView["rings"][number];
+type GemView = RingView["gems"][number];
+type MonsterView = BattlePlayerView["monsters"][number];
+type TargetOption = {
+  id: TargetId;
+  label: string;
+  disabled: boolean;
+  reasonKey?: string;
+};
+const elementTypes = ["fire", "ice", "electric"] as const satisfies readonly ElementType[];
 
 const app = document.querySelector<HTMLDivElement>("#app");
 
@@ -26,6 +40,7 @@ if (!app) {
 const root = app;
 let selectedScenarioId = fixtures.scenarios[0]?.id ?? "";
 let state = createState();
+let isSetupOpen = true;
 let actionIndex = 0;
 let errorMessage: string | null = null;
 let manualTargetId: TargetId = "playerTwo.hero";
@@ -53,6 +68,11 @@ function t(key: string): string {
 }
 
 function render(): void {
+  if (isSetupOpen) {
+    renderSetup();
+    return;
+  }
+
   const scenario = currentScenario();
   const remainingActions = Math.max(0, scenario.actions.length - actionIndex);
   ensureValidManualTarget();
@@ -91,6 +111,7 @@ function render(): void {
       </section>
 
       <section class="controls">
+        <button id="backToSetup">${escapeHtml(t("ui.battleSetup"))}</button>
         <button id="nextAction" ${remainingActions === 0 ? "disabled" : ""}>
           ${escapeHtml(t("ui.nextAction"))}
         </button>
@@ -101,6 +122,8 @@ function render(): void {
       </section>
 
       ${errorMessage ? `<p class="error">${escapeHtml(errorMessage)}</p>` : ""}
+
+      ${renderBattleBoard()}
 
       <main class="layout">
         <section class="panel players">
@@ -124,14 +147,71 @@ function render(): void {
         <section class="panel log">
           <h2>${escapeHtml(t("ui.eventLog"))}</h2>
           <ol>
-            ${state.log
-              .slice()
-              .reverse()
+            ${state.log.slice().reverse().map(renderEvent).join("")}
+          </ol>
+        </section>
+      </main>
+    </section>
+  `;
+
+  bindEvents();
+}
+
+function renderSetup(): void {
+  const scenario = currentScenario();
+  const setup = createBattleSetupFromFixture(scenario.battleSetupId ?? "basicDuel");
+  const playerNames = setup.players.map((player) => player.username).join(t("ui.listSeparator"));
+
+  root.innerHTML = `
+    <section class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">BattleNess</p>
+          <h1>${escapeHtml(t("ui.battleSetup"))}</h1>
+        </div>
+        <label class="scenario-picker">
+          <span>${escapeHtml(t("ui.scenario"))}</span>
+          <select id="scenarioSelect">
+            ${fixtures.scenarios
               .map(
-                (event) =>
-                  `<li><code>${escapeHtml(event.type)}</code> ${escapeHtml(JSON.stringify(event))}</li>`,
+                (candidate) => `
+                  <option value="${escapeHtml(candidate.id)}" ${
+                    candidate.id === scenario.id ? "selected" : ""
+                  }>
+                    ${escapeHtml(t(candidate.descriptionKey))}
+                  </option>
+                `,
               )
               .join("")}
+          </select>
+        </label>
+      </header>
+
+      <main class="setup-layout">
+        <section class="panel setup-summary">
+          <h2>${escapeHtml(t("ui.battleSetup"))}</h2>
+          <dl class="setup-stats">
+            ${stat(t("ui.battle"), setup.id)}
+            ${stat(t("ui.scenario"), t(scenario.descriptionKey))}
+            ${stat(t("ui.players"), playerNames)}
+            ${stat(t("ui.seed"), setup.seed)}
+          </dl>
+          <div class="controls setup-controls">
+            <button id="startBattle">${escapeHtml(t("ui.startBattle"))}</button>
+          </div>
+        </section>
+
+        <section class="panel players">
+          <h2>${escapeHtml(t("ui.players"))}</h2>
+          <div class="player-grid">
+            ${setup.players.map(renderSetupPlayer).join("")}
+          </div>
+        </section>
+
+        <section class="panel actions">
+          <h2>${escapeHtml(t("ui.remainingActions"))}</h2>
+          <ol>
+            ${scenario.actions.map((action, index) => renderAction(action as BattleAction, index)).join("")}
           </ol>
         </section>
       </main>
@@ -146,8 +226,19 @@ function bindEvents(): void {
     .querySelector<HTMLSelectElement>("#scenarioSelect")
     ?.addEventListener("change", (event) => {
       selectedScenarioId = (event.currentTarget as HTMLSelectElement).value;
-      resetScenario();
+      openSetup();
+      render();
     });
+
+  document.querySelector<HTMLButtonElement>("#startBattle")?.addEventListener("click", () => {
+    startBattle();
+    render();
+  });
+
+  document.querySelector<HTMLButtonElement>("#backToSetup")?.addEventListener("click", () => {
+    openSetup();
+    render();
+  });
 
   document.querySelector<HTMLButtonElement>("#nextAction")?.addEventListener("click", () => {
     runNextAction();
@@ -173,6 +264,24 @@ function bindEvents(): void {
       render();
     });
 
+  document.querySelectorAll<HTMLButtonElement>("[data-board-target-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const targetId = button.dataset.boardTargetId as TargetId | undefined;
+      if (targetId) {
+        manualTargetId = targetId;
+      }
+      render();
+    });
+  });
+
+  document.querySelector<HTMLButtonElement>("#boardEndTurn")?.addEventListener("click", () => {
+    const activePlayer = getActivePlayer();
+    if (activePlayer) {
+      applyManualAction({ type: "endTurn", playerId: activePlayer.id });
+    }
+    render();
+  });
+
   document.querySelectorAll<HTMLButtonElement>("[data-manual-ring-id]").forEach((button) => {
     button.addEventListener("click", () => {
       const ringInstanceId = button.dataset.manualRingId;
@@ -182,6 +291,19 @@ function bindEvents(): void {
       render();
     });
   });
+
+  document
+    .querySelectorAll<HTMLButtonElement>("[data-manual-element-player-id]")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        const playerId = button.dataset.manualElementPlayerId;
+        const element = button.dataset.manualElement as ElementType | undefined;
+        if (playerId && element) {
+          chooseManualElement(playerId, element);
+        }
+        render();
+      });
+    });
 
   document.querySelectorAll<HTMLButtonElement>("[data-manual-monster-id]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -232,9 +354,28 @@ function resetScenario(): void {
   manualTargetId = defaultTargetId();
 }
 
+function openSetup(): void {
+  state = createState();
+  actionIndex = 0;
+  errorMessage = null;
+  isSetupOpen = true;
+}
+
+function startBattle(): void {
+  state = createState();
+  actionIndex = 0;
+  errorMessage = null;
+  isSetupOpen = false;
+  manualTargetId = defaultTargetId();
+}
+
 function renderManualActions(): string {
   const activePlayer = getActivePlayer();
   const isFinished = state.status === "finished";
+
+  if (state.status === "choosingFirstPlayer") {
+    return renderElementChoiceActions();
+  }
 
   if (!activePlayer) {
     return `
@@ -243,15 +384,18 @@ function renderManualActions(): string {
     `;
   }
 
+  const targets = targetOptions();
+  const targetNotice = targetSelectionNotice(targets);
+
   return `
     <h2>${escapeHtml(t("ui.manualActions"))}</h2>
     <label class="target-picker">
       <span>${escapeHtml(t("ui.target"))}</span>
       <select id="manualTarget" ${isFinished ? "disabled" : ""}>
-        ${targetOptions()
+        ${targets
           .map(
             (target) => `
-              <option value="${escapeHtml(target.id)}" ${
+              <option value="${escapeHtml(target.id)}" ${target.disabled ? "disabled" : ""} ${
                 target.id === manualTargetId ? "selected" : ""
               }>
                 ${escapeHtml(target.label)}
@@ -260,6 +404,7 @@ function renderManualActions(): string {
           )
           .join("")}
       </select>
+      ${targetNotice ? `<p class="target-notice">${escapeHtml(targetNotice)}</p>` : ""}
     </label>
 
     <h4>${escapeHtml(t("ui.rings"))}</h4>
@@ -269,8 +414,15 @@ function renderManualActions(): string {
           const disabled =
             isFinished || ring.currentCooldown > 0 || activePlayer.energy.current < ring.energyCost;
           return `
-            <button data-manual-ring-id="${escapeHtml(ring.id)}" ${disabled ? "disabled" : ""}>
-              ${escapeHtml(t(ring.nameKey))} - ${escapeHtml(t("ui.energy"))} ${ring.energyCost}
+            <button class="action-button" data-manual-ring-id="${escapeHtml(ring.id)}" ${
+              disabled ? "disabled" : ""
+            }>
+              <strong>${escapeHtml(t(ring.nameKey))}</strong>
+              <span>
+                ${escapeHtml(t("ui.energy"))} ${ring.energyCost} /
+                ${escapeHtml(t("ui.damage"))} ${ringTotalDamage(ring)} /
+                ${escapeHtml(t("ui.cooldown"))} ${ring.currentCooldown}/${ring.cooldown}
+              </span>
             </button>
           `;
         })
@@ -308,6 +460,187 @@ function renderManualActions(): string {
       )}</button>
     </div>
   `;
+}
+
+function renderBattleBoard(): string {
+  const [bottomPlayer, topPlayer] = state.players;
+  const activePlayer = getActivePlayer();
+  const activeRings = activePlayer?.rings ?? bottomPlayer.rings;
+  const isFinished = state.status === "finished";
+
+  return `
+    <section class="battle-board" aria-label="${escapeHtml(t("ui.battleBoard"))}">
+      ${renderEnergyTrack(topPlayer, "top")}
+      <div class="board-main">
+        <aside class="hero-rail">
+          ${renderBoardHero(topPlayer, "top")}
+          <div class="turn-stack">
+            <strong>${escapeHtml(String(activePlayer?.energy.turnCount ?? 0))}</strong>
+            <span>${escapeHtml(t("ui.turn"))}</span>
+            <button id="boardEndTurn" ${!activePlayer || isFinished ? "disabled" : ""}>
+              ${escapeHtml(t("ui.action.endTurn"))}
+            </button>
+          </div>
+          ${renderBoardHero(bottomPlayer, "bottom")}
+        </aside>
+
+        <section class="monster-field" aria-label="${escapeHtml(t("ui.monsters"))}">
+          ${renderMonsterRow(topPlayer, "top")}
+          ${renderMonsterRow(bottomPlayer, "bottom")}
+        </section>
+      </div>
+
+      ${renderRingBelt(activeRings, activePlayer)}
+      ${renderEnergyTrack(bottomPlayer, "bottom")}
+    </section>
+  `;
+}
+
+function renderEnergyTrack(player: BattlePlayerView, position: "top" | "bottom"): string {
+  const slots = Array.from({ length: 8 }, (_, index) => index < player.energy.current);
+  return `
+    <div class="energy-track ${position}">
+      <div class="energy-slots">
+        ${slots.map((filled) => `<span class="${filled ? "filled" : ""}"></span>`).join("")}
+      </div>
+      <strong>${escapeHtml(player.username)}</strong>
+      <span>${escapeHtml(t("ui.energy"))} ${player.energy.current}/${player.energy.maxForTurn}</span>
+    </div>
+  `;
+}
+
+function renderBoardHero(player: BattlePlayerView, position: "top" | "bottom"): string {
+  const targetId = `${player.id}.hero` as TargetId;
+  const disabledReason = targetDisabledReason(targetId);
+  const isSelected = manualTargetId === targetId;
+
+  return `
+    <button
+      class="board-hero ${position} ${isSelected ? "selected" : ""}"
+      data-board-target-id="${escapeHtml(targetId)}"
+      ${disabledReason ? "disabled" : ""}
+    >
+      <strong>${escapeHtml(player.username)}</strong>
+      <span>${escapeHtml(t("ui.hero"))}</span>
+      <small>${escapeHtml(t("ui.health"))} ${player.hero.health}/${player.hero.maxHealth}</small>
+    </button>
+  `;
+}
+
+function renderMonsterRow(player: BattlePlayerView, position: "top" | "bottom"): string {
+  return `
+    <div class="monster-row ${position}">
+      ${Array.from({ length: 3 }, (_, index) => renderMonsterSlot(player, index)).join("")}
+    </div>
+  `;
+}
+
+function renderMonsterSlot(player: BattlePlayerView, index: number): string {
+  const monster = player.monsters[index];
+  if (!monster) {
+    return `<div class="monster-slot empty">${escapeHtml(t("ui.emptySlot"))}</div>`;
+  }
+
+  const targetId = monster.id as TargetId;
+  const disabledReason = targetDisabledReason(targetId);
+  const isSelected = manualTargetId === targetId;
+
+  return `
+    <button
+      class="monster-slot ${isSelected ? "selected" : ""}"
+      data-board-target-id="${escapeHtml(targetId)}"
+      ${disabledReason ? "disabled" : ""}
+    >
+      <span class="monster-skill">${renderSkillBadges(monster) || t("ui.none")}</span>
+      <strong>${escapeHtml(t(monster.nameKey))}</strong>
+      <span class="monster-stats">
+        <span>${escapeHtml(t("ui.damage"))} ${monster.damage}</span>
+        <span>${escapeHtml(t("ui.health"))} ${monster.health}/${monster.maxHealth}</span>
+      </span>
+    </button>
+  `;
+}
+
+function renderRingBelt(rings: RingView[], activePlayer: BattlePlayerView | null): string {
+  return `
+    <div class="ring-belt" aria-label="${escapeHtml(t("ui.rings"))}">
+      ${rings.map((ring) => renderBoardRing(ring, activePlayer)).join("")}
+    </div>
+  `;
+}
+
+function renderBoardRing(ring: RingView, activePlayer: BattlePlayerView | null): string {
+  const disabled =
+    !activePlayer ||
+    state.status !== "active" ||
+    ring.ownerId !== activePlayer.id ||
+    ring.currentCooldown > 0 ||
+    activePlayer.energy.current < ring.energyCost;
+
+  return `
+    <button class="board-ring" data-manual-ring-id="${escapeHtml(ring.id)}" ${
+      disabled ? "disabled" : ""
+    }>
+      <strong>${escapeHtml(t(ring.nameKey))}</strong>
+      <span class="ring-stats">
+        <span>${escapeHtml(t("ui.damage"))} ${ringTotalDamage(ring)}</span>
+        <span>${escapeHtml(t("ui.energy"))} ${ring.energyCost}</span>
+      </span>
+      <span class="ring-gems">
+        ${Array.from({ length: 3 }, (_, index) => {
+          const gem = ring.gems[index];
+          return `<span class="${gem ? "filled" : ""}" title="${gem ? escapeHtml(t(gem.nameKey)) : ""}"></span>`;
+        }).join("")}
+      </span>
+    </button>
+  `;
+}
+
+function renderElementChoiceActions(): string {
+  return `
+    <h2>${escapeHtml(t("ui.manualActions"))}</h2>
+    <p class="muted">${escapeHtml(t("ui.chooseStartingElement"))}</p>
+    <div class="element-choice-grid">
+      ${state.players
+        .map((player) => {
+          const chosenElement = state.firstPlayerChoices?.[player.id];
+          return `
+            <article>
+              <h4>${escapeHtml(player.username)}</h4>
+              <div class="button-list element-buttons">
+                ${elementTypes
+                  .map(
+                    (element) => `
+                      <button
+                        data-manual-element-player-id="${escapeHtml(player.id)}"
+                        data-manual-element="${escapeHtml(element)}"
+                        ${chosenElement ? "disabled" : ""}
+                      >
+                        ${escapeHtml(t(`ui.element.${element}`))}
+                      </button>
+                    `,
+                  )
+                  .join("")}
+              </div>
+              <p class="muted">
+                ${escapeHtml(
+                  chosenElement ? t(`ui.element.${chosenElement}`) : t("ui.noElementChoice"),
+                )}
+              </p>
+            </article>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
+function chooseManualElement(playerId: string, element: ElementType): void {
+  applyManualAction({
+    type: "chooseElement",
+    playerId,
+    element,
+  });
 }
 
 function useManualRing(ringInstanceId: string): void {
@@ -360,7 +693,7 @@ function applyManualAction(action: BattleAction): void {
   }
 }
 
-function renderPlayer(player: BattleState["players"][number]): string {
+function renderPlayer(player: BattlePlayerView): string {
   return `
     <article class="player-card ${player.id === state.activePlayerId ? "active" : ""}">
       <h3>${escapeHtml(player.username)}</h3>
@@ -374,10 +707,14 @@ function renderPlayer(player: BattleState["players"][number]): string {
         ${player.rings
           .map(
             (ring) => `
-              <li>
+              <li class="ring-item">
                 <strong>${escapeHtml(t(ring.nameKey))}</strong>
-                <span>${escapeHtml(t("ui.energy"))} ${ring.energyCost}</span>
-                <span>${escapeHtml(t("ui.cooldown"))} ${ring.currentCooldown}</span>
+                <dl class="inline-stats">
+                  ${stat(t("ui.energy"), String(ring.energyCost))}
+                  ${stat(t("ui.damage"), String(ringTotalDamage(ring)))}
+                  ${stat(t("ui.cooldown"), `${ring.currentCooldown}/${ring.cooldown}`)}
+                </dl>
+                ${renderGemList(ring)}
               </li>
             `,
           )
@@ -395,6 +732,7 @@ function renderPlayer(player: BattleState["players"][number]): string {
                       <strong>${escapeHtml(t(monster.nameKey))}</strong>
                       <span>${escapeHtml(t("ui.health"))} ${monster.health}/${monster.maxHealth}</span>
                       <span>${escapeHtml(t("ui.cooldown"))} ${monster.currentCooldown}</span>
+                      ${renderSkillBadges(monster)}
                     </li>
                   `,
                 )
@@ -404,6 +742,99 @@ function renderPlayer(player: BattleState["players"][number]): string {
       </ul>
     </article>
   `;
+}
+
+function renderSetupPlayer(player: BattlePlayerView): string {
+  return `
+    <article class="player-card">
+      <h3>${escapeHtml(player.username)}</h3>
+      <dl>
+        ${stat(t("ui.level"), String(player.level))}
+        ${stat(t("ui.health"), `${player.hero.health}/${player.hero.maxHealth}`)}
+        ${stat(t("ui.speed"), String(player.hero.speed))}
+      </dl>
+
+      <h4>${escapeHtml(t("ui.rings"))}</h4>
+      <ul class="object-list">
+        ${player.rings
+          .map(
+            (ring) => `
+              <li class="ring-item">
+                <strong>${escapeHtml(t(ring.nameKey))}</strong>
+                <dl class="inline-stats">
+                  ${stat(t("ui.energy"), String(ring.energyCost))}
+                  ${stat(t("ui.damage"), String(ringTotalDamage(ring)))}
+                  ${stat(t("ui.cooldown"), String(ring.cooldown))}
+                </dl>
+                ${renderGemList(ring)}
+              </li>
+            `,
+          )
+          .join("")}
+      </ul>
+    </article>
+  `;
+}
+
+function renderGemList(ring: RingView): string {
+  if (ring.gems.length === 0) {
+    return `<p class="muted">${escapeHtml(t("ui.noGem"))}</p>`;
+  }
+
+  return `
+    <div class="gem-list" aria-label="${escapeHtml(t("ui.gems"))}">
+      ${ring.gems.map(renderGem).join("")}
+    </div>
+  `;
+}
+
+function renderGem(gem: GemView): string {
+  return `
+    <article class="gem-item">
+      <strong>${escapeHtml(t(gem.nameKey))}</strong>
+      <dl class="inline-stats compact">
+        ${stat(t("ui.damage"), String(gem.damage))}
+        ${stat(t("ui.energyPenalty"), String(gem.energyPenalty))}
+        ${stat(t("ui.cooldownPenalty"), String(gem.cooldownPenalty))}
+      </dl>
+      <span>${escapeHtml(t("ui.enchantment"))}: ${escapeHtml(enchantmentLabel(gem))}</span>
+    </article>
+  `;
+}
+
+function renderSkillBadges(monster: MonsterView): string {
+  if (monster.skills.length === 0) {
+    return "";
+  }
+
+  return `
+    <span class="skill-list">
+      ${monster.skills
+        .map((skill) => {
+          const skillType = typeof skill === "string" ? skill : skill.type;
+          return `<span>${escapeHtml(t(`ui.skill.${skillType}`))}</span>`;
+        })
+        .join("")}
+    </span>
+  `;
+}
+
+function enchantmentLabel(gem: GemView): string {
+  if (!gem.enchantment) {
+    return t("ui.none");
+  }
+
+  if (gem.enchantment.type === "spell") {
+    const spell = state.definitions.spells[gem.enchantment.spellId];
+    return `${t("ui.spell")}: ${spell ? t(spell.nameKey) : gem.enchantment.spellId}`;
+  }
+
+  const monster = state.definitions.monsters[gem.enchantment.monsterId];
+  return `${t("ui.monster")}: ${monster ? t(monster.nameKey) : gem.enchantment.monsterId}`;
+}
+
+function ringTotalDamage(ring: RingView): number {
+  return ring.damage + ring.gems.reduce((sum, gem) => sum + gem.damage, 0);
 }
 
 function renderAction(action: BattleAction, index: number): string {
@@ -426,34 +857,309 @@ function renderAction(action: BattleAction, index: number): string {
   `;
 }
 
-function getActivePlayer(): BattleState["players"][number] | null {
+function renderEvent(event: BattleEvent): string {
+  return `
+    <li class="event-item">
+      <div>
+        <strong>${escapeHtml(t(`event.type.${event.type}`))}</strong>
+        <code>${escapeHtml(event.type)}</code>
+      </div>
+      <span>${escapeHtml(eventMessage(event))}</span>
+      ${eventDetails(event)}
+    </li>
+  `;
+}
+
+function eventMessage(event: BattleEvent): string {
+  switch (event.type) {
+    case "battleStarted":
+      return formatMessage("event.battleStarted", { battleId: event.battleId });
+    case "firstPlayerChoiceRequested":
+      return formatMessage("event.firstPlayerChoiceRequested", {
+        players: event.playerIds.map(playerLabel).join(t("ui.listSeparator")),
+      });
+    case "elementChosen":
+      return formatMessage("event.elementChosen", {
+        player: playerLabel(event.playerId),
+        element: t(`ui.element.${event.element}`),
+      });
+    case "elementDuelTied":
+      return formatMessage("event.elementDuelTied", {
+        element: t(`ui.element.${event.element}`),
+      });
+    case "firstPlayerChosen":
+      return formatMessage(`event.firstPlayerChosen.${event.reason}`, {
+        player: playerLabel(event.playerId),
+      });
+    case "turnStarted":
+      return formatMessage("event.turnStarted", {
+        player: playerLabel(event.playerId),
+        turnCount: String(event.turnCount),
+        energy: String(event.energy),
+      });
+    case "cooldownChanged":
+      return formatMessage("event.cooldownChanged", {
+        target: combatObjectLabel(event.targetId),
+        from: String(event.from),
+        to: String(event.to),
+      });
+    case "ringUsed":
+      return formatMessage("event.ringUsed", {
+        player: playerLabel(event.playerId),
+        ring: ringLabel(event.ringInstanceId),
+        target: targetLabel(event.targetId),
+      });
+    case "energySpent":
+      return formatMessage("event.energySpent", {
+        player: playerLabel(event.playerId),
+        amount: String(event.amount),
+        remaining: String(event.remaining),
+      });
+    case "damageDealt":
+      return formatMessage("event.damageDealt", {
+        amount: String(event.amount),
+        target: targetLabel(event.targetId),
+        element: event.element ? t(`ui.element.${event.element}`) : t("ui.none"),
+      });
+    case "spellCast":
+      return formatMessage("event.spellCast", {
+        spell: spellLabel(event.spellId),
+        target: targetLabel(event.targetId),
+      });
+    case "monsterSummoned":
+      return formatMessage("event.monsterSummoned", {
+        player: playerLabel(event.playerId),
+        monster: monsterDefinitionLabel(event.monsterId),
+      });
+    case "monsterUsed":
+      return formatMessage("event.monsterUsed", {
+        player: playerLabel(event.playerId),
+        monster: combatObjectLabel(event.monsterInstanceId),
+        target: targetLabel(event.targetId),
+      });
+    case "monsterDestroyed":
+      return formatMessage("event.monsterDestroyed", {
+        monster: combatObjectLabel(event.monsterInstanceId),
+      });
+    case "turnEnded":
+      return formatMessage("event.turnEnded", {
+        player: playerLabel(event.playerId),
+      });
+    case "battleEnded":
+      return battleResultMessage(event.result);
+  }
+}
+
+function eventDetails(event: BattleEvent): string {
+  const details = eventTechnicalDetails(event);
+  if (details.length === 0) {
+    return "";
+  }
+
+  return `
+    <dl class="event-details">
+      ${details.map(([label, value]) => stat(t(label), value)).join("")}
+    </dl>
+  `;
+}
+
+function eventTechnicalDetails(event: BattleEvent): Array<[string, string]> {
+  switch (event.type) {
+    case "battleStarted":
+      return [["ui.battle", event.battleId]];
+    case "ringUsed":
+      return [
+        ["ui.ringId", event.ringInstanceId],
+        ["ui.targetId", event.targetId],
+      ];
+    case "spellCast":
+      return [
+        ["ui.spellId", event.spellId],
+        ["ui.gemId", event.sourceGemId],
+        ["ui.targetId", event.targetId],
+      ];
+    case "monsterSummoned":
+      return [
+        ["ui.monsterId", event.monsterId],
+        ["ui.monsterInstanceId", event.monsterInstanceId],
+      ];
+    case "monsterUsed":
+      return [
+        ["ui.monsterInstanceId", event.monsterInstanceId],
+        ["ui.targetId", event.targetId],
+      ];
+    case "monsterDestroyed":
+      return [["ui.monsterInstanceId", event.monsterInstanceId]];
+    case "damageDealt":
+      return [
+        ["ui.sourceId", event.sourceId],
+        ["ui.targetId", event.targetId],
+      ];
+    case "cooldownChanged":
+      return [["ui.targetId", event.targetId]];
+    default:
+      return [];
+  }
+}
+
+function battleResultMessage(result: BattleResult): string {
+  if (result.type === "draw") {
+    return t("event.battleEnded.draw");
+  }
+
+  return formatMessage("event.battleEnded.winner", {
+    winner: playerLabel(result.winnerId),
+    loser: playerLabel(result.loserId),
+  });
+}
+
+function formatMessage(key: string, values: Record<string, string>): string {
+  return t(key).replace(/\{(\w+)\}/g, (_, name: string) => values[name] ?? `{${name}}`);
+}
+
+function playerLabel(playerId: string): string {
+  return state.players.find((player) => player.id === playerId)?.username ?? playerId;
+}
+
+function targetLabel(targetId: TargetId): string {
+  if (targetId.endsWith(".hero")) {
+    return `${playerLabel(targetId.slice(0, -".hero".length))} ${t("ui.hero")}`;
+  }
+
+  return combatObjectLabel(targetId);
+}
+
+function combatObjectLabel(objectId: string): string {
+  for (const player of state.players) {
+    const ring = player.rings.find((candidate) => candidate.id === objectId);
+    if (ring) {
+      return t(ring.nameKey);
+    }
+
+    const monster = player.monsters.find((candidate) => candidate.id === objectId);
+    if (monster) {
+      return t(monster.nameKey);
+    }
+  }
+
+  return objectId;
+}
+
+function ringLabel(ringInstanceId: string): string {
+  return combatObjectLabel(ringInstanceId);
+}
+
+function spellLabel(spellId: string): string {
+  const spell = state.definitions.spells[spellId];
+  return spell ? t(spell.nameKey) : spellId;
+}
+
+function monsterDefinitionLabel(monsterId: string): string {
+  const monster = state.definitions.monsters[monsterId];
+  return monster ? t(monster.nameKey) : monsterId;
+}
+
+function getActivePlayer(): BattlePlayerView | null {
   return state.players.find((player) => player.id === state.activePlayerId) ?? null;
 }
 
-function targetOptions(): Array<{ id: TargetId; label: string }> {
+function targetOptions(): TargetOption[] {
   return state.players.flatMap((player) => [
-    {
-      id: `${player.id}.hero` as TargetId,
-      label: `${player.username} - ${t("ui.hero")}`,
-    },
-    ...player.monsters.map((monster) => ({
-      id: monster.id as TargetId,
-      label: `${player.username} - ${t(monster.nameKey)}`,
-    })),
+    createTargetOption(`${player.id}.hero` as TargetId, `${player.username} - ${t("ui.hero")}`),
+    ...player.monsters.map((monster) =>
+      createTargetOption(
+        monster.id as TargetId,
+        `${player.username} - ${t(monster.nameKey)}${hasTaunt(monster) ? ` (${t("ui.skill.taunt")})` : ""}`,
+      ),
+    ),
   ]);
+}
+
+function createTargetOption(id: TargetId, baseLabel: string): TargetOption {
+  const reasonKey = targetDisabledReason(id);
+  return {
+    id,
+    label: reasonKey ? `${baseLabel} - ${t(reasonKey)}` : baseLabel,
+    disabled: Boolean(reasonKey),
+    reasonKey,
+  };
+}
+
+function targetDisabledReason(targetId: TargetId): string | undefined {
+  const activePlayer = getActivePlayer();
+  const target = findTarget(targetId);
+  if (!activePlayer || !target || target.player.id === activePlayer.id) {
+    return undefined;
+  }
+
+  const tauntMonsters = target.player.monsters.filter(hasTaunt);
+  if (tauntMonsters.length === 0) {
+    return undefined;
+  }
+
+  if (target.kind === "monster" && hasTaunt(target.monster)) {
+    return undefined;
+  }
+
+  return "ui.targetBlockedByTaunt";
+}
+
+function targetSelectionNotice(targets: TargetOption[]): string | null {
+  return targets.some((target) => target.reasonKey === "ui.targetBlockedByTaunt")
+    ? t("ui.tauntTargetNotice")
+    : null;
 }
 
 function defaultTargetId(): TargetId {
   const activePlayer = getActivePlayer();
   const opponent = state.players.find((player) => player.id !== activePlayer?.id);
-  return `${opponent?.id ?? state.players[0].id}.hero` as TargetId;
+  const targets = targetOptions();
+  const opponentTarget = targets.find(
+    (target) => !target.disabled && opponent && target.id.startsWith(`${opponent.id}.`),
+  );
+  const fallbackTarget = targets.find((target) => !target.disabled) ?? targets[0];
+
+  return opponentTarget?.id ?? fallbackTarget.id;
 }
 
 function ensureValidManualTarget(): void {
+  if (state.status !== "active") {
+    return;
+  }
+
   const targets = targetOptions();
-  if (!targets.some((target) => target.id === manualTargetId)) {
+  const selectedTarget = targets.find((target) => target.id === manualTargetId);
+  if (!selectedTarget || selectedTarget.disabled) {
     manualTargetId = defaultTargetId();
   }
+}
+
+function findTarget(
+  targetId: TargetId,
+):
+  | { kind: "hero"; player: BattlePlayerView }
+  | { kind: "monster"; player: BattlePlayerView; monster: MonsterView }
+  | null {
+  if (targetId.endsWith(".hero")) {
+    const playerId = targetId.slice(0, -".hero".length);
+    const player = state.players.find((candidate) => candidate.id === playerId);
+    return player ? { kind: "hero", player } : null;
+  }
+
+  for (const player of state.players) {
+    const monster = player.monsters.find((candidate) => candidate.id === targetId);
+    if (monster) {
+      return { kind: "monster", player, monster };
+    }
+  }
+
+  return null;
+}
+
+function hasTaunt(monster: MonsterView): boolean {
+  return monster.skills.some((skill) =>
+    typeof skill === "string" ? skill === "taunt" : skill.type === "taunt",
+  );
 }
 
 function stat(label: string, value: string): string {

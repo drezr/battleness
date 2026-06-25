@@ -58,5 +58,15 @@
     "baseEnergyCost": 3,
     "baseCooldown": 0,
     "baseSpeed": 0
+  },
+  {
+    "id": "trainingFlameBand",
+    "nameKey": "ring.trainingFlameBand.name",
+    "element": "fire",
+    "rarity": "normal",
+    "baseDamage": 5,
+    "baseEnergyCost": 2,
+    "baseCooldown": 1,
+    "baseSpeed": 4
   }
 ]

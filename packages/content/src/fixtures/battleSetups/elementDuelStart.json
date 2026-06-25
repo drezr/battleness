@@ -1,0 +1,5 @@
+{
+  "id": "elementDuelStart",
+  "seed": "element-duel-start-seed",
+  "playerIds": ["playerElectric", "playerFire"]
+}

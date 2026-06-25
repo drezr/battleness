@@ -114,9 +114,19 @@ h4 {
   margin-bottom: 12px;
 }
 
+.target-notice {
+  margin: 0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #fff3bc;
+  background: rgb(255 229 51 / 12%);
+  font-size: 0.82rem;
+}
+
 .summary,
 .controls,
 .layout,
+.setup-layout,
 .player-grid,
 .button-list {
   display: grid;
@@ -141,12 +151,255 @@ h4 {
 }
 
 .controls {
-  grid-template-columns: repeat(3, minmax(0, 160px));
+  grid-template-columns: repeat(4, minmax(0, 160px));
   margin-bottom: 12px;
 }
 
 .layout {
   grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  align-items: start;
+}
+
+.battle-board {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+  border: 2px solid rgb(255 255 255 / 28%);
+  border-radius: 8px;
+  padding: 8px;
+  background: rgb(0 0 0 / 16%);
+}
+
+.energy-track {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(120px, auto);
+  gap: 12px;
+  align-items: center;
+  min-height: 34px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 6px;
+  padding: 5px 8px;
+  background: rgb(255 255 255 / 6%);
+}
+
+.energy-track.top {
+  grid-template-columns: minmax(120px, auto) auto minmax(180px, 1fr);
+}
+
+.energy-track.top .energy-slots {
+  order: 3;
+}
+
+.energy-slots {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(14px, 1fr));
+  gap: 5px;
+}
+
+.energy-slots span {
+  min-height: 18px;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 16%);
+}
+
+.energy-slots span.filled {
+  background: #46ef43;
+}
+
+.board-main {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 8px;
+  min-height: 330px;
+}
+
+.hero-rail {
+  display: grid;
+  grid-template-rows: 1fr auto 1fr;
+  gap: 8px;
+}
+
+.board-hero {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 10px;
+  height: 100%;
+  min-height: 120px;
+  border: 2px solid rgb(255 255 255 / 34%);
+  background: rgb(0 0 0 / 18%);
+  text-align: left;
+}
+
+.board-hero strong {
+  font-size: 1rem;
+}
+
+.board-hero span {
+  font-size: 1.55rem;
+}
+
+.board-hero small {
+  border: 2px solid rgb(255 255 255 / 34%);
+  border-radius: 4px;
+  padding: 5px 8px;
+  color: #ff5f7a;
+  background: rgb(0 0 0 / 22%);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.turn-stack {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  color: #eef8fb;
+}
+
+.turn-stack strong {
+  font-size: 1.1rem;
+}
+
+.turn-stack span {
+  color: #cbd9df;
+  font-size: 0.82rem;
+}
+
+.turn-stack button {
+  width: 100%;
+}
+
+.monster-field {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+  border: 2px solid rgb(255 255 255 / 24%);
+  border-radius: 6px;
+  padding: 12px;
+  background: rgb(255 255 255 / 4%);
+}
+
+.monster-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(90px, 118px));
+  justify-content: space-around;
+  align-items: center;
+  gap: 14px;
+}
+
+.monster-slot {
+  display: grid;
+  grid-template-rows: 24px 1fr auto;
+  gap: 6px;
+  min-height: 132px;
+  border: 2px solid rgb(255 255 255 / 30%);
+  border-radius: 6px;
+  padding: 0;
+  overflow: hidden;
+  color: #f7fbff;
+  background: rgb(0 0 0 / 22%);
+  text-align: center;
+}
+
+.monster-slot.empty {
+  display: grid;
+  place-items: center;
+  border-style: dashed;
+  color: rgb(255 255 255 / 38%);
+  background: rgb(0 0 0 / 10%);
+  font-size: 0.78rem;
+}
+
+.monster-slot strong {
+  align-self: center;
+  padding: 0 8px;
+}
+
+.monster-skill {
+  display: grid;
+  place-items: center;
+  border-bottom: 2px solid rgb(255 255 255 / 24%);
+  color: #ff4be1;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.monster-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 2px solid rgb(255 255 255 / 24%);
+}
+
+.monster-stats span {
+  padding: 6px 4px;
+  color: #cbd9df;
+  font-size: 0.7rem;
+}
+
+.monster-stats span + span {
+  border-left: 2px solid rgb(255 255 255 / 24%);
+}
+
+.ring-belt {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(72px, 1fr));
+  gap: 7px;
+}
+
+.board-ring {
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  gap: 5px;
+  min-height: 96px;
+  min-width: 0;
+  border: 2px solid rgb(255 255 255 / 32%);
+  border-radius: 6px;
+  padding: 8px 6px 6px;
+  background: rgb(255 95 122 / 18%);
+  text-align: center;
+}
+
+.board-ring strong {
+  align-self: center;
+  font-size: 0.9rem;
+  line-height: 1.15;
+}
+
+.ring-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  color: #cbd9df;
+  font-size: 0.68rem;
+}
+
+.ring-gems {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.ring-gems span {
+  aspect-ratio: 1;
+  border: 2px solid rgb(255 255 255 / 70%);
+  border-radius: 999px;
+  opacity: 0.35;
+  background: rgb(255 255 255 / 20%);
+}
+
+.ring-gems span.filled {
+  opacity: 1;
+  background: #00d7ff;
+}
+
+.board-hero.selected,
+.monster-slot.selected {
+  border-color: #ffe533;
+  box-shadow: 0 0 0 2px rgb(255 229 51 / 25%);
+}
+
+.setup-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.48fr);
   align-items: start;
 }
 
@@ -156,6 +409,20 @@ h4 {
 
 .panel {
   padding: 16px;
+}
+
+.setup-summary {
+  grid-column: 1 / -1;
+}
+
+.setup-stats {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.setup-controls {
+  grid-template-columns: minmax(0, 180px);
+  margin-top: 16px;
+  margin-bottom: 0;
 }
 
 .player-grid {
@@ -183,6 +450,11 @@ dl div,
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.object-list li.ring-item {
+  display: grid;
+  align-items: stretch;
 }
 
 dt {
@@ -235,9 +507,107 @@ ul {
   grid-template-columns: 1fr;
 }
 
+.action-button {
+  display: grid;
+  height: auto;
+  justify-items: start;
+  gap: 4px;
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.action-button span {
+  color: #cbd9df;
+  font-size: 0.82rem;
+}
+
 .button-list.split {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: 16px;
+}
+
+.element-choice-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.element-choice-grid article {
+  display: grid;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 10px;
+  background: rgb(255 255 255 / 7%);
+}
+
+.element-choice-grid h4 {
+  margin: 0;
+}
+
+.element-buttons {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.element-buttons button {
+  min-width: 0;
+  padding: 0 8px;
+}
+
+.inline-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 8px;
+}
+
+.inline-stats.compact {
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+}
+
+.inline-stats div {
+  display: grid;
+  gap: 2px;
+  justify-items: start;
+}
+
+.inline-stats dt {
+  font-size: 0.72rem;
+}
+
+.inline-stats dd {
+  font-size: 0.88rem;
+}
+
+.gem-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.gem-item {
+  display: grid;
+  gap: 6px;
+  border-radius: 8px;
+  padding: 8px;
+  background: rgb(0 0 0 / 18%);
+}
+
+.gem-item > span {
+  color: #cbd9df;
+  font-size: 0.82rem;
+}
+
+.skill-list {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.skill-list span {
+  border-radius: 999px;
+  padding: 2px 7px;
+  color: #172b38;
+  background: #c6f8ff;
+  font-size: 0.72rem;
+  font-weight: 800;
 }
 
 .log ol {
@@ -248,6 +618,45 @@ ul {
 .log li {
   overflow-wrap: anywhere;
   font-size: 0.82rem;
+}
+
+.event-item {
+  display: grid;
+  gap: 8px;
+}
+
+.event-item > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.event-item > span {
+  color: #eef8fb;
+  line-height: 1.4;
+}
+
+.event-details {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  margin-top: 0;
+}
+
+.event-details div {
+  display: grid;
+  gap: 2px;
+  justify-items: start;
+}
+
+.event-details dt {
+  font-size: 0.7rem;
+}
+
+.event-details dd {
+  color: #cbd9df;
+  font-size: 0.78rem;
+  font-weight: 600;
 }
 
 .log code {
@@ -266,9 +675,29 @@ ul {
 @media (max-width: 760px) {
   .topbar,
   .layout,
+  .setup-layout,
   .controls,
-  .button-list.split {
+  .button-list.split,
+  .board-main,
+  .energy-track,
+  .energy-track.top {
     grid-template-columns: 1fr;
+  }
+
+  .energy-track.top .energy-slots {
+    order: 0;
+  }
+
+  .hero-rail {
+    grid-template-rows: auto auto auto;
+  }
+
+  .monster-row {
+    grid-template-columns: repeat(3, minmax(76px, 1fr));
+  }
+
+  .ring-belt {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   h1 {

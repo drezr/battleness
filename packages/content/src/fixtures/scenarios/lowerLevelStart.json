@@ -1,0 +1,10 @@
+{
+  "id": "lowerLevelStart",
+  "descriptionKey": "scenario.lowerLevelStart.description",
+  "battleSetupId": "lowerLevelStart",
+  "actions": [],
+  "expect": {
+    "eventTypes": ["battleStarted", "firstPlayerChosen", "turnStarted"],
+    "result": null
+  }
+}

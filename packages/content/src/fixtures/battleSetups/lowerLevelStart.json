@@ -1,0 +1,5 @@
+{
+  "id": "lowerLevelStart",
+  "seed": "lower-level-start-seed",
+  "playerIds": ["playerLowLevel", "playerHighLevel"]
+}

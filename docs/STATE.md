@@ -5,13 +5,35 @@ This file records modifications made to the project during agent-assisted work.
 ## Current State
 
 - BattleNess is being restarted as a clean rebuild.
-- No gameplay/application code has been implemented in this restart yet.
-- Technical discussion is in progress before choosing the framework, architecture, data model, and tooling.
+- A TypeScript monorepo skeleton is in place with `packages/engine`, `packages/content`, and `apps/prototype`.
+- The first deterministic local combat prototype is implemented with JSON-backed content, scenario fixtures, localization files, and a Vite browser UI.
+- The combat engine now resolves the starting player from hero speed, lower hero level, or repeated element duels when speed and level are tied.
+- The prototype event log now renders localized event titles and descriptions while preserving compact technical IDs for debugging.
+- The prototype target selector now disables Taunt-protected enemy targets, auto-selects a legal fallback target, and displays Taunt skill badges on monsters.
+- The prototype now opens on a battle setup screen that previews the selected scenario, seed, players, computed stats, rings, gems, and enchantments before launching combat.
+- Additional prototype setups now cover lower-level-start and element-duel-start rules from the setup screen.
+- The user's battle layout sketch is documented as future UI direction, while the current prototype remains an engine/debug interface.
+- The prototype combat screen now includes a first sketch-inspired battle board with heroes, monster rows, active rings, selectable targets, an end-turn control, and top/bottom energy tracks.
 
 ## Change Log
 
 ### 2026-06-25
 
+- Added ring detail display to `apps/prototype`, including total ring damage, current/base cooldown, socketed gems, gem penalties, and resolved spell or monster enchantments.
+- Added localized UI labels for gem, damage, penalty, spell, monster, enchantment, and empty-gem display terms to the English and French locale files.
+- Added focused engine tests for Taunt target blocking, first-turn opposing hero damage protection across ring and spell effects, full-board summon failure, simultaneous hero defeat draws, and cooldown decrement timing.
+- Implemented combat-start resolution in `packages/engine`: speed chooses the first player, tied speed falls back to lower level, and tied speed plus tied level enters repeated fire/ice/electric element duels until one player wins.
+- Moved first-player selection out of `packages/content`, so fixture builders now create unresolved battle setup data and the engine initializes turn energy and active player state.
+- Added prototype controls and locale labels for element choices during first-player duel states.
+- Updated engine/content tests for speed, level, repeated element-duel resolution, and engine-owned first-player initialization.
+- Replaced the raw JSON event-log display in `apps/prototype` with localized event titles, human-readable event messages, and compact technical detail fields.
+- Added localized English and French event-log labels and message templates for all current engine event types.
+- Improved manual target selection in `apps/prototype` by disabling enemy targets protected by Taunt, showing a localized Taunt notice, auto-correcting illegal selected targets, and displaying localized monster skill badges.
+- Added a battle setup screen to `apps/prototype` with scenario selection, setup metadata, player stat previews, equipped ring and gem details, and an explicit start-battle action before entering combat controls.
+- Added prototype battle setup fixtures and scenario fixtures for lower-level starting priority and speed/level-tied element duel resolution.
+- Added prototype player and inventory fixtures plus a training fire ring definition to support equal-speed element-duel testing.
+- Documented the user's battle layout sketch direction in `docs/PROJECT.md` and `docs/RESUME.md`.
+- Added the first sketch-inspired battle board view to `apps/prototype`, keeping the existing debug panels below it for inspection and scenario replay.
 - Added manual combat controls to `apps/prototype`, allowing the active player to select a target, use available rings, use ready monsters, end the turn, or concede while keeping scenario replay controls and the event log.
 - Added localized UI labels for manual combat controls to the English and French locale files.
 
