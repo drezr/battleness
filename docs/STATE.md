@@ -24,6 +24,7 @@ This file records modifications made to the project during agent-assisted work.
 - Shield, Pierce, Haste, Rage, and MultiHit are implemented in the deterministic engine with dedicated replay events and localized prototype rendering.
 - A development-only `skillShowcase` scenario preloads ready monsters for manual skill testing.
 - Successful combat commands are recorded in `actionHistory`, and the prototype supports versioned battle-record JSON export, import, step replay, full replay, and deterministic result/state verification.
+- GitHub Actions CI now installs pnpm before configuring the Node cache and uses Node 24-compatible action runtimes.
 
 ## Change Log
 
@@ -39,6 +40,7 @@ This file records modifications made to the project during agent-assisted work.
 - Added versioned `BattleRecord` generation, JSON serialization and parsing, action-shape validation, deterministic replay, result verification, and canonical final-state checksums.
 - Added localized prototype controls for battle-record export, import, step replay, and full replay, with manual combat locked while a replay is incomplete.
 - Added engine and DOM regression tests for successful-action history, invalid-action exclusion, serialization, replay equivalence, tamper detection, and replay controls.
+- Fixed GitHub Actions CI startup failures by using `pnpm/action-setup@v6` before `actions/setup-node@v6`, upgrading checkout to v6, and removing the obsolete Corepack activation step.
 
 ### 2026-06-25
 
