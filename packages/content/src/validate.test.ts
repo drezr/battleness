@@ -6,6 +6,7 @@ import {
   fixtures,
   locales,
   monsterDefinitionSchema,
+  playerFixtureSchema,
   ringDefinitionSchema,
   validateContent,
 } from "./index";
@@ -20,6 +21,15 @@ describe("content package", () => {
       ringDefinitionSchema.parse({
         ...definitions.rings[0],
         baseCooldown: 0,
+      }),
+    ).toThrow();
+  });
+
+  it("rejects fixture levels because total experience is the progression source of truth", () => {
+    expect(() =>
+      playerFixtureSchema.parse({
+        ...fixtures.players[0],
+        level: 1,
       }),
     ).toThrow();
   });

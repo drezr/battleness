@@ -64,50 +64,75 @@ export const materialDefinitionSchema = z.object({
   rarity: raritySchema,
 });
 
-export const playerFixtureSchema = z.object({
-  id: z.string().min(1),
-  username: z.string().min(1),
-  level: z.number().int().nonnegative(),
-  experience: z.number().int().nonnegative(),
-  equippedRingInstanceIds: z.array(z.string().min(1)),
-});
+export const playerFixtureSchema = z
+  .object({
+    id: z.string().min(1),
+    username: z.string().min(1),
+    experience: z.number().int().nonnegative(),
+    equippedRingInstanceIds: z.array(z.string().min(1)),
+  })
+  .strict();
 
 export const gemEnchantmentSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("monster"),
-    monsterId: z.string().min(1),
+    monsterInstanceId: z.string().min(1),
   }),
   z.object({
     type: z.literal("spell"),
-    spellId: z.string().min(1),
+    spellInstanceId: z.string().min(1),
   }),
 ]);
 
-export const ringInstanceSchema = z.object({
-  id: z.string().min(1),
-  definitionId: z.string().min(1),
-  ownerId: z.string().min(1),
-  level: z.number().int().nonnegative(),
-  quality: z.number().int().min(0).max(100),
-  socketCount: z.number().int().min(1).max(3),
-  socketedGemInstanceIds: z.array(z.string().min(1)).max(3),
-  equipped: z.boolean(),
-});
+export const ringInstanceSchema = z
+  .object({
+    id: z.string().min(1),
+    definitionId: z.string().min(1),
+    ownerId: z.string().min(1),
+    experience: z.number().int().nonnegative(),
+    quality: z.number().int().min(0).max(100),
+    socketCount: z.number().int().min(1).max(3),
+    socketedGemInstanceIds: z.array(z.string().min(1)).max(3),
+    equipped: z.boolean(),
+  })
+  .strict();
 
-export const gemInstanceSchema = z.object({
-  id: z.string().min(1),
-  definitionId: z.string().min(1),
-  ownerId: z.string().min(1),
-  level: z.number().int().nonnegative(),
-  quality: z.number().int().min(0).max(100),
-  enchantment: gemEnchantmentSchema.optional(),
-});
+export const gemInstanceSchema = z
+  .object({
+    id: z.string().min(1),
+    definitionId: z.string().min(1),
+    ownerId: z.string().min(1),
+    experience: z.number().int().nonnegative(),
+    quality: z.number().int().min(0).max(100),
+    enchantment: gemEnchantmentSchema.optional(),
+  })
+  .strict();
+
+export const monsterInstanceSchema = z
+  .object({
+    id: z.string().min(1),
+    definitionId: z.string().min(1),
+    ownerId: z.string().min(1),
+    experience: z.number().int().nonnegative(),
+    quality: z.number().int().min(0).max(100),
+  })
+  .strict();
+
+export const spellInstanceSchema = z
+  .object({
+    id: z.string().min(1),
+    definitionId: z.string().min(1),
+    ownerId: z.string().min(1),
+    experience: z.number().int().nonnegative(),
+    quality: z.number().int().min(0).max(100),
+  })
+  .strict();
 
 export const inventoryFixtureSchema = z.object({
   rings: z.array(ringInstanceSchema),
   gems: z.array(gemInstanceSchema),
-  monsters: z.array(z.unknown()),
-  spells: z.array(z.unknown()),
+  monsters: z.array(monsterInstanceSchema),
+  spells: z.array(spellInstanceSchema),
 });
 
 export const battleSetupFixtureSchema = z.object({
@@ -177,5 +202,7 @@ export type PlayerFixture = z.infer<typeof playerFixtureSchema>;
 export type InventoryFixture = z.infer<typeof inventoryFixtureSchema>;
 export type RingInstance = z.infer<typeof ringInstanceSchema>;
 export type GemInstance = z.infer<typeof gemInstanceSchema>;
+export type MonsterInstance = z.infer<typeof monsterInstanceSchema>;
+export type SpellInstance = z.infer<typeof spellInstanceSchema>;
 export type BattleSetupFixture = z.infer<typeof battleSetupFixtureSchema>;
 export type ScenarioFixture = z.infer<typeof scenarioFixtureSchema>;

@@ -1139,11 +1139,13 @@ function enchantmentLabel(gem: GemView): string {
   }
 
   if (gem.enchantment.type === "spell") {
-    const spell = state.definitions.spells[gem.enchantment.spellId];
+    const spell =
+      state.definitions.spells[gem.enchantment.resolvedDefinitionId ?? gem.enchantment.spellId];
     return `${t("ui.spell")}: ${spell ? t(spell.nameKey) : gem.enchantment.spellId}`;
   }
 
-  const monster = state.definitions.monsters[gem.enchantment.monsterId];
+  const monster =
+    state.definitions.monsters[gem.enchantment.resolvedDefinitionId ?? gem.enchantment.monsterId];
   return `${t("ui.monster")}: ${monster ? t(monster.nameKey) : gem.enchantment.monsterId}`;
 }
 

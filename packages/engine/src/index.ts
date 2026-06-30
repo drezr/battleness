@@ -524,13 +524,21 @@ function useRing(
     }
 
     if (gem.enchantment.type === "monster") {
-      events.push(...summonMonster(state, player, gem.enchantment.monsterId));
+      events.push(
+        ...summonMonster(
+          state,
+          player,
+          gem.enchantment.monsterId,
+          gem.enchantment.resolvedDefinitionId,
+        ),
+      );
       continue;
     }
 
-    const spell = state.definitions.spells[gem.enchantment.spellId];
+    const spellDefinitionId = gem.enchantment.resolvedDefinitionId ?? gem.enchantment.spellId;
+    const spell = state.definitions.spells[spellDefinitionId];
     if (!spell) {
-      throw new Error(`Spell definition ${gem.enchantment.spellId} was not found.`);
+      throw new Error(`Spell definition ${spellDefinitionId} was not found.`);
     }
 
     const spellTarget = action.enchantmentTargets?.[gem.id] ?? action.targetId;
@@ -539,7 +547,7 @@ function useRing(
 
     events.push({
       type: "spellCast",
-      spellId: spell.id,
+      spellId: gem.enchantment.spellId,
       sourceGemId: gem.id,
       targetId: spellTarget,
     });
@@ -547,9 +555,17 @@ function useRing(
     for (const effect of spell.effects) {
       if (effect.type === "dealDamage") {
         events.push(
-          ...applyDamage(state, player.id, spell.id, spellTarget, effect.amount, spell.element, {
-            blockFirstTurnHeroDamage: true,
-          }),
+          ...applyDamage(
+            state,
+            player.id,
+            gem.enchantment.spellId,
+            spellTarget,
+            effect.amount,
+            spell.element,
+            {
+              blockFirstTurnHeroDamage: true,
+            },
+          ),
         );
       }
     }
@@ -655,21 +671,26 @@ function concede(state: BattleState, playerId: string): BattleEvent[] {
   return [{ type: "battleEnded", result }];
 }
 
-function summonMonster(state: BattleState, player: BattlePlayer, monsterId: string): BattleEvent[] {
+function summonMonster(
+  state: BattleState,
+  player: BattlePlayer,
+  monsterId: string,
+  resolvedDefinitionId = monsterId,
+): BattleEvent[] {
   if (player.monsters.length >= 3) {
     return [];
   }
 
-  const definition = state.definitions.monsters[monsterId];
+  const definition = state.definitions.monsters[resolvedDefinitionId];
   if (!definition) {
-    throw new Error(`Monster definition ${monsterId} was not found.`);
+    throw new Error(`Monster definition ${resolvedDefinitionId} was not found.`);
   }
 
   const instanceNumber =
     player.monsters.filter((monster) => monster.definitionId === monsterId).length + 1;
   const monsterInstance: MonsterCombatInstance = {
     id: `${player.id}.monster.${monsterId}.${instanceNumber}`,
-    definitionId: definition.id,
+    definitionId: monsterId,
     ownerId: player.id,
     nameKey: definition.nameKey,
     element: definition.element,

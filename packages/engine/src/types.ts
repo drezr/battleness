@@ -82,10 +82,12 @@ export type GemEnchantment =
   | {
       type: "monster";
       monsterId: string;
+      resolvedDefinitionId?: string;
     }
   | {
       type: "spell";
       spellId: string;
+      resolvedDefinitionId?: string;
     };
 
 export type MonsterCombatInstance = {

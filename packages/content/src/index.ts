@@ -29,8 +29,9 @@ import {
   scenarioFixtureSchema,
   spellDefinitionSchema,
 } from "./schemas";
+import { validateContentReferences } from "./references";
 
-export const contentVersion = "prototype-1";
+export const contentVersion = "prototype-2";
 
 export const definitions = {
   gems,
@@ -60,14 +61,14 @@ export const locales = {
 } as const;
 
 export function validateContent(): void {
-  ringDefinitionSchema.array().parse(rings);
-  gemDefinitionSchema.array().parse(gems);
-  monsterDefinitionSchema.array().parse(monsters);
-  spellDefinitionSchema.array().parse(spells);
+  const validatedRings = ringDefinitionSchema.array().parse(rings);
+  const validatedGems = gemDefinitionSchema.array().parse(gems);
+  const validatedMonsters = monsterDefinitionSchema.array().parse(monsters);
+  const validatedSpells = spellDefinitionSchema.array().parse(spells);
   materialDefinitionSchema.array().parse(materials);
-  playerFixtureSchema.array().parse(players);
-  inventoryFixtureSchema.parse(inventories);
-  battleSetupFixtureSchema
+  const validatedPlayers = playerFixtureSchema.array().parse(players);
+  const validatedInventory = inventoryFixtureSchema.parse(inventories);
+  const validatedBattleSetups = battleSetupFixtureSchema
     .array()
     .parse([basicDuel, lowerLevelStart, elementDuelStart, skillShowcase]);
   scenarioFixtureSchema
@@ -82,7 +83,21 @@ export function validateContent(): void {
     ]);
   localeSchema.parse(en);
   localeSchema.parse(fr);
+
+  validateContentReferences({
+    definitions: {
+      rings: validatedRings,
+      gems: validatedGems,
+      monsters: validatedMonsters,
+      spells: validatedSpells,
+    },
+    players: validatedPlayers,
+    inventory: validatedInventory,
+    battleSetups: validatedBattleSetups,
+  });
 }
 
 export * from "./battleSetup";
+export * from "./progression";
+export * from "./references";
 export * from "./schemas";

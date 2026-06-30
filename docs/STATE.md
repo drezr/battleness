@@ -26,6 +26,10 @@ This file records modifications made to the project during agent-assisted work.
 - Successful combat commands are recorded in `actionHistory`, and the prototype supports versioned battle-record JSON export, import, step replay, full replay, and deterministic result/state verification.
 - GitHub Actions CI now installs pnpm before configuring the Node cache and uses Node 24-compatible action runtimes.
 - The BattleNess logo and application icon are stored in the prototype brand assets and used in the header, favicon, and Apple touch icon metadata.
+- Progression and stat formulas are now decided for experience-derived levels, quality and level scaling, hero health, fixed turn energy, equipment speed, spell penalty reduction, and campaign reward configuration.
+- The content/setup layer now implements those formulas, derives levels from total experience, and resolves owned item progression before combat.
+- Monster and spell enchantments now reference explicit owned inventory instances with independent experience and quality.
+- Content startup validation now checks cross-file references, ownership, uniqueness, equipment, sockets, enchantments, and battle setup consistency after Zod shape validation.
 
 ## Change Log
 
@@ -43,6 +47,14 @@ This file records modifications made to the project during agent-assisted work.
 - Added engine and DOM regression tests for successful-action history, invalid-action exclusion, serialization, replay equivalence, tamper detection, and replay controls.
 - Fixed GitHub Actions CI startup failures by using `pnpm/action-setup@v6` before `actions/setup-node@v6`, upgrading checkout to v6, and removing the obsolete Corepack activation step.
 - Added the provided BattleNess logo and icon under `apps/prototype/public/assets/brand/` and integrated them into the prototype UI and HTML metadata.
+- Documented the confirmed progression formulas: `100 * level^2` total experience thresholds, additive level and quality item scaling, level-based hero health, unscaled equipped-ring speed, fixed turn energy progression, and spell penalty reduction.
+- Defined solo campaign rewards as opponent-owned content data and deferred PvP and ranked reward formulas until matchmaking and ranking design.
+- Added the progression resolver with experience thresholds, capped level derivation, item scaling, hero health, and spell penalty calculations.
+- Migrated player, ring, and gem fixtures from persisted levels to total experience, and added owned monster and spell fixture instances.
+- Resolved progressed monster and spell instances into battle-scoped definitions while preserving stable content IDs in engine actions, events, and summoned-monster IDs.
+- Bumped the fixture/content format to `prototype-2` and added focused formula, schema-migration, setup-resolution, and runtime-enchantment tests.
+- Added aggregated relational content validation with focused tests for unknown definitions and owners, invalid equipment and sockets, missing or reused enchantments, duplicate instance IDs, and invalid battle setups.
+- Recorded that solo campaign opponents and reward records remain intentionally deferred.
 
 ### 2026-06-25
 

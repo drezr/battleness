@@ -2,43 +2,37 @@
   {
     "id": "playerOne",
     "username": "Player One",
-    "level": 1,
-    "experience": 0,
+    "experience": 100,
     "equippedRingInstanceIds": ["playerOne.ring.emberLoop", "playerOne.ring.sparkBand"]
   },
   {
     "id": "playerTwo",
     "username": "Player Two",
-    "level": 1,
-    "experience": 0,
+    "experience": 100,
     "equippedRingInstanceIds": ["playerTwo.ring.frostSeal", "playerTwo.ring.ironCircle"]
   },
   {
     "id": "playerLowLevel",
     "username": "Lower Level",
-    "level": 1,
-    "experience": 0,
+    "experience": 100,
     "equippedRingInstanceIds": ["playerLowLevel.ring.stormCoil"]
   },
   {
     "id": "playerHighLevel",
     "username": "Higher Level",
-    "level": 4,
-    "experience": 900,
+    "experience": 1600,
     "equippedRingInstanceIds": ["playerHighLevel.ring.stormCoil"]
   },
   {
     "id": "playerElectric",
     "username": "Electric Adept",
-    "level": 2,
-    "experience": 220,
+    "experience": 400,
     "equippedRingInstanceIds": ["playerElectric.ring.stormCoil"]
   },
   {
     "id": "playerFire",
     "username": "Fire Adept",
-    "level": 2,
-    "experience": 220,
+    "experience": 400,
     "equippedRingInstanceIds": ["playerFire.ring.trainingFlameBand"]
   }
 ]

@@ -29,11 +29,13 @@ These instructions are persistent project context for future agents working on B
 - Prototype fixtures should live under `packages/content/src/fixtures/` and simulate database-owned player and inventory data.
 - Engine tests should include focused unit tests and full combat scenario tests loaded from JSON fixtures.
 - Content objects should use readable camelCase string IDs.
-- Ring and gem definitions should describe base item types only; socketing, enchantments, item level, quality, ownership, and equipped state belong to player-owned item instances.
+- Ring and gem definitions should describe base item types only; socketing, enchantments, total experience, quality, ownership, and equipped state belong to player-owned item instances. Levels are derived from total experience.
+- Monster and spell progression belongs to explicit player-owned instances referenced by gem enchantments and resolved before combat.
 - The combat engine should not read JSON files directly. It should receive validated `BattleSetup` objects prepared from definitions, player fixtures or database rows, and inventory instances.
 - Combat engine actions should be typed command objects, and engine results should include detailed event logs.
 - Randomness should go through deterministic seeded state only.
 - JSON content should be validated with a TypeScript-friendly schema validation library such as Zod.
+- Run relational validation after schema validation so cross-file IDs, ownership, equipment, sockets, enchantments, and battle setup references fail before combat starts.
 - Use a TypeScript monorepo with separate workspaces for the combat engine, game content, and first prototype app.
 - Use Vite with a simple DOM interface for the first local combat prototype.
 - Use pnpm as the package manager.

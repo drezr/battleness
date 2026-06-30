@@ -32,12 +32,12 @@ The game is a one-versus-one, turn-based combat game. Each player controls a her
 
 - Heroes, rings, gems, monsters, and spells have experience and levels.
 - Levels range from 0 to 50.
-- Hero levels increase health and energy.
+- Hero levels increase health. Combat energy is independent from hero level.
 - Ring and gem levels increase damage.
 - Monster levels increase damage and health.
 - Spell levels reduce energy and cooldown penalties.
 - Rings, gems, monsters, and spells have quality from 0 to 100%.
-- Rings, gems, monsters, and spells have speed points, which contribute to hero speed.
+- A hero's speed is the sum of the base speed values of their equipped rings.
 - Elemental types are electric, fire, and ice.
 - Electric beats fire, fire beats ice, and ice beats electric.
 - Gems, monsters, and spells can add energy and cooldown penalties to the ring that contains them.
@@ -265,21 +265,40 @@ This section separates executable game rules from implementation decisions. It i
 ### Prototype Stats
 
 - BattleNess does not have predefined hero classes. In combat, the hero is the logged-in player represented by account and progression data.
-- In production, player identity, experience, equipped rings, inventory item instances, socket counts, socketed gems, gem enchantments, item levels, and item quality should come from the database.
+- In production, player identity, total experience, equipped rings, inventory item instances, socket counts, socketed gems, gem enchantments, and item quality should come from the database. Levels are derived from total experience.
 - For the first combat prototype, fixture JSON files should simulate the database-owned player and inventory data.
 - Health, damage, energy cost, cooldown, and similar combat values should be resolved from content definitions plus player-owned item instances.
-- The engine should still keep a clear stat-input boundary so level, quality, and progression formulas can be added later without rewriting core combat resolution.
+- The engine should keep a clear stat-input boundary so level, quality, and progression formulas are resolved without coupling them to core combat resolution.
 - Initial content definitions should be split across separate JSON files under `packages/content/src/definitions/`, such as `rings.json`, `gems.json`, `monsters.json`, `spells.json`, and `materials.json`.
 - Prototype fixtures should live under `packages/content/src/fixtures/` and include simulated players, inventories, and battle setups.
 - Engine tests should include both focused unit tests and full combat scenario tests loaded from JSON fixtures.
+
+### Progression And Stat Resolution
+
+- Levels range from 0 to 50 and quality ranges from 0 to 100.
+- Total experience is the progression source of truth. A hero or item's level is derived from total experience rather than maintained as an independent mutable value.
+- The total experience threshold for a level is `100 * level^2`. Level 1 requires 100 total experience, level 2 requires 400, level 10 requires 10,000, and level 50 requires 250,000.
+- Quality grants a linear stat bonus from 0% at quality 0 to 25% at quality 100.
+- Item level grants a linear stat bonus of 2% per level, up to 100% at level 50.
+- Level and quality bonuses are additive. For scalable item stats, `bonusPercent = level * 2 + floor(quality / 4)` and `resolvedStat = floor(baseStat * (100 + bonusPercent) / 100)`.
+- For example, a base stat of 4 at level 10 and quality 60 resolves to `floor(4 * 135 / 100)`, or 5.
+- Ring and gem progression scales damage. Monster progression scales damage and maximum health. Spell progression reduces the spell's own energy and cooldown penalties but does not scale effect damage.
+- A hero's maximum health is `30 + floor(30 * level / 50)`. Maximum health is 30 at level 0, 45 at level 25, and 60 at level 50.
+- Hero level does not change turn energy. Each player's energy still progresses from 1 to 8 according to that player's own turn count.
+- Hero speed is the sum of the unscaled base speed values of equipped rings. Level and quality do not modify speed.
+- A spell's penalty reduction is `floor((level * 2 + floor(quality / 2)) / 50)`.
+- Each resolved spell penalty is `max(0, basePenalty - penaltyReduction)`. The final ring energy cost and cooldown minimums still apply after all penalties are combined.
+- Positive integer stat calculations use floor rounding unless a more specific combat rule says otherwise.
+- Progression formulas belong in the content/setup layer. The combat engine continues to receive fully resolved values through `BattleSetup`.
 
 ### Engine And Content Format
 
 - Content objects should use readable string IDs.
 - JSON content IDs should use camelCase slugs, such as `spark`, `firebolt`, and `iceShard`, to stay ergonomic in TypeScript and consistent with JSON field naming.
-- Ring definitions should describe the base ring type only. Socket count, socketed gems, item level, quality, ownership, and equipped state belong to player-owned ring instances.
-- Gem definitions should describe the base gem type only. Gem enchantments, item level, quality, and ownership belong to player-owned gem instances.
-- Monster and spell definitions describe reusable content. Player-owned monster or spell instances should be introduced only when those objects need to exist as owned inventory items.
+- Ring definitions should describe the base ring type only. Socket count, socketed gems, total experience, quality, ownership, and equipped state belong to player-owned ring instances.
+- Gem definitions should describe the base gem type only. Gem enchantments, total experience, quality, and ownership belong to player-owned gem instances.
+- Monster and spell definitions describe reusable content. Player-owned monster and spell instances hold total experience, quality, and ownership so their progression can be resolved independently.
+- Gem enchantments reference owned monster or spell instance IDs. The content/setup layer converts them to battle-scoped resolved definitions while preserving stable content IDs in combat events and summoned-monster IDs.
 - The combat engine should not read JSON files directly. It should receive validated `BattleSetup` objects prepared from definitions, player fixtures or database rows, and inventory instances.
 - `BattleSetup` should contain the two players, resolved combat stats, equipped ring instances, socketed gem instances, referenced definitions, and any deterministic seed required for the battle.
 - Player actions sent to the combat engine should be represented as typed command objects, such as `{ type: "useRing", actorId, ringId, targetId }`.
@@ -293,6 +312,9 @@ This section separates executable game rules from implementation decisions. It i
 - The initial rules do not require much randomness; this rule mainly protects future systems such as AI decisions, randomized rewards, shuffled/generated content, or random tie-breakers.
 - Scenario test fixtures should support both single-action expectations and multi-action sequences.
 - JSON content should be validated with a TypeScript-friendly schema validation library such as Zod.
+- Content validation has two layers: Zod validates individual data shapes, then relational validation checks references and ownership across definitions, players, inventories, and battle setups.
+- Relational validation rejects duplicate IDs, unknown definitions or owners, invalid equipped-ring relationships, overfilled sockets, reused gems or enchantments, cross-owner references, and invalid battle setup participants or initial monsters.
+- The prototype runs both validation layers during startup through `validateContent()`, so invalid fixture data fails before a battle begins.
 
 ### Initial Implementation Contract
 
@@ -315,8 +337,11 @@ This section separates executable game rules from implementation decisions. It i
 - Monster definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseHealth`, `baseDamage`, `baseCooldown`, `baseSpeed`, and an optional single `skill`.
 - Spell definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseEnergyPenalty`, `baseCooldownPenalty`, and `effects`.
 - Spell `effects` should be an array of explicit typed effect objects. The first supported effect type is `dealDamage` with `amount` and `target` fields.
-- Player fixtures should use this initial shape: `id`, `username`, `level`, `experience`, and `equippedRingInstanceIds`.
-- Inventory fixtures should contain player-owned ring, gem, monster, and spell instances. Ring instances contain `id`, `definitionId`, `ownerId`, `level`, `quality`, `socketCount`, `socketedGemInstanceIds`, and `equipped`. Gem instances contain `id`, `definitionId`, `ownerId`, `level`, `quality`, and optional `enchantment`.
+- Player fixtures use `id`, `username`, `experience`, and `equippedRingInstanceIds`. They do not persist a separate level.
+- Inventory fixtures contain player-owned ring, gem, monster, and spell instances. Every item instance stores `id`, `definitionId`, `ownerId`, `experience`, and `quality`.
+- Ring instances additionally store `socketCount`, `socketedGemInstanceIds`, and `equipped`.
+- Gem instances may contain an enchantment with either `monsterInstanceId` or `spellInstanceId`.
+- Content version `prototype-2` introduces experience-derived levels and independently progressable monster and spell instances.
 - The initial `BattleSetup` should contain `id`, `seed`, two players, resolved combat stats, equipped ring instances, socketed gem instances, referenced definitions, and optional initial status for first-player element choice.
 - The initial `BattleAction` union should include `chooseElement`, `useRing`, `useMonster`, `endTurn`, and `concede`.
 - The version 1 `BattleRecord` shape includes `format`, `formatVersion`, `rulesVersion`, `contentVersion`, `setup`, `actions`, `result`, and `finalStateChecksum`.
@@ -347,15 +372,16 @@ This section separates executable game rules from implementation decisions. It i
 
 - After combat, rewards may include experience, credits, and materials.
 - Equipped items gain experience after combat.
-- In solo campaign, victory grants a fixed reward and unlocks the next opponent.
+- In solo campaign, each opponent defines its fixed victory rewards in content data and victory unlocks the next opponent.
 - In solo campaign, defeat grants only a small amount of item experience.
-- In PvP, rewards vary based on player level and opponent level.
+- In PvP, rewards will vary based on player level and opponent level.
 - In PvP defeat, the player receives a small amount of experience, credits, and 1 to 2 low-rarity materials.
-- Exact reward formulas are not defined yet.
+- The exact PvP and ranked reward formulas will be decided with the matchmaking and ranking design.
 
 ### Rule Questions To Resolve
 
-- What are the exact formulas for level, quality, damage, health, energy cost, cooldown, experience, and rewards?
+- What are the exact PvP and ranked reward formulas?
+- What fixed reward values should each solo campaign opponent grant? Campaign opponent design is intentionally deferred.
 
 ## Technical Baseline
 

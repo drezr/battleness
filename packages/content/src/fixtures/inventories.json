@@ -4,7 +4,7 @@
       "id": "playerOne.ring.emberLoop",
       "definitionId": "emberLoop",
       "ownerId": "playerOne",
-      "level": 1,
+      "experience": 100,
       "quality": 72,
       "socketCount": 1,
       "socketedGemInstanceIds": ["playerOne.gem.rubyShard"],
@@ -14,7 +14,7 @@
       "id": "playerOne.ring.sparkBand",
       "definitionId": "sparkBand",
       "ownerId": "playerOne",
-      "level": 1,
+      "experience": 100,
       "quality": 66,
       "socketCount": 2,
       "socketedGemInstanceIds": ["playerOne.gem.sparkPrism", "playerOne.gem.frostChip"],
@@ -24,7 +24,7 @@
       "id": "playerTwo.ring.frostSeal",
       "definitionId": "frostSeal",
       "ownerId": "playerTwo",
-      "level": 1,
+      "experience": 100,
       "quality": 70,
       "socketCount": 2,
       "socketedGemInstanceIds": ["playerTwo.gem.frostChip", "playerTwo.gem.staticPearl"],
@@ -34,7 +34,7 @@
       "id": "playerTwo.ring.ironCircle",
       "definitionId": "ironCircle",
       "ownerId": "playerTwo",
-      "level": 1,
+      "experience": 100,
       "quality": 62,
       "socketCount": 1,
       "socketedGemInstanceIds": ["playerTwo.gem.plainQuartz"],
@@ -44,7 +44,7 @@
       "id": "playerLowLevel.ring.stormCoil",
       "definitionId": "stormCoil",
       "ownerId": "playerLowLevel",
-      "level": 1,
+      "experience": 100,
       "quality": 55,
       "socketCount": 1,
       "socketedGemInstanceIds": ["playerLowLevel.gem.staticPearl"],
@@ -54,7 +54,7 @@
       "id": "playerHighLevel.ring.stormCoil",
       "definitionId": "stormCoil",
       "ownerId": "playerHighLevel",
-      "level": 1,
+      "experience": 100,
       "quality": 55,
       "socketCount": 1,
       "socketedGemInstanceIds": ["playerHighLevel.gem.plainQuartz"],
@@ -64,7 +64,7 @@
       "id": "playerElectric.ring.stormCoil",
       "definitionId": "stormCoil",
       "ownerId": "playerElectric",
-      "level": 1,
+      "experience": 100,
       "quality": 68,
       "socketCount": 1,
       "socketedGemInstanceIds": ["playerElectric.gem.staticPearl"],
@@ -74,7 +74,7 @@
       "id": "playerFire.ring.trainingFlameBand",
       "definitionId": "trainingFlameBand",
       "ownerId": "playerFire",
-      "level": 1,
+      "experience": 100,
       "quality": 68,
       "socketCount": 1,
       "socketedGemInstanceIds": ["playerFire.gem.rubyShard"],
@@ -86,80 +86,152 @@
       "id": "playerOne.gem.rubyShard",
       "definitionId": "rubyShard",
       "ownerId": "playerOne",
-      "level": 1,
+      "experience": 100,
       "quality": 60,
-      "enchantment": { "type": "spell", "spellId": "firebolt" }
+      "enchantment": {
+        "type": "spell",
+        "spellInstanceId": "playerOne.spell.firebolt"
+      }
     },
     {
       "id": "playerOne.gem.frostChip",
       "definitionId": "frostChip",
       "ownerId": "playerOne",
-      "level": 1,
+      "experience": 100,
       "quality": 58,
-      "enchantment": { "type": "monster", "monsterId": "iceGuardian" }
+      "enchantment": {
+        "type": "monster",
+        "monsterInstanceId": "playerOne.monster.iceGuardian"
+      }
     },
     {
       "id": "playerOne.gem.sparkPrism",
       "definitionId": "sparkPrism",
       "ownerId": "playerOne",
-      "level": 1,
+      "experience": 100,
       "quality": 64,
-      "enchantment": { "type": "spell", "spellId": "spark" }
+      "enchantment": {
+        "type": "spell",
+        "spellInstanceId": "playerOne.spell.spark"
+      }
     },
     {
       "id": "playerTwo.gem.frostChip",
       "definitionId": "frostChip",
       "ownerId": "playerTwo",
-      "level": 1,
+      "experience": 100,
       "quality": 63,
-      "enchantment": { "type": "spell", "spellId": "iceShard" }
+      "enchantment": {
+        "type": "spell",
+        "spellInstanceId": "playerTwo.spell.iceShard"
+      }
     },
     {
       "id": "playerTwo.gem.staticPearl",
       "definitionId": "staticPearl",
       "ownerId": "playerTwo",
-      "level": 1,
+      "experience": 100,
       "quality": 65,
-      "enchantment": { "type": "monster", "monsterId": "stormHound" }
+      "enchantment": {
+        "type": "monster",
+        "monsterInstanceId": "playerTwo.monster.stormHound"
+      }
     },
     {
       "id": "playerTwo.gem.plainQuartz",
       "definitionId": "plainQuartz",
       "ownerId": "playerTwo",
-      "level": 1,
+      "experience": 100,
       "quality": 50
     },
     {
       "id": "playerLowLevel.gem.staticPearl",
       "definitionId": "staticPearl",
       "ownerId": "playerLowLevel",
-      "level": 1,
+      "experience": 100,
       "quality": 52
     },
     {
       "id": "playerHighLevel.gem.plainQuartz",
       "definitionId": "plainQuartz",
       "ownerId": "playerHighLevel",
-      "level": 1,
+      "experience": 100,
       "quality": 50
     },
     {
       "id": "playerElectric.gem.staticPearl",
       "definitionId": "staticPearl",
       "ownerId": "playerElectric",
-      "level": 1,
+      "experience": 100,
       "quality": 66,
-      "enchantment": { "type": "monster", "monsterId": "stormHound" }
+      "enchantment": {
+        "type": "monster",
+        "monsterInstanceId": "playerElectric.monster.stormHound"
+      }
     },
     {
       "id": "playerFire.gem.rubyShard",
       "definitionId": "rubyShard",
       "ownerId": "playerFire",
-      "level": 1,
+      "experience": 100,
       "quality": 66,
-      "enchantment": { "type": "spell", "spellId": "firebolt" }
+      "enchantment": {
+        "type": "spell",
+        "spellInstanceId": "playerFire.spell.firebolt"
+      }
     }
   ],
-  "monsters": [],
-  "spells": []
+  "monsters": [
+    {
+      "id": "playerOne.monster.iceGuardian",
+      "definitionId": "iceGuardian",
+      "ownerId": "playerOne",
+      "experience": 100,
+      "quality": 58
+    },
+    {
+      "id": "playerTwo.monster.stormHound",
+      "definitionId": "stormHound",
+      "ownerId": "playerTwo",
+      "experience": 100,
+      "quality": 65
+    },
+    {
+      "id": "playerElectric.monster.stormHound",
+      "definitionId": "stormHound",
+      "ownerId": "playerElectric",
+      "experience": 100,
+      "quality": 66
+    }
+  ],
+  "spells": [
+    {
+      "id": "playerOne.spell.firebolt",
+      "definitionId": "firebolt",
+      "ownerId": "playerOne",
+      "experience": 100,
+      "quality": 60
+    },
+    {
+      "id": "playerOne.spell.spark",
+      "definitionId": "spark",
+      "ownerId": "playerOne",
+      "experience": 100,
+      "quality": 64
+    },
+    {
+      "id": "playerTwo.spell.iceShard",
+      "definitionId": "iceShard",
+      "ownerId": "playerTwo",
+      "experience": 100,
+      "quality": 63
+    },
+    {
+      "id": "playerFire.spell.firebolt",
+      "definitionId": "firebolt",
+      "ownerId": "playerFire",
+      "experience": 100,
+      "quality": 66
+    }
+  ]
 }

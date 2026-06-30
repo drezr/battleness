@@ -23,10 +23,12 @@ import type {
   GemInstance,
   InventoryFixture,
   MonsterDefinition as ContentMonsterDefinition,
+  MonsterInstance,
   PlayerFixture,
   RingDefinition,
   RingInstance,
   SpellDefinition as ContentSpellDefinition,
+  SpellInstance,
 } from "./schemas";
 import {
   battleSetupFixtureSchema,
@@ -37,6 +39,12 @@ import {
   ringDefinitionSchema,
   spellDefinitionSchema,
 } from "./schemas";
+import {
+  levelFromExperience,
+  resolveHeroMaxHealth,
+  resolveItemStat,
+  resolveSpellPenalty,
+} from "./progression";
 
 const definitionData = {
   gems: gemDefinitionSchema.array().parse(gemsJson),
@@ -70,13 +78,21 @@ export function createBattleSetup(
   players: readonly PlayerFixture[],
   inventory: InventoryFixture,
 ): BattleSetup {
+  const resolvedDefinitions: BattleSetup["definitions"] = {
+    monsters: Object.fromEntries(
+      definitionData.monsters.map((monster) => [monster.id, toEngineMonsterDefinition(monster)]),
+    ),
+    spells: Object.fromEntries(
+      definitionData.spells.map((spell) => [spell.id, toEngineSpellDefinition(spell)]),
+    ),
+  };
   const battlePlayers = setup.playerIds.map((playerId) => {
     const player = players.find((candidate) => candidate.id === playerId);
     if (!player) {
       throw new Error(`Player fixture ${playerId} was not found.`);
     }
 
-    return createBattlePlayer(player, inventory);
+    return createBattlePlayer(player, inventory, resolvedDefinitions);
   }) as [BattlePlayer, BattlePlayer];
 
   for (const initialMonster of setup.initialMonsters ?? []) {
@@ -116,29 +132,27 @@ export function createBattleSetup(
     activePlayerId: null,
     startingPlayerId: null,
     firstPlayerChoices: {},
-    definitions: {
-      monsters: Object.fromEntries(
-        definitionData.monsters.map((monster) => [monster.id, toEngineMonsterDefinition(monster)]),
-      ),
-      spells: Object.fromEntries(
-        definitionData.spells.map((spell) => [spell.id, toEngineSpellDefinition(spell)]),
-      ),
-    },
+    definitions: resolvedDefinitions,
     players: battlePlayers,
   };
 }
 
-function createBattlePlayer(player: PlayerFixture, inventory: InventoryFixture): BattlePlayer {
+function createBattlePlayer(
+  player: PlayerFixture,
+  inventory: InventoryFixture,
+  resolvedDefinitions: BattleSetup["definitions"],
+): BattlePlayer {
+  const level = levelFromExperience(player.experience);
   const rings = player.equippedRingInstanceIds.map((ringInstanceId) =>
-    createRingCombatInstance(player.id, ringInstanceId, inventory),
+    createRingCombatInstance(player.id, ringInstanceId, inventory, resolvedDefinitions),
   );
   const speed = rings.reduce((sum, ring) => sum + ring.speed, 0);
-  const maxHealth = 30;
+  const maxHealth = resolveHeroMaxHealth(level);
 
   return {
     id: player.id,
     username: player.username,
-    level: player.level,
+    level,
     hero: {
       health: maxHealth,
       maxHealth,
@@ -158,6 +172,7 @@ function createRingCombatInstance(
   ownerId: string,
   ringInstanceId: string,
   inventory: InventoryFixture,
+  resolvedDefinitions: BattleSetup["definitions"],
 ): RingCombatInstance {
   const instance = findRingInstance(inventory, ringInstanceId);
   if (instance.ownerId !== ownerId) {
@@ -165,8 +180,9 @@ function createRingCombatInstance(
   }
 
   const definition = findRingDefinition(instance.definitionId);
+  const level = levelFromExperience(instance.experience);
   const gems = instance.socketedGemInstanceIds.map((gemInstanceId) =>
-    createGemCombatInstance(ownerId, gemInstanceId, inventory),
+    createGemCombatInstance(ownerId, gemInstanceId, inventory, resolvedDefinitions),
   );
   const energyPenalty = gems.reduce((sum, gem) => sum + gem.energyPenalty, 0);
   const cooldownPenalty = gems.reduce((sum, gem) => sum + gem.cooldownPenalty, 0);
@@ -177,7 +193,7 @@ function createRingCombatInstance(
     ownerId: instance.ownerId,
     nameKey: definition.nameKey,
     element: definition.element,
-    damage: definition.baseDamage,
+    damage: resolveItemStat(definition.baseDamage, level, instance.quality),
     energyCost: Math.max(1, definition.baseEnergyCost + energyPenalty),
     cooldown: definition.baseCooldown + cooldownPenalty,
     currentCooldown: 0,
@@ -190,6 +206,7 @@ function createGemCombatInstance(
   ownerId: string,
   gemInstanceId: string,
   inventory: InventoryFixture,
+  resolvedDefinitions: BattleSetup["definitions"],
 ): GemCombatInstance {
   const instance = findGemInstance(inventory, gemInstanceId);
   if (instance.ownerId !== ownerId) {
@@ -197,12 +214,17 @@ function createGemCombatInstance(
   }
 
   const definition = findGemDefinition(instance.definitionId);
-  const enchantment = instance.enchantment as GemEnchantment | undefined;
+  const level = levelFromExperience(instance.experience);
+  const enchantment = resolveGemEnchantment(ownerId, instance, inventory, resolvedDefinitions);
   let energyPenalty = definition.baseEnergyPenalty;
   let cooldownPenalty = definition.baseCooldownPenalty;
 
   if (enchantment?.type === "spell") {
-    const spell = findSpellDefinition(enchantment.spellId);
+    const spell =
+      resolvedDefinitions.spells[enchantment.resolvedDefinitionId ?? enchantment.spellId];
+    if (!spell) {
+      throw new Error(`Resolved spell definition ${enchantment.spellId} was not found.`);
+    }
     energyPenalty += spell.baseEnergyPenalty;
     cooldownPenalty += spell.baseCooldownPenalty;
   }
@@ -213,10 +235,64 @@ function createGemCombatInstance(
     ownerId: instance.ownerId,
     nameKey: definition.nameKey,
     element: definition.element,
-    damage: definition.baseDamage,
+    damage: resolveItemStat(definition.baseDamage, level, instance.quality),
     energyPenalty,
     cooldownPenalty,
     enchantment,
+  };
+}
+
+function resolveGemEnchantment(
+  ownerId: string,
+  gemInstance: GemInstance,
+  inventory: InventoryFixture,
+  resolvedDefinitions: BattleSetup["definitions"],
+): GemEnchantment | undefined {
+  const enchantment = gemInstance.enchantment;
+  if (!enchantment) {
+    return undefined;
+  }
+
+  if (enchantment.type === "monster") {
+    const instance = findMonsterInstance(inventory, enchantment.monsterInstanceId);
+    assertOwnedBy(instance, ownerId, "Monster");
+    const definition = findMonsterDefinition(instance.definitionId);
+    const level = levelFromExperience(instance.experience);
+
+    resolvedDefinitions.monsters[instance.id] = {
+      ...toEngineMonsterDefinition(definition),
+      id: instance.id,
+      baseHealth: resolveItemStat(definition.baseHealth, level, instance.quality),
+      baseDamage: resolveItemStat(definition.baseDamage, level, instance.quality),
+    };
+
+    return {
+      type: "monster",
+      monsterId: definition.id,
+      resolvedDefinitionId: instance.id,
+    };
+  }
+
+  const instance = findSpellInstance(inventory, enchantment.spellInstanceId);
+  assertOwnedBy(instance, ownerId, "Spell");
+  const definition = findSpellDefinition(instance.definitionId);
+  const level = levelFromExperience(instance.experience);
+
+  resolvedDefinitions.spells[instance.id] = {
+    ...toEngineSpellDefinition(definition),
+    id: instance.id,
+    baseEnergyPenalty: resolveSpellPenalty(definition.baseEnergyPenalty, level, instance.quality),
+    baseCooldownPenalty: resolveSpellPenalty(
+      definition.baseCooldownPenalty,
+      level,
+      instance.quality,
+    ),
+  };
+
+  return {
+    type: "spell",
+    spellId: definition.id,
+    resolvedDefinitionId: instance.id,
   };
 }
 
@@ -272,6 +348,34 @@ function findGemInstance(inventory: InventoryFixture, id: string): GemInstance {
   }
 
   return instance;
+}
+
+function findMonsterInstance(inventory: InventoryFixture, id: string): MonsterInstance {
+  const instance = inventory.monsters.find((candidate) => candidate.id === id);
+  if (!instance) {
+    throw new Error(`Monster instance ${id} was not found.`);
+  }
+
+  return instance;
+}
+
+function findSpellInstance(inventory: InventoryFixture, id: string): SpellInstance {
+  const instance = inventory.spells.find((candidate) => candidate.id === id);
+  if (!instance) {
+    throw new Error(`Spell instance ${id} was not found.`);
+  }
+
+  return instance;
+}
+
+function assertOwnedBy(
+  instance: MonsterInstance | SpellInstance,
+  ownerId: string,
+  label: string,
+): void {
+  if (instance.ownerId !== ownerId) {
+    throw new Error(`${label} instance ${instance.id} does not belong to player ${ownerId}.`);
+  }
 }
 
 function toEngineMonsterDefinition(definition: ContentMonsterDefinition): MonsterDefinition {
