@@ -170,6 +170,16 @@ h4 {
   background: rgb(0 0 0 / 16%);
 }
 
+.board-action-hint {
+  margin: 0;
+  border: 1px solid rgb(255 229 51 / 34%);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: #fff3bc;
+  background: rgb(255 229 51 / 10%);
+  font-size: 0.86rem;
+}
+
 .energy-track {
   display: grid;
   grid-template-columns: minmax(180px, 1fr) auto minmax(120px, auto);
@@ -231,6 +241,30 @@ h4 {
   text-align: left;
 }
 
+.board-hero.legal:not(:disabled),
+.monster-slot.legal:not(:disabled) {
+  cursor: crosshair;
+}
+
+.monster-slot.action-ready:not(:disabled) {
+  cursor: pointer;
+}
+
+.board-hero.legal:not(:disabled):hover,
+.monster-slot.legal:not(:disabled):hover {
+  border-color: #00d7ff;
+}
+
+.board-hero.blocked,
+.monster-slot.blocked {
+  border-color: rgb(255 95 122 / 55%);
+}
+
+.monster-slot.prepared {
+  border-color: #ffe533;
+  box-shadow: 0 0 0 2px rgb(255 229 51 / 25%);
+}
+
 .board-hero strong {
   font-size: 1rem;
 }
@@ -281,7 +315,7 @@ h4 {
 
 .monster-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(90px, 118px));
+  grid-template-columns: repeat(3, minmax(160px, 220px));
   justify-content: space-around;
   align-items: center;
   gap: 14px;
@@ -326,14 +360,16 @@ h4 {
 
 .monster-stats {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   border-top: 2px solid rgb(255 255 255 / 24%);
 }
 
 .monster-stats span {
   padding: 6px 4px;
   color: #cbd9df;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .monster-stats span + span {
@@ -342,13 +378,25 @@ h4 {
 
 .ring-belt {
   display: grid;
+  gap: 5px;
+}
+
+.ring-belt-label {
+  color: #cbd9df;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.ring-belt-cards {
+  display: grid;
   grid-template-columns: repeat(10, minmax(72px, 1fr));
   gap: 7px;
 }
 
 .board-ring {
   display: grid;
-  grid-template-rows: 1fr auto auto;
+  grid-template-rows: 1fr auto auto auto;
   gap: 5px;
   min-height: 96px;
   min-width: 0;
@@ -359,6 +407,19 @@ h4 {
   text-align: center;
 }
 
+.board-ring.ready:not(:disabled):hover {
+  border-color: #00d7ff;
+}
+
+.board-ring.selected {
+  border-color: #ffe533;
+  box-shadow: 0 0 0 2px rgb(255 229 51 / 25%);
+}
+
+.board-ring.unavailable {
+  background: rgb(255 255 255 / 8%);
+}
+
 .board-ring strong {
   align-self: center;
   font-size: 0.9rem;
@@ -367,10 +428,24 @@ h4 {
 
 .ring-stats {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
+  grid-template-columns: 1fr;
+  gap: 2px;
   color: #cbd9df;
+  font-size: 0.66rem;
+}
+
+.ring-stats span {
+  overflow-wrap: anywhere;
+}
+
+.ring-state {
+  color: #fff3bc;
   font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.board-ring.unavailable .ring-state {
+  color: #cbd9df;
 }
 
 .ring-gems {
@@ -693,10 +768,11 @@ ul {
   }
 
   .monster-row {
-    grid-template-columns: repeat(3, minmax(76px, 1fr));
+    grid-template-columns: repeat(3, minmax(132px, 1fr));
+    overflow-x: auto;
   }
 
-  .ring-belt {
+  .ring-belt-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

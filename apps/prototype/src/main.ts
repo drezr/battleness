@@ -44,6 +44,8 @@ let isSetupOpen = true;
 let actionIndex = 0;
 let errorMessage: string | null = null;
 let manualTargetId: TargetId = "playerTwo.hero";
+let selectedRingInstanceId: string | null = null;
+let selectedMonsterInstanceId: string | null = null;
 
 render();
 
@@ -76,6 +78,8 @@ function render(): void {
   const scenario = currentScenario();
   const remainingActions = Math.max(0, scenario.actions.length - actionIndex);
   ensureValidManualTarget();
+  ensureValidSelectedRing();
+  ensureValidSelectedMonster();
 
   root.innerHTML = `
     <section class="shell">
@@ -268,7 +272,18 @@ function bindEvents(): void {
     button.addEventListener("click", () => {
       const targetId = button.dataset.boardTargetId as TargetId | undefined;
       if (targetId) {
-        manualTargetId = targetId;
+        selectBoardTarget(targetId, button.dataset.boardMonsterId);
+      }
+      render();
+    });
+  });
+
+  document.querySelectorAll<HTMLButtonElement>("[data-board-ring-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const ringInstanceId = button.dataset.boardRingId;
+      if (ringInstanceId) {
+        selectedRingInstanceId = selectedRingInstanceId === ringInstanceId ? null : ringInstanceId;
+        selectedMonsterInstanceId = null;
       }
       render();
     });
@@ -351,6 +366,8 @@ function resetScenario(): void {
   state = createState();
   actionIndex = 0;
   errorMessage = null;
+  selectedRingInstanceId = null;
+  selectedMonsterInstanceId = null;
   manualTargetId = defaultTargetId();
 }
 
@@ -358,6 +375,8 @@ function openSetup(): void {
   state = createState();
   actionIndex = 0;
   errorMessage = null;
+  selectedRingInstanceId = null;
+  selectedMonsterInstanceId = null;
   isSetupOpen = true;
 }
 
@@ -365,6 +384,8 @@ function startBattle(): void {
   state = createState();
   actionIndex = 0;
   errorMessage = null;
+  selectedRingInstanceId = null;
+  selectedMonsterInstanceId = null;
   isSetupOpen = false;
   manualTargetId = defaultTargetId();
 }
@@ -465,12 +486,13 @@ function renderManualActions(): string {
 function renderBattleBoard(): string {
   const [bottomPlayer, topPlayer] = state.players;
   const activePlayer = getActivePlayer();
-  const activeRings = activePlayer?.rings ?? bottomPlayer.rings;
   const isFinished = state.status === "finished";
 
   return `
     <section class="battle-board" aria-label="${escapeHtml(t("ui.battleBoard"))}">
       ${renderEnergyTrack(topPlayer, "top")}
+      ${renderRingBelt(topPlayer, "top", activePlayer)}
+      ${renderBoardActionHint()}
       <div class="board-main">
         <aside class="hero-rail">
           ${renderBoardHero(topPlayer, "top")}
@@ -490,10 +512,22 @@ function renderBattleBoard(): string {
         </section>
       </div>
 
-      ${renderRingBelt(activeRings, activePlayer)}
+      ${renderRingBelt(bottomPlayer, "bottom", activePlayer)}
       ${renderEnergyTrack(bottomPlayer, "bottom")}
     </section>
   `;
+}
+
+function renderBoardActionHint(): string {
+  const selectedRing = selectedBoardRing();
+  const selectedMonster = selectedBoardMonster();
+  const message = selectedRing
+    ? formatMessage("ui.boardRingPrepared", { ring: t(selectedRing.nameKey) })
+    : selectedMonster
+      ? formatMessage("ui.boardMonsterPrepared", { monster: t(selectedMonster.nameKey) })
+      : t("ui.boardSelectAction");
+
+  return `<p class="board-action-hint">${escapeHtml(message)}</p>`;
 }
 
 function renderEnergyTrack(player: BattlePlayerView, position: "top" | "bottom"): string {
@@ -513,10 +547,11 @@ function renderBoardHero(player: BattlePlayerView, position: "top" | "bottom"): 
   const targetId = `${player.id}.hero` as TargetId;
   const disabledReason = targetDisabledReason(targetId);
   const isSelected = manualTargetId === targetId;
+  const targetClass = disabledReason ? "blocked" : "legal";
 
   return `
     <button
-      class="board-hero ${position} ${isSelected ? "selected" : ""}"
+      class="board-hero ${position} ${targetClass} ${isSelected ? "selected" : ""}"
       data-board-target-id="${escapeHtml(targetId)}"
       ${disabledReason ? "disabled" : ""}
     >
@@ -543,12 +578,20 @@ function renderMonsterSlot(player: BattlePlayerView, index: number): string {
 
   const targetId = monster.id as TargetId;
   const disabledReason = targetDisabledReason(targetId);
-  const isSelected = manualTargetId === targetId;
+  const isTargetSelected = manualTargetId === targetId;
+  const isActionSelected = selectedMonsterInstanceId === monster.id;
+  const targetClass = disabledReason ? "blocked" : "legal";
+  const actionClass = boardMonsterUnavailableReason(monster, player)
+    ? "action-unavailable"
+    : "action-ready";
 
   return `
     <button
-      class="monster-slot ${isSelected ? "selected" : ""}"
+      class="monster-slot ${targetClass} ${actionClass} ${isTargetSelected ? "selected" : ""} ${
+        isActionSelected ? "prepared" : ""
+      }"
       data-board-target-id="${escapeHtml(targetId)}"
+      data-board-monster-id="${escapeHtml(monster.id)}"
       ${disabledReason ? "disabled" : ""}
     >
       <span class="monster-skill">${renderSkillBadges(monster) || t("ui.none")}</span>
@@ -556,36 +599,46 @@ function renderMonsterSlot(player: BattlePlayerView, index: number): string {
       <span class="monster-stats">
         <span>${escapeHtml(t("ui.damage"))} ${monster.damage}</span>
         <span>${escapeHtml(t("ui.health"))} ${monster.health}/${monster.maxHealth}</span>
+        <span>${escapeHtml(t("ui.cooldown"))} ${monster.currentCooldown}/${monster.cooldown}</span>
       </span>
     </button>
   `;
 }
 
-function renderRingBelt(rings: RingView[], activePlayer: BattlePlayerView | null): string {
+function renderRingBelt(
+  player: BattlePlayerView,
+  position: "top" | "bottom",
+  activePlayer: BattlePlayerView | null,
+): string {
   return `
-    <div class="ring-belt" aria-label="${escapeHtml(t("ui.rings"))}">
-      ${rings.map((ring) => renderBoardRing(ring, activePlayer)).join("")}
+    <div class="ring-belt ${position}" aria-label="${escapeHtml(
+      formatMessage("ui.playerRings", { player: player.username }),
+    )}">
+      <span class="ring-belt-label">${escapeHtml(
+        formatMessage("ui.playerRings", { player: player.username }),
+      )}</span>
+      <div class="ring-belt-cards">
+        ${player.rings.map((ring) => renderBoardRing(ring, activePlayer)).join("")}
+      </div>
     </div>
   `;
 }
 
 function renderBoardRing(ring: RingView, activePlayer: BattlePlayerView | null): string {
-  const disabled =
-    !activePlayer ||
-    state.status !== "active" ||
-    ring.ownerId !== activePlayer.id ||
-    ring.currentCooldown > 0 ||
-    activePlayer.energy.current < ring.energyCost;
+  const unavailableReason = boardRingUnavailableReason(ring, activePlayer);
+  const isSelected = selectedRingInstanceId === ring.id;
 
   return `
-    <button class="board-ring" data-manual-ring-id="${escapeHtml(ring.id)}" ${
-      disabled ? "disabled" : ""
-    }>
+    <button class="board-ring ${isSelected ? "selected" : ""} ${
+      unavailableReason ? "unavailable" : "ready"
+    }" data-board-ring-id="${escapeHtml(ring.id)}" ${unavailableReason ? "disabled" : ""}>
       <strong>${escapeHtml(t(ring.nameKey))}</strong>
       <span class="ring-stats">
         <span>${escapeHtml(t("ui.damage"))} ${ringTotalDamage(ring)}</span>
         <span>${escapeHtml(t("ui.energy"))} ${ring.energyCost}</span>
+        <span>${escapeHtml(t("ui.cooldown"))} ${ring.currentCooldown}/${ring.cooldown}</span>
       </span>
+      <span class="ring-state">${escapeHtml(unavailableReason ? t(unavailableReason) : t("ui.ready"))}</span>
       <span class="ring-gems">
         ${Array.from({ length: 3 }, (_, index) => {
           const gem = ring.gems[index];
@@ -594,6 +647,41 @@ function renderBoardRing(ring: RingView, activePlayer: BattlePlayerView | null):
       </span>
     </button>
   `;
+}
+
+function boardRingUnavailableReason(
+  ring: RingView,
+  activePlayer: BattlePlayerView | null,
+): string | null {
+  if (!activePlayer || state.status !== "active" || ring.ownerId !== activePlayer.id) {
+    return "ui.notActive";
+  }
+
+  if (ring.currentCooldown > 0) {
+    return "ui.onCooldown";
+  }
+
+  if (activePlayer.energy.current < ring.energyCost) {
+    return "ui.notEnoughEnergy";
+  }
+
+  return null;
+}
+
+function boardMonsterUnavailableReason(
+  monster: MonsterView,
+  player: BattlePlayerView,
+): string | null {
+  const activePlayer = getActivePlayer();
+  if (!activePlayer || state.status !== "active" || player.id !== activePlayer.id) {
+    return "ui.notActive";
+  }
+
+  if (monster.currentCooldown > 0) {
+    return "ui.onCooldown";
+  }
+
+  return null;
 }
 
 function renderElementChoiceActions(): string {
@@ -643,7 +731,33 @@ function chooseManualElement(playerId: string, element: ElementType): void {
   });
 }
 
+function selectBoardTarget(targetId: TargetId, monsterInstanceId?: string): void {
+  if (!selectedRingInstanceId && monsterInstanceId) {
+    const monster = activePlayerMonster(monsterInstanceId);
+    if (monster && !boardMonsterUnavailableReason(monster.monster, monster.player)) {
+      selectedMonsterInstanceId =
+        selectedMonsterInstanceId === monsterInstanceId ? null : monsterInstanceId;
+      return;
+    }
+  }
+
+  manualTargetId = targetId;
+
+  if (selectedRingInstanceId) {
+    useManualRingOnTarget(selectedRingInstanceId, targetId);
+    return;
+  }
+
+  if (selectedMonsterInstanceId) {
+    useManualMonsterOnTarget(selectedMonsterInstanceId, targetId);
+  }
+}
+
 function useManualRing(ringInstanceId: string): void {
+  useManualRingOnTarget(ringInstanceId, manualTargetId);
+}
+
+function useManualRingOnTarget(ringInstanceId: string, targetId: TargetId): void {
   const activePlayer = getActivePlayer();
   if (!activePlayer) {
     return;
@@ -655,21 +769,23 @@ function useManualRing(ringInstanceId: string): void {
   }
 
   const enchantmentTargets = Object.fromEntries(
-    ring.gems
-      .filter((gem) => gem.enchantment?.type === "spell")
-      .map((gem) => [gem.id, manualTargetId]),
+    ring.gems.filter((gem) => gem.enchantment?.type === "spell").map((gem) => [gem.id, targetId]),
   );
 
   applyManualAction({
     type: "useRing",
     playerId: activePlayer.id,
     ringInstanceId,
-    targetId: manualTargetId,
+    targetId,
     enchantmentTargets,
   });
 }
 
 function useManualMonster(monsterInstanceId: string): void {
+  useManualMonsterOnTarget(monsterInstanceId, manualTargetId);
+}
+
+function useManualMonsterOnTarget(monsterInstanceId: string, targetId: TargetId): void {
   const activePlayer = getActivePlayer();
   if (!activePlayer) {
     return;
@@ -679,7 +795,7 @@ function useManualMonster(monsterInstanceId: string): void {
     type: "useMonster",
     playerId: activePlayer.id,
     monsterInstanceId,
-    targetId: manualTargetId,
+    targetId,
   });
 }
 
@@ -687,7 +803,11 @@ function applyManualAction(action: BattleAction): void {
   try {
     state = applyBattleAction(state, action).state;
     errorMessage = null;
+    selectedRingInstanceId = null;
+    selectedMonsterInstanceId = null;
     ensureValidManualTarget();
+    ensureValidSelectedRing();
+    ensureValidSelectedMonster();
   } catch (error) {
     errorMessage = error instanceof Error ? error.message : String(error);
   }
@@ -835,6 +955,16 @@ function enchantmentLabel(gem: GemView): string {
 
 function ringTotalDamage(ring: RingView): number {
   return ring.damage + ring.gems.reduce((sum, gem) => sum + gem.damage, 0);
+}
+
+function selectedBoardRing(): RingView | null {
+  const activePlayer = getActivePlayer();
+  return activePlayer?.rings.find((ring) => ring.id === selectedRingInstanceId) ?? null;
+}
+
+function selectedBoardMonster(): MonsterView | null {
+  const activePlayer = getActivePlayer();
+  return activePlayer?.monsters.find((monster) => monster.id === selectedMonsterInstanceId) ?? null;
 }
 
 function renderAction(action: BattleAction, index: number): string {
@@ -1132,6 +1262,37 @@ function ensureValidManualTarget(): void {
   if (!selectedTarget || selectedTarget.disabled) {
     manualTargetId = defaultTargetId();
   }
+}
+
+function ensureValidSelectedRing(): void {
+  if (!selectedRingInstanceId) {
+    return;
+  }
+
+  const activePlayer = getActivePlayer();
+  const ring = activePlayer?.rings.find((candidate) => candidate.id === selectedRingInstanceId);
+  if (!ring || boardRingUnavailableReason(ring, activePlayer)) {
+    selectedRingInstanceId = null;
+  }
+}
+
+function ensureValidSelectedMonster(): void {
+  if (!selectedMonsterInstanceId) {
+    return;
+  }
+
+  const monster = activePlayerMonster(selectedMonsterInstanceId);
+  if (!monster || boardMonsterUnavailableReason(monster.monster, monster.player)) {
+    selectedMonsterInstanceId = null;
+  }
+}
+
+function activePlayerMonster(
+  monsterInstanceId: string,
+): { player: BattlePlayerView; monster: MonsterView } | null {
+  const activePlayer = getActivePlayer();
+  const monster = activePlayer?.monsters.find((candidate) => candidate.id === monsterInstanceId);
+  return activePlayer && monster ? { player: activePlayer, monster } : null;
 }
 
 function findTarget(

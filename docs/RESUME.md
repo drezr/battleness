@@ -16,7 +16,7 @@ Read these files before making changes:
 - Current phase: first local deterministic combat prototype implementation.
 - User intent: clean rebuild of an already-started game.
 - A TypeScript monorepo is in place with `packages/engine`, `packages/content`, and `apps/prototype`.
-- The prototype includes deterministic combat state creation, ring and monster actions, direct-damage spells, summons, Taunt, first-turn protection, battle end checks, combat-start resolution, JSON scenarios, a battle setup screen, a first sketch-inspired battle board, manual browser controls, localized event-log rendering, and Taunt-aware target selection.
+- The prototype includes deterministic combat state creation, ring and monster actions, direct-damage spells, summons, Taunt, first-turn protection, battle end checks, combat-start resolution, JSON scenarios, a battle setup screen, a first sketch-inspired battle board with prepare-action-then-target interaction for rings and monsters, both players' rings visible for development testing, manual browser controls, localized event-log rendering, and Taunt-aware target selection.
 - The user handles commits and pushes to GitHub themselves.
 - The first milestone is a local deterministic combat prototype focused on the combat engine.
 

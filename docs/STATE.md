@@ -14,6 +14,10 @@ This file records modifications made to the project during agent-assisted work.
 - Additional prototype setups now cover lower-level-start and element-duel-start rules from the setup screen.
 - The user's battle layout sketch is documented as future UI direction, while the current prototype remains an engine/debug interface.
 - The prototype combat screen now includes a first sketch-inspired battle board with heroes, monster rows, active rings, selectable targets, an end-turn control, and top/bottom energy tracks.
+- The battle board now supports explicit ring or monster preparation followed by target selection, with visual states for ready, selected, cooldown, insufficient energy, legal targets, and blocked targets.
+- The battle board temporarily displays both players' rings for development testing, while only the active player's available rings can be prepared and used.
+- Battle board monster cards now display current/base cooldown beside damage and health.
+- Battle board monster cards are wider for stat readability, and board ring cards now display current/base cooldown.
 
 ## Change Log
 
@@ -34,6 +38,10 @@ This file records modifications made to the project during agent-assisted work.
 - Added prototype player and inventory fixtures plus a training fire ring definition to support equal-speed element-duel testing.
 - Documented the user's battle layout sketch direction in `docs/PROJECT.md` and `docs/RESUME.md`.
 - Added the first sketch-inspired battle board view to `apps/prototype`, keeping the existing debug panels below it for inspection and scenario replay.
+- Improved the battle board interaction model so board rings and ready active-player monsters are prepared first and then executed by clicking a legal target, with localized hints and clearer visual availability states.
+- Updated the development battle board to show both players' ring rows, with inactive or unavailable rings still disabled.
+- Added current/base cooldown display to monster cards on the battle board.
+- Widened battle board monster cards and added current/base cooldown display to board ring cards.
 - Added manual combat controls to `apps/prototype`, allowing the active player to select a target, use available rings, use ready monsters, end the turn, or concede while keeping scenario replay controls and the event log.
 - Added localized UI labels for manual combat controls to the English and French locale files.
 
