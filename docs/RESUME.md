@@ -270,6 +270,10 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - Object colors: Ring uses pink, Gem uses cyan, Monster uses green, Spell uses magenta, and Material uses blue.
 - Element colors: Electric uses yellow, Fire uses pink-red, and Ice uses light cyan.
 - Rarity colors: Common uses white or light gray, Refined uses blue, Rare uses orange, and Legendary uses purple.
+- The prototype applies those rarity colors to ring, gem, and monster borders on the battle board, detail panels, setup preview, and manual action controls.
+- Yellow selection outlines and red blocked-state indicators remain distinct from the rarity border.
+- Localized elemental badges appear in the top-right corner of ring, gem, and monster cards across those same views.
+- Socketed gem markers use elemental fill colors and rarity border colors simultaneously.
 - Stat colors: Damage uses pink-red, Health uses red, Energy uses green, Energy Penalty uses pale green, Cooldown uses light cyan, Cooldown Penalty uses cyan, Quality uses orange, Speed uses yellow, Skill uses magenta, and Rarity uses purple.
 
 ## Battle Layout Direction

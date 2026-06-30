@@ -130,6 +130,10 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - The battle screen should eventually follow the user's sketch direction: heroes anchored on the left, the monster battlefield occupying the center, rings arranged as a bottom hand or equipment row, and energy bars visible at the top and bottom.
 - Monster cards should expose skill, damage, and health zones clearly.
 - Ring cards should expose damage and energy/cost information, with socketed gems visible along the bottom of each ring.
+- Ring, gem, and monster frames identify rarity consistently: common uses light gray, refined uses blue, rare uses orange, and legendary uses purple.
+- Selection, targeting, and blocked-state indicators remain separate from rarity framing so interaction state does not replace item identity.
+- Ring, gem, and monster cards also display a localized elemental badge in the top-right corner: Electric uses yellow, Fire uses pink-red, and Ice uses light cyan.
+- Compact socketed gems use their elemental fill color while retaining rarity on the surrounding border.
 - The current prototype now includes a first sketch-inspired battle board, but it is still a functional prototype/debug interface rather than the final battle layout.
 
 ### Progression And Economy

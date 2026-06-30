@@ -694,6 +694,7 @@ function summonMonster(
     ownerId: player.id,
     nameKey: definition.nameKey,
     element: definition.element,
+    rarity: definition.rarity,
     health: definition.baseHealth,
     maxHealth: definition.baseHealth,
     baseDamage: definition.baseDamage,

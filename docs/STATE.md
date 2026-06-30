@@ -32,6 +32,8 @@ This file records modifications made to the project during agent-assisted work.
 - Content startup validation now checks cross-file references, ownership, uniqueness, equipment, sockets, enchantments, and battle setup consistency after Zod shape validation.
 - A complete prototype content collection proposal now covers rings, gems, monsters, direct-damage spells, materials, elemental roles, base statistics, and development-only fixtures.
 - The confirmed prototype collection is implemented as content version `prototype-3` with `common`, `refined`, `rare`, and `legendary` rarity tiers.
+- Combat instances now retain rarity, and the prototype frames rings, gems, and monsters with their rarity color across board, setup, detail, and manual-action views.
+- Rings, gems, and monsters now show localized top-right elemental badges, and compact gem sockets combine elemental fill with rarity borders.
 
 ## Change Log
 
@@ -63,6 +65,9 @@ This file records modifications made to the project during agent-assisted work.
 - Implemented 13 ring definitions, 13 gem definitions, 18 monster definitions, 6 direct-damage spell definitions, and 70 material definitions with complete English and French localization.
 - Replaced the `normal` and `magic` rarity identifiers with `common` and `refined` across schemas, definitions, tests, and documentation.
 - Extended material validation to enforce atomic metadata, unique chemical symbols and atomic numbers, rarity prices, and required localization keys.
+- Propagated rarity through engine monster definitions and combat instances, added shared rarity border styles, and preserved separate hover, selection, targeting, and blocked-state feedback.
+- Added DOM tests for common and refined rings, refined gems, and rare monsters.
+- Added DOM assertions for Electric ring and Ice monster badges while preserving localized element labels.
 
 ### 2026-06-25
 

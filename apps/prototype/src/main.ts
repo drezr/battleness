@@ -20,6 +20,7 @@ import {
   type BattleResult,
   type BattleState,
   type ElementType,
+  type Rarity,
   type TargetId,
 } from "@battleness/engine";
 import "./styles.css";
@@ -610,9 +611,10 @@ function renderManualActions(): string {
           const disabled =
             isFinished || ring.currentCooldown > 0 || activePlayer.energy.current < ring.energyCost;
           return `
-            <button class="action-button" data-manual-ring-id="${escapeHtml(ring.id)}" ${
+            <button class="action-button ${rarityClass(ring.rarity)}" data-manual-ring-id="${escapeHtml(ring.id)}" data-rarity="${ring.rarity}" ${
               disabled ? "disabled" : ""
             }>
+              ${renderElementBadge(ring.element)}
               <strong>${escapeHtml(t(ring.nameKey))}</strong>
               <span>
                 ${escapeHtml(t("ui.energy"))} ${ring.energyCost} /
@@ -633,9 +635,10 @@ function renderManualActions(): string {
               .map((monster) => {
                 const disabled = isFinished || monster.currentCooldown > 0;
                 return `
-                  <button data-manual-monster-id="${escapeHtml(monster.id)}" ${
+                  <button class="action-button ${rarityClass(monster.rarity)}" data-manual-monster-id="${escapeHtml(monster.id)}" data-rarity="${monster.rarity}" ${
                     disabled ? "disabled" : ""
                   }>
+                    ${renderElementBadge(monster.element)}
                     ${escapeHtml(t(monster.nameKey))} - ${escapeHtml(t("ui.cooldown"))} ${
                       monster.currentCooldown
                     }
@@ -762,13 +765,15 @@ function renderMonsterSlot(player: BattlePlayerView, index: number): string {
 
   return `
     <button
-      class="monster-slot ${targetClass} ${actionClass} ${isTargetSelected ? "selected" : ""} ${
-        isActionSelected ? "prepared" : ""
-      }"
+      class="monster-slot ${rarityClass(monster.rarity)} ${targetClass} ${actionClass} ${
+        isTargetSelected ? "selected" : ""
+      } ${isActionSelected ? "prepared" : ""}"
       data-board-target-id="${escapeHtml(targetId)}"
       data-board-monster-id="${escapeHtml(monster.id)}"
+      data-rarity="${monster.rarity}"
       ${disabledReason ? "disabled" : ""}
     >
+      ${renderElementBadge(monster.element)}
       <span class="monster-skill">${renderSkillBadges(monster) || t("ui.none")}</span>
       <strong>${escapeHtml(t(monster.nameKey))}</strong>
       <span class="monster-stats">
@@ -804,9 +809,12 @@ function renderBoardRing(ring: RingView, activePlayer: BattlePlayerView | null):
   const isSelected = selectedRingInstanceId === ring.id;
 
   return `
-    <button class="board-ring ${isSelected ? "selected" : ""} ${
-      unavailableReason ? "unavailable" : "ready"
-    }" data-board-ring-id="${escapeHtml(ring.id)}" ${unavailableReason ? "disabled" : ""}>
+    <button class="board-ring ${rarityClass(ring.rarity)} ${
+      isSelected ? "selected" : ""
+    } ${unavailableReason ? "unavailable" : "ready"}" data-board-ring-id="${escapeHtml(
+      ring.id,
+    )}" data-rarity="${ring.rarity}" ${unavailableReason ? "disabled" : ""}>
+      ${renderElementBadge(ring.element)}
       <strong>${escapeHtml(t(ring.nameKey))}</strong>
       <span class="ring-stats">
         <span>${escapeHtml(t("ui.damage"))} ${ringTotalDamage(ring)}</span>
@@ -817,7 +825,11 @@ function renderBoardRing(ring: RingView, activePlayer: BattlePlayerView | null):
       <span class="ring-gems">
         ${Array.from({ length: 3 }, (_, index) => {
           const gem = ring.gems[index];
-          return `<span class="${gem ? "filled" : ""}" title="${gem ? escapeHtml(t(gem.nameKey)) : ""}"></span>`;
+          return `<span class="${
+            gem ? `filled ${rarityClass(gem.rarity)} element-${gem.element}` : ""
+          }" data-rarity="${gem?.rarity ?? ""}" title="${
+            gem ? escapeHtml(`${t(gem.nameKey)} - ${t(`ui.element.${gem.element}`)}`) : ""
+          }"></span>`;
         }).join("")}
       </span>
     </button>
@@ -1012,7 +1024,8 @@ function renderPlayer(player: BattlePlayerView): string {
         ${player.rings
           .map(
             (ring) => `
-              <li class="ring-item">
+              <li class="ring-item ${rarityClass(ring.rarity)}" data-rarity="${ring.rarity}">
+                ${renderElementBadge(ring.element)}
                 <strong>${escapeHtml(t(ring.nameKey))}</strong>
                 <dl class="inline-stats">
                   ${stat(t("ui.energy"), String(ring.energyCost))}
@@ -1033,7 +1046,8 @@ function renderPlayer(player: BattlePlayerView): string {
             ? player.monsters
                 .map(
                   (monster) => `
-                    <li>
+                    <li class="monster-item ${rarityClass(monster.rarity)}" data-rarity="${monster.rarity}">
+                      ${renderElementBadge(monster.element)}
                       <strong>${escapeHtml(t(monster.nameKey))}</strong>
                       <span>${escapeHtml(t("ui.health"))} ${monster.health}/${monster.maxHealth}</span>
                       <span>${escapeHtml(t("ui.cooldown"))} ${monster.currentCooldown}</span>
@@ -1064,7 +1078,8 @@ function renderSetupPlayer(player: BattlePlayerView): string {
         ${player.rings
           .map(
             (ring) => `
-              <li class="ring-item">
+              <li class="ring-item ${rarityClass(ring.rarity)}" data-rarity="${ring.rarity}">
+                ${renderElementBadge(ring.element)}
                 <strong>${escapeHtml(t(ring.nameKey))}</strong>
                 <dl class="inline-stats">
                   ${stat(t("ui.energy"), String(ring.energyCost))}
@@ -1095,7 +1110,8 @@ function renderGemList(ring: RingView): string {
 
 function renderGem(gem: GemView): string {
   return `
-    <article class="gem-item">
+    <article class="gem-item ${rarityClass(gem.rarity)}" data-rarity="${gem.rarity}">
+      ${renderElementBadge(gem.element)}
       <strong>${escapeHtml(t(gem.nameKey))}</strong>
       <dl class="inline-stats compact">
         ${stat(t("ui.damage"), String(gem.damage))}
@@ -1131,6 +1147,17 @@ function renderSkillBadges(monster: MonsterView): string {
       <span>${escapeHtml(label)}</span>
     </span>
   `;
+}
+
+function rarityClass(rarity: Rarity): string {
+  return `rarity-${rarity}`;
+}
+
+function renderElementBadge(element: ElementType): string {
+  const label = t(`ui.element.${element}`);
+  return `<span class="element-badge element-${element}" title="${escapeHtml(
+    label,
+  )}">${escapeHtml(label)}</span>`;
 }
 
 function enchantmentLabel(gem: GemView): string {

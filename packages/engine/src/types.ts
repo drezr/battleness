@@ -16,6 +16,7 @@ export type SpellDefinition = {
   id: string;
   nameKey: string;
   element: ElementType;
+  rarity: Rarity;
   baseEnergyPenalty: number;
   baseCooldownPenalty: number;
   effects: SpellEffect[];
@@ -25,6 +26,7 @@ export type MonsterDefinition = {
   id: string;
   nameKey: string;
   element: ElementType;
+  rarity: Rarity;
   baseHealth: number;
   baseDamage: number;
   baseCooldown: number;
@@ -58,6 +60,7 @@ export type RingCombatInstance = {
   ownerId: string;
   nameKey: string;
   element: ElementType;
+  rarity: Rarity;
   damage: number;
   energyCost: number;
   cooldown: number;
@@ -72,6 +75,7 @@ export type GemCombatInstance = {
   ownerId: string;
   nameKey: string;
   element: ElementType;
+  rarity: Rarity;
   damage: number;
   energyPenalty: number;
   cooldownPenalty: number;
@@ -96,6 +100,7 @@ export type MonsterCombatInstance = {
   ownerId: string;
   nameKey: string;
   element: ElementType;
+  rarity: Rarity;
   health: number;
   maxHealth: number;
   baseDamage: number;

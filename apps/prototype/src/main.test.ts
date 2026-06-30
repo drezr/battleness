@@ -28,6 +28,29 @@ describe("battle board interactions", () => {
     expect(eventTypes()).toContain("ringUsed");
   });
 
+  it("renders rarity classes on rings, gems, and monsters", () => {
+    startBattle("basicRingAttack");
+
+    expect(ringAfterRender("playerOne.ring.sparkBand").classList).toContain("rarity-common");
+    expect(ringAfterRender("playerTwo.ring.ironCircle").classList).toContain("rarity-refined");
+    expect(getElement('[title="Static Pearl - Electric"]').classList).toContain("rarity-refined");
+    expect(
+      getElement('[data-board-ring-id="playerOne.ring.sparkBand"] .element-badge').textContent,
+    ).toBe("Electric");
+  });
+
+  it("renders rare monster borders on the battle board", () => {
+    startBattle("skillShowcase");
+
+    expect(
+      getButton('[data-board-monster-id="playerTwo.monster.shieldWisp.1"]').classList,
+    ).toContain("rarity-rare");
+    expect(
+      getElement('[data-board-monster-id="playerTwo.monster.shieldWisp.1"] .element-badge')
+        .textContent,
+    ).toBe("Ice");
+  });
+
   it("blocks non-Taunt enemy targets after a Taunt monster is summoned", () => {
     summonIceGuardian();
     getButton("#boardEndTurn").click();

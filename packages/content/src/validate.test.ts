@@ -158,6 +158,8 @@ describe("content package", () => {
     expect(setup.players).toHaveLength(2);
     expect(setup.activePlayerId).toBeNull();
     expect(sparkBand?.gems.length).toBe(2);
+    expect(sparkBand?.rarity).toBe("common");
+    expect(sparkBand?.gems[1]?.rarity).toBe("refined");
     expect(Object.keys(setup.definitions.spells)).toEqual(
       expect.arrayContaining(["spark", "firebolt", "iceShard"]),
     );
