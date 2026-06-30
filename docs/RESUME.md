@@ -90,6 +90,7 @@ The following are currently marked as decided in `docs/PROJECT.md`:
 - Prefer OAuth login first, especially Google and Facebook, then add email and password authentication.
 - Build a localization module from the beginning. User-facing text must resolve through localization keys and translation JSON files, not hardcoded strings.
 - Set up an organized asset pipeline from the beginning, even if early assets are AI-generated templates that may be replaced later.
+- The BattleNess logo and application icon are stored under `apps/prototype/public/assets/brand/` and are integrated into the prototype header and document metadata.
 - Plan for sound and music later.
 - Persist match actions, deterministic seed, and result for replay/debug/history, similar in spirit to chess PGN.
 - Keep versioned JSON content definitions as the source of truth and import them into the database if runtime querying, admin tooling, or production operations require it. Player-owned instances and progression data belong in the database.

@@ -98,7 +98,13 @@ function render(): void {
     <section class="shell">
       <header class="topbar">
         <div>
-          <p class="eyebrow">BattleNess</p>
+          <img
+            class="brand-logo"
+            src="/assets/brand/battleness-logo.png"
+            width="1536"
+            height="1024"
+            alt="BattleNess"
+          />
           <h1>${escapeHtml(t("ui.title"))}</h1>
         </div>
         <label class="scenario-picker">
@@ -187,7 +193,13 @@ function renderSetup(): void {
     <section class="shell">
       <header class="topbar">
         <div>
-          <p class="eyebrow">BattleNess</p>
+          <img
+            class="brand-logo"
+            src="/assets/brand/battleness-logo.png"
+            width="1536"
+            height="1024"
+            alt="BattleNess"
+          />
           <h1>${escapeHtml(t("ui.battleSetup"))}</h1>
         </div>
         <label class="scenario-picker">

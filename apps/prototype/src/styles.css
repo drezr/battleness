@@ -65,12 +65,11 @@ select {
   margin-bottom: 20px;
 }
 
-.eyebrow {
-  margin: 0 0 8px;
-  color: #00d7ff;
-  font-size: 0.875rem;
-  font-weight: 700;
-  text-transform: uppercase;
+.brand-logo {
+  display: block;
+  width: min(210px, 45vw);
+  height: auto;
+  margin-bottom: 8px;
 }
 
 h1,

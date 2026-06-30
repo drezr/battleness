@@ -369,7 +369,7 @@ This section separates executable game rules from implementation decisions. It i
 - Data model: initial game content should be defined in JSON files.
 - Engine/framework: Vite with a simple DOM UI for the first combat prototype; Nuxt and Phaser remain long-term options.
 - Architecture: TypeScript monorepo with separate engine, content, and prototype app workspaces.
-- Tooling: TypeScript, pnpm, Vitest, ESLint, Prettier, Zod-style validation, and Prisma are decided; asset pipeline is not decided yet.
+- Tooling: TypeScript, pnpm, Vitest, ESLint, Prettier, Zod-style validation, Prisma, and an organized asset pipeline are decided.
 
 ## Technical Decisions
 
@@ -554,6 +554,8 @@ This section separates executable game rules from implementation decisions. It i
 
 - Status: decided.
 - Decision: Set up an organized asset pipeline from the beginning, even if early assets are AI-generated templates that may be replaced later.
+- The current BattleNess logo and application icon live under `apps/prototype/public/assets/brand/`.
+- The prototype uses the logo in its battle and setup headers, and the icon as its browser favicon and Apple touch icon.
 - Reason: BattleNess will need visual assets, and early structure prevents scattered files and unclear asset ownership.
 - Tradeoffs: This adds project setup before final art exists, but template assets can validate UI and combat presentation needs early.
 
