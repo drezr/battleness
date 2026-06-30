@@ -29,7 +29,7 @@ export type MonsterDefinition = {
   baseDamage: number;
   baseCooldown: number;
   baseSpeed: number;
-  skills: MonsterSkill[];
+  skill?: MonsterSkill;
 };
 
 export type CombatantStats = {
@@ -96,24 +96,17 @@ export type MonsterCombatInstance = {
   element: ElementType;
   health: number;
   maxHealth: number;
+  baseDamage: number;
   damage: number;
   cooldown: number;
   currentCooldown: number;
   speed: number;
-  skills: MonsterSkill[];
+  skill?: MonsterSkill;
+  shieldActive: boolean;
+  rageActive: boolean;
 };
 
-export type MonsterSkill =
-  | "haste"
-  | "multiHit"
-  | "pierce"
-  | "rage"
-  | "shield"
-  | "taunt"
-  | {
-      type: "haste" | "multiHit" | "pierce" | "rage" | "shield" | "taunt";
-      amount?: number;
-    };
+export type MonsterSkill = "haste" | "multiHit" | "pierce" | "rage" | "shield" | "taunt";
 
 export type BattleSetup = {
   id: string;
@@ -187,11 +180,33 @@ export type BattleEvent =
   | { type: "spellCast"; spellId: string; sourceGemId: string; targetId: TargetId }
   | { type: "monsterSummoned"; playerId: string; monsterInstanceId: string; monsterId: string }
   | { type: "monsterUsed"; playerId: string; monsterInstanceId: string; targetId: TargetId }
+  | { type: "shieldBroken"; monsterInstanceId: string; sourceId: string }
+  | {
+      type: "pierceOverflow";
+      monsterInstanceId: string;
+      targetMonsterInstanceId: string;
+      targetHeroId: TargetId;
+      amount: number;
+    }
+  | { type: "hasteActivated"; monsterInstanceId: string }
+  | {
+      type: "rageActivated";
+      monsterInstanceId: string;
+      previousDamage: number;
+      damage: number;
+    }
+  | {
+      type: "multiHitResolved";
+      monsterInstanceId: string;
+      targetIds: TargetId[];
+    }
   | { type: "monsterDestroyed"; monsterInstanceId: string }
   | { type: "turnEnded"; playerId: string }
   | { type: "battleEnded"; result: BattleResult };
 
 export type BattleState = BattleSetup & {
+  initialSetup: BattleSetup;
+  actionHistory: BattleAction[];
   log: BattleEvent[];
   result: BattleResult | null;
 };
@@ -199,4 +214,20 @@ export type BattleState = BattleSetup & {
 export type BattleActionResult = {
   state: BattleState;
   events: BattleEvent[];
+};
+
+export type BattleRecord = {
+  format: "battlenessBattleRecord";
+  formatVersion: 1;
+  rulesVersion: string;
+  contentVersion: string;
+  setup: BattleSetup;
+  actions: BattleAction[];
+  result: BattleResult | null;
+  finalStateChecksum: string;
+};
+
+export type BattleRecordVersions = {
+  rulesVersion: string;
+  contentVersion: string;
 };

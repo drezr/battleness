@@ -16,7 +16,7 @@ Read these files before making changes:
 - Current phase: first local deterministic combat prototype implementation.
 - User intent: clean rebuild of an already-started game.
 - A TypeScript monorepo is in place with `packages/engine`, `packages/content`, and `apps/prototype`.
-- The prototype includes deterministic combat state creation, ring and monster actions, direct-damage spells, summons, Taunt, first-turn protection, battle end checks, combat-start resolution, JSON scenarios, a battle setup screen, a first sketch-inspired battle board with prepare-action-then-target interaction for rings and monsters, both players' rings visible for development testing, manual browser controls, localized event-log rendering, and Taunt-aware target selection.
+- The prototype includes deterministic combat state creation, ring and monster actions, direct-damage spells, summons, all six current monster skills, first-turn protection, battle end checks, combat-start resolution, JSON scenarios, versioned battle-record export/import and replay, a battle setup screen, a first sketch-inspired battle board with prepare-action-then-target interaction for rings and monsters, both players' rings visible for development testing, manual browser controls, localized event-log rendering, Taunt-aware target selection, and DOM interaction tests for critical board flows.
 - The user handles commits and pushes to GitHub themselves.
 - The first milestone is a local deterministic combat prototype focused on the combat engine.
 
@@ -47,7 +47,7 @@ High-level rules:
 - Gems go into ring sockets and add damage.
 - Gems can be enchanted with monsters or spells.
 - Ring use triggers socketed gem enchantments.
-- Monsters fight alongside the hero and have damage, health, cooldown, elemental type, and optional skills.
+- Monsters fight alongside the hero and have damage, health, cooldown, elemental type, and at most one optional skill.
 - Spells have unique effects.
 - The starting player cannot damage the opposing hero on the first turn, but can still summon monsters and cast spells.
 - Items have rarity, quality, level, experience, speed points, and elemental properties.
@@ -149,6 +149,16 @@ These questions are listed in `docs/PROJECT.md` and should be resolved before im
 - Taunt prevents the opponent from targeting non-Taunt targets controlled by the Taunt owner's side.
 - Taunt blocks opposing rings, monsters, and direct-damage spells unless a rule or effect explicitly allows otherwise.
 - Enemy Taunt does not restrict a player targeting their own hero or their own monsters.
+- A monster can have at most one skill.
+- Shield negates the first complete incoming damage instance and then breaks permanently.
+- Pierce transfers monster overkill damage to the target monster's controlling hero. Shield prevents the hit and its overflow, while first-turn hero protection prevents protected overflow damage.
+- Haste causes a summoned monster to enter with cooldown 0 and allows it to act immediately.
+- A monster's resolved cooldown is at least 1 after it acts; Haste affects only its initial summon cooldown.
+- Rage activates permanently below 50% health and changes monster damage to `floor(baseDamage * 1.2)`.
+- MultiHit attacks a hero normally. When a monster is targeted, it deals full damage to every monster controlled by that target's owner, including the attacker's own side when an allied monster is selected.
+- MultiHit independently breaks each Shield that negates one of its hits. Taunt restricts the initial target but does not protect other monsters from the resulting MultiHit effect.
+- Skill resolution order is current damage and elemental advantage, MultiHit target expansion, Shield, health damage, Pierce overflow, Rage activation, and monster destruction.
+- Skill replay events should include `shieldBroken`, `pierceOverflow`, `hasteActivated`, `rageActivated`, and `multiHitResolved`.
 - Each side can control up to 3 monsters.
 - Monsters are removed immediately after the effect that reduces their health to 0.
 - Duplicate monster summons create new monster instances if the board is not full.
@@ -162,6 +172,7 @@ These questions are listed in `docs/PROJECT.md` and should be resolved before im
 - If ring damage kills its target before enchantments trigger, only enchantments that specifically require the dead target fail.
 - If both heroes reach 0 during the same resolution sequence, the battle result is a draw.
 - A ring's current energy cost cannot be lower than 1.
+- A ring's resolved cooldown cannot be lower than 1, preventing repeated use during the same turn.
 - BattleNess should not include healing mechanics, to keep combat dynamic.
 - The initial combat engine should support explicit spell effects and include three direct-damage test spells: Spark, Firebolt, and Ice Shard.
 - The initial direct-damage spell can target heroes or monsters, allies or enemies, including self-damage or damaging allied monsters.
@@ -183,13 +194,19 @@ These questions are listed in `docs/PROJECT.md` and should be resolved before im
 - `BattleSetup` should contain the two players, resolved combat stats, equipped ring instances, socketed gem instances, referenced definitions, and any deterministic seed required for the battle.
 - Player actions sent to the combat engine should be represented as typed command objects, such as `{ type: "useRing", actorId, ringId, targetId }`.
 - The combat engine should produce a detailed event log after each action for debugging, UI rendering, and future replay support.
+- Battle state stores its immutable initial setup and every successfully applied command in `actionHistory`.
+- Version 1 `BattleRecord` JSON stores format, rules and content versions, setup and seed, actions, result, and a canonical final-state checksum.
+- Imported records are structurally validated and can be replayed one action at a time or to completion.
+- Completed replays verify both the declared result and deterministic final-state checksum.
+- The current FNV-1a checksum is intended for consistency checks, not cryptographic tamper protection.
 - Randomness should be allowed only through deterministic seeded state. The initial rules do not require much randomness, but this protects future AI decisions, randomized rewards, shuffled/generated content, or random tie-breakers.
 - Scenario test fixtures should support both single-action expectations and multi-action sequences.
 - JSON content should be validated with a TypeScript-friendly schema validation library such as Zod.
 - Initial implementation files should include content definitions under `packages/content/src/definitions/`, prototype fixtures under `packages/content/src/fixtures/`, and locale files under `packages/content/src/locales/`.
 - Initial battle actions should include `chooseElement`, `useRing`, `useMonster`, `endTurn`, and `concede`.
 - Initial event log types should include battle start/end, first-player choice request, element choices, tied element duels, final first-player choice, turn start/end, cooldown changes, ring use, energy spend, damage, spell cast, monster summon/use/destruction, and battle result.
-- Initial scenario fixtures should include `basicRingAttack`, `summonAndTaunt`, `spellSelfTargeting`, `lowerLevelStart`, and `elementDuelStart`.
+- Scenario fixtures include `basicRingAttack`, `summonAndTaunt`, `spellSelfTargeting`, `skillShowcase`, `lowerLevelStart`, and `elementDuelStart`.
+- `skillShowcase` is a development-only battle setup with three ready monsters per side for manually exercising all current skills.
 
 ## Elemental Design Direction
 

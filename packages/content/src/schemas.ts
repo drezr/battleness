@@ -3,13 +3,7 @@ import { z } from "zod";
 export const elementSchema = z.enum(["electric", "fire", "ice"]);
 export const raritySchema = z.enum(["normal", "magic", "rare", "legendary"]);
 
-export const skillSchema = z.union([
-  z.enum(["haste", "multiHit", "pierce", "rage", "shield", "taunt"]),
-  z.object({
-    type: z.enum(["haste", "multiHit", "pierce", "rage", "shield", "taunt"]),
-    amount: z.number().int().nonnegative().optional(),
-  }),
-]);
+export const skillSchema = z.enum(["haste", "multiHit", "pierce", "rage", "shield", "taunt"]);
 
 export const ringDefinitionSchema = z.object({
   id: z.string().min(1),
@@ -18,7 +12,7 @@ export const ringDefinitionSchema = z.object({
   rarity: raritySchema,
   baseDamage: z.number().int().nonnegative(),
   baseEnergyCost: z.number().int().nonnegative(),
-  baseCooldown: z.number().int().nonnegative(),
+  baseCooldown: z.number().int().positive(),
   baseSpeed: z.number().int().nonnegative(),
 });
 
@@ -32,17 +26,19 @@ export const gemDefinitionSchema = z.object({
   baseCooldownPenalty: z.number().int().nonnegative(),
 });
 
-export const monsterDefinitionSchema = z.object({
-  id: z.string().min(1),
-  nameKey: z.string().min(1),
-  element: elementSchema,
-  rarity: raritySchema,
-  baseHealth: z.number().int().positive(),
-  baseDamage: z.number().int().nonnegative(),
-  baseCooldown: z.number().int().nonnegative(),
-  baseSpeed: z.number().int().nonnegative(),
-  skills: z.array(skillSchema),
-});
+export const monsterDefinitionSchema = z
+  .object({
+    id: z.string().min(1),
+    nameKey: z.string().min(1),
+    element: elementSchema,
+    rarity: raritySchema,
+    baseHealth: z.number().int().positive(),
+    baseDamage: z.number().int().nonnegative(),
+    baseCooldown: z.number().int().positive(),
+    baseSpeed: z.number().int().nonnegative(),
+    skill: skillSchema.optional(),
+  })
+  .strict();
 
 export const dealDamageEffectSchema = z.object({
   type: z.literal("dealDamage"),
@@ -118,6 +114,15 @@ export const battleSetupFixtureSchema = z.object({
   id: z.string().min(1),
   seed: z.string().min(1),
   playerIds: z.tuple([z.string().min(1), z.string().min(1)]),
+  initialMonsters: z
+    .array(
+      z.object({
+        playerId: z.string().min(1),
+        monsterId: z.string().min(1),
+      }),
+    )
+    .max(6)
+    .optional(),
 });
 
 export const battleActionFixtureSchema = z.discriminatedUnion("type", [

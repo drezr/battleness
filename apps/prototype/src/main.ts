@@ -1,4 +1,5 @@
 import {
+  contentVersion,
   createBattleSetupFromFixture,
   fixtures,
   locales,
@@ -6,9 +7,16 @@ import {
 } from "@battleness/content";
 import {
   applyBattleAction,
+  assertBattleRecordResult,
+  assertBattleRecordState,
+  createBattleRecord,
   createBattleState,
+  parseBattleRecord,
+  rulesVersion,
+  serializeBattleRecord,
   type BattleAction,
   type BattleEvent,
+  type BattleRecord,
   type BattleResult,
   type BattleState,
   type ElementType,
@@ -46,6 +54,9 @@ let errorMessage: string | null = null;
 let manualTargetId: TargetId = "playerTwo.hero";
 let selectedRingInstanceId: string | null = null;
 let selectedMonsterInstanceId: string | null = null;
+let battleRecordText = "";
+let replayRecord: BattleRecord | null = null;
+let replayActionIndex = 0;
 
 render();
 
@@ -76,7 +87,9 @@ function render(): void {
   }
 
   const scenario = currentScenario();
-  const remainingActions = Math.max(0, scenario.actions.length - actionIndex);
+  const displayedActions = replayRecord?.actions ?? (scenario.actions as readonly BattleAction[]);
+  const displayedActionIndex = replayRecord ? replayActionIndex : actionIndex;
+  const remainingActions = Math.max(0, displayedActions.length - displayedActionIndex);
   ensureValidManualTarget();
   ensureValidSelectedRing();
   ensureValidSelectedMonster();
@@ -116,10 +129,10 @@ function render(): void {
 
       <section class="controls">
         <button id="backToSetup">${escapeHtml(t("ui.battleSetup"))}</button>
-        <button id="nextAction" ${remainingActions === 0 ? "disabled" : ""}>
+        <button id="nextAction" ${remainingActions === 0 || replayRecord ? "disabled" : ""}>
           ${escapeHtml(t("ui.nextAction"))}
         </button>
-        <button id="runAll" ${remainingActions === 0 ? "disabled" : ""}>
+        <button id="runAll" ${remainingActions === 0 || replayRecord ? "disabled" : ""}>
           ${escapeHtml(t("ui.runAll"))}
         </button>
         <button id="resetScenario">${escapeHtml(t("ui.reset"))}</button>
@@ -130,6 +143,8 @@ function render(): void {
       ${renderBattleBoard()}
 
       <main class="layout">
+        ${renderReplayPanel()}
+
         <section class="panel players">
           <h2>${escapeHtml(t("ui.players"))}</h2>
           <div class="player-grid">
@@ -144,7 +159,9 @@ function render(): void {
         <section class="panel actions">
           <h2>${escapeHtml(t("ui.remainingActions"))}</h2>
           <ol>
-            ${scenario.actions.map((action, index) => renderAction(action as BattleAction, index)).join("")}
+            ${displayedActions
+              .map((action, index) => renderAction(action, index, displayedActionIndex))
+              .join("")}
           </ol>
         </section>
 
@@ -262,6 +279,38 @@ function bindEvents(): void {
   });
 
   document
+    .querySelector<HTMLTextAreaElement>("#battleRecordText")
+    ?.addEventListener("input", (event) => {
+      battleRecordText = (event.currentTarget as HTMLTextAreaElement).value;
+    });
+
+  document
+    .querySelector<HTMLButtonElement>("#exportBattleRecord")
+    ?.addEventListener("click", () => {
+      exportCurrentBattleRecord();
+      render();
+    });
+
+  document
+    .querySelector<HTMLButtonElement>("#importBattleRecord")
+    ?.addEventListener("click", () => {
+      importBattleRecord();
+      render();
+    });
+
+  document.querySelector<HTMLButtonElement>("#replayNextAction")?.addEventListener("click", () => {
+    runNextReplayAction();
+    render();
+  });
+
+  document.querySelector<HTMLButtonElement>("#replayAllActions")?.addEventListener("click", () => {
+    while (replayRecord && replayActionIndex < replayRecord.actions.length && !errorMessage) {
+      runNextReplayAction();
+    }
+    render();
+  });
+
+  document
     .querySelector<HTMLSelectElement>("#manualTarget")
     ?.addEventListener("change", (event) => {
       manualTargetId = (event.currentTarget as HTMLSelectElement).value as TargetId;
@@ -362,9 +411,119 @@ function runNextAction(): void {
   }
 }
 
+function renderReplayPanel(): string {
+  const totalActions = replayRecord?.actions.length ?? 0;
+  const hasRemainingReplayActions = Boolean(
+    replayRecord && replayActionIndex < replayRecord.actions.length,
+  );
+  const progress = formatMessage("ui.replayProgress", {
+    current: String(replayActionIndex),
+    total: String(totalActions),
+  });
+
+  return `
+    <section class="panel replay-panel">
+      <h2>${escapeHtml(t("ui.battleRecord"))}</h2>
+      <div class="controls replay-controls">
+        <button id="exportBattleRecord">${escapeHtml(t("ui.exportReplay"))}</button>
+        <button id="importBattleRecord">${escapeHtml(t("ui.importReplay"))}</button>
+        <button id="replayNextAction" ${hasRemainingReplayActions ? "" : "disabled"}>
+          ${escapeHtml(t("ui.replayNext"))}
+        </button>
+        <button id="replayAllActions" ${hasRemainingReplayActions ? "" : "disabled"}>
+          ${escapeHtml(t("ui.replayAll"))}
+        </button>
+      </div>
+      <p class="muted">${escapeHtml(progress)}</p>
+      <textarea
+        id="battleRecordText"
+        aria-label="${escapeHtml(t("ui.battleRecordJson"))}"
+        placeholder="${escapeHtml(t("ui.battleRecordPlaceholder"))}"
+        spellcheck="false"
+      >${escapeHtml(battleRecordText)}</textarea>
+    </section>
+  `;
+}
+
+function exportCurrentBattleRecord(): void {
+  try {
+    battleRecordText = serializeBattleRecord(
+      createBattleRecord(state, {
+        rulesVersion,
+        contentVersion,
+      }),
+    );
+    errorMessage = null;
+  } catch (error) {
+    errorMessage = error instanceof Error ? error.message : String(error);
+  }
+}
+
+function importBattleRecord(): void {
+  const recordText =
+    document.querySelector<HTMLTextAreaElement>("#battleRecordText")?.value ?? battleRecordText;
+  battleRecordText = recordText;
+
+  try {
+    const record = parseBattleRecord(recordText);
+    if (record.rulesVersion !== rulesVersion || record.contentVersion !== contentVersion) {
+      throw new Error(
+        formatMessage("ui.replayVersionMismatch", {
+          rulesVersion: record.rulesVersion,
+          contentVersion: record.contentVersion,
+        }),
+      );
+    }
+
+    const matchingScenario = fixtures.scenarios.find(
+      (scenario) => (scenario.battleSetupId ?? "basicDuel") === record.setup.id,
+    );
+    if (matchingScenario) {
+      selectedScenarioId = matchingScenario.id;
+    }
+
+    replayRecord = record;
+    replayActionIndex = 0;
+    state = createBattleState(record.setup);
+    if (record.actions.length === 0) {
+      assertBattleRecordResult(record, state);
+      assertBattleRecordState(record, state);
+    }
+    actionIndex = 0;
+    errorMessage = null;
+    selectedRingInstanceId = null;
+    selectedMonsterInstanceId = null;
+    isSetupOpen = false;
+    manualTargetId = defaultTargetId();
+  } catch (error) {
+    errorMessage = error instanceof Error ? error.message : String(error);
+  }
+}
+
+function runNextReplayAction(): void {
+  const action = replayRecord?.actions[replayActionIndex];
+  if (!replayRecord || !action) {
+    return;
+  }
+
+  try {
+    state = applyBattleAction(state, action).state;
+    replayActionIndex += 1;
+    if (replayActionIndex === replayRecord.actions.length) {
+      assertBattleRecordResult(replayRecord, state);
+      assertBattleRecordState(replayRecord, state);
+    }
+    errorMessage = null;
+  } catch (error) {
+    errorMessage = error instanceof Error ? error.message : String(error);
+  }
+}
+
 function resetScenario(): void {
   state = createState();
   actionIndex = 0;
+  replayRecord = null;
+  replayActionIndex = 0;
   errorMessage = null;
   selectedRingInstanceId = null;
   selectedMonsterInstanceId = null;
@@ -374,6 +533,8 @@ function resetScenario(): void {
 function openSetup(): void {
   state = createState();
   actionIndex = 0;
+  replayRecord = null;
+  replayActionIndex = 0;
   errorMessage = null;
   selectedRingInstanceId = null;
   selectedMonsterInstanceId = null;
@@ -383,6 +544,8 @@ function openSetup(): void {
 function startBattle(): void {
   state = createState();
   actionIndex = 0;
+  replayRecord = null;
+  replayActionIndex = 0;
   errorMessage = null;
   selectedRingInstanceId = null;
   selectedMonsterInstanceId = null;
@@ -392,7 +555,7 @@ function startBattle(): void {
 
 function renderManualActions(): string {
   const activePlayer = getActivePlayer();
-  const isFinished = state.status === "finished";
+  const isFinished = state.status === "finished" || isReplayLocked();
 
   if (state.status === "choosingFirstPlayer") {
     return renderElementChoiceActions();
@@ -486,7 +649,7 @@ function renderManualActions(): string {
 function renderBattleBoard(): string {
   const [bottomPlayer, topPlayer] = state.players;
   const activePlayer = getActivePlayer();
-  const isFinished = state.status === "finished";
+  const isFinished = state.status === "finished" || isReplayLocked();
 
   return `
     <section class="battle-board" aria-label="${escapeHtml(t("ui.battleBoard"))}">
@@ -653,6 +816,10 @@ function boardRingUnavailableReason(
   ring: RingView,
   activePlayer: BattlePlayerView | null,
 ): string | null {
+  if (isReplayLocked()) {
+    return "ui.replayInProgress";
+  }
+
   if (!activePlayer || state.status !== "active" || ring.ownerId !== activePlayer.id) {
     return "ui.notActive";
   }
@@ -672,6 +839,10 @@ function boardMonsterUnavailableReason(
   monster: MonsterView,
   player: BattlePlayerView,
 ): string | null {
+  if (isReplayLocked()) {
+    return "ui.replayInProgress";
+  }
+
   const activePlayer = getActivePlayer();
   if (!activePlayer || state.status !== "active" || player.id !== activePlayer.id) {
     return "ui.notActive";
@@ -702,7 +873,7 @@ function renderElementChoiceActions(): string {
                       <button
                         data-manual-element-player-id="${escapeHtml(player.id)}"
                         data-manual-element="${escapeHtml(element)}"
-                        ${chosenElement ? "disabled" : ""}
+                        ${chosenElement || isReplayLocked() ? "disabled" : ""}
                       >
                         ${escapeHtml(t(`ui.element.${element}`))}
                       </button>
@@ -801,6 +972,8 @@ function useManualMonsterOnTarget(monsterInstanceId: string, targetId: TargetId)
 
 function applyManualAction(action: BattleAction): void {
   try {
+    replayRecord = null;
+    replayActionIndex = 0;
     state = applyBattleAction(state, action).state;
     errorMessage = null;
     selectedRingInstanceId = null;
@@ -923,18 +1096,27 @@ function renderGem(gem: GemView): string {
 }
 
 function renderSkillBadges(monster: MonsterView): string {
-  if (monster.skills.length === 0) {
+  if (!monster.skill) {
     return "";
   }
 
+  const stateKey =
+    monster.skill === "shield"
+      ? monster.shieldActive
+        ? "ui.skillState.active"
+        : "ui.skillState.broken"
+      : monster.skill === "rage"
+        ? monster.rageActive
+          ? "ui.skillState.active"
+          : "ui.skillState.inactive"
+        : null;
+  const label = stateKey
+    ? `${t(`ui.skill.${monster.skill}`)} - ${t(stateKey)}`
+    : t(`ui.skill.${monster.skill}`);
+
   return `
     <span class="skill-list">
-      ${monster.skills
-        .map((skill) => {
-          const skillType = typeof skill === "string" ? skill : skill.type;
-          return `<span>${escapeHtml(t(`ui.skill.${skillType}`))}</span>`;
-        })
-        .join("")}
+      <span>${escapeHtml(label)}</span>
     </span>
   `;
 }
@@ -967,8 +1149,8 @@ function selectedBoardMonster(): MonsterView | null {
   return activePlayer?.monsters.find((monster) => monster.id === selectedMonsterInstanceId) ?? null;
 }
 
-function renderAction(action: BattleAction, index: number): string {
-  const className = index < actionIndex ? "done" : index === actionIndex ? "current" : "";
+function renderAction(action: BattleAction, index: number, currentIndex = actionIndex): string {
+  const className = index < currentIndex ? "done" : index === currentIndex ? "current" : "";
   const label = t(`ui.action.${action.type}`);
   const detail =
     action.type === "useRing"
@@ -1067,6 +1249,32 @@ function eventMessage(event: BattleEvent): string {
         monster: combatObjectLabel(event.monsterInstanceId),
         target: targetLabel(event.targetId),
       });
+    case "shieldBroken":
+      return formatMessage("event.shieldBroken", {
+        monster: combatObjectLabel(event.monsterInstanceId),
+        source: combatObjectLabel(event.sourceId),
+      });
+    case "pierceOverflow":
+      return formatMessage("event.pierceOverflow", {
+        monster: combatObjectLabel(event.monsterInstanceId),
+        amount: String(event.amount),
+        hero: targetLabel(event.targetHeroId),
+      });
+    case "hasteActivated":
+      return formatMessage("event.hasteActivated", {
+        monster: combatObjectLabel(event.monsterInstanceId),
+      });
+    case "rageActivated":
+      return formatMessage("event.rageActivated", {
+        monster: combatObjectLabel(event.monsterInstanceId),
+        previousDamage: String(event.previousDamage),
+        damage: String(event.damage),
+      });
+    case "multiHitResolved":
+      return formatMessage("event.multiHitResolved", {
+        monster: combatObjectLabel(event.monsterInstanceId),
+        count: String(event.targetIds.length),
+      });
     case "monsterDestroyed":
       return formatMessage("event.monsterDestroyed", {
         monster: combatObjectLabel(event.monsterInstanceId),
@@ -1117,6 +1325,24 @@ function eventTechnicalDetails(event: BattleEvent): Array<[string, string]> {
       return [
         ["ui.monsterInstanceId", event.monsterInstanceId],
         ["ui.targetId", event.targetId],
+      ];
+    case "shieldBroken":
+      return [
+        ["ui.monsterInstanceId", event.monsterInstanceId],
+        ["ui.sourceId", event.sourceId],
+      ];
+    case "pierceOverflow":
+      return [
+        ["ui.monsterInstanceId", event.monsterInstanceId],
+        ["ui.targetId", event.targetHeroId],
+      ];
+    case "hasteActivated":
+    case "rageActivated":
+      return [["ui.monsterInstanceId", event.monsterInstanceId]];
+    case "multiHitResolved":
+      return [
+        ["ui.monsterInstanceId", event.monsterInstanceId],
+        ["ui.targetId", event.targetIds.join(t("ui.listSeparator"))],
       ];
     case "monsterDestroyed":
       return [["ui.monsterInstanceId", event.monsterInstanceId]];
@@ -1216,6 +1442,10 @@ function createTargetOption(id: TargetId, baseLabel: string): TargetOption {
 }
 
 function targetDisabledReason(targetId: TargetId): string | undefined {
+  if (isReplayLocked()) {
+    return "ui.replayInProgress";
+  }
+
   const activePlayer = getActivePlayer();
   const target = findTarget(targetId);
   if (!activePlayer || !target || target.player.id === activePlayer.id) {
@@ -1232,6 +1462,10 @@ function targetDisabledReason(targetId: TargetId): string | undefined {
   }
 
   return "ui.targetBlockedByTaunt";
+}
+
+function isReplayLocked(): boolean {
+  return Boolean(replayRecord && replayActionIndex < replayRecord.actions.length);
 }
 
 function targetSelectionNotice(targets: TargetOption[]): string | null {
@@ -1318,9 +1552,7 @@ function findTarget(
 }
 
 function hasTaunt(monster: MonsterView): boolean {
-  return monster.skills.some((skill) =>
-    typeof skill === "string" ? skill === "taunt" : skill.type === "taunt",
-  );
+  return monster.skill === "taunt";
 }
 
 function stat(label: string, value: string): string {

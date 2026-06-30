@@ -8,7 +8,7 @@
     "baseDamage": 2,
     "baseCooldown": 1,
     "baseSpeed": 0,
-    "skills": ["taunt"]
+    "skill": "taunt"
   },
   {
     "id": "emberImp",
@@ -19,7 +19,7 @@
     "baseDamage": 4,
     "baseCooldown": 2,
     "baseSpeed": 1,
-    "skills": ["rage"]
+    "skill": "rage"
   },
   {
     "id": "stormHound",
@@ -30,7 +30,7 @@
     "baseDamage": 2,
     "baseCooldown": 1,
     "baseSpeed": 3,
-    "skills": ["haste"]
+    "skill": "haste"
   },
   {
     "id": "frostBeetle",
@@ -39,9 +39,9 @@
     "rarity": "magic",
     "baseHealth": 8,
     "baseDamage": 1,
-    "baseCooldown": 0,
+    "baseCooldown": 1,
     "baseSpeed": 0,
-    "skills": ["shield"]
+    "skill": "shield"
   },
   {
     "id": "rageSprite",
@@ -52,7 +52,7 @@
     "baseDamage": 5,
     "baseCooldown": 2,
     "baseSpeed": 1,
-    "skills": ["rage"]
+    "skill": "rage"
   },
   {
     "id": "shieldWisp",
@@ -61,8 +61,30 @@
     "rarity": "rare",
     "baseHealth": 9,
     "baseDamage": 1,
-    "baseCooldown": 0,
+    "baseCooldown": 1,
     "baseSpeed": 0,
-    "skills": [{ "type": "shield", "amount": 2 }]
+    "skill": "shield"
+  },
+  {
+    "id": "emberLancer",
+    "nameKey": "monster.emberLancer.name",
+    "element": "fire",
+    "rarity": "normal",
+    "baseHealth": 5,
+    "baseDamage": 4,
+    "baseCooldown": 2,
+    "baseSpeed": 1,
+    "skill": "pierce"
+  },
+  {
+    "id": "arcStriker",
+    "nameKey": "monster.arcStriker.name",
+    "element": "electric",
+    "rarity": "magic",
+    "baseHealth": 5,
+    "baseDamage": 2,
+    "baseCooldown": 1,
+    "baseSpeed": 3,
+    "skill": "multiHit"
   }
 ]

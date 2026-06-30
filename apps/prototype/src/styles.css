@@ -160,6 +160,28 @@ h4 {
   align-items: start;
 }
 
+.replay-panel {
+  grid-column: 1 / -1;
+}
+
+.replay-controls {
+  margin-bottom: 10px;
+}
+
+.replay-panel textarea {
+  width: 100%;
+  min-height: 180px;
+  resize: vertical;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 6px;
+  padding: 10px;
+  color: #e9f2f4;
+  background: #10212a;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
 .battle-board {
   display: grid;
   gap: 8px;

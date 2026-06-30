@@ -1,0 +1,13 @@
+{
+  "id": "skillShowcase",
+  "seed": "skill-showcase-seed",
+  "playerIds": ["playerOne", "playerTwo"],
+  "initialMonsters": [
+    { "playerId": "playerOne", "monsterId": "emberLancer" },
+    { "playerId": "playerOne", "monsterId": "arcStriker" },
+    { "playerId": "playerOne", "monsterId": "stormHound" },
+    { "playerId": "playerTwo", "monsterId": "iceGuardian" },
+    { "playerId": "playerTwo", "monsterId": "shieldWisp" },
+    { "playerId": "playerTwo", "monsterId": "emberImp" }
+  ]
+}

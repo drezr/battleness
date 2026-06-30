@@ -5,6 +5,8 @@ import {
   definitions,
   fixtures,
   locales,
+  monsterDefinitionSchema,
+  ringDefinitionSchema,
   validateContent,
 } from "./index";
 
@@ -13,10 +15,39 @@ describe("content package", () => {
     expect(() => validateContent()).not.toThrow();
   });
 
+  it("rejects ring definitions with a cooldown below 1", () => {
+    expect(() =>
+      ringDefinitionSchema.parse({
+        ...definitions.rings[0],
+        baseCooldown: 0,
+      }),
+    ).toThrow();
+  });
+
   it("includes the initial direct-damage spells", () => {
     const spellIds = definitions.spells.map((spell) => spell.id);
 
     expect(spellIds).toEqual(expect.arrayContaining(["spark", "firebolt", "iceShard"]));
+  });
+
+  it("defines every monster skill with one optional skill and positive cooldowns", () => {
+    expect(definitions.monsters.map((monster) => monster.skill)).toEqual(
+      expect.arrayContaining(["haste", "multiHit", "pierce", "rage", "shield", "taunt"]),
+    );
+    expect(definitions.monsters.every((monster) => monster.baseCooldown >= 1)).toBe(true);
+    expect(() =>
+      monsterDefinitionSchema.parse({
+        id: "legacyMonster",
+        nameKey: "monster.legacyMonster.name",
+        element: "ice",
+        rarity: "normal",
+        baseHealth: 5,
+        baseDamage: 1,
+        baseCooldown: 1,
+        baseSpeed: 0,
+        skills: ["shield"],
+      }),
+    ).toThrow();
   });
 
   it("includes the initial scenario fixtures and locale files", () => {
@@ -25,6 +56,7 @@ describe("content package", () => {
         "basicRingAttack",
         "summonAndTaunt",
         "spellSelfTargeting",
+        "skillShowcase",
         "lowerLevelStart",
         "elementDuelStart",
       ]),
@@ -70,6 +102,18 @@ describe("content package", () => {
       playerIds: ["playerElectric", "playerFire"],
       reason: "speedAndLevelTie",
     });
+  });
+
+  it("creates the development skill showcase with ready runtime skill states", () => {
+    const setup = createBattleSetupFromFixture("skillShowcase");
+    const monsters = setup.players.flatMap((player) => player.monsters);
+
+    expect(monsters).toHaveLength(6);
+    expect(monsters.every((monster) => monster.currentCooldown === 0)).toBe(true);
+    expect(monsters.find((monster) => monster.definitionId === "shieldWisp")?.shieldActive).toBe(
+      true,
+    );
+    expect(monsters.find((monster) => monster.definitionId === "emberImp")?.rageActive).toBe(false);
   });
 
   it("executes the initial JSON scenario fixtures through the engine", () => {

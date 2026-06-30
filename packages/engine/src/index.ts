@@ -4,6 +4,9 @@ import type {
   BattleAction,
   BattleActionResult,
   BattleEvent,
+  BattleRecord,
+  BattleRecordVersions,
+  BattleResult,
   BattleSetup,
   BattleState,
   BattlePlayer,
@@ -13,11 +16,15 @@ import type {
   TargetId,
 } from "./types";
 
+export const rulesVersion = "prototype-1";
+
 export function createBattleState(setup: BattleSetup): BattleState {
   assertValidBattleSetup(setup);
 
   const state: BattleState = {
     ...structuredClone(setup),
+    initialSetup: structuredClone(setup),
+    actionHistory: [],
     firstPlayerChoices: structuredClone(setup.firstPlayerChoices ?? {}),
     log: [{ type: "battleStarted", battleId: setup.id }],
     result: null,
@@ -57,8 +64,224 @@ export function applyBattleAction(state: BattleState, action: BattleAction): Bat
   }
 
   next.log.push(...events);
+  next.actionHistory.push(structuredClone(action));
 
   return { state: next, events };
+}
+
+export function createBattleRecord(
+  state: BattleState,
+  versions: BattleRecordVersions,
+): BattleRecord {
+  if (!versions.rulesVersion || !versions.contentVersion) {
+    throw new Error("Battle record rulesVersion and contentVersion are required.");
+  }
+
+  return {
+    format: "battlenessBattleRecord",
+    formatVersion: 1,
+    rulesVersion: versions.rulesVersion,
+    contentVersion: versions.contentVersion,
+    setup: structuredClone(state.initialSetup),
+    actions: structuredClone(state.actionHistory),
+    result: structuredClone(state.result),
+    finalStateChecksum: createBattleStateChecksum(state),
+  };
+}
+
+export function serializeBattleRecord(record: BattleRecord): string {
+  assertValidBattleRecord(record);
+  return JSON.stringify(record, null, 2);
+}
+
+export function parseBattleRecord(serializedRecord: string): BattleRecord {
+  let parsedRecord: unknown;
+
+  try {
+    parsedRecord = JSON.parse(serializedRecord);
+  } catch {
+    throw new Error("Battle record is not valid JSON.");
+  }
+
+  assertValidBattleRecord(parsedRecord);
+  return structuredClone(parsedRecord);
+}
+
+export function replayBattleRecord(record: BattleRecord): BattleState {
+  assertValidBattleRecord(record);
+
+  let state = createBattleState(record.setup);
+  for (const action of record.actions) {
+    state = applyBattleAction(state, action).state;
+  }
+
+  assertBattleRecordResult(record, state);
+  assertBattleRecordState(record, state);
+  return state;
+}
+
+export function assertBattleRecordResult(record: BattleRecord, state: BattleState): void {
+  const expectedResult = JSON.stringify(record.result);
+  const actualResult = JSON.stringify(state.result);
+  if (expectedResult !== actualResult) {
+    throw new Error(
+      `Battle record result mismatch: expected ${expectedResult}, received ${actualResult}.`,
+    );
+  }
+}
+
+export function assertBattleRecordState(record: BattleRecord, state: BattleState): void {
+  const checksum = createBattleStateChecksum(state);
+  if (record.finalStateChecksum !== checksum) {
+    throw new Error(
+      `Battle record state mismatch: expected ${record.finalStateChecksum}, received ${checksum}.`,
+    );
+  }
+}
+
+export function createBattleStateChecksum(state: BattleState): string {
+  const serializedState = canonicalJson(state);
+  let hash = 0x811c9dc5;
+
+  for (let index = 0; index < serializedState.length; index += 1) {
+    hash ^= serializedState.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+
+  return `fnv1a32:${(hash >>> 0).toString(16).padStart(8, "0")}`;
+}
+
+export function assertValidBattleRecord(record: unknown): asserts record is BattleRecord {
+  if (!isRecord(record)) {
+    throw new Error("Battle record must be an object.");
+  }
+
+  if (record.format !== "battlenessBattleRecord" || record.formatVersion !== 1) {
+    throw new Error("Battle record format or version is not supported.");
+  }
+
+  if (!isNonEmptyString(record.rulesVersion) || !isNonEmptyString(record.contentVersion)) {
+    throw new Error("Battle record rulesVersion and contentVersion are required.");
+  }
+  if (!isNonEmptyString(record.finalStateChecksum)) {
+    throw new Error("Battle record finalStateChecksum is required.");
+  }
+
+  if (!isRecord(record.setup)) {
+    throw new Error("Battle record setup is required.");
+  }
+  if (!Array.isArray(record.setup.players)) {
+    throw new Error("Battle record setup players must be an array.");
+  }
+  try {
+    assertValidBattleSetup(record.setup as BattleSetup);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Battle record setup is invalid: ${message}`);
+  }
+
+  if (!Array.isArray(record.actions)) {
+    throw new Error("Battle record actions must be an array.");
+  }
+  for (const action of record.actions) {
+    assertValidBattleAction(action);
+  }
+
+  assertValidBattleResult(record.result);
+}
+
+function assertValidBattleAction(action: unknown): asserts action is BattleAction {
+  if (!isRecord(action) || !isNonEmptyString(action.type) || !isNonEmptyString(action.playerId)) {
+    throw new Error("Battle record contains an invalid action.");
+  }
+
+  switch (action.type) {
+    case "chooseElement":
+      if (!isElementType(action.element)) {
+        throw new Error("Battle record contains an invalid chooseElement action.");
+      }
+      return;
+    case "useRing":
+      if (!isNonEmptyString(action.ringInstanceId) || !isTargetId(action.targetId)) {
+        throw new Error("Battle record contains an invalid useRing action.");
+      }
+      if (
+        action.enchantmentTargets !== undefined &&
+        (!isRecord(action.enchantmentTargets) ||
+          !Object.values(action.enchantmentTargets).every(isTargetId))
+      ) {
+        throw new Error("Battle record contains invalid ring enchantment targets.");
+      }
+      return;
+    case "useMonster":
+      if (!isNonEmptyString(action.monsterInstanceId) || !isTargetId(action.targetId)) {
+        throw new Error("Battle record contains an invalid useMonster action.");
+      }
+      return;
+    case "endTurn":
+    case "concede":
+      return;
+    default:
+      throw new Error(`Battle record contains unsupported action ${action.type}.`);
+  }
+}
+
+function assertValidBattleResult(result: unknown): asserts result is BattleResult | null {
+  if (result === null) {
+    return;
+  }
+
+  if (!isRecord(result) || !isNonEmptyString(result.type)) {
+    throw new Error("Battle record result is invalid.");
+  }
+
+  if (result.type === "draw") {
+    return;
+  }
+
+  if (
+    result.type === "winner" &&
+    isNonEmptyString(result.winnerId) &&
+    isNonEmptyString(result.loserId)
+  ) {
+    return;
+  }
+
+  throw new Error("Battle record result is invalid.");
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0;
+}
+
+function isElementType(value: unknown): value is ElementType {
+  return value === "electric" || value === "fire" || value === "ice";
+}
+
+function isTargetId(value: unknown): value is TargetId {
+  return (
+    isNonEmptyString(value) && (value.endsWith(".hero") || /^.+\.monster\..+\.\d+$/.test(value))
+  );
+}
+
+function canonicalJson(value: unknown): string {
+  if (value === null || typeof value !== "object") {
+    return JSON.stringify(value);
+  }
+
+  if (Array.isArray(value)) {
+    return `[${value.map(canonicalJson).join(",")}]`;
+  }
+
+  return `{${Object.entries(value)
+    .filter(([, entryValue]) => entryValue !== undefined)
+    .sort(([firstKey], [secondKey]) => (firstKey < secondKey ? -1 : firstKey > secondKey ? 1 : 0))
+    .map(([key, entryValue]) => `${JSON.stringify(key)}:${canonicalJson(entryValue)}`)
+    .join(",")}}`;
 }
 
 export function assertValidBattleSetup(setup: BattleSetup): void {
@@ -91,6 +314,10 @@ export function assertValidBattleSetup(setup: BattleSetup): void {
         throw new Error(`Ring ${ring.id} ownerId does not match player ${player.id}.`);
       }
 
+      if (ring.cooldown < 1) {
+        throw new Error(`Ring ${ring.id} cooldown must be at least 1.`);
+      }
+
       if (ring.gems.length > 3) {
         throw new Error(`Ring ${ring.id} has more than 3 socketed gems.`);
       }
@@ -104,6 +331,16 @@ export function assertValidBattleSetup(setup: BattleSetup): void {
 
     if (player.monsters.length > 3) {
       throw new Error(`Player ${player.id} controls more than 3 monsters.`);
+    }
+
+    for (const monster of player.monsters) {
+      if (monster.ownerId !== player.id) {
+        throw new Error(`Monster ${monster.id} ownerId does not match player ${player.id}.`);
+      }
+
+      if (monster.cooldown < 1) {
+        throw new Error(`Monster ${monster.id} cooldown must be at least 1.`);
+      }
     }
   }
 }
@@ -276,7 +513,9 @@ function useRing(
 
   const ringDamage = ring.damage + ring.gems.reduce((sum, gem) => sum + gem.damage, 0);
   events.push(
-    ...applyDamage(state, player.id, ring.id, action.targetId, ringDamage, ring.element, true),
+    ...applyDamage(state, player.id, ring.id, action.targetId, ringDamage, ring.element, {
+      blockFirstTurnHeroDamage: true,
+    }),
   );
 
   for (const gem of ring.gems) {
@@ -308,15 +547,9 @@ function useRing(
     for (const effect of spell.effects) {
       if (effect.type === "dealDamage") {
         events.push(
-          ...applyDamage(
-            state,
-            player.id,
-            spell.id,
-            spellTarget,
-            effect.amount,
-            spell.element,
-            true,
-          ),
+          ...applyDamage(state, player.id, spell.id, spellTarget, effect.amount, spell.element, {
+            blockFirstTurnHeroDamage: true,
+          }),
         );
       }
     }
@@ -344,23 +577,43 @@ function useMonster(
 
   monster.currentCooldown = monster.cooldown;
 
-  return [
+  const events: BattleEvent[] = [
     {
       type: "monsterUsed",
       playerId: player.id,
       monsterInstanceId: monster.id,
       targetId: action.targetId,
     },
-    ...applyDamage(
-      state,
-      player.id,
-      monster.id,
-      action.targetId,
-      monster.damage,
-      monster.element,
-      true,
-    ),
   ];
+  const target = getTarget(state, action.targetId);
+
+  if (monster.skill === "multiHit" && target?.kind === "monster") {
+    const targetIds = target.player.monsters.map((candidate) => candidate.id as TargetId);
+    events.push({
+      type: "multiHitResolved",
+      monsterInstanceId: monster.id,
+      targetIds,
+    });
+
+    for (const targetId of targetIds) {
+      events.push(
+        ...applyDamage(state, player.id, monster.id, targetId, monster.damage, monster.element, {
+          blockFirstTurnHeroDamage: true,
+        }),
+      );
+    }
+
+    return events;
+  }
+
+  events.push(
+    ...applyDamage(state, player.id, monster.id, action.targetId, monster.damage, monster.element, {
+      blockFirstTurnHeroDamage: true,
+      pierceMonsterInstanceId: monster.skill === "pierce" ? monster.id : undefined,
+    }),
+  );
+
+  return events;
 }
 
 function endTurn(state: BattleState, playerId: string): BattleEvent[] {
@@ -422,16 +675,19 @@ function summonMonster(state: BattleState, player: BattlePlayer, monsterId: stri
     element: definition.element,
     health: definition.baseHealth,
     maxHealth: definition.baseHealth,
+    baseDamage: definition.baseDamage,
     damage: definition.baseDamage,
     cooldown: definition.baseCooldown,
-    currentCooldown: 1,
+    currentCooldown: definition.skill === "haste" ? 0 : 1,
     speed: definition.baseSpeed,
-    skills: structuredClone(definition.skills),
+    skill: definition.skill,
+    shieldActive: definition.skill === "shield",
+    rageActive: false,
   };
 
   player.monsters.push(monsterInstance);
 
-  return [
+  const events: BattleEvent[] = [
     {
       type: "monsterSummoned",
       playerId: player.id,
@@ -439,6 +695,15 @@ function summonMonster(state: BattleState, player: BattlePlayer, monsterId: stri
       monsterId,
     },
   ];
+
+  if (definition.skill === "haste") {
+    events.push({
+      type: "hasteActivated",
+      monsterInstanceId: monsterInstance.id,
+    });
+  }
+
+  return events;
 }
 
 function applyDamage(
@@ -448,7 +713,10 @@ function applyDamage(
   targetId: TargetId,
   baseAmount: number,
   element: ElementType,
-  blockFirstTurnHeroDamage: boolean,
+  options: {
+    blockFirstTurnHeroDamage: boolean;
+    pierceMonsterInstanceId?: string;
+  },
 ): BattleEvent[] {
   const target = getTarget(state, targetId);
   if (!target) {
@@ -456,11 +724,9 @@ function applyDamage(
   }
 
   if (
-    blockFirstTurnHeroDamage &&
+    options.blockFirstTurnHeroDamage &&
     target.kind === "hero" &&
-    target.player.id !== sourcePlayerId &&
-    sourcePlayerId === state.startingPlayerId &&
-    getPlayer(state, sourcePlayerId).energy.turnCount === 1
+    isFirstTurnHeroDamageBlocked(state, sourcePlayerId, target.player.id)
   ) {
     return [];
   }
@@ -474,22 +740,91 @@ function applyDamage(
     return [];
   }
 
+  if (target.kind === "hero") {
+    const appliedAmount = Math.min(amount, target.player.hero.health);
+    if (appliedAmount <= 0) {
+      return [];
+    }
+
+    target.player.hero.health -= appliedAmount;
+    return [
+      {
+        type: "damageDealt",
+        sourceId,
+        targetId,
+        amount: appliedAmount,
+        element,
+      },
+    ];
+  }
+
+  if (target.monster.shieldActive) {
+    target.monster.shieldActive = false;
+    return [
+      {
+        type: "shieldBroken",
+        monsterInstanceId: target.monster.id,
+        sourceId,
+      },
+    ];
+  }
+
+  const appliedAmount = Math.min(amount, target.monster.health);
+  const overflowAmount = amount - appliedAmount;
+  target.monster.health -= appliedAmount;
+
   const events: BattleEvent[] = [
     {
       type: "damageDealt",
       sourceId,
       targetId,
-      amount,
+      amount: appliedAmount,
       element,
     },
   ];
 
-  if (target.kind === "hero") {
-    target.player.hero.health = Math.max(0, target.player.hero.health - amount);
-    return events;
+  if (options.pierceMonsterInstanceId && overflowAmount > 0) {
+    const heroTargetId = `${target.player.id}.hero` as TargetId;
+    const overflowEvents = applyDamage(
+      state,
+      sourcePlayerId,
+      sourceId,
+      heroTargetId,
+      overflowAmount,
+      element,
+      { blockFirstTurnHeroDamage: options.blockFirstTurnHeroDamage },
+    );
+
+    const heroDamageEvent = overflowEvents.find((event) => event.type === "damageDealt");
+    if (heroDamageEvent) {
+      events.push({
+        type: "pierceOverflow",
+        monsterInstanceId: options.pierceMonsterInstanceId,
+        targetMonsterInstanceId: target.monster.id,
+        targetHeroId: heroTargetId,
+        amount: heroDamageEvent.amount,
+      });
+      events.push(...overflowEvents);
+    }
   }
 
-  target.monster.health = Math.max(0, target.monster.health - amount);
+  if (
+    target.monster.health > 0 &&
+    target.monster.skill === "rage" &&
+    !target.monster.rageActive &&
+    target.monster.health * 2 < target.monster.maxHealth
+  ) {
+    const previousDamage = target.monster.damage;
+    target.monster.rageActive = true;
+    target.monster.damage = Math.floor(target.monster.baseDamage * 1.2);
+    events.push({
+      type: "rageActivated",
+      monsterInstanceId: target.monster.id,
+      previousDamage,
+      damage: target.monster.damage,
+    });
+  }
+
   if (target.monster.health === 0) {
     target.player.monsters = target.player.monsters.filter(
       (monster) => monster.id !== target.monster.id,
@@ -498,6 +833,18 @@ function applyDamage(
   }
 
   return events;
+}
+
+function isFirstTurnHeroDamageBlocked(
+  state: BattleState,
+  sourcePlayerId: string,
+  targetPlayerId: string,
+): boolean {
+  return (
+    targetPlayerId !== sourcePlayerId &&
+    sourcePlayerId === state.startingPlayerId &&
+    getPlayer(state, sourcePlayerId).energy.turnCount === 1
+  );
 }
 
 function finishBattleIfNeeded(state: BattleState, events: BattleEvent[]): void {
@@ -609,9 +956,7 @@ function assertTauntAllowsTarget(
 }
 
 function hasTaunt(monster: MonsterCombatInstance): boolean {
-  return monster.skills.some((skill) =>
-    typeof skill === "string" ? skill === "taunt" : skill.type === "taunt",
-  );
+  return monster.skill === "taunt";
 }
 
 function hasElementalAdvantage(attacker: ElementType, defender: ElementType): boolean {

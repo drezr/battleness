@@ -1,0 +1,10 @@
+{
+  "id": "skillShowcase",
+  "descriptionKey": "scenario.skillShowcase.description",
+  "battleSetupId": "skillShowcase",
+  "actions": [],
+  "expect": {
+    "eventTypes": [],
+    "result": null
+  }
+}

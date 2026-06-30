@@ -23,9 +23,9 @@ The game is a one-versus-one, turn-based combat game. Each player controls a her
 - Gems are placed into ring sockets and add damage.
 - Gems can be enchanted by a monster or a spell.
 - When a ring is used, the gems inside it can summon their monsters or cast their spells.
-- Monsters fight alongside the hero and have damage, health, cooldown, and optional skills.
+- Monsters fight alongside the hero and have damage, health, cooldown, and at most one optional skill.
 - Spells have unique effects.
-- Monsters enter play with cooldown 1, so they cannot act until the next turn.
+- Monsters normally enter play with cooldown 1, so they cannot act until the next turn. Haste monsters are the exception and enter ready.
 - The starting player cannot damage the opposing hero on the first turn, but can still summon monsters and cast spells.
 
 ### Progression And Item Concepts
@@ -162,7 +162,7 @@ This section separates executable game rules from implementation decisions. It i
 - If both players choose the same element in the element choice duel, the duel repeats until there is a winner.
 - Both heroes begin battle with their computed maximum health.
 - All rings begin battle ready.
-- No monsters are in play at battle start unless a later rule adds pre-summoned monsters.
+- No monsters are in play at battle start during normal gameplay. Development fixtures may preload monsters for isolated rule testing.
 
 ### Turn Structure
 
@@ -207,9 +207,10 @@ This section separates executable game rules from implementation decisions. It i
 
 - A monster is controlled by the player who summoned it.
 - A monster has health, damage, cooldown, elemental type, and optionally a skill.
+- A monster can have at most one skill.
 - A monster is destroyed and removed immediately after the effect that reduces its health to 0.
-- A summoned monster enters play with cooldown 1.
-- Because summoned monsters enter with cooldown 1, they cannot act on the same turn they are summoned.
+- A summoned monster normally enters play with cooldown 1.
+- Because ordinary summoned monsters enter with cooldown 1, they cannot act on the same turn they are summoned. Haste overrides this rule.
 - A monster can damage a legal hero or monster target when it is ready and its controller uses it.
 - Using a monster puts that monster on cooldown.
 - Each side can control up to 3 monsters.
@@ -219,6 +220,17 @@ This section separates executable game rules from implementation decisions. It i
 - Some monsters may have Taunt. If a player controls one or more monsters with Taunt, the opponent cannot target that player's non-Taunt targets with rings, monsters, or direct-damage spells unless a rule or effect explicitly allows it.
 - If a player controls multiple monsters with Taunt, the opponent may choose any of those Taunt monsters as the target.
 - Enemy Taunt does not restrict a player who targets their own hero or their own monsters.
+- Shield starts active when the monster is summoned. It completely negates the first incoming damage instance, regardless of its amount, and is then permanently broken.
+- Pierce transfers overkill damage from a monster target to that monster's controlling hero. The overflow equals resolved damage minus the monster's remaining health.
+- Shield prevents the complete hit before Pierce overflow can occur. First-turn hero protection also prevents Pierce overflow from damaging the protected hero.
+- Haste causes a summoned monster to enter play with cooldown 0, allowing it to act during the turn in which it was summoned.
+- Rage activates permanently when the monster's health falls strictly below 50% of its maximum health. Its damage becomes `floor(baseDamage * 1.2)`.
+- MultiHit behaves as a normal attack when targeting a hero. When targeting a monster, it deals the monster's full resolved attack damage to every monster controlled by the target monster's owner.
+- MultiHit also applies when an allied monster is selected, causing every monster on that allied side to be hit.
+- Each Shield hit by MultiHit independently negates its hit and is then broken.
+- Taunt still restricts the initial MultiHit target, but the resulting MultiHit effect can damage non-Taunt monsters controlled by the same player.
+- Monster skill resolution uses the following order: resolve current damage and elemental advantage, expand MultiHit targets when applicable, resolve Shield for each target, apply health damage, apply Pierce overflow, activate Rage on surviving damaged monsters, then remove destroyed monsters.
+- Dedicated skill events should include `shieldBroken`, `pierceOverflow`, `hasteActivated`, `rageActivated`, and `multiHitResolved`.
 
 ### Spells
 
@@ -234,8 +246,10 @@ This section separates executable game rules from implementation decisions. It i
 ### Cooldowns
 
 - Rings and monsters can have cooldown values.
+- A ring's resolved cooldown must be at least 1, so a ring cannot be used more than once during the same turn.
+- A monster's resolved cooldown must be at least 1 after it acts, so it cannot be used repeatedly during the same turn. Haste only changes its initial summon cooldown.
 - A ring or monster on cooldown cannot be used.
-- A newly summoned monster starts with cooldown 1.
+- A newly summoned monster starts with cooldown 1 unless it has Haste.
 - A player's cooldown counters decrement at the start of that player's turn, before actions are taken.
 - Cooldown values should not go below 0.
 
@@ -270,6 +284,11 @@ This section separates executable game rules from implementation decisions. It i
 - `BattleSetup` should contain the two players, resolved combat stats, equipped ring instances, socketed gem instances, referenced definitions, and any deterministic seed required for the battle.
 - Player actions sent to the combat engine should be represented as typed command objects, such as `{ type: "useRing", actorId, ringId, targetId }`.
 - The combat engine should produce a detailed event log after each action for debugging, UI rendering, and future replay support.
+- `BattleState` keeps the immutable initial setup and an ordered `actionHistory` containing only successfully applied actions.
+- A version 1 `BattleRecord` contains its format identifier, format version, rules version, content version, initial setup and seed, ordered actions, declared result, and canonical final-state checksum.
+- Battle records serialize as readable JSON. Import validates the record structure and action shapes before execution.
+- Deterministic replay rebuilds the battle from the initial setup, reapplies every action, then verifies both the declared result and final-state checksum.
+- The current checksum is a canonical FNV-1a 32-bit consistency check for deterministic debugging, not a security or anti-tampering signature.
 - Randomness should be allowed only through deterministic seeded state, never through untracked runtime randomness such as direct `Math.random()` calls.
 - The initial rules do not require much randomness; this rule mainly protects future systems such as AI decisions, randomized rewards, shuffled/generated content, or random tie-breakers.
 - Scenario test fixtures should support both single-action expectations and multi-action sequences.
@@ -293,15 +312,17 @@ This section separates executable game rules from implementation decisions. It i
   - `packages/content/src/locales/fr.json`
 - Ring definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseDamage`, `baseEnergyCost`, `baseCooldown`, and `baseSpeed`.
 - Gem definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseDamage`, `baseEnergyPenalty`, and `baseCooldownPenalty`.
-- Monster definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseHealth`, `baseDamage`, `baseCooldown`, `baseSpeed`, and `skills`.
+- Monster definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseHealth`, `baseDamage`, `baseCooldown`, `baseSpeed`, and an optional single `skill`.
 - Spell definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseEnergyPenalty`, `baseCooldownPenalty`, and `effects`.
 - Spell `effects` should be an array of explicit typed effect objects. The first supported effect type is `dealDamage` with `amount` and `target` fields.
 - Player fixtures should use this initial shape: `id`, `username`, `level`, `experience`, and `equippedRingInstanceIds`.
 - Inventory fixtures should contain player-owned ring, gem, monster, and spell instances. Ring instances contain `id`, `definitionId`, `ownerId`, `level`, `quality`, `socketCount`, `socketedGemInstanceIds`, and `equipped`. Gem instances contain `id`, `definitionId`, `ownerId`, `level`, `quality`, and optional `enchantment`.
 - The initial `BattleSetup` should contain `id`, `seed`, two players, resolved combat stats, equipped ring instances, socketed gem instances, referenced definitions, and optional initial status for first-player element choice.
 - The initial `BattleAction` union should include `chooseElement`, `useRing`, `useMonster`, `endTurn`, and `concede`.
-- The initial event log should include `battleStarted`, `firstPlayerChoiceRequested`, `elementChosen`, `elementDuelTied`, `firstPlayerChosen`, `turnStarted`, `cooldownChanged`, `ringUsed`, `energySpent`, `damageDealt`, `spellCast`, `monsterSummoned`, `monsterUsed`, `monsterDestroyed`, `turnEnded`, and `battleEnded`.
-- Initial scenario fixtures should include `basicRingAttack`, `summonAndTaunt`, `spellSelfTargeting`, `lowerLevelStart`, and `elementDuelStart`.
+- The version 1 `BattleRecord` shape includes `format`, `formatVersion`, `rulesVersion`, `contentVersion`, `setup`, `actions`, `result`, and `finalStateChecksum`.
+- The event log includes `battleStarted`, `firstPlayerChoiceRequested`, `elementChosen`, `elementDuelTied`, `firstPlayerChosen`, `turnStarted`, `cooldownChanged`, `ringUsed`, `energySpent`, `damageDealt`, `spellCast`, `monsterSummoned`, `monsterUsed`, `shieldBroken`, `pierceOverflow`, `hasteActivated`, `rageActivated`, `multiHitResolved`, `monsterDestroyed`, `turnEnded`, and `battleEnded`.
+- Scenario fixtures include `basicRingAttack`, `summonAndTaunt`, `spellSelfTargeting`, `skillShowcase`, `lowerLevelStart`, and `elementDuelStart`.
+- The `skillShowcase` development fixture preloads three ready monsters per side so Shield, Pierce, Haste, Rage, MultiHit, and Taunt can be exercised manually from the prototype.
 - Scenario fixtures should support both full-state expectations and partial expectations for event types, health values, energy values, cooldown values, board state, and battle result.
 
 ### Damage And Targeting
@@ -547,6 +568,8 @@ This section separates executable game rules from implementation decisions. It i
 
 - Status: decided.
 - Decision: Persist actions, deterministic seed, and result for completed matches, similar in spirit to chess PGN as a compact record of what happened.
+- Implementation: The prototype now records successful actions and supports versioned JSON export, validated import, step replay, full replay, result verification, and deterministic final-state verification.
+- Persistence status: Battle records are currently local to the prototype. Database-backed match history remains future work.
 - Reason: Action logs support replay, debugging, moderation, analytics, and deterministic verification.
 - Tradeoffs: Replay support requires stable action schemas and migration strategy as combat rules evolve.
 

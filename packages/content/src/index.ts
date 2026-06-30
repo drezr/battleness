@@ -7,10 +7,12 @@ import inventories from "./fixtures/inventories.json";
 import basicDuel from "./fixtures/battleSetups/basicDuel.json";
 import elementDuelStart from "./fixtures/battleSetups/elementDuelStart.json";
 import lowerLevelStart from "./fixtures/battleSetups/lowerLevelStart.json";
+import skillShowcase from "./fixtures/battleSetups/skillShowcase.json";
 import basicRingAttack from "./fixtures/scenarios/basicRingAttack.json";
 import elementDuelStartScenario from "./fixtures/scenarios/elementDuelStart.json";
 import lowerLevelStartScenario from "./fixtures/scenarios/lowerLevelStart.json";
 import spellSelfTargeting from "./fixtures/scenarios/spellSelfTargeting.json";
+import skillShowcaseScenario from "./fixtures/scenarios/skillShowcase.json";
 import summonAndTaunt from "./fixtures/scenarios/summonAndTaunt.json";
 import players from "./fixtures/players.json";
 import en from "./locales/en.json";
@@ -28,6 +30,8 @@ import {
   spellDefinitionSchema,
 } from "./schemas";
 
+export const contentVersion = "prototype-1";
+
 export const definitions = {
   gems,
   materials,
@@ -39,11 +43,12 @@ export const definitions = {
 export const fixtures = {
   players,
   inventories,
-  battleSetups: [basicDuel, lowerLevelStart, elementDuelStart],
+  battleSetups: [basicDuel, lowerLevelStart, elementDuelStart, skillShowcase],
   scenarios: [
     basicRingAttack,
     summonAndTaunt,
     spellSelfTargeting,
+    skillShowcaseScenario,
     lowerLevelStartScenario,
     elementDuelStartScenario,
   ],
@@ -62,13 +67,16 @@ export function validateContent(): void {
   materialDefinitionSchema.array().parse(materials);
   playerFixtureSchema.array().parse(players);
   inventoryFixtureSchema.parse(inventories);
-  battleSetupFixtureSchema.array().parse([basicDuel, lowerLevelStart, elementDuelStart]);
+  battleSetupFixtureSchema
+    .array()
+    .parse([basicDuel, lowerLevelStart, elementDuelStart, skillShowcase]);
   scenarioFixtureSchema
     .array()
     .parse([
       basicRingAttack,
       summonAndTaunt,
       spellSelfTargeting,
+      skillShowcaseScenario,
       lowerLevelStartScenario,
       elementDuelStartScenario,
     ]);

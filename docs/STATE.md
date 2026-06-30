@@ -18,8 +18,27 @@ This file records modifications made to the project during agent-assisted work.
 - The battle board temporarily displays both players' rings for development testing, while only the active player's available rings can be prepared and used.
 - Battle board monster cards now display current/base cooldown beside damage and health.
 - Battle board monster cards are wider for stat readability, and board ring cards now display current/base cooldown.
+- The prototype now has DOM interaction tests for board ring use, Taunt target restrictions, and summoned-monster attacks on a later ready turn.
+- Ring definitions and battle setups now enforce a minimum resolved ring cooldown of 1.
+- The rules for Shield, Pierce, Haste, Rage, and MultiHit are decided, and monsters are limited to one skill each.
+- Shield, Pierce, Haste, Rage, and MultiHit are implemented in the deterministic engine with dedicated replay events and localized prototype rendering.
+- A development-only `skillShowcase` scenario preloads ready monsters for manual skill testing.
+- Successful combat commands are recorded in `actionHistory`, and the prototype supports versioned battle-record JSON export, import, step replay, full replay, and deterministic result/state verification.
 
 ## Change Log
+
+### 2026-06-30
+
+- Added Happy DOM-backed prototype interaction tests that exercise the rendered battle board instead of calling the combat engine directly.
+- Covered ring preparation and targeting, Taunt-protected targets, monster cooldown readiness, and the summon-then-attack regression path.
+- Raised all zero-cooldown sample rings to cooldown 1 and added content and engine validation that rejects ring cooldowns below 1.
+- Documented the confirmed single-skill monster model and the complete Shield, Pierce, Haste, Rage, MultiHit, resolution-order, and replay-event rules.
+- Migrated monster definitions and combat instances from `skills[]` to one optional `skill`, with explicit Shield and Rage runtime state.
+- Implemented Shield, Pierce overflow, Haste summon readiness, threshold-based Rage, and side-wide MultiHit resolution.
+- Added dedicated localized skill events, positive monster cooldown validation, two missing skill content definitions, a skill showcase fixture, and engine/content/DOM regression tests.
+- Added versioned `BattleRecord` generation, JSON serialization and parsing, action-shape validation, deterministic replay, result verification, and canonical final-state checksums.
+- Added localized prototype controls for battle-record export, import, step replay, and full replay, with manual combat locked while a replay is incomplete.
+- Added engine and DOM regression tests for successful-action history, invalid-action exclusion, serialization, replay equivalence, tamper detection, and replay controls.
 
 ### 2026-06-25
 

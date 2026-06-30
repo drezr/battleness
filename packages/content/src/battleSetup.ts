@@ -15,6 +15,7 @@ import inventoriesJson from "./fixtures/inventories.json";
 import basicDuelJson from "./fixtures/battleSetups/basicDuel.json";
 import elementDuelStartJson from "./fixtures/battleSetups/elementDuelStart.json";
 import lowerLevelStartJson from "./fixtures/battleSetups/lowerLevelStart.json";
+import skillShowcaseJson from "./fixtures/battleSetups/skillShowcase.json";
 import playersJson from "./fixtures/players.json";
 import type {
   BattleSetupFixture,
@@ -51,6 +52,7 @@ const fixtureData = {
     battleSetupFixtureSchema.parse(basicDuelJson),
     battleSetupFixtureSchema.parse(lowerLevelStartJson),
     battleSetupFixtureSchema.parse(elementDuelStartJson),
+    battleSetupFixtureSchema.parse(skillShowcaseJson),
   ],
 };
 
@@ -76,6 +78,36 @@ export function createBattleSetup(
 
     return createBattlePlayer(player, inventory);
   }) as [BattlePlayer, BattlePlayer];
+
+  for (const initialMonster of setup.initialMonsters ?? []) {
+    const player = battlePlayers.find((candidate) => candidate.id === initialMonster.playerId);
+    if (!player) {
+      throw new Error(
+        `Initial monster player ${initialMonster.playerId} is not part of setup ${setup.id}.`,
+      );
+    }
+
+    const definition = findMonsterDefinition(initialMonster.monsterId);
+    const instanceNumber =
+      player.monsters.filter((monster) => monster.definitionId === definition.id).length + 1;
+    player.monsters.push({
+      id: `${player.id}.monster.${definition.id}.${instanceNumber}`,
+      definitionId: definition.id,
+      ownerId: player.id,
+      nameKey: definition.nameKey,
+      element: definition.element,
+      health: definition.baseHealth,
+      maxHealth: definition.baseHealth,
+      baseDamage: definition.baseDamage,
+      damage: definition.baseDamage,
+      cooldown: definition.baseCooldown,
+      currentCooldown: 0,
+      speed: definition.baseSpeed,
+      skill: definition.skill,
+      shieldActive: definition.skill === "shield",
+      rageActive: false,
+    });
+  }
 
   return {
     id: setup.id,
@@ -206,6 +238,15 @@ function findGemDefinition(id: string): GemDefinition {
   return definition;
 }
 
+function findMonsterDefinition(id: string): ContentMonsterDefinition {
+  const definition = definitionData.monsters.find((candidate) => candidate.id === id);
+  if (!definition) {
+    throw new Error(`Monster definition ${id} was not found.`);
+  }
+
+  return definition;
+}
+
 function findSpellDefinition(id: string): SpellDefinitionFromContent {
   const definition = definitionData.spells.find((candidate) => candidate.id === id);
   if (!definition) {
@@ -242,7 +283,7 @@ function toEngineMonsterDefinition(definition: ContentMonsterDefinition): Monste
     baseDamage: definition.baseDamage,
     baseCooldown: definition.baseCooldown,
     baseSpeed: definition.baseSpeed,
-    skills: definition.skills,
+    skill: definition.skill,
   };
 }
 
