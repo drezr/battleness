@@ -171,8 +171,14 @@ describe("battle setup stat resolution", () => {
     expect(monster.baseHealth).toBe(9);
     expect(monster.baseDamage).toBe(2);
 
-    const initialState = createBattleState(setup);
-    const result = applyBattleAction(initialState, {
+    let readyState = createBattleState(setup);
+    for (const playerId of ["progressedPlayer", "basePlayer", "progressedPlayer", "basePlayer"]) {
+      readyState = applyBattleAction(readyState, {
+        type: "endTurn",
+        playerId,
+      }).state;
+    }
+    const result = applyBattleAction(readyState, {
       type: "useRing",
       playerId: "progressedPlayer",
       ringInstanceId: ring.id,

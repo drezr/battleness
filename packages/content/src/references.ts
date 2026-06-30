@@ -2,6 +2,7 @@ import type {
   BattleSetupFixture,
   GemDefinition,
   InventoryFixture,
+  MaterialDefinition,
   MonsterDefinition,
   PlayerFixture,
   RingDefinition,
@@ -14,7 +15,9 @@ export type ContentReferenceData = {
     gems: readonly GemDefinition[];
     monsters: readonly MonsterDefinition[];
     spells: readonly SpellDefinition[];
+    materials: readonly MaterialDefinition[];
   };
+  locales: Readonly<Record<string, Readonly<Record<string, string>>>>;
   players: readonly PlayerFixture[];
   inventory: InventoryFixture;
   battleSetups: readonly BattleSetupFixture[];
@@ -33,6 +36,11 @@ export function validateContentReferences(data: ContentReferenceData): void {
   const gemDefinitions = indexUnique(data.definitions.gems, "Gem definition", issues);
   const monsterDefinitions = indexUnique(data.definitions.monsters, "Monster definition", issues);
   const spellDefinitions = indexUnique(data.definitions.spells, "Spell definition", issues);
+  const materialDefinitions = indexUnique(
+    data.definitions.materials,
+    "Material definition",
+    issues,
+  );
   const players = indexUnique(data.players, "Player", issues);
   const rings = indexUnique(data.inventory.rings, "Ring instance", issues);
   const gems = indexUnique(data.inventory.gems, "Gem instance", issues);
@@ -79,9 +87,83 @@ export function validateContentReferences(data: ContentReferenceData): void {
   validateSocketedGems(data.inventory, gems, issues);
   validateEnchantments(data.inventory, monsters, spells, issues);
   validateBattleSetups(data.battleSetups, players, monsterDefinitions, issues);
+  validateMaterials(materialDefinitions.values(), issues);
+  validateLocalization(data, issues);
 
   if (issues.length > 0) {
     throw new ContentReferenceError(issues);
+  }
+}
+
+function validateMaterials(materials: Iterable<MaterialDefinition>, issues: string[]): void {
+  const expectedPriceByRarity = {
+    common: 100,
+    refined: 400,
+    rare: 1600,
+    legendary: 6400,
+  } as const;
+  const atomicNumberOwner = new Map<number, string>();
+  const chemicalSymbolOwner = new Map<string, string>();
+
+  for (const material of materials) {
+    const expectedPrice = expectedPriceByRarity[material.rarity];
+    if (material.basePrice !== expectedPrice) {
+      issues.push(
+        `Material definition "${material.id}" has base price ${material.basePrice}; ${material.rarity} materials require ${expectedPrice}.`,
+      );
+    }
+
+    if (material.realWorldType !== "chemicalElement") {
+      continue;
+    }
+
+    if (material.atomicNumber !== undefined) {
+      const existingId = atomicNumberOwner.get(material.atomicNumber);
+      if (existingId) {
+        issues.push(
+          `Chemical materials "${existingId}" and "${material.id}" share atomic number ${material.atomicNumber}.`,
+        );
+      } else {
+        atomicNumberOwner.set(material.atomicNumber, material.id);
+      }
+    }
+
+    if (material.chemicalSymbol !== undefined) {
+      const existingId = chemicalSymbolOwner.get(material.chemicalSymbol);
+      if (existingId) {
+        issues.push(
+          `Chemical materials "${existingId}" and "${material.id}" share symbol "${material.chemicalSymbol}".`,
+        );
+      } else {
+        chemicalSymbolOwner.set(material.chemicalSymbol, material.id);
+      }
+    }
+  }
+}
+
+function validateLocalization(data: ContentReferenceData, issues: string[]): void {
+  const requiredKeys = new Set<string>();
+  for (const definitions of [
+    data.definitions.rings,
+    data.definitions.gems,
+    data.definitions.monsters,
+    data.definitions.spells,
+    data.definitions.materials,
+  ]) {
+    for (const definition of definitions) {
+      requiredKeys.add(definition.nameKey);
+    }
+  }
+  for (const material of data.definitions.materials) {
+    requiredKeys.add(material.descriptionKey);
+  }
+
+  for (const [localeId, locale] of Object.entries(data.locales)) {
+    for (const key of requiredKeys) {
+      if (!(key in locale)) {
+        issues.push(`Locale "${localeId}" is missing required key "${key}".`);
+      }
+    }
   }
 }
 

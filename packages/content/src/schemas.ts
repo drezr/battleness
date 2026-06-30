@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const elementSchema = z.enum(["electric", "fire", "ice"]);
-export const raritySchema = z.enum(["normal", "magic", "rare", "legendary"]);
+export const raritySchema = z.enum(["common", "refined", "rare", "legendary"]);
 
 export const skillSchema = z.enum(["haste", "multiHit", "pierce", "rage", "shield", "taunt"]);
 
@@ -58,11 +58,63 @@ export const spellDefinitionSchema = z.object({
   effects: z.array(spellEffectSchema).min(1),
 });
 
-export const materialDefinitionSchema = z.object({
-  id: z.string().min(1),
-  nameKey: z.string().min(1),
-  rarity: raritySchema,
-});
+export const materialCraftingFamilySchema = z.enum(["ring", "spell", "gem", "monster"]);
+export const materialRealWorldTypeSchema = z.enum([
+  "chemicalElement",
+  "mineral",
+  "mineraloid",
+  "gemstone",
+  "biomaterial",
+  "industrialMaterial",
+  "geologicalMaterial",
+  "stateOfMatter",
+]);
+
+export const materialDefinitionSchema = z
+  .object({
+    id: z.string().min(1),
+    nameKey: z.string().min(1),
+    descriptionKey: z.string().min(1),
+    rarity: raritySchema,
+    craftingFamily: materialCraftingFamilySchema,
+    basePrice: z.number().int().positive(),
+    realWorldType: materialRealWorldTypeSchema,
+    atomicNumber: z.number().int().min(1).max(118).optional(),
+    chemicalSymbol: z
+      .string()
+      .regex(/^[A-Z][a-z]?$/)
+      .optional(),
+  })
+  .strict()
+  .superRefine((material, context) => {
+    const hasAtomicNumber = material.atomicNumber !== undefined;
+    const hasChemicalSymbol = material.chemicalSymbol !== undefined;
+
+    if (material.realWorldType === "chemicalElement") {
+      if (!hasAtomicNumber) {
+        context.addIssue({
+          code: "custom",
+          path: ["atomicNumber"],
+          message: "Chemical elements require an atomic number.",
+        });
+      }
+      if (!hasChemicalSymbol) {
+        context.addIssue({
+          code: "custom",
+          path: ["chemicalSymbol"],
+          message: "Chemical elements require a chemical symbol.",
+        });
+      }
+      return;
+    }
+
+    if (hasAtomicNumber || hasChemicalSymbol) {
+      context.addIssue({
+        code: "custom",
+        message: "Only chemical elements can define atomic metadata.",
+      });
+    }
+  });
 
 export const playerFixtureSchema = z
   .object({

@@ -5,6 +5,7 @@ import {
   definitions,
   fixtures,
   locales,
+  materialDefinitionSchema,
   monsterDefinitionSchema,
   playerFixtureSchema,
   ringDefinitionSchema,
@@ -40,6 +41,81 @@ describe("content package", () => {
     expect(spellIds).toEqual(expect.arrayContaining(["spark", "firebolt", "iceShard"]));
   });
 
+  it("implements the confirmed prototype collection", () => {
+    expect(definitions.rings).toHaveLength(13);
+    expect(definitions.gems).toHaveLength(13);
+    expect(definitions.monsters).toHaveLength(18);
+    expect(definitions.spells).toHaveLength(6);
+    expect(definitions.materials).toHaveLength(70);
+
+    const collectibleRings = definitions.rings.filter((ring) => ring.id !== "trainingFlameBand");
+    const collectibleGems = definitions.gems.filter((gem) => gem.id !== "plainQuartz");
+    const elementRarityPairs = (items: readonly { element: string; rarity: string }[]) =>
+      new Set(items.map((item) => `${item.element}:${item.rarity}`));
+
+    expect(elementRarityPairs(collectibleRings)).toHaveLength(12);
+    expect(elementRarityPairs(collectibleGems)).toHaveLength(12);
+  });
+
+  it("uses common and refined instead of the previous rarity names", () => {
+    const rarities = [
+      ...definitions.rings,
+      ...definitions.gems,
+      ...definitions.monsters,
+      ...definitions.spells,
+      ...definitions.materials,
+    ].map((definition) => definition.rarity);
+
+    expect(new Set(rarities)).toEqual(new Set(["common", "refined", "rare", "legendary"]));
+    expect(rarities).not.toContain("normal");
+    expect(rarities).not.toContain("magic");
+  });
+
+  it("preserves the historical material families with scientific metadata", () => {
+    const chemicalElements = definitions.materials.filter(
+      (material) => material.realWorldType === "chemicalElement",
+    );
+    const nickel = definitions.materials.find((material) => material.id === "nickel");
+
+    expect(
+      definitions.materials.filter((material) => material.craftingFamily === "ring"),
+    ).toHaveLength(23);
+    expect(
+      definitions.materials.filter((material) => material.craftingFamily === "spell"),
+    ).toHaveLength(14);
+    expect(
+      definitions.materials.filter((material) => material.craftingFamily === "gem"),
+    ).toHaveLength(17);
+    expect(
+      definitions.materials.filter((material) => material.craftingFamily === "monster"),
+    ).toHaveLength(16);
+    expect(chemicalElements).toHaveLength(41);
+    expect(nickel).toMatchObject({
+      rarity: "refined",
+      basePrice: 400,
+      atomicNumber: 28,
+      chemicalSymbol: "Ni",
+    });
+  });
+
+  it("requires atomic metadata only for chemical materials", () => {
+    const iron = definitions.materials.find((material) => material.id === "iron");
+    const pearl = definitions.materials.find((material) => material.id === "pearl");
+
+    expect(() =>
+      materialDefinitionSchema.parse({
+        ...iron,
+        atomicNumber: undefined,
+      }),
+    ).toThrow();
+    expect(() =>
+      materialDefinitionSchema.parse({
+        ...pearl,
+        chemicalSymbol: "Pe",
+      }),
+    ).toThrow();
+  });
+
   it("defines every monster skill with one optional skill and positive cooldowns", () => {
     expect(definitions.monsters.map((monster) => monster.skill)).toEqual(
       expect.arrayContaining(["haste", "multiHit", "pierce", "rage", "shield", "taunt"]),
@@ -50,7 +126,7 @@ describe("content package", () => {
         id: "legacyMonster",
         nameKey: "monster.legacyMonster.name",
         element: "ice",
-        rarity: "normal",
+        rarity: "common",
         baseHealth: 5,
         baseDamage: 1,
         baseCooldown: 1,

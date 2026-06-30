@@ -3,52 +3,115 @@
     "id": "rubyShard",
     "nameKey": "gem.rubyShard.name",
     "element": "fire",
-    "rarity": "normal",
+    "rarity": "common",
     "baseDamage": 2,
     "baseEnergyPenalty": 0,
-    "baseCooldownPenalty": 0
+    "baseCooldownPenalty": 1
+  },
+  {
+    "id": "emberCore",
+    "nameKey": "gem.emberCore.name",
+    "element": "fire",
+    "rarity": "refined",
+    "baseDamage": 3,
+    "baseEnergyPenalty": 1,
+    "baseCooldownPenalty": 1
+  },
+  {
+    "id": "infernoOpal",
+    "nameKey": "gem.infernoOpal.name",
+    "element": "fire",
+    "rarity": "rare",
+    "baseDamage": 5,
+    "baseEnergyPenalty": 1,
+    "baseCooldownPenalty": 2
+  },
+  {
+    "id": "sunforgeHeart",
+    "nameKey": "gem.sunforgeHeart.name",
+    "element": "fire",
+    "rarity": "legendary",
+    "baseDamage": 7,
+    "baseEnergyPenalty": 2,
+    "baseCooldownPenalty": 2
   },
   {
     "id": "sparkPrism",
     "nameKey": "gem.sparkPrism.name",
     "element": "electric",
-    "rarity": "normal",
+    "rarity": "common",
     "baseDamage": 1,
     "baseEnergyPenalty": 0,
     "baseCooldownPenalty": 0
   },
   {
+    "id": "staticPearl",
+    "nameKey": "gem.staticPearl.name",
+    "element": "electric",
+    "rarity": "refined",
+    "baseDamage": 1,
+    "baseEnergyPenalty": 0,
+    "baseCooldownPenalty": 0
+  },
+  {
+    "id": "voltDiamond",
+    "nameKey": "gem.voltDiamond.name",
+    "element": "electric",
+    "rarity": "rare",
+    "baseDamage": 2,
+    "baseEnergyPenalty": 0,
+    "baseCooldownPenalty": 0
+  },
+  {
+    "id": "tempestEye",
+    "nameKey": "gem.tempestEye.name",
+    "element": "electric",
+    "rarity": "legendary",
+    "baseDamage": 3,
+    "baseEnergyPenalty": 0,
+    "baseCooldownPenalty": 1
+  },
+  {
     "id": "frostChip",
     "nameKey": "gem.frostChip.name",
     "element": "ice",
-    "rarity": "normal",
+    "rarity": "common",
     "baseDamage": 1,
-    "baseEnergyPenalty": 0,
+    "baseEnergyPenalty": 1,
+    "baseCooldownPenalty": 0
+  },
+  {
+    "id": "rimeQuartz",
+    "nameKey": "gem.rimeQuartz.name",
+    "element": "ice",
+    "rarity": "refined",
+    "baseDamage": 2,
+    "baseEnergyPenalty": 1,
+    "baseCooldownPenalty": 0
+  },
+  {
+    "id": "glacierPearl",
+    "nameKey": "gem.glacierPearl.name",
+    "element": "ice",
+    "rarity": "rare",
+    "baseDamage": 3,
+    "baseEnergyPenalty": 2,
+    "baseCooldownPenalty": 0
+  },
+  {
+    "id": "absoluteZeroGem",
+    "nameKey": "gem.absoluteZeroGem.name",
+    "element": "ice",
+    "rarity": "legendary",
+    "baseDamage": 5,
+    "baseEnergyPenalty": 3,
     "baseCooldownPenalty": 0
   },
   {
     "id": "plainQuartz",
     "nameKey": "gem.plainQuartz.name",
     "element": "electric",
-    "rarity": "normal",
-    "baseDamage": 1,
-    "baseEnergyPenalty": 0,
-    "baseCooldownPenalty": 0
-  },
-  {
-    "id": "emberCore",
-    "nameKey": "gem.emberCore.name",
-    "element": "fire",
-    "rarity": "magic",
-    "baseDamage": 3,
-    "baseEnergyPenalty": 1,
-    "baseCooldownPenalty": 1
-  },
-  {
-    "id": "staticPearl",
-    "nameKey": "gem.staticPearl.name",
-    "element": "electric",
-    "rarity": "magic",
+    "rarity": "common",
     "baseDamage": 1,
     "baseEnergyPenalty": 0,
     "baseCooldownPenalty": 0

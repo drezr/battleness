@@ -1,20 +1,9 @@
 [
   {
-    "id": "iceGuardian",
-    "nameKey": "monster.iceGuardian.name",
-    "element": "ice",
-    "rarity": "normal",
-    "baseHealth": 7,
-    "baseDamage": 2,
-    "baseCooldown": 1,
-    "baseSpeed": 0,
-    "skill": "taunt"
-  },
-  {
     "id": "emberImp",
     "nameKey": "monster.emberImp.name",
     "element": "fire",
-    "rarity": "normal",
+    "rarity": "common",
     "baseHealth": 3,
     "baseDamage": 4,
     "baseCooldown": 2,
@@ -22,10 +11,65 @@
     "skill": "rage"
   },
   {
+    "id": "emberLancer",
+    "nameKey": "monster.emberLancer.name",
+    "element": "fire",
+    "rarity": "common",
+    "baseHealth": 5,
+    "baseDamage": 4,
+    "baseCooldown": 2,
+    "baseSpeed": 1,
+    "skill": "pierce"
+  },
+  {
+    "id": "rageSprite",
+    "nameKey": "monster.rageSprite.name",
+    "element": "fire",
+    "rarity": "refined",
+    "baseHealth": 4,
+    "baseDamage": 5,
+    "baseCooldown": 2,
+    "baseSpeed": 1,
+    "skill": "rage"
+  },
+  {
+    "id": "cinderRam",
+    "nameKey": "monster.cinderRam.name",
+    "element": "fire",
+    "rarity": "refined",
+    "baseHealth": 6,
+    "baseDamage": 5,
+    "baseCooldown": 2,
+    "baseSpeed": 1,
+    "skill": "pierce"
+  },
+  {
+    "id": "magmaColossus",
+    "nameKey": "monster.magmaColossus.name",
+    "element": "fire",
+    "rarity": "rare",
+    "baseHealth": 7,
+    "baseDamage": 7,
+    "baseCooldown": 3,
+    "baseSpeed": 0,
+    "skill": "rage"
+  },
+  {
+    "id": "solarDrake",
+    "nameKey": "monster.solarDrake.name",
+    "element": "fire",
+    "rarity": "legendary",
+    "baseHealth": 9,
+    "baseDamage": 9,
+    "baseCooldown": 3,
+    "baseSpeed": 2,
+    "skill": "pierce"
+  },
+  {
     "id": "stormHound",
     "nameKey": "monster.stormHound.name",
     "element": "electric",
-    "rarity": "normal",
+    "rarity": "common",
     "baseHealth": 4,
     "baseDamage": 2,
     "baseCooldown": 1,
@@ -33,10 +77,87 @@
     "skill": "haste"
   },
   {
+    "id": "voltMite",
+    "nameKey": "monster.voltMite.name",
+    "element": "electric",
+    "rarity": "common",
+    "baseHealth": 3,
+    "baseDamage": 1,
+    "baseCooldown": 1,
+    "baseSpeed": 4,
+    "skill": "multiHit"
+  },
+  {
+    "id": "arcStriker",
+    "nameKey": "monster.arcStriker.name",
+    "element": "electric",
+    "rarity": "refined",
+    "baseHealth": 5,
+    "baseDamage": 2,
+    "baseCooldown": 1,
+    "baseSpeed": 3,
+    "skill": "multiHit"
+  },
+  {
+    "id": "coilLynx",
+    "nameKey": "monster.coilLynx.name",
+    "element": "electric",
+    "rarity": "refined",
+    "baseHealth": 5,
+    "baseDamage": 3,
+    "baseCooldown": 1,
+    "baseSpeed": 4,
+    "skill": "haste"
+  },
+  {
+    "id": "thunderRaptor",
+    "nameKey": "monster.thunderRaptor.name",
+    "element": "electric",
+    "rarity": "rare",
+    "baseHealth": 6,
+    "baseDamage": 3,
+    "baseCooldown": 1,
+    "baseSpeed": 5,
+    "skill": "multiHit"
+  },
+  {
+    "id": "tempestTitan",
+    "nameKey": "monster.tempestTitan.name",
+    "element": "electric",
+    "rarity": "legendary",
+    "baseHealth": 8,
+    "baseDamage": 4,
+    "baseCooldown": 1,
+    "baseSpeed": 5,
+    "skill": "haste"
+  },
+  {
+    "id": "iceGuardian",
+    "nameKey": "monster.iceGuardian.name",
+    "element": "ice",
+    "rarity": "common",
+    "baseHealth": 7,
+    "baseDamage": 2,
+    "baseCooldown": 1,
+    "baseSpeed": 0,
+    "skill": "taunt"
+  },
+  {
+    "id": "snowSentinel",
+    "nameKey": "monster.snowSentinel.name",
+    "element": "ice",
+    "rarity": "common",
+    "baseHealth": 6,
+    "baseDamage": 2,
+    "baseCooldown": 1,
+    "baseSpeed": 0,
+    "skill": "shield"
+  },
+  {
     "id": "frostBeetle",
     "nameKey": "monster.frostBeetle.name",
     "element": "ice",
-    "rarity": "magic",
+    "rarity": "refined",
     "baseHealth": 8,
     "baseDamage": 1,
     "baseCooldown": 1,
@@ -44,15 +165,15 @@
     "skill": "shield"
   },
   {
-    "id": "rageSprite",
-    "nameKey": "monster.rageSprite.name",
-    "element": "fire",
-    "rarity": "magic",
-    "baseHealth": 4,
-    "baseDamage": 5,
-    "baseCooldown": 2,
-    "baseSpeed": 1,
-    "skill": "rage"
+    "id": "rimeGolem",
+    "nameKey": "monster.rimeGolem.name",
+    "element": "ice",
+    "rarity": "refined",
+    "baseHealth": 10,
+    "baseDamage": 2,
+    "baseCooldown": 1,
+    "baseSpeed": 0,
+    "skill": "taunt"
   },
   {
     "id": "shieldWisp",
@@ -66,25 +187,14 @@
     "skill": "shield"
   },
   {
-    "id": "emberLancer",
-    "nameKey": "monster.emberLancer.name",
-    "element": "fire",
-    "rarity": "normal",
-    "baseHealth": 5,
-    "baseDamage": 4,
-    "baseCooldown": 2,
-    "baseSpeed": 1,
-    "skill": "pierce"
-  },
-  {
-    "id": "arcStriker",
-    "nameKey": "monster.arcStriker.name",
-    "element": "electric",
-    "rarity": "magic",
-    "baseHealth": 5,
-    "baseDamage": 2,
+    "id": "eternalWarden",
+    "nameKey": "monster.eternalWarden.name",
+    "element": "ice",
+    "rarity": "legendary",
+    "baseHealth": 14,
+    "baseDamage": 3,
     "baseCooldown": 1,
-    "baseSpeed": 3,
-    "skill": "multiHit"
+    "baseSpeed": 0,
+    "skill": "taunt"
   }
 ]

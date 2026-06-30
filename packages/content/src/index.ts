@@ -31,7 +31,7 @@ import {
 } from "./schemas";
 import { validateContentReferences } from "./references";
 
-export const contentVersion = "prototype-2";
+export const contentVersion = "prototype-3";
 
 export const definitions = {
   gems,
@@ -65,7 +65,7 @@ export function validateContent(): void {
   const validatedGems = gemDefinitionSchema.array().parse(gems);
   const validatedMonsters = monsterDefinitionSchema.array().parse(monsters);
   const validatedSpells = spellDefinitionSchema.array().parse(spells);
-  materialDefinitionSchema.array().parse(materials);
+  const validatedMaterials = materialDefinitionSchema.array().parse(materials);
   const validatedPlayers = playerFixtureSchema.array().parse(players);
   const validatedInventory = inventoryFixtureSchema.parse(inventories);
   const validatedBattleSetups = battleSetupFixtureSchema
@@ -81,8 +81,8 @@ export function validateContent(): void {
       lowerLevelStartScenario,
       elementDuelStartScenario,
     ]);
-  localeSchema.parse(en);
-  localeSchema.parse(fr);
+  const validatedEn = localeSchema.parse(en);
+  const validatedFr = localeSchema.parse(fr);
 
   validateContentReferences({
     definitions: {
@@ -90,7 +90,9 @@ export function validateContent(): void {
       gems: validatedGems,
       monsters: validatedMonsters,
       spells: validatedSpells,
+      materials: validatedMaterials,
     },
+    locales: { en: validatedEn, fr: validatedFr },
     players: validatedPlayers,
     inventory: validatedInventory,
     battleSetups: validatedBattleSetups,

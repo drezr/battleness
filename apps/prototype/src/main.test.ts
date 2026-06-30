@@ -62,7 +62,7 @@ describe("battle board interactions", () => {
 
   it("shows a summoned Haste monster as immediately ready", () => {
     startBattle("basicRingAttack");
-    for (let turn = 0; turn < 5; turn += 1) {
+    for (let turn = 0; turn < 7; turn += 1) {
       getButton("#boardEndTurn").click();
     }
 

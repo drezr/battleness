@@ -1,17 +1,714 @@
 [
   {
-    "id": "ironDust",
-    "nameKey": "material.ironDust.name",
-    "rarity": "normal"
+    "id": "aluminium",
+    "nameKey": "material.aluminium.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "common",
+    "craftingFamily": "ring",
+    "basePrice": 100,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 13,
+    "chemicalSymbol": "Al"
   },
   {
-    "id": "chargedCrystal",
-    "nameKey": "material.chargedCrystal.name",
-    "rarity": "magic"
+    "id": "iron",
+    "nameKey": "material.iron.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "common",
+    "craftingFamily": "ring",
+    "basePrice": 100,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 26,
+    "chemicalSymbol": "Fe"
   },
   {
-    "id": "frozenCore",
-    "nameKey": "material.frozenCore.name",
-    "rarity": "rare"
+    "id": "sodium",
+    "nameKey": "material.sodium.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "common",
+    "craftingFamily": "ring",
+    "basePrice": 100,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 11,
+    "chemicalSymbol": "Na"
+  },
+  {
+    "id": "magnesium",
+    "nameKey": "material.magnesium.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "common",
+    "craftingFamily": "ring",
+    "basePrice": 100,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 12,
+    "chemicalSymbol": "Mg"
+  },
+  {
+    "id": "manganese",
+    "nameKey": "material.manganese.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "common",
+    "craftingFamily": "ring",
+    "basePrice": 100,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 25,
+    "chemicalSymbol": "Mn"
+  },
+  {
+    "id": "calcium",
+    "nameKey": "material.calcium.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "common",
+    "craftingFamily": "ring",
+    "basePrice": 100,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 20,
+    "chemicalSymbol": "Ca"
+  },
+  {
+    "id": "copper",
+    "nameKey": "material.copper.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "common",
+    "craftingFamily": "ring",
+    "basePrice": 100,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 29,
+    "chemicalSymbol": "Cu"
+  },
+  {
+    "id": "titanium",
+    "nameKey": "material.titanium.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "refined",
+    "craftingFamily": "ring",
+    "basePrice": 400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 22,
+    "chemicalSymbol": "Ti"
+  },
+  {
+    "id": "chromium",
+    "nameKey": "material.chromium.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "refined",
+    "craftingFamily": "ring",
+    "basePrice": 400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 24,
+    "chemicalSymbol": "Cr"
+  },
+  {
+    "id": "zinc",
+    "nameKey": "material.zinc.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "refined",
+    "craftingFamily": "ring",
+    "basePrice": 400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 30,
+    "chemicalSymbol": "Zn"
+  },
+  {
+    "id": "nickel",
+    "nameKey": "material.nickel.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "refined",
+    "craftingFamily": "ring",
+    "basePrice": 400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 28,
+    "chemicalSymbol": "Ni"
+  },
+  {
+    "id": "cobalt",
+    "nameKey": "material.cobalt.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "refined",
+    "craftingFamily": "ring",
+    "basePrice": 400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 27,
+    "chemicalSymbol": "Co"
+  },
+  {
+    "id": "lead",
+    "nameKey": "material.lead.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "refined",
+    "craftingFamily": "ring",
+    "basePrice": 400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 82,
+    "chemicalSymbol": "Pb"
+  },
+  {
+    "id": "silver",
+    "nameKey": "material.silver.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "rare",
+    "craftingFamily": "ring",
+    "basePrice": 1600,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 47,
+    "chemicalSymbol": "Ag"
+  },
+  {
+    "id": "mercury",
+    "nameKey": "material.mercury.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "rare",
+    "craftingFamily": "ring",
+    "basePrice": 1600,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 80,
+    "chemicalSymbol": "Hg"
+  },
+  {
+    "id": "gold",
+    "nameKey": "material.gold.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "rare",
+    "craftingFamily": "ring",
+    "basePrice": 1600,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 79,
+    "chemicalSymbol": "Au"
+  },
+  {
+    "id": "platinum",
+    "nameKey": "material.platinum.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "rare",
+    "craftingFamily": "ring",
+    "basePrice": 1600,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 78,
+    "chemicalSymbol": "Pt"
+  },
+  {
+    "id": "tungsten",
+    "nameKey": "material.tungsten.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "rare",
+    "craftingFamily": "ring",
+    "basePrice": 1600,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 74,
+    "chemicalSymbol": "W"
+  },
+  {
+    "id": "uranium",
+    "nameKey": "material.uranium.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "rare",
+    "craftingFamily": "ring",
+    "basePrice": 1600,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 92,
+    "chemicalSymbol": "U"
+  },
+  {
+    "id": "iridium",
+    "nameKey": "material.iridium.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "legendary",
+    "craftingFamily": "ring",
+    "basePrice": 6400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 77,
+    "chemicalSymbol": "Ir"
+  },
+  {
+    "id": "plutonium",
+    "nameKey": "material.plutonium.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "legendary",
+    "craftingFamily": "ring",
+    "basePrice": 6400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 94,
+    "chemicalSymbol": "Pu"
+  },
+  {
+    "id": "neptunium",
+    "nameKey": "material.neptunium.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "legendary",
+    "craftingFamily": "ring",
+    "basePrice": 6400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 93,
+    "chemicalSymbol": "Np"
+  },
+  {
+    "id": "radium",
+    "nameKey": "material.radium.name",
+    "descriptionKey": "material.description.ringCrafting",
+    "rarity": "legendary",
+    "craftingFamily": "ring",
+    "basePrice": 6400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 88,
+    "chemicalSymbol": "Ra"
+  },
+  {
+    "id": "hydrogen",
+    "nameKey": "material.hydrogen.name",
+    "descriptionKey": "material.description.spellCrafting",
+    "rarity": "common",
+    "craftingFamily": "spell",
+    "basePrice": 100,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 1,
+    "chemicalSymbol": "H"
+  },
+  {
+    "id": "oxygen",
+    "nameKey": "material.oxygen.name",
+    "descriptionKey": "material.description.spellCrafting",
+    "rarity": "common",
+    "craftingFamily": "spell",
+    "basePrice": 100,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 8,
+    "chemicalSymbol": "O"
+  },
+  {
+    "id": "nitrogen",
+    "nameKey": "material.nitrogen.name",
+    "descriptionKey": "material.description.spellCrafting",
+    "rarity": "common",
+    "craftingFamily": "spell",
+    "basePrice": 100,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 7,
+    "chemicalSymbol": "N"
+  },
+  {
+    "id": "helium",
+    "nameKey": "material.helium.name",
+    "descriptionKey": "material.description.spellCrafting",
+    "rarity": "common",
+    "craftingFamily": "spell",
+    "basePrice": 100,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 2,
+    "chemicalSymbol": "He"
+  },
+  {
+    "id": "chlorine",
+    "nameKey": "material.chlorine.name",
+    "descriptionKey": "material.description.spellCrafting",
+    "rarity": "refined",
+    "craftingFamily": "spell",
+    "basePrice": 400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 17,
+    "chemicalSymbol": "Cl"
+  },
+  {
+    "id": "fluorine",
+    "nameKey": "material.fluorine.name",
+    "descriptionKey": "material.description.spellCrafting",
+    "rarity": "refined",
+    "craftingFamily": "spell",
+    "basePrice": 400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 9,
+    "chemicalSymbol": "F"
+  },
+  {
+    "id": "bromine",
+    "nameKey": "material.bromine.name",
+    "descriptionKey": "material.description.spellCrafting",
+    "rarity": "refined",
+    "craftingFamily": "spell",
+    "basePrice": 400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 35,
+    "chemicalSymbol": "Br"
+  },
+  {
+    "id": "neon",
+    "nameKey": "material.neon.name",
+    "descriptionKey": "material.description.spellCrafting",
+    "rarity": "rare",
+    "craftingFamily": "spell",
+    "basePrice": 1600,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 10,
+    "chemicalSymbol": "Ne"
+  },
+  {
+    "id": "argon",
+    "nameKey": "material.argon.name",
+    "descriptionKey": "material.description.spellCrafting",
+    "rarity": "rare",
+    "craftingFamily": "spell",
+    "basePrice": 1600,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 18,
+    "chemicalSymbol": "Ar"
+  },
+  {
+    "id": "iodine",
+    "nameKey": "material.iodine.name",
+    "descriptionKey": "material.description.spellCrafting",
+    "rarity": "rare",
+    "craftingFamily": "spell",
+    "basePrice": 1600,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 53,
+    "chemicalSymbol": "I"
+  },
+  {
+    "id": "krypton",
+    "nameKey": "material.krypton.name",
+    "descriptionKey": "material.description.spellCrafting",
+    "rarity": "legendary",
+    "craftingFamily": "spell",
+    "basePrice": 6400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 36,
+    "chemicalSymbol": "Kr"
+  },
+  {
+    "id": "xenon",
+    "nameKey": "material.xenon.name",
+    "descriptionKey": "material.description.spellCrafting",
+    "rarity": "legendary",
+    "craftingFamily": "spell",
+    "basePrice": 6400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 54,
+    "chemicalSymbol": "Xe"
+  },
+  {
+    "id": "radon",
+    "nameKey": "material.radon.name",
+    "descriptionKey": "material.description.spellCrafting",
+    "rarity": "legendary",
+    "craftingFamily": "spell",
+    "basePrice": 6400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 86,
+    "chemicalSymbol": "Rn"
+  },
+  {
+    "id": "astatine",
+    "nameKey": "material.astatine.name",
+    "descriptionKey": "material.description.spellCrafting",
+    "rarity": "legendary",
+    "craftingFamily": "spell",
+    "basePrice": 6400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 85,
+    "chemicalSymbol": "At"
+  },
+  {
+    "id": "pearl",
+    "nameKey": "material.pearl.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "common",
+    "craftingFamily": "gem",
+    "basePrice": 100,
+    "realWorldType": "gemstone"
+  },
+  {
+    "id": "amethyst",
+    "nameKey": "material.amethyst.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "common",
+    "craftingFamily": "gem",
+    "basePrice": 100,
+    "realWorldType": "gemstone"
+  },
+  {
+    "id": "chromite",
+    "nameKey": "material.chromite.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "common",
+    "craftingFamily": "gem",
+    "basePrice": 100,
+    "realWorldType": "mineral"
+  },
+  {
+    "id": "topaz",
+    "nameKey": "material.topaz.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "common",
+    "craftingFamily": "gem",
+    "basePrice": 100,
+    "realWorldType": "gemstone"
+  },
+  {
+    "id": "turquoise",
+    "nameKey": "material.turquoise.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "common",
+    "craftingFamily": "gem",
+    "basePrice": 100,
+    "realWorldType": "gemstone"
+  },
+  {
+    "id": "citrine",
+    "nameKey": "material.citrine.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "refined",
+    "craftingFamily": "gem",
+    "basePrice": 400,
+    "realWorldType": "gemstone"
+  },
+  {
+    "id": "azurite",
+    "nameKey": "material.azurite.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "refined",
+    "craftingFamily": "gem",
+    "basePrice": 400,
+    "realWorldType": "mineral"
+  },
+  {
+    "id": "moonstone",
+    "nameKey": "material.moonstone.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "refined",
+    "craftingFamily": "gem",
+    "basePrice": 400,
+    "realWorldType": "gemstone"
+  },
+  {
+    "id": "sunstone",
+    "nameKey": "material.sunstone.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "refined",
+    "craftingFamily": "gem",
+    "basePrice": 400,
+    "realWorldType": "gemstone"
+  },
+  {
+    "id": "opal",
+    "nameKey": "material.opal.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "refined",
+    "craftingFamily": "gem",
+    "basePrice": 400,
+    "realWorldType": "mineraloid"
+  },
+  {
+    "id": "sapphire",
+    "nameKey": "material.sapphire.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "rare",
+    "craftingFamily": "gem",
+    "basePrice": 1600,
+    "realWorldType": "gemstone"
+  },
+  {
+    "id": "ruby",
+    "nameKey": "material.ruby.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "rare",
+    "craftingFamily": "gem",
+    "basePrice": 1600,
+    "realWorldType": "gemstone"
+  },
+  {
+    "id": "emerald",
+    "nameKey": "material.emerald.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "rare",
+    "craftingFamily": "gem",
+    "basePrice": 1600,
+    "realWorldType": "gemstone"
+  },
+  {
+    "id": "diamond",
+    "nameKey": "material.diamond.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "rare",
+    "craftingFamily": "gem",
+    "basePrice": 1600,
+    "realWorldType": "gemstone"
+  },
+  {
+    "id": "redDiamond",
+    "nameKey": "material.redDiamond.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "legendary",
+    "craftingFamily": "gem",
+    "basePrice": 6400,
+    "realWorldType": "gemstone"
+  },
+  {
+    "id": "blackOpal",
+    "nameKey": "material.blackOpal.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "legendary",
+    "craftingFamily": "gem",
+    "basePrice": 6400,
+    "realWorldType": "mineraloid"
+  },
+  {
+    "id": "alexandrite",
+    "nameKey": "material.alexandrite.name",
+    "descriptionKey": "material.description.gemCrafting",
+    "rarity": "legendary",
+    "craftingFamily": "gem",
+    "basePrice": 6400,
+    "realWorldType": "gemstone"
+  },
+  {
+    "id": "sand",
+    "nameKey": "material.sand.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "common",
+    "craftingFamily": "monster",
+    "basePrice": 100,
+    "realWorldType": "geologicalMaterial"
+  },
+  {
+    "id": "wax",
+    "nameKey": "material.wax.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "common",
+    "craftingFamily": "monster",
+    "basePrice": 100,
+    "realWorldType": "biomaterial"
+  },
+  {
+    "id": "rubber",
+    "nameKey": "material.rubber.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "common",
+    "craftingFamily": "monster",
+    "basePrice": 100,
+    "realWorldType": "industrialMaterial"
+  },
+  {
+    "id": "coal",
+    "nameKey": "material.coal.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "common",
+    "craftingFamily": "monster",
+    "basePrice": 100,
+    "realWorldType": "geologicalMaterial"
+  },
+  {
+    "id": "cellulose",
+    "nameKey": "material.cellulose.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "common",
+    "craftingFamily": "monster",
+    "basePrice": 100,
+    "realWorldType": "biomaterial"
+  },
+  {
+    "id": "oil",
+    "nameKey": "material.oil.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "refined",
+    "craftingFamily": "monster",
+    "basePrice": 400,
+    "realWorldType": "geologicalMaterial"
+  },
+  {
+    "id": "carbon",
+    "nameKey": "material.carbon.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "refined",
+    "craftingFamily": "monster",
+    "basePrice": 400,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 6,
+    "chemicalSymbol": "C"
+  },
+  {
+    "id": "ink",
+    "nameKey": "material.ink.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "refined",
+    "craftingFamily": "monster",
+    "basePrice": 400,
+    "realWorldType": "industrialMaterial"
+  },
+  {
+    "id": "silk",
+    "nameKey": "material.silk.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "refined",
+    "craftingFamily": "monster",
+    "basePrice": 400,
+    "realWorldType": "biomaterial"
+  },
+  {
+    "id": "keratin",
+    "nameKey": "material.keratin.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "refined",
+    "craftingFamily": "monster",
+    "basePrice": 400,
+    "realWorldType": "biomaterial"
+  },
+  {
+    "id": "silicon",
+    "nameKey": "material.silicon.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "rare",
+    "craftingFamily": "monster",
+    "basePrice": 1600,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 14,
+    "chemicalSymbol": "Si"
+  },
+  {
+    "id": "sulfur",
+    "nameKey": "material.sulfur.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "rare",
+    "craftingFamily": "monster",
+    "basePrice": 1600,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 16,
+    "chemicalSymbol": "S"
+  },
+  {
+    "id": "phosphorus",
+    "nameKey": "material.phosphorus.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "rare",
+    "craftingFamily": "monster",
+    "basePrice": 1600,
+    "realWorldType": "chemicalElement",
+    "atomicNumber": 15,
+    "chemicalSymbol": "P"
+  },
+  {
+    "id": "chitin",
+    "nameKey": "material.chitin.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "rare",
+    "craftingFamily": "monster",
+    "basePrice": 1600,
+    "realWorldType": "biomaterial"
+  },
+  {
+    "id": "plasma",
+    "nameKey": "material.plasma.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "legendary",
+    "craftingFamily": "monster",
+    "basePrice": 6400,
+    "realWorldType": "stateOfMatter"
+  },
+  {
+    "id": "graphene",
+    "nameKey": "material.graphene.name",
+    "descriptionKey": "material.description.monsterCrafting",
+    "rarity": "legendary",
+    "craftingFamily": "monster",
+    "basePrice": 6400,
+    "realWorldType": "industrialMaterial"
   }
 ]

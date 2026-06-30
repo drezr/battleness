@@ -163,7 +163,7 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - Ring and gem damage, monster damage and health, hero health, and spell penalties are resolved while building `BattleSetup`.
 - Owned monster and spell instances are explicit inventory records referenced by gem enchantments.
 - Resolved monster and spell definitions use battle-scoped instance IDs internally while combat events and summoned-monster IDs retain stable content IDs.
-- Content version `prototype-2` identifies the migrated fixture and resolved-definition format.
+- Content version `prototype-2` introduced the migrated fixture and resolved-definition format; `prototype-3` is the current content collection version.
 - Focused unit and integration tests cover thresholds, caps, floor rounding, invalid inputs, resolved setup stats, and runtime use of resolved enchantments.
 
 ## Content Reference Validation
@@ -176,6 +176,18 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - It verifies battle setup participants, distinct players, initial monster definitions, participant ownership, and the three-monster initial board limit.
 - `validateContent()` runs relational validation during prototype startup, before battle setup construction.
 - Solo campaign opponent and reward design remains deferred at the user's request.
+
+## Prototype Content Collection Proposal
+
+- `docs/CONTENT_COLLECTION_PROPOSAL.md` proposes a balanced engine-testing collection built around current mechanics.
+- It proposes 12 collectible rings, 12 collectible gems, 18 monsters, 6 direct-damage spells, and 70 materials.
+- It preserves all current reusable content, proposes a small number of adjustments to existing base values, and adds missing element/rarity coverage.
+- `trainingFlameBand` and `plainQuartz` are proposed as development-only fixture definitions.
+- The implemented collection deliberately limits spells to direct damage until the engine supports more effect types.
+- The collection is applied to executable JSON and both locale files as content version `prototype-3`.
+- `docs/MATERIAL_COLLECTION_PROPOSAL.md` replaces the initial 12-material list with a detailed 70-material model derived from the historical SQLite `mats` table.
+- The material model preserves ring, spell, gem, and monster crafting families, carries forward the four rarity price tiers, and provides a migration map for historical recipe IDs.
+- Chemical element metadata follows IUPAC naming, symbols, and atomic numbers; non-element materials remain real minerals, gemstones, biomaterials, industrial materials, or physical substances.
 
 ## Recent Combat Rule Decisions
 
@@ -257,7 +269,7 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 
 - Object colors: Ring uses pink, Gem uses cyan, Monster uses green, Spell uses magenta, and Material uses blue.
 - Element colors: Electric uses yellow, Fire uses pink-red, and Ice uses light cyan.
-- Rarity colors: Normal uses white or light gray, Magic uses blue, Rare uses orange, and Legendary uses purple.
+- Rarity colors: Common uses white or light gray, Refined uses blue, Rare uses orange, and Legendary uses purple.
 - Stat colors: Damage uses pink-red, Health uses red, Energy uses green, Energy Penalty uses pale green, Cooldown uses light cyan, Cooldown Penalty uses cyan, Quality uses orange, Speed uses yellow, Skill uses magenta, and Rarity uses purple.
 
 ## Battle Layout Direction

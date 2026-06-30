@@ -1,5 +1,5 @@
 export type ElementType = "electric" | "fire" | "ice";
-export type Rarity = "normal" | "magic" | "rare" | "legendary";
+export type Rarity = "common" | "refined" | "rare" | "legendary";
 
 export type TargetId = `${string}.hero` | `${string}.monster.${string}.${number}`;
 

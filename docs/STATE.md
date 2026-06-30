@@ -30,6 +30,8 @@ This file records modifications made to the project during agent-assisted work.
 - The content/setup layer now implements those formulas, derives levels from total experience, and resolves owned item progression before combat.
 - Monster and spell enchantments now reference explicit owned inventory instances with independent experience and quality.
 - Content startup validation now checks cross-file references, ownership, uniqueness, equipment, sockets, enchantments, and battle setup consistency after Zod shape validation.
+- A complete prototype content collection proposal now covers rings, gems, monsters, direct-damage spells, materials, elemental roles, base statistics, and development-only fixtures.
+- The confirmed prototype collection is implemented as content version `prototype-3` with `common`, `refined`, `rare`, and `legendary` rarity tiers.
 
 ## Change Log
 
@@ -55,6 +57,12 @@ This file records modifications made to the project during agent-assisted work.
 - Bumped the fixture/content format to `prototype-2` and added focused formula, schema-migration, setup-resolution, and runtime-enchantment tests.
 - Added aggregated relational content validation with focused tests for unknown definitions and owners, invalid equipment and sockets, missing or reused enchantments, duplicate instance IDs, and invalid battle setups.
 - Recorded that solo campaign opponents and reward records remain intentionally deferred.
+- Added `docs/CONTENT_COLLECTION_PROPOSAL.md` as a non-executable balance proposal for confirmation before JSON and locale implementation.
+- Replaced the initial 12-material proposal with a 70-material model derived from the historical SQLite `mats` table and real-world chemistry.
+- Added `docs/MATERIAL_COLLECTION_PROPOSAL.md` with crafting families, rarity prices, English and French names, chemical metadata, real-world material classifications, and historical recipe ID migrations.
+- Implemented 13 ring definitions, 13 gem definitions, 18 monster definitions, 6 direct-damage spell definitions, and 70 material definitions with complete English and French localization.
+- Replaced the `normal` and `magic` rarity identifiers with `common` and `refined` across schemas, definitions, tests, and documentation.
+- Extended material validation to enforce atomic metadata, unique chemical symbols and atomic numbers, rarity prices, and required localization keys.
 
 ### 2026-06-25
 

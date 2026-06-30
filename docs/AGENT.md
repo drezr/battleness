@@ -31,6 +31,7 @@ These instructions are persistent project context for future agents working on B
 - Content objects should use readable camelCase string IDs.
 - Ring and gem definitions should describe base item types only; socketing, enchantments, total experience, quality, ownership, and equipped state belong to player-owned item instances. Levels are derived from total experience.
 - Monster and spell progression belongs to explicit player-owned instances referenced by gem enchantments and resolved before combat.
+- Use `common`, `refined`, `rare`, and `legendary` as the rarity identifiers; the previous `normal` and `magic` identifiers are obsolete.
 - The combat engine should not read JSON files directly. It should receive validated `BattleSetup` objects prepared from definitions, player fixtures or database rows, and inventory instances.
 - Combat engine actions should be typed command objects, and engine results should include detailed event logs.
 - Randomness should go through deterministic seeded state only.

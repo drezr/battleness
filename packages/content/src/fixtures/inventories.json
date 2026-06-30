@@ -17,7 +17,7 @@
       "experience": 100,
       "quality": 66,
       "socketCount": 2,
-      "socketedGemInstanceIds": ["playerOne.gem.sparkPrism", "playerOne.gem.frostChip"],
+      "socketedGemInstanceIds": ["playerOne.gem.sparkPrism", "playerOne.gem.staticPearl"],
       "equipped": true
     },
     {
@@ -98,11 +98,7 @@
       "definitionId": "frostChip",
       "ownerId": "playerOne",
       "experience": 100,
-      "quality": 58,
-      "enchantment": {
-        "type": "monster",
-        "monsterInstanceId": "playerOne.monster.iceGuardian"
-      }
+      "quality": 58
     },
     {
       "id": "playerOne.gem.sparkPrism",
@@ -113,6 +109,17 @@
       "enchantment": {
         "type": "spell",
         "spellInstanceId": "playerOne.spell.spark"
+      }
+    },
+    {
+      "id": "playerOne.gem.staticPearl",
+      "definitionId": "staticPearl",
+      "ownerId": "playerOne",
+      "experience": 100,
+      "quality": 58,
+      "enchantment": {
+        "type": "monster",
+        "monsterInstanceId": "playerOne.monster.iceGuardian"
       }
     },
     {

@@ -1,29 +1,56 @@
 [
   {
-    "id": "spark",
-    "nameKey": "spell.spark.name",
-    "element": "electric",
-    "rarity": "normal",
-    "baseEnergyPenalty": 0,
-    "baseCooldownPenalty": 0,
-    "effects": [{ "type": "dealDamage", "amount": 2, "target": "any" }]
-  },
-  {
     "id": "firebolt",
     "nameKey": "spell.firebolt.name",
     "element": "fire",
-    "rarity": "normal",
+    "rarity": "common",
     "baseEnergyPenalty": 1,
     "baseCooldownPenalty": 0,
     "effects": [{ "type": "dealDamage", "amount": 4, "target": "any" }]
   },
   {
+    "id": "solarFlare",
+    "nameKey": "spell.solarFlare.name",
+    "element": "fire",
+    "rarity": "rare",
+    "baseEnergyPenalty": 1,
+    "baseCooldownPenalty": 2,
+    "effects": [{ "type": "dealDamage", "amount": 7, "target": "any" }]
+  },
+  {
+    "id": "spark",
+    "nameKey": "spell.spark.name",
+    "element": "electric",
+    "rarity": "common",
+    "baseEnergyPenalty": 0,
+    "baseCooldownPenalty": 0,
+    "effects": [{ "type": "dealDamage", "amount": 2, "target": "any" }]
+  },
+  {
+    "id": "arcPulse",
+    "nameKey": "spell.arcPulse.name",
+    "element": "electric",
+    "rarity": "rare",
+    "baseEnergyPenalty": 0,
+    "baseCooldownPenalty": 1,
+    "effects": [{ "type": "dealDamage", "amount": 3, "target": "any" }]
+  },
+  {
     "id": "iceShard",
     "nameKey": "spell.iceShard.name",
     "element": "ice",
-    "rarity": "normal",
+    "rarity": "common",
     "baseEnergyPenalty": 1,
     "baseCooldownPenalty": 0,
     "effects": [{ "type": "dealDamage", "amount": 3, "target": "any" }]
+  },
+  {
+    "id": "glacialSpike",
+    "nameKey": "spell.glacialSpike.name",
+    "element": "ice",
+    "rarity": "rare",
+    "baseEnergyPenalty": 2,
+    "baseCooldownPenalty": 0,
+    "effects": [{ "type": "dealDamage", "amount": 5, "target": "any" }]
   }
 ]

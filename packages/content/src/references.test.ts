@@ -3,6 +3,7 @@ import {
   ContentReferenceError,
   definitions,
   fixtures,
+  locales,
   type ContentReferenceData,
   validateContentReferences,
 } from "./index";
@@ -80,6 +81,22 @@ describe("content reference validation", () => {
       'Battle setup "basicDuel" references unknown initial monster definition "missingMonster".',
     ]);
   });
+
+  it("reports invalid material prices and missing localization keys", () => {
+    const data = createReferenceData();
+    data.definitions.materials[0].basePrice = 400;
+    const incompleteEnglishLocale = { ...data.locales.en };
+    delete incompleteEnglishLocale[data.definitions.rings[0].nameKey];
+    data.locales = {
+      ...data.locales,
+      en: incompleteEnglishLocale,
+    };
+
+    expectIssues(data, [
+      'Material definition "aluminium" has base price 400; common materials require 100.',
+      'Locale "en" is missing required key "ring.emberLoop.name".',
+    ]);
+  });
 });
 
 function createReferenceData(): ContentReferenceData {
@@ -89,7 +106,9 @@ function createReferenceData(): ContentReferenceData {
       gems: definitions.gems,
       monsters: definitions.monsters,
       spells: definitions.spells,
+      materials: definitions.materials,
     },
+    locales,
     players: fixtures.players,
     inventory: fixtures.inventories,
     battleSetups: fixtures.battleSetups,

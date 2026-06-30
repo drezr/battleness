@@ -41,7 +41,7 @@ The game is a one-versus-one, turn-based combat game. Each player controls a her
 - Elemental types are electric, fire, and ice.
 - Electric beats fire, fire beats ice, and ice beats electric.
 - Gems, monsters, and spells can add energy and cooldown penalties to the ring that contains them.
-- Item rarity, from least rare to most rare, is normal, magic, rare, and legendary.
+- Item rarity, from least rare to most rare, is common, refined, rare, and legendary.
 
 ### Economy And Modes
 
@@ -95,7 +95,7 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 
 ### Item Stats
 
-- Rarity: An item's scarcity and value tier. Current rarity order is normal, magic, rare, legendary.
+- Rarity: An item's scarcity and value tier. Current rarity order is common, refined, rare, legendary.
 - Quality: A 0 to 100% item value that improves some item characteristics.
 - Level: An item or hero progression value from 0 to 50.
 - Experience: Progress earned by heroes or items that contributes to level.
@@ -122,7 +122,7 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 
 - Object colors: Ring uses pink, Gem uses cyan, Monster uses green, Spell uses magenta, and Material uses blue.
 - Element colors: Electric uses yellow, Fire uses pink-red, and Ice uses light cyan.
-- Rarity colors: Normal uses white or light gray, Magic uses blue, Rare uses orange, and Legendary uses purple.
+- Rarity colors: Common uses white or light gray, Refined uses blue, Rare uses orange, and Legendary uses purple.
 - Stat colors: Damage uses pink-red, Health uses red, Energy uses green, Energy Penalty uses pale green, Cooldown uses light cyan, Cooldown Penalty uses cyan, Quality uses orange, Speed uses yellow, Skill uses magenta, and Rarity uses purple.
 
 ### Battle Layout Direction
@@ -336,12 +336,14 @@ This section separates executable game rules from implementation decisions. It i
 - Gem definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseDamage`, `baseEnergyPenalty`, and `baseCooldownPenalty`.
 - Monster definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseHealth`, `baseDamage`, `baseCooldown`, `baseSpeed`, and an optional single `skill`.
 - Spell definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseEnergyPenalty`, `baseCooldownPenalty`, and `effects`.
+- Material definitions use `id`, `nameKey`, `descriptionKey`, `rarity`, `craftingFamily`, `basePrice`, `realWorldType`, and optional `atomicNumber` and `chemicalSymbol`.
+- Material atomic metadata is required for chemical elements and forbidden for other real-world material types.
 - Spell `effects` should be an array of explicit typed effect objects. The first supported effect type is `dealDamage` with `amount` and `target` fields.
 - Player fixtures use `id`, `username`, `experience`, and `equippedRingInstanceIds`. They do not persist a separate level.
 - Inventory fixtures contain player-owned ring, gem, monster, and spell instances. Every item instance stores `id`, `definitionId`, `ownerId`, `experience`, and `quality`.
 - Ring instances additionally store `socketCount`, `socketedGemInstanceIds`, and `equipped`.
 - Gem instances may contain an enchantment with either `monsterInstanceId` or `spellInstanceId`.
-- Content version `prototype-2` introduces experience-derived levels and independently progressable monster and spell instances.
+- Content version `prototype-2` introduced experience-derived levels and independently progressable monster and spell instances. Content version `prototype-3` adds the confirmed collection, new rarity identifiers, and enriched materials.
 - The initial `BattleSetup` should contain `id`, `seed`, two players, resolved combat stats, equipped ring instances, socketed gem instances, referenced definitions, and optional initial status for first-player element choice.
 - The initial `BattleAction` union should include `chooseElement`, `useRing`, `useMonster`, `endTurn`, and `concede`.
 - The version 1 `BattleRecord` shape includes `format`, `formatVersion`, `rulesVersion`, `contentVersion`, `setup`, `actions`, `result`, and `finalStateChecksum`.
@@ -382,6 +384,14 @@ This section separates executable game rules from implementation decisions. It i
 
 - What are the exact PvP and ranked reward formulas?
 - What fixed reward values should each solo campaign opponent grant? Campaign opponent design is intentionally deferred.
+
+### Prototype Content Collection
+
+- The first balance collection is documented in `docs/CONTENT_COLLECTION_PROPOSAL.md` and implemented as content version `prototype-3`.
+- The collection contains 12 collectible rings, 12 collectible gems, 18 monsters, 6 direct-damage spells, and 70 materials.
+- `trainingFlameBand` and `plainQuartz` remain development-only definitions outside the collectible pool.
+- The material collection is detailed in `docs/MATERIAL_COLLECTION_PROPOSAL.md` and is derived from the historical 70-row SQLite `mats` table.
+- The material model preserves four crafting families and rarity prices, adds chemical metadata where applicable, and replaces eight fictional resources with real substances or elements.
 
 ## Technical Baseline
 
