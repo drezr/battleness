@@ -133,6 +133,20 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - Ring, gem, and monster artwork is rendered in the current battle and setup cards. Spell and material artwork is ready for future inventory, forge, and shop views.
 - The setup screen includes a collapsible development collection that renders every current asset by category.
 
+### Battle Lab
+
+- The prototype setup screen can switch between scripted scenario fixtures and an editable Battle Lab.
+- The Battle Lab supports two configurable players, 1 to 10 rings per player, up to 3 gems per ring, and optional spell or monster enchantments for each gem.
+- Player, ring, gem, spell, and monster levels and qualities are editable within the progression limits.
+- `packages/content/src/battleLab.ts` converts the editor configuration into temporary player and inventory instances, then resolves them through the regular `createBattleSetup` pipeline.
+- Battle Lab configurations can be serialized to and imported from strictly validated JSON. Imports also resolve content references before replacing the active configuration.
+- Named Battle Lab presets are stored in browser `localStorage` under a versioned key. This is development convenience only; account-backed saved loadouts remain part of future inventory and backend work.
+- The Battle Lab comparison view reports resolved health, speed, total ring damage, total energy cost, damage per energy, and damage per cooldown.
+- Current balance warnings are diagnostic heuristics, not game rules: they flag a relative efficiency difference of at least 50% or a speed difference of at least 4.
+- The Battle Lab batch runner executes two deterministic variants, each favoring a different player if an element duel is required to choose the starting player.
+- Its greedy diagnostic policy prioritizes the highest immediate-damage ready action, respects energy, cooldown, first-turn hero protection, and Taunt, and ends the turn when no action is available.
+- Simulations stop after 500 actions and report a timeout instead of assuming a result. The policy is a balance aid, not a human-play or AI-strength model.
+
 ### Battle Layout Direction
 
 - The battle screen should eventually follow the user's sketch direction: heroes anchored on the left, the monster battlefield occupying the center, rings arranged as a bottom hand or equipment row, and energy bars visible at the top and bottom.
@@ -155,6 +169,18 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - Improvement: The forge action that spends credits to increase item quality or increase a ring's socket count.
 - Shop: The game vendor where players can buy materials and sell items.
 - Player Market: A future economy system where players can list items for sale and buy items listed by other players.
+- Initial prototype recipes always consume exactly three quantity-1 materials from the matching crafting family.
+- Material rarities scale by crafted item rarity: common items use three common materials; refined items use one refined and two common materials; rare items use one rare, one refined, and one common material; legendary items use one legendary, one rare, and one refined material.
+- Initial crafted items are level 1 and quality 50. Crafted rings start with one socket.
+- The prototype development forge persists credits, material stock, crafted item instances, and the next crafted-instance sequence in browser `localStorage`.
+- Development inventory starts with 1000 prototype credits. Quality improvement spends credits to add 5 quality points to a crafted item up to 100. Ring socket improvement spends credits to increase crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
+- Development inventory JSON can be exported, imported, or reset from the setup screen. This is a prototype tool and does not replace future account inventory persistence.
+- Battle Lab can use either free-edit definitions or development inventory instances as its item source. When development inventory is selected, ring, gem, spell, and monster selections are made from crafted instances, and level, quality, and ring socket count are derived from those instances.
+- The setup screen exposes a complete development inventory view with total counters, all material stock quantities, crafted item cards, and type, rarity, and element filters.
+- Development inventory rings can socket crafted gems up to their socket count. A crafted gem can be socketed into only one ring at a time.
+- Development inventory gems can be enchanted by one crafted spell or monster. A crafted spell or monster can be used as only one gem enchantment at a time.
+- When Battle Lab uses a development inventory ring, its socketed gems and those gems' enchantments are imported automatically into the loadout.
+- The setup screen includes a development loadout builder for choosing up to 10 crafted rings, previewing resolved speed, damage, energy, and cooldown efficiency, saving named loadouts in browser `localStorage`, and sending the selected loadout to either Battle Lab player.
 
 ## Proposed Game Rules Specification
 
@@ -386,6 +412,12 @@ This section separates executable game rules from implementation decisions. It i
 
 - After combat, rewards may include experience, credits, and materials.
 - Equipped items gain experience after combat.
+- The current prototype implements claimable deterministic rewards for credits, materials, and source-backed item XP. Replays do not grant rewards.
+- Prototype winner rewards grant 150 credits plus one common material from each crafting family: `aluminium`, `hydrogen`, `pearl`, and `sand`.
+- Prototype draw rewards grant 90 credits plus `aluminium` and `pearl`.
+- Prototype item XP applies only to crafted development inventory instances referenced by Battle Lab `sourceInstanceId` values, regardless of whether those source-backed items are assigned to Player One or Player Two.
+- Source-backed equipped rings, socketed gems, and gem enchantments gain 8 XP when rewards are claimed. Each ring use adds 20 XP to the ring and each of its socketed gems. Each spell trigger adds 20 XP to the spell. Each monster summon and monster attack adds 20 XP to the matching monster source instance.
+- Hero XP is intentionally deferred until local player or account progression is modeled.
 - In solo campaign, each opponent defines its fixed victory rewards in content data and victory unlocks the next opponent.
 - In solo campaign, defeat grants only a small amount of item experience.
 - In PvP, rewards will vary based on player level and opponent level.
@@ -399,9 +431,11 @@ This section separates executable game rules from implementation decisions. It i
 
 ### Prototype Content Collection
 
-- The first balance collection is documented in `docs/CONTENT_COLLECTION_PROPOSAL.md` and implemented as content version `prototype-3`.
+- The first balance collection is documented in `docs/CONTENT_COLLECTION_PROPOSAL.md` and implemented as content version `prototype-4`.
 - The collection contains 12 collectible rings, 12 collectible gems, 18 monsters, 6 direct-damage spells, and 70 materials.
 - `trainingFlameBand` and `plainQuartz` remain development-only definitions outside the collectible pool.
+- The collection contains 48 initial recipes: one recipe for every collectible ring, gem, monster, and spell. Development-only definitions are intentionally excluded.
+- The prototype setup screen can craft these recipes into local development inventory instances, and Battle Lab can use those crafted instances as a development item source.
 - The material collection is detailed in `docs/MATERIAL_COLLECTION_PROPOSAL.md` and is derived from the historical 70-row SQLite `mats` table.
 - The material model preserves four crafting families and rarity prices, adds chemical metadata where applicable, and replaces eight fictional resources with real substances or elements.
 

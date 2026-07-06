@@ -4,7 +4,7 @@
 
 This document records the first coherent BattleNess content collection for engine testing and early balance work.
 
-The collection is implemented in the executable JSON definitions and locale files as content version `prototype-3`.
+The collection is implemented in the executable JSON definitions and locale files as content version `prototype-4`.
 
 The collection deliberately uses only mechanics currently supported by the combat engine:
 
@@ -21,7 +21,7 @@ The collection deliberately uses only mechanics currently supported by the comba
 - Cover all four rarities for rings and gems.
 - Provide enough monsters to exercise every implemented skill in varied stat profiles.
 - Keep the spell set small until the engine supports more effect types.
-- Provide material names for future forge and reward design without deciding recipes yet.
+- Provide material names and initial recipes for early forge testing.
 - Keep development-only fixtures out of the future collectible pool.
 
 ## Element Profiles
@@ -186,6 +186,27 @@ It preserves the historical collection structure:
 
 The proposal replaces eight fictional `bio*` and `mystic*` resources with real materials or chemical elements and defines migrations for historical recipe IDs.
 
+## Recipes
+
+The executable collection now includes 48 initial recipes: one recipe for each collectible ring, gem, monster, and spell. `trainingFlameBand` and `plainQuartz` remain development-only definitions and intentionally have no recipes.
+
+Each recipe consumes exactly three quantity-1 materials from the same crafting family as the crafted item. Material rarities scale with output rarity:
+
+- Common output: common, common, common.
+- Refined output: refined, common, common.
+- Rare output: rare, refined, common.
+- Legendary output: legendary, rare, refined.
+
+Initial crafted items are level 1 and quality 50. Crafted rings start with one socket. Development inventory starts with 1000 prototype credits. Quality improvement spends credits to add 5 quality points to a crafted item up to 100. Ring socket improvement spends credits to increase crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
+
+The prototype development inventory persists credits, crafted output, and material stock in browser `localStorage` and can be exported, imported, or reset from the setup screen. The setup screen also shows a complete inventory view with material quantities, crafted item cards, and type, rarity, and element filters. Battle Lab can use these crafted instances as an item source for development loadouts.
+
+Development inventory instances now carry prototype socketing and enchantment state: crafted rings store socketed crafted gem instance IDs, crafted gems store one optional crafted spell or monster enchantment, and Battle Lab imports that configuration when a crafted ring is selected.
+
+The setup screen also includes a browser-local development loadout builder. It stores named sets of up to 10 crafted ring instance IDs in `localStorage`, previews resolved speed, damage, energy, and cooldown efficiency through the regular Battle Lab setup pipeline, and can send the selected ring set to either Battle Lab player.
+
+Finished non-replay battles now feed the same browser-local development loop with deterministic prototype rewards. Winner rewards grant 150 credits plus one common material from each crafting family: `aluminium`, `hydrogen`, `pearl`, and `sand`. Draw rewards grant 90 credits plus `aluminium` and `pearl`. Source-backed equipped Battle Lab items gain 8 XP, and each actual ring use, socketed gem use, spell trigger, monster summon, or monster attack adds 20 XP to the matching crafted item instance. Hero XP is intentionally deferred until local player or account progression is modeled.
+
 ## Proposed Collection Totals
 
 | Category  | Main collection | Development-only | Total definitions after implementation |
@@ -195,16 +216,18 @@ The proposal replaces eight fictional `bio*` and `mystic*` resources with real m
 | Monsters  |              18 |                0 |                                     18 |
 | Spells    |               6 |                0 |                                      6 |
 | Materials |              70 |                0 |                                     70 |
+| Recipes   |              48 |                0 |                                     48 |
 
 ## Remaining Decisions
 
 - Whether rarities above common require a minimum player level.
 - Whether monster speed should remain descriptive metadata or gain a combat purpose in a future rule.
 - Which new definitions should receive owned fixture instances for representative matchup scenarios.
+- How crafted items should move from the browser-local development inventory into future account persistence.
 
 ## Recommended Next Steps
 
 1. Produce a generated balance report using level 0, representative mid-game progression, and maximum progression.
 2. Add focused scenario fixtures for representative elemental and rarity matchups.
 3. Adjust statistical outliers before introducing additional spell effects.
-4. Migrate historical recipes only when forge design resumes.
+4. Decide the next forge step: persistent inventory integration, quality improvement, or ring socket improvement.

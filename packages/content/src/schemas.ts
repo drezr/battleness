@@ -116,6 +116,47 @@ export const materialDefinitionSchema = z
     }
   });
 
+export const craftableItemTypeSchema = z.enum(["ring", "gem", "monster", "spell"]);
+
+export const recipeIngredientSchema = z
+  .object({
+    materialId: z.string().min(1),
+    quantity: z.number().int().positive(),
+  })
+  .strict();
+
+export const recipeDefinitionSchema = z
+  .object({
+    id: z.string().min(1),
+    outputType: craftableItemTypeSchema,
+    outputDefinitionId: z.string().min(1),
+    craftedLevel: z.number().int().min(1).max(50),
+    craftedQuality: z.number().int().min(0).max(100),
+    ringSocketCount: z.number().int().min(1).max(3).optional(),
+    ingredients: z.tuple([recipeIngredientSchema, recipeIngredientSchema, recipeIngredientSchema]),
+  })
+  .strict()
+  .superRefine((recipe, context) => {
+    if (recipe.outputType === "ring") {
+      if (recipe.ringSocketCount === undefined) {
+        context.addIssue({
+          code: "custom",
+          path: ["ringSocketCount"],
+          message: "Ring recipes require a socket count.",
+        });
+      }
+      return;
+    }
+
+    if (recipe.ringSocketCount !== undefined) {
+      context.addIssue({
+        code: "custom",
+        path: ["ringSocketCount"],
+        message: "Only ring recipes can define a socket count.",
+      });
+    }
+  });
+
 export const playerFixtureSchema = z
   .object({
     id: z.string().min(1),
@@ -250,6 +291,9 @@ export type GemDefinition = z.infer<typeof gemDefinitionSchema>;
 export type MonsterDefinition = z.infer<typeof monsterDefinitionSchema>;
 export type SpellDefinition = z.infer<typeof spellDefinitionSchema>;
 export type MaterialDefinition = z.infer<typeof materialDefinitionSchema>;
+export type CraftableItemType = z.infer<typeof craftableItemTypeSchema>;
+export type RecipeIngredient = z.infer<typeof recipeIngredientSchema>;
+export type RecipeDefinition = z.infer<typeof recipeDefinitionSchema>;
 export type PlayerFixture = z.infer<typeof playerFixtureSchema>;
 export type InventoryFixture = z.infer<typeof inventoryFixtureSchema>;
 export type RingInstance = z.infer<typeof ringInstanceSchema>;

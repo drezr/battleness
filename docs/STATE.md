@@ -31,9 +31,24 @@ This file records modifications made to the project during agent-assisted work.
 - Monster and spell enchantments now reference explicit owned inventory instances with independent experience and quality.
 - Content startup validation now checks cross-file references, ownership, uniqueness, equipment, sockets, enchantments, and battle setup consistency after Zod shape validation.
 - A complete prototype content collection proposal now covers rings, gems, monsters, direct-damage spells, materials, elemental roles, base statistics, and development-only fixtures.
-- The confirmed prototype collection is implemented as content version `prototype-3` with `common`, `refined`, `rare`, and `legendary` rarity tiers.
+- The confirmed prototype collection is implemented as content version `prototype-4` with `common`, `refined`, `rare`, and `legendary` rarity tiers.
 - Combat instances now retain rarity, and the prototype frames rings, gems, and monsters with their rarity color across board, setup, detail, and manual-action views.
 - Rings, gems, and monsters now show localized top-right elemental badges, and compact gem sockets combine elemental fill with rarity borders.
+- The content package now includes 48 forge recipes for the collectible rings, gems, monsters, and spells. Development-only `trainingFlameBand` and `plainQuartz` stay outside the recipe pool.
+- Prototype recipes always use exactly three quantity-1 materials from the matching crafting family. Material rarities scale by crafted item rarity: common uses three common materials, refined uses one refined and two common materials, rare uses one rare, one refined, and one common material, and legendary uses one legendary, one rare, and one refined material.
+- Crafted prototype items are created at level 1 and quality 50. Crafted rings start with one socket.
+- The setup screen now includes a development forge panel with recipe selection, required material stock controls, real material consumption, restock, and a list of crafted instances.
+- The development forge now persists credits, material stock, crafted item instances, and next crafted-instance sequence in browser `localStorage`.
+- Development inventory starts with 1000 prototype credits. Quality improvement raises one crafted item by 5 quality points up to 100, and ring socket improvement raises crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
+- The setup screen supports development inventory export, import, and reset through a versioned JSON format.
+- Battle Lab now supports a development-inventory item source mode. In that mode, rings, gems, and spell or monster enchantments can be selected from crafted inventory instances, and level, quality, and ring socket count are derived from the selected instances.
+- The setup screen now includes a complete development inventory view with total counters, all material stock quantities, crafted item cards, and type, rarity, and element filters.
+- Development inventory crafted rings can now socket crafted gems up to their socket count, and socketed gems can be removed.
+- Development inventory crafted gems can now be enchanted with one crafted spell or monster, and enchantments can be removed.
+- The prototype prevents reusing a gem in multiple rings and prevents reusing the same spell or monster as multiple gem enchantments.
+- Battle Lab inventory-backed ring selection now imports the selected ring's socketed gems and gem enchantments automatically.
+- The setup screen now includes a development loadout builder that selects up to 10 crafted rings, summarizes resolved speed, damage, energy, and cooldown efficiency, saves named loadouts in browser `localStorage`, and can send the selected loadout to either Battle Lab player.
+- Finished non-replay battles now show deterministic prototype rewards. Claiming rewards adds credits, common materials, and item XP to the browser-local development inventory. Winner rewards grant 150 credits plus one common material from each crafting family; draw rewards grant 90 credits plus two common materials. Source-backed equipped items gain 8 XP, and each ring use, socketed gem use, spell trigger, monster summon, or monster attack adds 20 XP to the matching crafted item instance.
 
 ## Change Log
 
@@ -71,6 +86,26 @@ This file records modifications made to the project during agent-assisted work.
 - Generated and integrated sprite atlases covering all 13 rings, 13 gems, 18 monsters, 6 spells, and 70 materials.
 - Added a typed item artwork manifest with startup coverage validation and rendered ring, gem, and monster artwork in the current prototype cards.
 - Added a localized, collapsible setup-screen collection that displays artwork for all 120 current content definitions.
+- Added an editable Battle Lab mode with configurable players, rings, gems, levels, qualities, and spell or monster enchantments.
+- Added a content-layer Battle Lab builder that creates temporary inventory instances and reuses the regular progression and battle setup pipeline.
+- Added validation for player identity, ring and socket limits, levels, and qualities, plus content and DOM workflow tests.
+- Added strict Battle Lab JSON parsing and serialization with reference resolution before import.
+- Added named browser-local presets with save, load, overwrite, and delete behavior.
+- Added resolved loadout comparisons for health, speed, damage, energy, and cooldown efficiency, with explicit relative-difference warnings.
+- Added two-variant deterministic Battle Lab batch simulation with a bounded greedy policy, Taunt-aware targeting, and result, action, turn, starting-player, and final-health reporting.
+- Added executable forge recipe definitions and validation for output references, material references, matching crafting families, fixed three-material inputs, and rarity-tier ingredient patterns.
+- Added a content forge service that consumes material stock and creates typed player-owned item instances.
+- Added a setup-screen development forge panel and DOM coverage for crafting an item through the UI.
+- Added browser-local development inventory persistence for forge stock and crafted item output.
+- Added development inventory JSON export, import, reset, and DOM regression coverage.
+- Added an inventory-backed Battle Lab source mode for selecting crafted ring, gem, spell, and monster instances while preserving the existing free-edit mode.
+- Added a complete development inventory UI and DOM coverage for material quantities, crafted item display, and filtering.
+- Added inventory socketing and gem-enchantment actions with persisted development inventory updates.
+- Updated Battle Lab inventory-backed selection so configured ring instances bring their socketed gems and enchantments into combat setup.
+- Added a browser-local development loadout builder for selecting crafted rings, saving named ring sets, previewing resolved metrics, and sending them to Battle Lab.
+- Added development forge improvement actions for spending prototype credits on item quality and ring socket upgrades.
+- Added claimable deterministic post-battle rewards that feed credits and materials back into the development inventory.
+- Added source-backed item XP rewards for equipped and used crafted items in Battle Lab development battles.
 
 ### 2026-06-25
 

@@ -53,6 +53,15 @@ These instructions are persistent project context for future agents working on B
 - Build localization from the beginning: user-facing text should resolve through localization keys and translation JSON files, not hardcoded strings.
 - Set up an organized asset pipeline from the beginning, even if early assets are AI-generated templates.
 - Keep versioned JSON content definitions as the source of truth and import them into the database if runtime querying, admin tooling, or production operations require it. Player-owned instances and progression data belong in the database.
+- Prototype forge recipes use exactly three quantity-1 materials from the matching crafting family. Ingredient rarity pattern is common/common/common for common outputs, refined/common/common for refined outputs, rare/refined/common for rare outputs, and legendary/rare/refined for legendary outputs. Crafted prototype items start at level 1 and quality 50; crafted rings start with one socket.
+- The prototype development inventory is browser-local and versioned JSON-backed. It persists prototype credits, forge material stock, crafted item instances, and the next crafted-instance sequence. Battle Lab can use either free-edit definitions or crafted development inventory instances as its item source.
+- Development inventory starts with 1000 prototype credits. Quality improvement adds 5 quality points to a crafted item up to 100. Ring socket improvement increases crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
+- The setup screen should keep exposing the complete development inventory: total counters, all material quantities, crafted item cards, and type, rarity, and element filters.
+- Development inventory socketing rules: a ring can socket crafted gems up to its socket count, a gem can be socketed in only one ring, a gem can have at most one spell or monster enchantment, and each crafted spell or monster can be used as only one enchantment.
+- Battle Lab inventory-backed ring selection should import the selected ring's socketed gems and those gems' enchantments automatically.
+- The development loadout builder is browser-local and should keep saving named sets of up to 10 crafted ring instance IDs, previewing resolved combat metrics, and sending the selected ring set to either Battle Lab player.
+- Prototype post-battle rewards are deterministic and claimable once per non-replay finished battle. Winner rewards are 150 credits plus `aluminium`, `hydrogen`, `pearl`, and `sand`; draw rewards are 90 credits plus `aluminium` and `pearl`.
+- Prototype item XP rewards apply only to crafted development inventory instances referenced by Battle Lab source IDs. Equipped source-backed items gain 8 XP, and each actual ring use, socketed gem use, spell trigger, monster summon, or monster attack adds 20 XP to the matching crafted item instance. Hero XP remains deferred.
 - Multiplayer should eventually use an authoritative server, matchmaking, and turn-based real-time interaction.
 
 ## Current Discussion Status

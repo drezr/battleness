@@ -1,0 +1,590 @@
+[
+  {
+    "id": "craftRingEmberLoop",
+    "outputType": "ring",
+    "outputDefinitionId": "emberLoop",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ringSocketCount": 1,
+    "ingredients": [
+      { "materialId": "aluminium", "quantity": 1 },
+      { "materialId": "iron", "quantity": 1 },
+      { "materialId": "sodium", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftRingCinderSignet",
+    "outputType": "ring",
+    "outputDefinitionId": "cinderSignet",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ringSocketCount": 1,
+    "ingredients": [
+      { "materialId": "chromium", "quantity": 1 },
+      { "materialId": "sodium", "quantity": 1 },
+      { "materialId": "magnesium", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftRingFurnaceHalo",
+    "outputType": "ring",
+    "outputDefinitionId": "furnaceHalo",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ringSocketCount": 1,
+    "ingredients": [
+      { "materialId": "gold", "quantity": 1 },
+      { "materialId": "nickel", "quantity": 1 },
+      { "materialId": "manganese", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftRingSolarCrown",
+    "outputType": "ring",
+    "outputDefinitionId": "solarCrown",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ringSocketCount": 1,
+    "ingredients": [
+      { "materialId": "radium", "quantity": 1 },
+      { "materialId": "tungsten", "quantity": 1 },
+      { "materialId": "lead", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftRingSparkBand",
+    "outputType": "ring",
+    "outputDefinitionId": "sparkBand",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ringSocketCount": 1,
+    "ingredients": [
+      { "materialId": "manganese", "quantity": 1 },
+      { "materialId": "calcium", "quantity": 1 },
+      { "materialId": "copper", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftRingIronCircle",
+    "outputType": "ring",
+    "outputDefinitionId": "ironCircle",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ringSocketCount": 1,
+    "ingredients": [
+      { "materialId": "lead", "quantity": 1 },
+      { "materialId": "copper", "quantity": 1 },
+      { "materialId": "aluminium", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftRingStormCoil",
+    "outputType": "ring",
+    "outputDefinitionId": "stormCoil",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ringSocketCount": 1,
+    "ingredients": [
+      { "materialId": "silver", "quantity": 1 },
+      { "materialId": "chromium", "quantity": 1 },
+      { "materialId": "iron", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftRingTempestCircuit",
+    "outputType": "ring",
+    "outputDefinitionId": "tempestCircuit",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ringSocketCount": 1,
+    "ingredients": [
+      { "materialId": "radium", "quantity": 1 },
+      { "materialId": "gold", "quantity": 1 },
+      { "materialId": "nickel", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftRingFrostSeal",
+    "outputType": "ring",
+    "outputDefinitionId": "frostSeal",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ringSocketCount": 1,
+    "ingredients": [
+      { "materialId": "iron", "quantity": 1 },
+      { "materialId": "sodium", "quantity": 1 },
+      { "materialId": "magnesium", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftRingRimeClasp",
+    "outputType": "ring",
+    "outputDefinitionId": "rimeClasp",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ringSocketCount": 1,
+    "ingredients": [
+      { "materialId": "nickel", "quantity": 1 },
+      { "materialId": "magnesium", "quantity": 1 },
+      { "materialId": "manganese", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftRingGlacierRing",
+    "outputType": "ring",
+    "outputDefinitionId": "glacierRing",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ringSocketCount": 1,
+    "ingredients": [
+      { "materialId": "tungsten", "quantity": 1 },
+      { "materialId": "lead", "quantity": 1 },
+      { "materialId": "calcium", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftRingWinterCrown",
+    "outputType": "ring",
+    "outputDefinitionId": "winterCrown",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ringSocketCount": 1,
+    "ingredients": [
+      { "materialId": "radium", "quantity": 1 },
+      { "materialId": "silver", "quantity": 1 },
+      { "materialId": "chromium", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftGemRubyShard",
+    "outputType": "gem",
+    "outputDefinitionId": "rubyShard",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "pearl", "quantity": 1 },
+      { "materialId": "amethyst", "quantity": 1 },
+      { "materialId": "chromite", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftGemEmberCore",
+    "outputType": "gem",
+    "outputDefinitionId": "emberCore",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "azurite", "quantity": 1 },
+      { "materialId": "chromite", "quantity": 1 },
+      { "materialId": "topaz", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftGemInfernoOpal",
+    "outputType": "gem",
+    "outputDefinitionId": "infernoOpal",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "emerald", "quantity": 1 },
+      { "materialId": "sunstone", "quantity": 1 },
+      { "materialId": "turquoise", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftGemSunforgeHeart",
+    "outputType": "gem",
+    "outputDefinitionId": "sunforgeHeart",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "redDiamond", "quantity": 1 },
+      { "materialId": "sapphire", "quantity": 1 },
+      { "materialId": "citrine", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftGemSparkPrism",
+    "outputType": "gem",
+    "outputDefinitionId": "sparkPrism",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "turquoise", "quantity": 1 },
+      { "materialId": "pearl", "quantity": 1 },
+      { "materialId": "amethyst", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftGemStaticPearl",
+    "outputType": "gem",
+    "outputDefinitionId": "staticPearl",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "citrine", "quantity": 1 },
+      { "materialId": "amethyst", "quantity": 1 },
+      { "materialId": "chromite", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftGemVoltDiamond",
+    "outputType": "gem",
+    "outputDefinitionId": "voltDiamond",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "emerald", "quantity": 1 },
+      { "materialId": "moonstone", "quantity": 1 },
+      { "materialId": "topaz", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftGemTempestEye",
+    "outputType": "gem",
+    "outputDefinitionId": "tempestEye",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "blackOpal", "quantity": 1 },
+      { "materialId": "sapphire", "quantity": 1 },
+      { "materialId": "opal", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftGemFrostChip",
+    "outputType": "gem",
+    "outputDefinitionId": "frostChip",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "topaz", "quantity": 1 },
+      { "materialId": "turquoise", "quantity": 1 },
+      { "materialId": "pearl", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftGemRimeQuartz",
+    "outputType": "gem",
+    "outputDefinitionId": "rimeQuartz",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "opal", "quantity": 1 },
+      { "materialId": "pearl", "quantity": 1 },
+      { "materialId": "amethyst", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftGemGlacierPearl",
+    "outputType": "gem",
+    "outputDefinitionId": "glacierPearl",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "emerald", "quantity": 1 },
+      { "materialId": "azurite", "quantity": 1 },
+      { "materialId": "chromite", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftGemAbsoluteZeroGem",
+    "outputType": "gem",
+    "outputDefinitionId": "absoluteZeroGem",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "alexandrite", "quantity": 1 },
+      { "materialId": "sapphire", "quantity": 1 },
+      { "materialId": "sunstone", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterEmberImp",
+    "outputType": "monster",
+    "outputDefinitionId": "emberImp",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "sand", "quantity": 1 },
+      { "materialId": "wax", "quantity": 1 },
+      { "materialId": "rubber", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterEmberLancer",
+    "outputType": "monster",
+    "outputDefinitionId": "emberLancer",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "wax", "quantity": 1 },
+      { "materialId": "rubber", "quantity": 1 },
+      { "materialId": "coal", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterRageSprite",
+    "outputType": "monster",
+    "outputDefinitionId": "rageSprite",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "ink", "quantity": 1 },
+      { "materialId": "coal", "quantity": 1 },
+      { "materialId": "cellulose", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterCinderRam",
+    "outputType": "monster",
+    "outputDefinitionId": "cinderRam",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "silk", "quantity": 1 },
+      { "materialId": "cellulose", "quantity": 1 },
+      { "materialId": "sand", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterMagmaColossus",
+    "outputType": "monster",
+    "outputDefinitionId": "magmaColossus",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "silicon", "quantity": 1 },
+      { "materialId": "oil", "quantity": 1 },
+      { "materialId": "wax", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterSolarDrake",
+    "outputType": "monster",
+    "outputDefinitionId": "solarDrake",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "graphene", "quantity": 1 },
+      { "materialId": "phosphorus", "quantity": 1 },
+      { "materialId": "ink", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterStormHound",
+    "outputType": "monster",
+    "outputDefinitionId": "stormHound",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "wax", "quantity": 1 },
+      { "materialId": "rubber", "quantity": 1 },
+      { "materialId": "coal", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterVoltMite",
+    "outputType": "monster",
+    "outputDefinitionId": "voltMite",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "rubber", "quantity": 1 },
+      { "materialId": "coal", "quantity": 1 },
+      { "materialId": "cellulose", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterArcStriker",
+    "outputType": "monster",
+    "outputDefinitionId": "arcStriker",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "silk", "quantity": 1 },
+      { "materialId": "cellulose", "quantity": 1 },
+      { "materialId": "sand", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterCoilLynx",
+    "outputType": "monster",
+    "outputDefinitionId": "coilLynx",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "keratin", "quantity": 1 },
+      { "materialId": "sand", "quantity": 1 },
+      { "materialId": "wax", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterThunderRaptor",
+    "outputType": "monster",
+    "outputDefinitionId": "thunderRaptor",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "phosphorus", "quantity": 1 },
+      { "materialId": "carbon", "quantity": 1 },
+      { "materialId": "rubber", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterTempestTitan",
+    "outputType": "monster",
+    "outputDefinitionId": "tempestTitan",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "graphene", "quantity": 1 },
+      { "materialId": "silicon", "quantity": 1 },
+      { "materialId": "silk", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterIceGuardian",
+    "outputType": "monster",
+    "outputDefinitionId": "iceGuardian",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "rubber", "quantity": 1 },
+      { "materialId": "coal", "quantity": 1 },
+      { "materialId": "cellulose", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterSnowSentinel",
+    "outputType": "monster",
+    "outputDefinitionId": "snowSentinel",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "coal", "quantity": 1 },
+      { "materialId": "cellulose", "quantity": 1 },
+      { "materialId": "sand", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterFrostBeetle",
+    "outputType": "monster",
+    "outputDefinitionId": "frostBeetle",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "keratin", "quantity": 1 },
+      { "materialId": "sand", "quantity": 1 },
+      { "materialId": "wax", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterRimeGolem",
+    "outputType": "monster",
+    "outputDefinitionId": "rimeGolem",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "oil", "quantity": 1 },
+      { "materialId": "wax", "quantity": 1 },
+      { "materialId": "rubber", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterShieldWisp",
+    "outputType": "monster",
+    "outputDefinitionId": "shieldWisp",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "silicon", "quantity": 1 },
+      { "materialId": "ink", "quantity": 1 },
+      { "materialId": "coal", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftMonsterEternalWarden",
+    "outputType": "monster",
+    "outputDefinitionId": "eternalWarden",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "graphene", "quantity": 1 },
+      { "materialId": "phosphorus", "quantity": 1 },
+      { "materialId": "keratin", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftSpellFirebolt",
+    "outputType": "spell",
+    "outputDefinitionId": "firebolt",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "hydrogen", "quantity": 1 },
+      { "materialId": "oxygen", "quantity": 1 },
+      { "materialId": "nitrogen", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftSpellSolarFlare",
+    "outputType": "spell",
+    "outputDefinitionId": "solarFlare",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "argon", "quantity": 1 },
+      { "materialId": "bromine", "quantity": 1 },
+      { "materialId": "helium", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftSpellSpark",
+    "outputType": "spell",
+    "outputDefinitionId": "spark",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "nitrogen", "quantity": 1 },
+      { "materialId": "helium", "quantity": 1 },
+      { "materialId": "hydrogen", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftSpellArcPulse",
+    "outputType": "spell",
+    "outputDefinitionId": "arcPulse",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "neon", "quantity": 1 },
+      { "materialId": "fluorine", "quantity": 1 },
+      { "materialId": "oxygen", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftSpellIceShard",
+    "outputType": "spell",
+    "outputDefinitionId": "iceShard",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "hydrogen", "quantity": 1 },
+      { "materialId": "oxygen", "quantity": 1 },
+      { "materialId": "nitrogen", "quantity": 1 }
+    ]
+  },
+  {
+    "id": "craftSpellGlacialSpike",
+    "outputType": "spell",
+    "outputDefinitionId": "glacialSpike",
+    "craftedLevel": 1,
+    "craftedQuality": 50,
+    "ingredients": [
+      { "materialId": "iodine", "quantity": 1 },
+      { "materialId": "chlorine", "quantity": 1 },
+      { "materialId": "helium", "quantity": 1 }
+    ]
+  }
+]

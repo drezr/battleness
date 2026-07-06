@@ -1,6 +1,7 @@
 import gems from "./definitions/gems.json";
 import materials from "./definitions/materials.json";
 import monsters from "./definitions/monsters.json";
+import recipes from "./definitions/recipes.json";
 import rings from "./definitions/rings.json";
 import spells from "./definitions/spells.json";
 import inventories from "./fixtures/inventories.json";
@@ -25,18 +26,22 @@ import {
   materialDefinitionSchema,
   monsterDefinitionSchema,
   playerFixtureSchema,
+  recipeDefinitionSchema,
   ringDefinitionSchema,
   scenarioFixtureSchema,
   spellDefinitionSchema,
+  type MaterialDefinition,
+  type RecipeDefinition,
 } from "./schemas";
 import { validateContentReferences } from "./references";
 
-export const contentVersion = "prototype-3";
+export const contentVersion = "prototype-4";
 
 export const definitions = {
   gems,
-  materials,
+  materials: materials as readonly MaterialDefinition[],
   monsters,
+  recipes: recipes as unknown as readonly RecipeDefinition[],
   rings,
   spells,
 } as const;
@@ -66,6 +71,7 @@ export function validateContent(): void {
   const validatedMonsters = monsterDefinitionSchema.array().parse(monsters);
   const validatedSpells = spellDefinitionSchema.array().parse(spells);
   const validatedMaterials = materialDefinitionSchema.array().parse(materials);
+  const validatedRecipes = recipeDefinitionSchema.array().parse(recipes);
   const validatedPlayers = playerFixtureSchema.array().parse(players);
   const validatedInventory = inventoryFixtureSchema.parse(inventories);
   const validatedBattleSetups = battleSetupFixtureSchema
@@ -91,6 +97,7 @@ export function validateContent(): void {
       monsters: validatedMonsters,
       spells: validatedSpells,
       materials: validatedMaterials,
+      recipes: validatedRecipes,
     },
     locales: { en: validatedEn, fr: validatedFr },
     players: validatedPlayers,
@@ -100,6 +107,8 @@ export function validateContent(): void {
 }
 
 export * from "./battleSetup";
+export * from "./battleLab";
 export * from "./progression";
 export * from "./references";
 export * from "./schemas";
+export * from "./forge";

@@ -97,6 +97,19 @@ describe("content reference validation", () => {
       'Locale "en" is missing required key "ring.emberLoop.name".',
     ]);
   });
+
+  it("reports invalid recipe material references", () => {
+    const data = createReferenceData();
+    data.definitions.recipes[0].ingredients[0] = {
+      materialId: "hydrogen",
+      quantity: 2,
+    };
+
+    expectIssues(data, [
+      'Recipe definition "craftRingEmberLoop" ingredient "hydrogen" has quantity 2; prototype recipes require quantity 1.',
+      'Recipe definition "craftRingEmberLoop" uses spell material "hydrogen" for ring crafting.',
+    ]);
+  });
 });
 
 function createReferenceData(): ContentReferenceData {
@@ -107,6 +120,7 @@ function createReferenceData(): ContentReferenceData {
       monsters: definitions.monsters,
       spells: definitions.spells,
       materials: definitions.materials,
+      recipes: definitions.recipes,
     },
     locales,
     players: fixtures.players,

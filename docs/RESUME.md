@@ -277,6 +277,26 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - Generated item artwork atlases now cover every current ring, gem, monster, spell, and material definition. Stable ID mappings and startup coverage validation live in `apps/prototype/src/itemAssets.ts`.
 - The battle and setup interfaces render ring, gem, and monster atlas crops. Spell and material crops are mapped for future forge, inventory, and shop interfaces.
 - The setup screen now exposes all 120 mapped assets in a localized, collapsible development collection.
+- The setup screen now supports a Battle Lab mode for editing two loadouts and launching an unscripted battle.
+- Battle Lab configurations support 1 to 10 rings per player, up to 3 gems per ring, editable levels and qualities, and optional spell or monster enchantments.
+- `packages/content/src/battleLab.ts` resolves temporary editor instances through the same setup and progression path used by fixture-backed content. Loadout persistence is intentionally deferred.
+- Battle Lab loadouts support strict JSON import/export and named browser-local presets. These presets are development-only and do not replace future account persistence.
+- The editor includes resolved stat comparisons and diagnostic warnings for efficiency differences of at least 50% or speed differences of at least 4.
+- The Battle Lab can run two deterministic greedy simulations that vary the preferred element-duel winner, respect current targeting and action constraints, and report timeouts at 500 actions.
+- Content version `prototype-4` adds 48 initial forge recipes for collectible rings, gems, monsters, and spells. `trainingFlameBand` and `plainQuartz` remain development-only and have no recipes.
+- Prototype recipes use exactly three quantity-1 materials from the matching crafting family. Common outputs use three common materials; refined outputs use one refined and two common materials; rare outputs use one rare, one refined, and one common material; legendary outputs use one legendary, one rare, and one refined material.
+- Crafted prototype items are level 1 and quality 50. Crafted rings start with one socket. The setup screen includes a development forge panel with material stock controls, real consumption, restock, improvement actions, and crafted-instance output.
+- The development forge persists credits, material stock, crafted item output, and the next crafted-instance sequence in browser `localStorage`.
+- Development inventory starts with 1000 prototype credits. Quality improvement spends credits to add 5 quality points to a crafted item up to 100. Ring socket improvement spends credits to increase crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
+- Development inventory JSON can be exported, imported, and reset from the setup screen.
+- Battle Lab supports both free-edit definitions and a development-inventory item source mode. The inventory-backed mode selects crafted ring, gem, spell, and monster instances and derives level, quality, and ring socket count from those instances.
+- The setup screen includes a complete development inventory view with counters, all material quantities, crafted item cards, and type, rarity, and element filters.
+- Development inventory rings can socket crafted gems up to their socket count. A crafted gem can be socketed into only one ring at a time.
+- Development inventory gems can be enchanted by one crafted spell or monster. A crafted spell or monster can be used as only one gem enchantment at a time.
+- Selecting a configured development inventory ring in Battle Lab automatically imports its socketed gems and gem enchantments.
+- The setup screen includes a development loadout builder that selects up to 10 crafted rings, previews resolved speed, damage, energy, and cooldown efficiency, saves named loadouts in browser `localStorage`, and sends the current loadout to either Battle Lab player.
+- Finished non-replay battles show claimable deterministic prototype rewards. Winner rewards add 150 credits plus `aluminium`, `hydrogen`, `pearl`, and `sand`; draw rewards add 90 credits plus `aluminium` and `pearl`. Claimed rewards are persisted into the browser-local development inventory.
+- Source-backed Battle Lab items also gain XP when rewards are claimed. Equipped source-backed items gain 8 XP, and each actual ring use, socketed gem use, spell trigger, monster summon, or monster attack adds 20 XP to the matching crafted item instance. Hero XP is deferred.
 - Stat colors: Damage uses pink-red, Health uses red, Energy uses green, Energy Penalty uses pale green, Cooldown uses light cyan, Cooldown Penalty uses cyan, Quality uses orange, Speed uses yellow, Skill uses magenta, and Rarity uses purple.
 
 ## Battle Layout Direction

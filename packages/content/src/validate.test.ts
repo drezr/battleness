@@ -2,12 +2,17 @@ import { applyBattleAction, createBattleState, type BattleAction } from "@battle
 import { describe, expect, it } from "vitest";
 import {
   createBattleSetupFromFixture,
+  craftRecipe,
+  createMaterialStock,
   definitions,
   fixtures,
+  improveCraftedItemQuality,
+  improveRingSocketCount,
   locales,
   materialDefinitionSchema,
   monsterDefinitionSchema,
   playerFixtureSchema,
+  recipeDefinitionSchema,
   ringDefinitionSchema,
   validateContent,
 } from "./index";
@@ -47,6 +52,7 @@ describe("content package", () => {
     expect(definitions.monsters).toHaveLength(18);
     expect(definitions.spells).toHaveLength(6);
     expect(definitions.materials).toHaveLength(70);
+    expect(definitions.recipes).toHaveLength(48);
 
     const collectibleRings = definitions.rings.filter((ring) => ring.id !== "trainingFlameBand");
     const collectibleGems = definitions.gems.filter((gem) => gem.id !== "plainQuartz");
@@ -55,6 +61,119 @@ describe("content package", () => {
 
     expect(elementRarityPairs(collectibleRings)).toHaveLength(12);
     expect(elementRarityPairs(collectibleGems)).toHaveLength(12);
+  });
+
+  it("defines one three-material recipe for every collectible item", () => {
+    const recipeOutputIds = new Set(
+      definitions.recipes.map((recipe) => `${recipe.outputType}:${recipe.outputDefinitionId}`),
+    );
+
+    expect(recipeOutputIds.has("ring:trainingFlameBand")).toBe(false);
+    expect(recipeOutputIds.has("gem:plainQuartz")).toBe(false);
+    expect(definitions.recipes.every((recipe) => recipe.ingredients.length === 3)).toBe(true);
+    expect(
+      definitions.recipes.every((recipe) =>
+        recipe.ingredients.every((item) => item.quantity === 1),
+      ),
+    ).toBe(true);
+    expect(recipeOutputIds).toEqual(
+      new Set([
+        ...definitions.rings
+          .filter((ring) => ring.id !== "trainingFlameBand")
+          .map((ring) => `ring:${ring.id}`),
+        ...definitions.gems.filter((gem) => gem.id !== "plainQuartz").map((gem) => `gem:${gem.id}`),
+        ...definitions.monsters.map((monster) => `monster:${monster.id}`),
+        ...definitions.spells.map((spell) => `spell:${spell.id}`),
+      ]),
+    );
+  });
+
+  it("requires ring-only socket counts in recipes", () => {
+    expect(() =>
+      recipeDefinitionSchema.parse({
+        ...definitions.recipes.find((recipe) => recipe.outputType === "gem"),
+        ringSocketCount: 1,
+      }),
+    ).toThrow();
+  });
+
+  it("crafts an item instance and consumes material stock", () => {
+    const recipe = definitions.recipes.find((candidate) => candidate.id === "craftRingEmberLoop");
+    if (!recipe) {
+      throw new Error("Expected craftRingEmberLoop to exist.");
+    }
+    const result = craftRecipe({
+      recipe,
+      ownerId: "playerOne",
+      stock: createMaterialStock(definitions.materials, 2),
+      instanceSequence: 1,
+    });
+
+    expect(result.crafted).toEqual({
+      type: "ring",
+      item: {
+        id: "playerOne.ring.emberLoop.crafted.1",
+        definitionId: "emberLoop",
+        ownerId: "playerOne",
+        experience: 100,
+        quality: 50,
+        socketCount: 1,
+        socketedGemInstanceIds: [],
+        equipped: false,
+      },
+    });
+    expect(result.stock.aluminium).toBe(1);
+    expect(result.stock.iron).toBe(1);
+    expect(result.stock.sodium).toBe(1);
+  });
+
+  it("improves crafted item quality and ring sockets by spending credits", () => {
+    const recipe = definitions.recipes.find((candidate) => candidate.id === "craftRingEmberLoop");
+    if (!recipe) {
+      throw new Error("Expected craftRingEmberLoop to exist.");
+    }
+    const crafted = craftRecipe({
+      recipe,
+      ownerId: "playerOne",
+      stock: createMaterialStock(definitions.materials, 2),
+      instanceSequence: 1,
+    }).crafted;
+    if (crafted.type !== "ring") {
+      throw new Error("Expected crafted item to be a ring.");
+    }
+
+    const qualityResult = improveCraftedItemQuality(crafted, "common", 1000);
+
+    expect(qualityResult.cost).toBe(75);
+    expect(qualityResult.credits).toBe(925);
+    expect(qualityResult.crafted.item.quality).toBe(55);
+
+    const socketResult = improveRingSocketCount(qualityResult.crafted, "common", 925);
+
+    expect(socketResult.cost).toBe(250);
+    expect(socketResult.credits).toBe(675);
+    expect(socketResult.crafted.item.socketCount).toBe(2);
+
+    expect(() =>
+      improveCraftedItemQuality(
+        {
+          ...socketResult.crafted,
+          item: { ...socketResult.crafted.item, quality: 100 },
+        },
+        "common",
+        1000,
+      ),
+    ).toThrow("maximum");
+    expect(() =>
+      improveRingSocketCount(
+        {
+          ...socketResult.crafted,
+          item: { ...socketResult.crafted.item, socketCount: 3 },
+        },
+        "common",
+        1000,
+      ),
+    ).toThrow("maximum");
   });
 
   it("uses common and refined instead of the previous rarity names", () => {

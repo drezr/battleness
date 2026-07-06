@@ -4,7 +4,7 @@
 
 This document records the implemented 70-material collection derived from the historical `mats` table in `datas.db`.
 
-The executable schema, JSON definitions, and English and French locale entries are implemented in content version `prototype-3`. Historical recipes remain intentionally unimported until forge design resumes.
+The executable schema, JSON definitions, English and French locale entries, and initial prototype recipes are implemented in content version `prototype-4`. Historical SQLite recipes remain intentionally unimported because their result IDs do not match the current collectible collection.
 
 ## Source Analysis
 
@@ -219,4 +219,5 @@ Reference sources:
 - The historical four-times rarity price progression is enforced by validation.
 - Rarities use `common`, `refined`, `rare`, and `legendary`.
 - The eight fictional `bio*` and `mystic*` materials are replaced.
-- Historical recipe migrations are documented but not yet imported.
+- The current prototype has 48 newly defined recipes for collectible rings, gems, monsters, and spells.
+- Historical recipe migrations are documented but not imported.

@@ -5,6 +5,7 @@ import type {
   MaterialDefinition,
   MonsterDefinition,
   PlayerFixture,
+  RecipeDefinition,
   RingDefinition,
   SpellDefinition,
 } from "./schemas";
@@ -16,6 +17,7 @@ export type ContentReferenceData = {
     monsters: readonly MonsterDefinition[];
     spells: readonly SpellDefinition[];
     materials: readonly MaterialDefinition[];
+    recipes: readonly RecipeDefinition[];
   };
   locales: Readonly<Record<string, Readonly<Record<string, string>>>>;
   players: readonly PlayerFixture[];
@@ -41,6 +43,7 @@ export function validateContentReferences(data: ContentReferenceData): void {
     "Material definition",
     issues,
   );
+  const recipeDefinitions = indexUnique(data.definitions.recipes, "Recipe definition", issues);
   const players = indexUnique(data.players, "Player", issues);
   const rings = indexUnique(data.inventory.rings, "Ring instance", issues);
   const gems = indexUnique(data.inventory.gems, "Gem instance", issues);
@@ -88,11 +91,108 @@ export function validateContentReferences(data: ContentReferenceData): void {
   validateEnchantments(data.inventory, monsters, spells, issues);
   validateBattleSetups(data.battleSetups, players, monsterDefinitions, issues);
   validateMaterials(materialDefinitions.values(), issues);
+  validateRecipes(
+    recipeDefinitions.values(),
+    {
+      ringDefinitions,
+      gemDefinitions,
+      monsterDefinitions,
+      spellDefinitions,
+      materialDefinitions,
+    },
+    issues,
+  );
   validateLocalization(data, issues);
 
   if (issues.length > 0) {
     throw new ContentReferenceError(issues);
   }
+}
+
+function validateRecipes(
+  recipes: Iterable<RecipeDefinition>,
+  definitions: {
+    ringDefinitions: ReadonlyMap<string, RingDefinition>;
+    gemDefinitions: ReadonlyMap<string, GemDefinition>;
+    monsterDefinitions: ReadonlyMap<string, MonsterDefinition>;
+    spellDefinitions: ReadonlyMap<string, SpellDefinition>;
+    materialDefinitions: ReadonlyMap<string, MaterialDefinition>;
+  },
+  issues: string[],
+): void {
+  const expectedRaritiesByOutputRarity = {
+    common: ["common", "common", "common"],
+    refined: ["refined", "common", "common"],
+    rare: ["rare", "refined", "common"],
+    legendary: ["legendary", "rare", "refined"],
+  } as const satisfies Record<string, readonly string[]>;
+
+  for (const recipe of recipes) {
+    const output = outputDefinition(recipe, definitions);
+    if (!output) {
+      issues.push(
+        `Recipe definition "${recipe.id}" references unknown ${recipe.outputType} definition "${recipe.outputDefinitionId}".`,
+      );
+      continue;
+    }
+
+    const expectedRarities = expectedRaritiesByOutputRarity[output.rarity];
+    const seenMaterials = new Set<string>();
+
+    for (const [index, ingredient] of recipe.ingredients.entries()) {
+      if (seenMaterials.has(ingredient.materialId)) {
+        issues.push(
+          `Recipe definition "${recipe.id}" uses material "${ingredient.materialId}" more than once.`,
+        );
+      }
+      seenMaterials.add(ingredient.materialId);
+
+      if (ingredient.quantity !== 1) {
+        issues.push(
+          `Recipe definition "${recipe.id}" ingredient "${ingredient.materialId}" has quantity ${ingredient.quantity}; prototype recipes require quantity 1.`,
+        );
+      }
+
+      const material = definitions.materialDefinitions.get(ingredient.materialId);
+      if (!material) {
+        issues.push(
+          `Recipe definition "${recipe.id}" references unknown material "${ingredient.materialId}".`,
+        );
+        continue;
+      }
+      if (material.craftingFamily !== recipe.outputType) {
+        issues.push(
+          `Recipe definition "${recipe.id}" uses ${material.craftingFamily} material "${material.id}" for ${recipe.outputType} crafting.`,
+        );
+      }
+      if (material.rarity !== expectedRarities[index]) {
+        issues.push(
+          `Recipe definition "${recipe.id}" ingredient ${index + 1} uses ${material.rarity} material "${material.id}"; expected ${expectedRarities[index]}.`,
+        );
+      }
+    }
+  }
+}
+
+function outputDefinition(
+  recipe: RecipeDefinition,
+  definitions: {
+    ringDefinitions: ReadonlyMap<string, RingDefinition>;
+    gemDefinitions: ReadonlyMap<string, GemDefinition>;
+    monsterDefinitions: ReadonlyMap<string, MonsterDefinition>;
+    spellDefinitions: ReadonlyMap<string, SpellDefinition>;
+  },
+): RingDefinition | GemDefinition | MonsterDefinition | SpellDefinition | undefined {
+  if (recipe.outputType === "ring") {
+    return definitions.ringDefinitions.get(recipe.outputDefinitionId);
+  }
+  if (recipe.outputType === "gem") {
+    return definitions.gemDefinitions.get(recipe.outputDefinitionId);
+  }
+  if (recipe.outputType === "monster") {
+    return definitions.monsterDefinitions.get(recipe.outputDefinitionId);
+  }
+  return definitions.spellDefinitions.get(recipe.outputDefinitionId);
 }
 
 function validateMaterials(materials: Iterable<MaterialDefinition>, issues: string[]): void {
