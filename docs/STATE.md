@@ -68,6 +68,9 @@ This file records modifications made to the project during agent-assisted work.
 - Propagated rarity through engine monster definitions and combat instances, added shared rarity border styles, and preserved separate hover, selection, targeting, and blocked-state feedback.
 - Added DOM tests for common and refined rings, refined gems, and rare monsters.
 - Added DOM assertions for Electric ring and Ice monster badges while preserving localized element labels.
+- Generated and integrated sprite atlases covering all 13 rings, 13 gems, 18 monsters, 6 spells, and 70 materials.
+- Added a typed item artwork manifest with startup coverage validation and rendered ring, gem, and monster artwork in the current prototype cards.
+- Added a localized, collapsible setup-screen collection that displays artwork for all 120 current content definitions.
 
 ### 2026-06-25
 

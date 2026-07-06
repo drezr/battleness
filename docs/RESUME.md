@@ -274,6 +274,9 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - Yellow selection outlines and red blocked-state indicators remain distinct from the rarity border.
 - Localized elemental badges appear in the top-right corner of ring, gem, and monster cards across those same views.
 - Socketed gem markers use elemental fill colors and rarity border colors simultaneously.
+- Generated item artwork atlases now cover every current ring, gem, monster, spell, and material definition. Stable ID mappings and startup coverage validation live in `apps/prototype/src/itemAssets.ts`.
+- The battle and setup interfaces render ring, gem, and monster atlas crops. Spell and material crops are mapped for future forge, inventory, and shop interfaces.
+- The setup screen now exposes all 120 mapped assets in a localized, collapsible development collection.
 - Stat colors: Damage uses pink-red, Health uses red, Energy uses green, Energy Penalty uses pale green, Cooldown uses light cyan, Cooldown Penalty uses cyan, Quality uses orange, Speed uses yellow, Skill uses magenta, and Rarity uses purple.
 
 ## Battle Layout Direction

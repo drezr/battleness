@@ -422,6 +422,22 @@ h4 {
   text-align: center;
 }
 
+.item-artwork {
+  display: block;
+  min-width: 0;
+  border-radius: 5px;
+  background-image: var(--item-atlas);
+  background-position: var(--item-atlas-position);
+  background-size: var(--item-atlas-size);
+  background-repeat: no-repeat;
+}
+
+.monster-slot .monster-artwork {
+  width: 100%;
+  aspect-ratio: 1.55;
+  margin-top: 2px;
+}
+
 .monster-slot.empty {
   display: grid;
   place-items: center;
@@ -486,7 +502,7 @@ h4 {
 .board-ring {
   position: relative;
   display: grid;
-  grid-template-rows: 1fr auto auto auto;
+  grid-template-rows: auto 1fr auto auto auto;
   gap: 5px;
   min-height: 96px;
   min-width: 0;
@@ -495,6 +511,11 @@ h4 {
   padding: 28px 6px 6px;
   background: rgb(255 95 122 / 18%);
   text-align: center;
+}
+
+.board-ring .ring-artwork {
+  width: 100%;
+  aspect-ratio: 1.35;
 }
 
 .board-ring.ready:not(:disabled):hover {
@@ -557,7 +578,10 @@ h4 {
 .ring-gems span.filled {
   border-color: var(--rarity-color);
   opacity: 1;
-  background: var(--element-color, #00d7ff);
+  background-image: var(--item-atlas);
+  background-position: var(--item-atlas-position);
+  background-size: var(--item-atlas-size);
+  background-repeat: no-repeat;
   box-shadow: 0 0 8px var(--rarity-glow);
 }
 
@@ -587,6 +611,83 @@ h4 {
 
 .setup-summary {
   grid-column: 1 / -1;
+}
+
+.asset-collection {
+  grid-column: 1 / -1;
+}
+
+.asset-groups {
+  display: grid;
+  gap: 10px;
+}
+
+.asset-group {
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 8px;
+  background: rgb(0 0 0 / 12%);
+}
+
+.asset-group summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 0 14px;
+  color: #f7fbff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.asset-group summary small {
+  min-width: 28px;
+  border-radius: 999px;
+  padding: 3px 7px;
+  color: #172b38;
+  background: #c6f8ff;
+  text-align: center;
+}
+
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  border-top: 1px solid rgb(255 255 255 / 16%);
+  padding: 12px;
+}
+
+.asset-card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  min-width: 0;
+  border: 2px solid var(--rarity-color);
+  border-radius: 6px;
+  padding: 26px 8px 8px;
+  overflow: hidden;
+  background: #172b38;
+  box-shadow: inset 0 0 12px var(--rarity-glow);
+  text-align: center;
+}
+
+.asset-card .item-artwork {
+  width: 100%;
+  aspect-ratio: 1;
+  margin-bottom: 3px;
+}
+
+.asset-card strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.asset-card > small {
+  color: #cbd9df;
+  font-size: 0.68rem;
 }
 
 .setup-stats {
@@ -629,6 +730,14 @@ dl div,
 .object-list li.ring-item {
   display: grid;
   align-items: stretch;
+}
+
+.ring-item > .ring-artwork,
+.monster-item > .monster-artwork,
+.gem-item > .gem-artwork {
+  width: 92px;
+  aspect-ratio: 1;
+  margin: 0 auto 8px;
 }
 
 dt {

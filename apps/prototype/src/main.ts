@@ -1,6 +1,7 @@
 import {
   contentVersion,
   createBattleSetupFromFixture,
+  definitions,
   fixtures,
   locales,
   validateContent,
@@ -23,9 +24,11 @@ import {
   type Rarity,
   type TargetId,
 } from "@battleness/engine";
+import { itemArtworkStyle, validateItemAssets, type ItemAssetKind } from "./itemAssets";
 import "./styles.css";
 
 validateContent();
+validateItemAssets();
 
 type Scenario = (typeof fixtures.scenarios)[number];
 type BattlePlayerView = BattleState["players"][number];
@@ -248,11 +251,67 @@ function renderSetup(): void {
             ${scenario.actions.map((action, index) => renderAction(action as BattleAction, index)).join("")}
           </ol>
         </section>
+
+        ${renderAssetCollection()}
       </main>
     </section>
   `;
 
   bindEvents();
+}
+
+function renderAssetCollection(): string {
+  return `
+    <section class="panel asset-collection">
+      <h2>${escapeHtml(t("ui.collection"))}</h2>
+      <div class="asset-groups">
+        ${renderAssetGroup("ring", t("ui.rings"), definitions.rings)}
+        ${renderAssetGroup("gem", t("ui.gems"), definitions.gems)}
+        ${renderAssetGroup("monster", t("ui.monsters"), definitions.monsters)}
+        ${renderAssetGroup("spell", t("ui.spells"), definitions.spells)}
+        ${renderAssetGroup("material", t("ui.materials"), definitions.materials)}
+      </div>
+    </section>
+  `;
+}
+
+function renderAssetGroup(
+  kind: ItemAssetKind,
+  label: string,
+  items: readonly {
+    id: string;
+    nameKey: string;
+    rarity: string;
+    element?: string;
+  }[],
+): string {
+  return `
+    <details class="asset-group" ${kind === "ring" ? "open" : ""}>
+      <summary>
+        <span>${escapeHtml(label)}</span>
+        <small>${items.length}</small>
+      </summary>
+      <div class="asset-grid">
+        ${items
+          .map(
+            (item) => `
+              <article
+                class="asset-card ${rarityClass(item.rarity as Rarity)}"
+                data-asset-kind="${kind}"
+                data-asset-id="${escapeHtml(item.id)}"
+                data-rarity="${item.rarity}"
+              >
+                ${item.element ? renderElementBadge(item.element as ElementType) : ""}
+                ${renderItemArtwork(kind, item.id)}
+                <strong>${escapeHtml(t(item.nameKey))}</strong>
+                <small>${escapeHtml(t(`ui.rarity.${item.rarity}`))}</small>
+              </article>
+            `,
+          )
+          .join("")}
+      </div>
+    </details>
+  `;
 }
 
 function bindEvents(): void {
@@ -775,6 +834,7 @@ function renderMonsterSlot(player: BattlePlayerView, index: number): string {
     >
       ${renderElementBadge(monster.element)}
       <span class="monster-skill">${renderSkillBadges(monster) || t("ui.none")}</span>
+      ${renderItemArtwork("monster", monster.definitionId)}
       <strong>${escapeHtml(t(monster.nameKey))}</strong>
       <span class="monster-stats">
         <span>${escapeHtml(t("ui.damage"))} ${monster.damage}</span>
@@ -815,6 +875,7 @@ function renderBoardRing(ring: RingView, activePlayer: BattlePlayerView | null):
       ring.id,
     )}" data-rarity="${ring.rarity}" ${unavailableReason ? "disabled" : ""}>
       ${renderElementBadge(ring.element)}
+      ${renderItemArtwork("ring", ring.definitionId)}
       <strong>${escapeHtml(t(ring.nameKey))}</strong>
       <span class="ring-stats">
         <span>${escapeHtml(t("ui.damage"))} ${ringTotalDamage(ring)}</span>
@@ -829,7 +890,7 @@ function renderBoardRing(ring: RingView, activePlayer: BattlePlayerView | null):
             gem ? `filled ${rarityClass(gem.rarity)} element-${gem.element}` : ""
           }" data-rarity="${gem?.rarity ?? ""}" title="${
             gem ? escapeHtml(`${t(gem.nameKey)} - ${t(`ui.element.${gem.element}`)}`) : ""
-          }"></span>`;
+          }" ${gem ? `style="${itemArtworkStyle("gem", gem.definitionId)}"` : ""}></span>`;
         }).join("")}
       </span>
     </button>
@@ -1026,6 +1087,7 @@ function renderPlayer(player: BattlePlayerView): string {
             (ring) => `
               <li class="ring-item ${rarityClass(ring.rarity)}" data-rarity="${ring.rarity}">
                 ${renderElementBadge(ring.element)}
+                ${renderItemArtwork("ring", ring.definitionId)}
                 <strong>${escapeHtml(t(ring.nameKey))}</strong>
                 <dl class="inline-stats">
                   ${stat(t("ui.energy"), String(ring.energyCost))}
@@ -1048,6 +1110,7 @@ function renderPlayer(player: BattlePlayerView): string {
                   (monster) => `
                     <li class="monster-item ${rarityClass(monster.rarity)}" data-rarity="${monster.rarity}">
                       ${renderElementBadge(monster.element)}
+                      ${renderItemArtwork("monster", monster.definitionId)}
                       <strong>${escapeHtml(t(monster.nameKey))}</strong>
                       <span>${escapeHtml(t("ui.health"))} ${monster.health}/${monster.maxHealth}</span>
                       <span>${escapeHtml(t("ui.cooldown"))} ${monster.currentCooldown}</span>
@@ -1080,6 +1143,7 @@ function renderSetupPlayer(player: BattlePlayerView): string {
             (ring) => `
               <li class="ring-item ${rarityClass(ring.rarity)}" data-rarity="${ring.rarity}">
                 ${renderElementBadge(ring.element)}
+                ${renderItemArtwork("ring", ring.definitionId)}
                 <strong>${escapeHtml(t(ring.nameKey))}</strong>
                 <dl class="inline-stats">
                   ${stat(t("ui.energy"), String(ring.energyCost))}
@@ -1112,6 +1176,7 @@ function renderGem(gem: GemView): string {
   return `
     <article class="gem-item ${rarityClass(gem.rarity)}" data-rarity="${gem.rarity}">
       ${renderElementBadge(gem.element)}
+      ${renderItemArtwork("gem", gem.definitionId)}
       <strong>${escapeHtml(t(gem.nameKey))}</strong>
       <dl class="inline-stats compact">
         ${stat(t("ui.damage"), String(gem.damage))}
@@ -1121,6 +1186,13 @@ function renderGem(gem: GemView): string {
       <span>${escapeHtml(t("ui.enchantment"))}: ${escapeHtml(enchantmentLabel(gem))}</span>
     </article>
   `;
+}
+
+function renderItemArtwork(kind: ItemAssetKind, definitionId: string): string {
+  return `<span class="item-artwork ${kind}-artwork" style="${itemArtworkStyle(
+    kind,
+    definitionId,
+  )}" aria-hidden="true"></span>`;
 }
 
 function renderSkillBadges(monster: MonsterView): string {

@@ -39,6 +39,22 @@ describe("battle board interactions", () => {
     ).toBe("Electric");
   });
 
+  it("renders artwork for every current content definition in the setup collection", () => {
+    const assets = document.querySelectorAll<HTMLElement>("[data-asset-kind][data-asset-id]");
+
+    expect(assets).toHaveLength(120);
+    expect(
+      getElement('[data-asset-kind="ring"][data-asset-id="emberLoop"] .item-artwork').getAttribute(
+        "style",
+      ),
+    ).toContain("/assets/items/rings-atlas.png");
+    expect(
+      getElement(
+        '[data-asset-kind="material"][data-asset-id="graphene"] .item-artwork',
+      ).getAttribute("style"),
+    ).toContain("/assets/items/materials-atlas.png");
+  });
+
   it("renders rare monster borders on the battle board", () => {
     startBattle("skillShowcase");
 

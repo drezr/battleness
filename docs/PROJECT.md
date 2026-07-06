@@ -125,6 +125,14 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - Rarity colors: Common uses white or light gray, Refined uses blue, Rare uses orange, and Legendary uses purple.
 - Stat colors: Damage uses pink-red, Health uses red, Energy uses green, Energy Penalty uses pale green, Cooldown uses light cyan, Cooldown Penalty uses cyan, Quality uses orange, Speed uses yellow, Skill uses magenta, and Rarity uses purple.
 
+### Item Artwork
+
+- The prototype uses generated sprite atlases for all current rings, gems, monsters, spells, and materials.
+- Atlas cell order is mapped to stable content definition IDs in `apps/prototype/src/itemAssets.ts`.
+- The prototype validates artwork coverage at startup so newly added definitions cannot silently ship without an asset mapping.
+- Ring, gem, and monster artwork is rendered in the current battle and setup cards. Spell and material artwork is ready for future inventory, forge, and shop views.
+- The setup screen includes a collapsible development collection that renders every current asset by category.
+
 ### Battle Layout Direction
 
 - The battle screen should eventually follow the user's sketch direction: heroes anchored on the left, the monster battlefield occupying the center, rings arranged as a bottom hand or equipment row, and energy bars visible at the top and bottom.
