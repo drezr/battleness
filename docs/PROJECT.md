@@ -35,7 +35,7 @@ The game is a one-versus-one, turn-based combat game. Each player controls a her
 - Hero levels increase health. Combat energy is independent from hero level.
 - Ring and gem levels increase damage.
 - Monster levels increase damage and health.
-- Spell levels reduce energy and cooldown penalties.
+- Spell levels increase direct-damage effect amounts. Energy and cooldown penalties do not scale for now.
 - Rings, gems, monsters, and spells have quality from 0 to 100%.
 - A hero's speed is the sum of the base speed values of their equipped rings.
 - Elemental types are electric, fire, and ice.
@@ -171,7 +171,7 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - Player Market: A future economy system where players can list items for sale and buy items listed by other players.
 - Initial prototype recipes always consume exactly three quantity-1 materials from the matching crafting family.
 - Material rarities scale by crafted item rarity: common items use three common materials; refined items use one refined and two common materials; rare items use one rare, one refined, and one common material; legendary items use one legendary, one rare, and one refined material.
-- Initial crafted items are level 1 and quality 50. Crafted rings start with one socket.
+- Initial crafted items are level 1 and quality 0. Crafted rings start with one socket.
 - The prototype development forge persists credits, material stock, crafted item instances, and the next crafted-instance sequence in browser `localStorage`.
 - Development inventory starts with 1000 prototype credits. Quality improvement spends credits to add 5 quality points to a crafted item up to 100. Ring socket improvement spends credits to increase crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
 - Development inventory JSON can be exported, imported, or reset from the setup screen. This is a prototype tool and does not replace future account inventory persistence.
@@ -181,6 +181,7 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - Development inventory gems can be enchanted by one crafted spell or monster. A crafted spell or monster can be used as only one gem enchantment at a time.
 - When Battle Lab uses a development inventory ring, its socketed gems and those gems' enchantments are imported automatically into the loadout.
 - The setup screen includes a development loadout builder for choosing up to 10 crafted rings, previewing resolved speed, damage, energy, and cooldown efficiency, saving named loadouts in browser `localStorage`, and sending the selected loadout to either Battle Lab player.
+- Development inventory crafted item cards display derived level, current XP, next-level XP, and an XP progress bar. Loadout builder ring rows and selected-ring summaries also expose level and XP progress.
 
 ## Proposed Game Rules Specification
 
@@ -274,7 +275,7 @@ This section separates executable game rules from implementation decisions. It i
 
 - A spell has a specific effect.
 - BattleNess should not include healing mechanics, to keep combat dynamic.
-- Spell level reduces its energy penalty and cooldown penalty.
+- Spell level increases direct-damage effect amounts. Spell energy and cooldown penalties stay fixed for now.
 - A spell triggers when the ring containing its gem is used.
 - The initial combat engine should support explicit spell effects and include three direct-damage test spells: Spark, Firebolt, and Ice Shard.
 - Spell effects must be specified as explicit engine effects, not free-form text.
@@ -318,16 +319,17 @@ This section separates executable game rules from implementation decisions. It i
 - The total experience threshold for a level is `100 * level^2`. Level 1 requires 100 total experience, level 2 requires 400, level 10 requires 10,000, and level 50 requires 250,000.
 - Quality grants a linear stat bonus from 0% at quality 0 to 25% at quality 100.
 - Item level grants a linear stat bonus of 2% per level, up to 100% at level 50.
-- Level and quality bonuses are additive. For scalable item stats, `bonusPercent = level * 2 + floor(quality / 4)` and `resolvedStat = floor(baseStat * (100 + bonusPercent) / 100)`.
-- For example, a base stat of 4 at level 10 and quality 60 resolves to `floor(4 * 135 / 100)`, or 5.
-- Ring and gem progression scales damage. Monster progression scales damage and maximum health. Spell progression reduces the spell's own energy and cooldown penalties but does not scale effect damage.
+- Level and quality bonuses are additive. For scalable item stats, `bonusPercent = max(0, level - 1) * 2 + floor(quality / 4)` and `resolvedStat = floor(baseStat * (100 + bonusPercent) / 100)`.
+- For example, a base stat of 4 at level 10 and quality 60 resolves to `floor(4 * 133 / 100)`, or 5.
+- Ring and gem progression scales damage. Monster progression scales damage and maximum health. Spell progression scales direct-damage effect amounts.
+- Energy costs, cooldowns, speed, energy penalties, and cooldown penalties do not scale for now.
 - A hero's maximum health is `30 + floor(30 * level / 50)`. Maximum health is 30 at level 0, 45 at level 25, and 60 at level 50.
 - Hero level does not change turn energy. Each player's energy still progresses from 1 to 8 according to that player's own turn count.
 - Hero speed is the sum of the unscaled base speed values of equipped rings. Level and quality do not modify speed.
-- A spell's penalty reduction is `floor((level * 2 + floor(quality / 2)) / 50)`.
-- Each resolved spell penalty is `max(0, basePenalty - penaltyReduction)`. The final ring energy cost and cooldown minimums still apply after all penalties are combined.
+- Spell energy and cooldown penalties remain equal to their base values until a future balancing pass explicitly changes this rule.
 - Positive integer stat calculations use floor rounding unless a more specific combat rule says otherwise.
 - Progression formulas belong in the content/setup layer. The combat engine continues to receive fully resolved values through `BattleSetup`.
+- Content balance reports compare item definitions across base (`level 1`, `quality 0`), mid (`level 10`, `quality 50`), and max (`level 50`, `quality 100`) progression profiles. Primary metrics are damage per energy for rings, damage per penalty for gems and spells, and health plus damage for monsters. High outliers are flagged within matching item type and rarity groups.
 
 ### Engine And Content Format
 
@@ -418,6 +420,7 @@ This section separates executable game rules from implementation decisions. It i
 - Prototype item XP applies only to crafted development inventory instances referenced by Battle Lab `sourceInstanceId` values, regardless of whether those source-backed items are assigned to Player One or Player Two.
 - Source-backed equipped rings, socketed gems, and gem enchantments gain 8 XP when rewards are claimed. Each ring use adds 20 XP to the ring and each of its socketed gems. Each spell trigger adds 20 XP to the spell. Each monster summon and monster attack adds 20 XP to the matching monster source instance.
 - Hero XP is intentionally deferred until local player or account progression is modeled.
+- The prototype battle screen shows a deterministic result summary after finished battles. The summary is derived from the battle log and covers the result, turns, actions played, damage by player, rings used, spells cast, monsters summoned or used, item XP generated, and reward claim status. Imported replays can show this summary but cannot claim rewards.
 - In solo campaign, each opponent defines its fixed victory rewards in content data and victory unlocks the next opponent.
 - In solo campaign, defeat grants only a small amount of item experience.
 - In PvP, rewards will vary based on player level and opponent level.

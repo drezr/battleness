@@ -26,7 +26,7 @@ This file records modifications made to the project during agent-assisted work.
 - Successful combat commands are recorded in `actionHistory`, and the prototype supports versioned battle-record JSON export, import, step replay, full replay, and deterministic result/state verification.
 - GitHub Actions CI now installs pnpm before configuring the Node cache and uses Node 24-compatible action runtimes.
 - The BattleNess logo and application icon are stored in the prototype brand assets and used in the header, favicon, and Apple touch icon metadata.
-- Progression and stat formulas are now decided for experience-derived levels, quality and level scaling, hero health, fixed turn energy, equipment speed, spell penalty reduction, and campaign reward configuration.
+- Progression and stat formulas are now decided for experience-derived levels, quality and level scaling, hero health, fixed turn energy, equipment speed, fixed spell penalties, spell direct-damage scaling, and campaign reward configuration.
 - The content/setup layer now implements those formulas, derives levels from total experience, and resolves owned item progression before combat.
 - Monster and spell enchantments now reference explicit owned inventory instances with independent experience and quality.
 - Content startup validation now checks cross-file references, ownership, uniqueness, equipment, sockets, enchantments, and battle setup consistency after Zod shape validation.
@@ -36,7 +36,7 @@ This file records modifications made to the project during agent-assisted work.
 - Rings, gems, and monsters now show localized top-right elemental badges, and compact gem sockets combine elemental fill with rarity borders.
 - The content package now includes 48 forge recipes for the collectible rings, gems, monsters, and spells. Development-only `trainingFlameBand` and `plainQuartz` stay outside the recipe pool.
 - Prototype recipes always use exactly three quantity-1 materials from the matching crafting family. Material rarities scale by crafted item rarity: common uses three common materials, refined uses one refined and two common materials, rare uses one rare, one refined, and one common material, and legendary uses one legendary, one rare, and one refined material.
-- Crafted prototype items are created at level 1 and quality 50. Crafted rings start with one socket.
+- Crafted prototype items are created at level 1 and quality 0. Crafted rings start with one socket.
 - The setup screen now includes a development forge panel with recipe selection, required material stock controls, real material consumption, restock, and a list of crafted instances.
 - The development forge now persists credits, material stock, crafted item instances, and next crafted-instance sequence in browser `localStorage`.
 - Development inventory starts with 1000 prototype credits. Quality improvement raises one crafted item by 5 quality points up to 100, and ring socket improvement raises crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
@@ -49,6 +49,10 @@ This file records modifications made to the project during agent-assisted work.
 - Battle Lab inventory-backed ring selection now imports the selected ring's socketed gems and gem enchantments automatically.
 - The setup screen now includes a development loadout builder that selects up to 10 crafted rings, summarizes resolved speed, damage, energy, and cooldown efficiency, saves named loadouts in browser `localStorage`, and can send the selected loadout to either Battle Lab player.
 - Finished non-replay battles now show deterministic prototype rewards. Claiming rewards adds credits, common materials, and item XP to the browser-local development inventory. Winner rewards grant 150 credits plus one common material from each crafting family; draw rewards grant 90 credits plus two common materials. Source-backed equipped items gain 8 XP, and each ring use, socketed gem use, spell trigger, monster summon, or monster attack adds 20 XP to the matching crafted item instance.
+- Finished battles now show a result summary derived from the battle log, including result, turn count, actions played, damage by player, rings used, spells cast, monsters summoned or used, item XP generated, and reward claim status.
+- Crafted item cards now show derived level, current XP, next-level XP, and a progress bar. Loadout builder ring rows and selected-ring summaries also show level and XP progress.
+- Scaled combat stats now render in green in the prototype when their resolved value is above the base definition value.
+- Added a content balance report that compares rings, gems, spells, and monsters across base, mid, and max progression profiles and flags high primary-metric outliers by item type and rarity. The setup screen now exposes this report for development review.
 
 ## Change Log
 
@@ -66,9 +70,9 @@ This file records modifications made to the project during agent-assisted work.
 - Added engine and DOM regression tests for successful-action history, invalid-action exclusion, serialization, replay equivalence, tamper detection, and replay controls.
 - Fixed GitHub Actions CI startup failures by using `pnpm/action-setup@v6` before `actions/setup-node@v6`, upgrading checkout to v6, and removing the obsolete Corepack activation step.
 - Added the provided BattleNess logo and icon under `apps/prototype/public/assets/brand/` and integrated them into the prototype UI and HTML metadata.
-- Documented the confirmed progression formulas: `100 * level^2` total experience thresholds, additive level and quality item scaling, level-based hero health, unscaled equipped-ring speed, fixed turn energy progression, and spell penalty reduction.
+- Documented the confirmed progression formulas: `100 * level^2` total experience thresholds, additive level and quality item scaling, level-based hero health, unscaled equipped-ring speed, fixed turn energy progression, fixed penalties, and spell direct-damage scaling.
 - Defined solo campaign rewards as opponent-owned content data and deferred PvP and ranked reward formulas until matchmaking and ranking design.
-- Added the progression resolver with experience thresholds, capped level derivation, item scaling, hero health, and spell penalty calculations.
+- Added the progression resolver with experience thresholds, capped level derivation, item scaling, hero health, and fixed spell penalty behavior.
 - Migrated player, ring, and gem fixtures from persisted levels to total experience, and added owned monster and spell fixture instances.
 - Resolved progressed monster and spell instances into battle-scoped definitions while preserving stable content IDs in engine actions, events, and summoned-monster IDs.
 - Bumped the fixture/content format to `prototype-2` and added focused formula, schema-migration, setup-resolution, and runtime-enchantment tests.
@@ -106,6 +110,7 @@ This file records modifications made to the project during agent-assisted work.
 - Added development forge improvement actions for spending prototype credits on item quality and ring socket upgrades.
 - Added claimable deterministic post-battle rewards that feed credits and materials back into the development inventory.
 - Added source-backed item XP rewards for equipped and used crafted items in Battle Lab development battles.
+- Added visible item XP progression on development inventory cards and loadout builder ring summaries.
 
 ### 2026-06-25
 

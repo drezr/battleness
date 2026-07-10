@@ -4,8 +4,6 @@ export const MAX_QUALITY = 100;
 const EXPERIENCE_FACTOR = 100;
 const ITEM_LEVEL_BONUS_PERCENT = 2;
 const QUALITY_BONUS_DIVISOR = 4;
-const SPELL_QUALITY_DIVISOR = 2;
-const SPELL_PENALTY_STEP = 50;
 const HERO_BASE_HEALTH = 30;
 
 export function experienceForLevel(level: number): number {
@@ -21,7 +19,9 @@ export function levelFromExperience(experience: number): number {
 export function itemBonusPercent(level: number, quality: number): number {
   assertLevel(level);
   assertQuality(quality);
-  return level * ITEM_LEVEL_BONUS_PERCENT + Math.floor(quality / QUALITY_BONUS_DIVISOR);
+  return (
+    Math.max(0, level - 1) * ITEM_LEVEL_BONUS_PERCENT + Math.floor(quality / QUALITY_BONUS_DIVISOR)
+  );
 }
 
 export function resolveItemStat(baseStat: number, level: number, quality: number): number {
@@ -37,10 +37,7 @@ export function resolveHeroMaxHealth(level: number): number {
 export function spellPenaltyReduction(level: number, quality: number): number {
   assertLevel(level);
   assertQuality(quality);
-  return Math.floor(
-    (level * ITEM_LEVEL_BONUS_PERCENT + Math.floor(quality / SPELL_QUALITY_DIVISOR)) /
-      SPELL_PENALTY_STEP,
-  );
+  return 0;
 }
 
 export function resolveSpellPenalty(basePenalty: number, level: number, quality: number): number {

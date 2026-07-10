@@ -39,12 +39,7 @@ import {
   ringDefinitionSchema,
   spellDefinitionSchema,
 } from "./schemas";
-import {
-  levelFromExperience,
-  resolveHeroMaxHealth,
-  resolveItemStat,
-  resolveSpellPenalty,
-} from "./progression";
+import { levelFromExperience, resolveHeroMaxHealth, resolveItemStat } from "./progression";
 
 const definitionData = {
   gems: gemDefinitionSchema.array().parse(gemsJson),
@@ -284,11 +279,15 @@ function resolveGemEnchantment(
   resolvedDefinitions.spells[instance.id] = {
     ...toEngineSpellDefinition(definition),
     id: instance.id,
-    baseEnergyPenalty: resolveSpellPenalty(definition.baseEnergyPenalty, level, instance.quality),
-    baseCooldownPenalty: resolveSpellPenalty(
-      definition.baseCooldownPenalty,
-      level,
-      instance.quality,
+    baseEnergyPenalty: definition.baseEnergyPenalty,
+    baseCooldownPenalty: definition.baseCooldownPenalty,
+    effects: definition.effects.map((effect) =>
+      effect.type === "dealDamage"
+        ? {
+            ...effect,
+            amount: resolveItemStat(effect.amount, level, instance.quality),
+          }
+        : effect,
     ),
   };
 

@@ -145,22 +145,23 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 
 - Levels range from 0 to 50, quality ranges from 0 to 100, and total experience is the source of truth from which level is derived.
 - The total experience threshold for a level is `100 * level^2`.
-- Quality grants up to a 25% linear stat bonus, and item level grants 2% per level up to 100%.
-- Scalable item stats use `bonusPercent = level * 2 + floor(quality / 4)` and `resolvedStat = floor(baseStat * (100 + bonusPercent) / 100)`.
-- Ring and gem progression scales damage. Monster progression scales damage and health. Spell progression reduces its own penalties without scaling effect damage.
+- Quality grants up to a 25% linear stat bonus, and item level grants 2% per level after level 1.
+- Scalable item stats use `bonusPercent = max(0, level - 1) * 2 + floor(quality / 4)` and `resolvedStat = floor(baseStat * (100 + bonusPercent) / 100)`.
+- Ring and gem progression scales damage. Monster progression scales damage and health. Spell progression scales direct-damage effect amounts.
 - Hero maximum health is `30 + floor(30 * level / 50)`.
 - Hero level does not modify combat energy, which remains based on each player's turn count and capped at 8.
 - Hero speed is the sum of equipped rings' unscaled base speed values.
-- Spell penalty reduction is `floor((level * 2 + floor(quality / 2)) / 50)`, and each resolved penalty is clamped to a minimum of 0.
+- Energy costs, cooldowns, speed, energy penalties, and cooldown penalties do not scale for now.
 - Final ring energy cost and cooldown minimums remain 1.
 - Positive integer stat calculations use floor rounding unless a specific rule overrides it.
 - Campaign victory rewards are configured per opponent in content data. PvP and ranked reward formulas remain deferred until matchmaking and ranking are designed.
 
 ## Progression Implementation
 
-- `packages/content/src/progression.ts` implements experience thresholds, level derivation, item stat scaling, hero health, and spell penalty reduction.
+- `packages/content/src/progression.ts` implements experience thresholds, level derivation, item stat scaling, hero health, and fixed spell penalty behavior.
 - Player and item fixtures store total `experience` and no longer persist `level`.
-- Ring and gem damage, monster damage and health, hero health, and spell penalties are resolved while building `BattleSetup`.
+- Ring and gem damage, monster damage and health, hero health, and spell direct-damage effects are resolved while building `BattleSetup`.
+- `packages/content/src/balanceReport.ts` compares ring, gem, spell, and monster definitions across base (`level 1`, `quality 0`), mid (`level 10`, `quality 50`), and max (`level 50`, `quality 100`) progression profiles. It reports primary metrics and high outliers by item type and rarity, and the prototype setup screen renders the report for balancing review.
 - Owned monster and spell instances are explicit inventory records referenced by gem enchantments.
 - Resolved monster and spell definitions use battle-scoped instance IDs internally while combat events and summoned-monster IDs retain stable content IDs.
 - Content version `prototype-2` introduced the migrated fixture and resolved-definition format; `prototype-3` is the current content collection version.
@@ -285,7 +286,7 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - The Battle Lab can run two deterministic greedy simulations that vary the preferred element-duel winner, respect current targeting and action constraints, and report timeouts at 500 actions.
 - Content version `prototype-4` adds 48 initial forge recipes for collectible rings, gems, monsters, and spells. `trainingFlameBand` and `plainQuartz` remain development-only and have no recipes.
 - Prototype recipes use exactly three quantity-1 materials from the matching crafting family. Common outputs use three common materials; refined outputs use one refined and two common materials; rare outputs use one rare, one refined, and one common material; legendary outputs use one legendary, one rare, and one refined material.
-- Crafted prototype items are level 1 and quality 50. Crafted rings start with one socket. The setup screen includes a development forge panel with material stock controls, real consumption, restock, improvement actions, and crafted-instance output.
+- Crafted prototype items are level 1 and quality 0. Crafted rings start with one socket. The setup screen includes a development forge panel with material stock controls, real consumption, restock, improvement actions, and crafted-instance output.
 - The development forge persists credits, material stock, crafted item output, and the next crafted-instance sequence in browser `localStorage`.
 - Development inventory starts with 1000 prototype credits. Quality improvement spends credits to add 5 quality points to a crafted item up to 100. Ring socket improvement spends credits to increase crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
 - Development inventory JSON can be exported, imported, and reset from the setup screen.
@@ -297,6 +298,9 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - The setup screen includes a development loadout builder that selects up to 10 crafted rings, previews resolved speed, damage, energy, and cooldown efficiency, saves named loadouts in browser `localStorage`, and sends the current loadout to either Battle Lab player.
 - Finished non-replay battles show claimable deterministic prototype rewards. Winner rewards add 150 credits plus `aluminium`, `hydrogen`, `pearl`, and `sand`; draw rewards add 90 credits plus `aluminium` and `pearl`. Claimed rewards are persisted into the browser-local development inventory.
 - Source-backed Battle Lab items also gain XP when rewards are claimed. Equipped source-backed items gain 8 XP, and each actual ring use, socketed gem use, spell trigger, monster summon, or monster attack adds 20 XP to the matching crafted item instance. Hero XP is deferred.
+- Finished battles show a deterministic result summary derived from the battle log: result, turn count, actions played, damage by player, rings used, spells cast, monsters summoned or used, item XP generated, and reward claim status. Imported replays can show the summary but cannot claim rewards.
+- Development inventory cards show item level, XP toward the next level, and a progress bar. Loadout builder ring options and selected-ring summaries also show level and XP progress.
+- Prototype combat stats render in green when their resolved value is above the base definition value, with a tooltip showing the base value.
 - Stat colors: Damage uses pink-red, Health uses red, Energy uses green, Energy Penalty uses pale green, Cooldown uses light cyan, Cooldown Penalty uses cyan, Quality uses orange, Speed uses yellow, Skill uses magenta, and Rarity uses purple.
 
 ## Battle Layout Direction

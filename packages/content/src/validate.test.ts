@@ -116,7 +116,7 @@ describe("content package", () => {
         definitionId: "emberLoop",
         ownerId: "playerOne",
         experience: 100,
-        quality: 50,
+        quality: 0,
         socketCount: 1,
         socketedGemInstanceIds: [],
         equipped: false,
@@ -144,14 +144,14 @@ describe("content package", () => {
 
     const qualityResult = improveCraftedItemQuality(crafted, "common", 1000);
 
-    expect(qualityResult.cost).toBe(75);
-    expect(qualityResult.credits).toBe(925);
-    expect(qualityResult.crafted.item.quality).toBe(55);
+    expect(qualityResult.cost).toBe(25);
+    expect(qualityResult.credits).toBe(975);
+    expect(qualityResult.crafted.item.quality).toBe(5);
 
-    const socketResult = improveRingSocketCount(qualityResult.crafted, "common", 925);
+    const socketResult = improveRingSocketCount(qualityResult.crafted, "common", 975);
 
     expect(socketResult.cost).toBe(250);
-    expect(socketResult.credits).toBe(675);
+    expect(socketResult.credits).toBe(725);
     expect(socketResult.crafted.item.socketCount).toBe(2);
 
     expect(() =>

@@ -3,22 +3,31 @@ import {
   canCraftRecipe,
   createBattleSetupFromFixture,
   createBattleSetupFromLab,
+  createBalanceReport,
   craftRecipe,
   definitions,
   fixtures,
+  experienceForLevel,
   improveCraftedItemQuality,
   improveRingSocketCount,
   levelFromExperience,
   locales,
+  MAX_LEVEL,
   parseBattleLabConfigJson,
   serializeBattleLabConfig,
   qualityImprovementCost,
+  resolveItemStat,
   socketImprovementCost,
   validateContent,
   type BattleLabConfig,
   type BattleLabEnchantmentConfig,
   type BattleLabGemConfig,
   type BattleLabRingConfig,
+  type BalanceItemKind,
+  type BalanceItemReport,
+  type BalanceMetricId,
+  type BalanceProfileId,
+  type BalanceWarning,
   type CraftedItemInstance,
   type ImprovementRarity,
   type RecipeDefinition,
@@ -99,6 +108,18 @@ type BattleRewardPreview = {
   materials: BattleRewardMaterial[];
   itemXp: BattleRewardItemXp[];
   reasonKey: string;
+};
+type BattleResultSummary = {
+  resultLabel: string;
+  turnCount: number;
+  actionCount: number;
+  damageByPlayer: Array<{ playerId: string; playerName: string; damage: number }>;
+  ringsUsed: Array<{ id: string; label: string; count: number }>;
+  spellsCast: Array<{ id: string; label: string; count: number }>;
+  monstersSummoned: Array<{ id: string; label: string; count: number }>;
+  monstersUsed: Array<{ id: string; label: string; count: number }>;
+  itemXp: BattleRewardItemXp[];
+  rewardsStatusKey: string;
 };
 type BattleSourceMap = {
   rings: Map<string, string>;
@@ -261,6 +282,8 @@ function render(): void {
 
       ${renderBattleBoard()}
 
+      ${renderBattleResultSummaryPanel()}
+
       ${renderBattleRewardsPanel()}
 
       <main class="layout">
@@ -381,6 +404,8 @@ function renderSetup(): void {
 
         ${setupMode === "battleLab" ? renderBattleLabEditor() : ""}
 
+        ${renderContentBalanceReportPanel()}
+
         ${renderForgePanel()}
 
         ${renderDevelopmentInventoryPanel()}
@@ -426,17 +451,17 @@ function createDefaultBattleLabConfig(): BattleLabConfig {
           {
             definitionId: "sparkBand",
             level: 1,
-            quality: 60,
+            quality: 0,
             gems: [
               {
                 definitionId: "sparkPrism",
                 level: 1,
-                quality: 60,
+                quality: 0,
                 enchantment: {
                   type: "spell",
                   definitionId: "spark",
                   level: 1,
-                  quality: 60,
+                  quality: 0,
                 },
               },
             ],
@@ -451,17 +476,17 @@ function createDefaultBattleLabConfig(): BattleLabConfig {
           {
             definitionId: "frostSeal",
             level: 1,
-            quality: 60,
+            quality: 0,
             gems: [
               {
                 definitionId: "frostChip",
                 level: 1,
-                quality: 60,
+                quality: 0,
                 enchantment: {
                   type: "spell",
                   definitionId: "iceShard",
                   level: 1,
-                  quality: 60,
+                  quality: 0,
                 },
               },
             ],
@@ -606,7 +631,7 @@ function renderBattleLabBalance(players: BattleState["players"]): string {
                         <div>
                           ${renderItemArtwork("ring", ring.definitionId)}
                           <strong>${escapeHtml(t(ring.nameKey))}</strong>
-                          <span>${escapeHtml(t("ui.damage"))}: ${ringTotalDamage(ring)}</span>
+                          <span>${escapeHtml(t("ui.damage"))}: ${renderResolvedValue(ringTotalDamage(ring), baseRingTotalDamage(ring))}</span>
                           <span>${escapeHtml(t("ui.energy"))}: ${ring.energyCost}</span>
                           <span>${escapeHtml(t("ui.cooldown"))}: ${ring.cooldown}</span>
                         </div>
@@ -681,6 +706,146 @@ function renderBattleLabSimulationResults(): string {
       </table>
     </div>
   `;
+}
+
+function renderContentBalanceReportPanel(): string {
+  const report = createBalanceReport(definitions);
+
+  return `
+    <section class="panel content-balance-report">
+      <div class="section-heading">
+        <h2>${escapeHtml(t("ui.contentBalanceReport"))}</h2>
+        <span>${escapeHtml(contentVersion)}</span>
+      </div>
+      <div class="balance-profile-grid">
+        ${report.profiles
+          .map(
+            (profile) => `
+              <article>
+                <strong>${escapeHtml(balanceProfileLabel(profile.id))}</strong>
+                <span>${escapeHtml(t("ui.level"))}: ${profile.level}</span>
+                <span>${escapeHtml(t("ui.quality"))}: ${profile.quality}</span>
+              </article>
+            `,
+          )
+          .join("")}
+      </div>
+      <div class="content-balance-layout">
+        <section>
+          <h3>${escapeHtml(t("ui.balanceWarnings"))}</h3>
+          ${renderContentBalanceWarnings(report.warnings)}
+        </section>
+        <section>
+          <h3>${escapeHtml(t("ui.balanceComparison"))}</h3>
+          <div class="balance-report-groups">
+            ${(["ring", "gem", "spell", "monster"] as const)
+              .map((kind) => renderBalanceItemGroup(kind, report.items))
+              .join("")}
+          </div>
+        </section>
+      </div>
+    </section>
+  `;
+}
+
+function renderContentBalanceWarnings(warnings: readonly BalanceWarning[]): string {
+  if (warnings.length === 0) {
+    return `<p class="muted">${escapeHtml(t("ui.noContentBalanceWarnings"))}</p>`;
+  }
+
+  return `
+    <ul class="content-balance-warnings">
+      ${warnings
+        .slice(0, 8)
+        .map(
+          (warning) => `
+            <li>
+              ${escapeHtml(
+                formatMessage("ui.highOutlierWarning", {
+                  item: balanceItemLabel(warning.kind, warning.itemId),
+                  profile: balanceProfileLabel(warning.profileId),
+                  metric: balanceMetricLabel(warning.metric),
+                  value: formatMetricValue(warning.value),
+                  average: formatMetricValue(warning.average),
+                }),
+              )}
+            </li>
+          `,
+        )
+        .join("")}
+    </ul>
+  `;
+}
+
+function renderBalanceItemGroup(
+  kind: BalanceItemKind,
+  items: readonly BalanceItemReport[],
+): string {
+  const groupItems = items.filter((item) => item.kind === kind);
+
+  return `
+    <article class="balance-report-group">
+      <h4>${escapeHtml(t(`ui.${kind}s`))}</h4>
+      <div class="balance-report-table-wrap">
+        <table class="balance-report-table">
+          <thead>
+            <tr>
+              <th>${escapeHtml(t(`ui.${kind}`))}</th>
+              <th>${escapeHtml(t("ui.element"))}</th>
+              <th>${escapeHtml(t("ui.rarity"))}</th>
+              ${(["base", "mid", "max"] as const)
+                .map((profileId) => `<th>${escapeHtml(balanceProfileLabel(profileId))}</th>`)
+                .join("")}
+            </tr>
+          </thead>
+          <tbody>
+            ${groupItems
+              .map(
+                (item) => `
+                  <tr>
+                    <td>${escapeHtml(t(item.nameKey))}</td>
+                    <td>${escapeHtml(t(`ui.element.${item.element}`))}</td>
+                    <td>${escapeHtml(t(`ui.rarity.${item.rarity}`))}</td>
+                    ${(["base", "mid", "max"] as const)
+                      .map((profileId) => {
+                        const profile = item.profiles.find(
+                          (candidate) => candidate.profileId === profileId,
+                        );
+                        return `<td>${escapeHtml(
+                          profile
+                            ? `${formatMetricValue(profile.primaryValue)} ${balanceMetricLabel(
+                                profile.primaryMetric,
+                              )}`
+                            : "-",
+                        )}</td>`;
+                      })
+                      .join("")}
+                  </tr>
+                `,
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </div>
+    </article>
+  `;
+}
+
+function balanceItemLabel(kind: BalanceItemKind, itemId: string): string {
+  const definition = itemDefinition(kind, itemId);
+  return t(definition.nameKey);
+}
+
+function balanceProfileLabel(profileId: BalanceProfileId): string {
+  return t(`ui.balanceProfile.${profileId}`);
+}
+
+function balanceMetricLabel(metric: BalanceMetricId): string {
+  return t(`ui.balanceMetric.${metric}`);
+}
+
+function formatMetricValue(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2);
 }
 
 function renderForgePanel(): string {
@@ -990,6 +1155,7 @@ function renderLoadoutRingOption(
 ): string {
   const definition = itemDefinition("ring", crafted.item.definitionId);
   const selected = selectedLoadoutRingIds.includes(crafted.item.id);
+  const xp = itemXpProgress(crafted);
   const socketLabel =
     crafted.item.socketedGemInstanceIds.length > 0
       ? crafted.item.socketedGemInstanceIds
@@ -1012,6 +1178,7 @@ function renderLoadoutRingOption(
       ${renderItemArtwork("ring", definition.id)}
       <span>
         <strong>${escapeHtml(t(definition.nameKey))}</strong>
+        <small>${escapeHtml(t("ui.level"))}: ${xp.level} / ${escapeHtml(xpProgressLabel(xp))}</small>
         <small>${escapeHtml(t("ui.socketedGems"))}: ${escapeHtml(socketLabel)}</small>
         <code>${escapeHtml(crafted.item.id)}</code>
       </span>
@@ -1024,6 +1191,7 @@ function renderLoadoutSelectedRing(
 ): string {
   const definition = itemDefinition("ring", crafted.item.definitionId);
   const resolved = resolvedLoadoutRing(crafted);
+  const xp = itemXpProgress(crafted);
   const gemLabels = crafted.item.socketedGemInstanceIds
     .map((gemId) => {
       const gem = craftedItemById("gem", gemId);
@@ -1040,7 +1208,9 @@ function renderLoadoutSelectedRing(
       ${renderItemArtwork("ring", definition.id)}
       <div>
         <strong>${escapeHtml(t(definition.nameKey))}</strong>
-        <span>${escapeHtml(t("ui.damage"))}: ${resolved ? ringTotalDamage(resolved) : "-"}</span>
+        <span>${escapeHtml(t("ui.level"))}: ${xp.level}</span>
+        <span>${escapeHtml(xpProgressLabel(xp))}</span>
+        <span>${escapeHtml(t("ui.damage"))}: ${resolved ? renderResolvedValue(ringTotalDamage(resolved), baseRingTotalDamage(resolved)) : "-"}</span>
         <span>${escapeHtml(t("ui.energy"))}: ${resolved?.energyCost ?? "-"}</span>
         <span>${escapeHtml(t("ui.cooldown"))}: ${resolved?.cooldown ?? "-"}</span>
         <span>${escapeHtml(t("ui.speed"))}: ${resolved?.speed ?? "-"}</span>
@@ -1060,7 +1230,7 @@ function renderFilterOption(value: string, label: string, selectedValue: string)
 
 function renderInventoryCraftedCard(crafted: CraftedItemInstance): string {
   const output = itemDefinition(crafted.type, crafted.item.definitionId);
-  const level = Math.max(1, levelFromExperience(crafted.item.experience));
+  const xp = itemXpProgress(crafted);
   const extraStats =
     crafted.type === "ring"
       ? `${t("ui.sockets")}: ${crafted.item.socketCount}`
@@ -1078,14 +1248,95 @@ function renderInventoryCraftedCard(crafted: CraftedItemInstance): string {
       ${renderItemArtwork(crafted.type, output.id)}
       <strong>${escapeHtml(t(output.nameKey))}</strong>
       <span>${escapeHtml(t(`ui.${crafted.type}`))} - ${escapeHtml(t(`ui.rarity.${output.rarity}`))}</span>
-      <span>${escapeHtml(t("ui.level"))}: ${level}</span>
+      <span>${escapeHtml(t("ui.level"))}: ${xp.level}</span>
       <span>${escapeHtml(t("ui.quality"))}: ${crafted.item.quality}</span>
+      ${renderXpProgress(xp)}
+      ${renderInventoryCraftedCombatStats(crafted)}
       <span>${escapeHtml(extraStats)}</span>
       ${renderItemImprovementControls(crafted)}
       ${crafted.type === "ring" ? renderRingSocketControls(crafted) : ""}
       ${crafted.type === "gem" ? renderGemEnchantmentControls(crafted) : ""}
       <code>${escapeHtml(crafted.item.id)}</code>
     </article>
+  `;
+}
+
+function renderInventoryCraftedCombatStats(crafted: CraftedItemInstance): string {
+  const level = Math.max(1, levelFromExperience(crafted.item.experience));
+  const quality = crafted.item.quality;
+
+  if (crafted.type === "ring") {
+    const baseDamage = baseRingDamage(crafted.item.definitionId);
+    return `<span>${escapeHtml(t("ui.damage"))}: ${renderResolvedValue(resolveItemStat(baseDamage, level, quality), baseDamage)}</span>`;
+  }
+
+  if (crafted.type === "gem") {
+    const baseDamage = baseGemDamage(crafted.item.definitionId);
+    return `<span>${escapeHtml(t("ui.damage"))}: ${renderResolvedValue(resolveItemStat(baseDamage, level, quality), baseDamage)}</span>`;
+  }
+
+  if (crafted.type === "monster") {
+    const baseHealth = baseMonsterHealth(crafted.item.definitionId);
+    const baseDamage = baseMonsterDamage(crafted.item.definitionId);
+    return `
+      <span>${escapeHtml(t("ui.health"))}: ${renderResolvedValue(resolveItemStat(baseHealth, level, quality), baseHealth)}</span>
+      <span>${escapeHtml(t("ui.damage"))}: ${renderResolvedValue(resolveItemStat(baseDamage, level, quality), baseDamage)}</span>
+    `;
+  }
+
+  const baseDamage = baseSpellDamage(crafted.item.definitionId);
+  return `<span>${escapeHtml(t("ui.damage"))}: ${renderResolvedValue(resolveItemStat(baseDamage, level, quality), baseDamage)}</span>`;
+}
+
+type ItemXpProgress = {
+  level: number;
+  currentXp: number;
+  nextLevelXp: number | null;
+  progressPercent: number;
+};
+
+function itemXpProgress(crafted: CraftedItemInstance): ItemXpProgress {
+  const level = Math.max(1, levelFromExperience(crafted.item.experience));
+  const nextLevelXp = level >= MAX_LEVEL ? null : experienceForLevel(level + 1);
+  const levelStartXp = experienceForLevel(level);
+  const progressPercent =
+    nextLevelXp === null
+      ? 100
+      : Math.max(
+          0,
+          Math.min(
+            100,
+            Math.floor(
+              ((crafted.item.experience - levelStartXp) / (nextLevelXp - levelStartXp)) * 100,
+            ),
+          ),
+        );
+
+  return {
+    level,
+    currentXp: crafted.item.experience,
+    nextLevelXp,
+    progressPercent,
+  };
+}
+
+function xpProgressLabel(progress: ItemXpProgress): string {
+  return progress.nextLevelXp === null
+    ? formatMessage("ui.xpMaxLevel", { xp: String(progress.currentXp) })
+    : formatMessage("ui.xpProgress", {
+        current: String(progress.currentXp),
+        next: String(progress.nextLevelXp),
+      });
+}
+
+function renderXpProgress(progress: ItemXpProgress): string {
+  return `
+    <div class="xp-progress" title="${escapeHtml(xpProgressLabel(progress))}">
+      <span>${escapeHtml(xpProgressLabel(progress))}</span>
+      <div aria-hidden="true">
+        <i style="width: ${progress.progressPercent}%"></i>
+      </div>
+    </div>
   `;
 }
 
@@ -1438,6 +1689,126 @@ function applyItemXpRewards(
       },
     } as CraftedItemInstance;
   });
+}
+
+function battleResultSummary(): BattleResultSummary | null {
+  if (state.status !== "finished" || !state.result) {
+    return null;
+  }
+
+  const damageByPlayerId = new Map(state.players.map((player) => [player.id, 0]));
+  const ringsUsed = new Map<string, { id: string; label: string; count: number }>();
+  const spellsCast = new Map<string, { id: string; label: string; count: number }>();
+  const monstersSummoned = new Map<string, { id: string; label: string; count: number }>();
+  const monstersUsed = new Map<string, { id: string; label: string; count: number }>();
+  const monsterDefinitionByInstanceId = new Map<string, string>();
+  let turnCount = 0;
+  let activeDamageOwnerId: string | undefined;
+
+  for (const player of state.players) {
+    for (const monster of player.monsters) {
+      monsterDefinitionByInstanceId.set(monster.id, monster.definitionId);
+    }
+  }
+
+  for (const event of state.log) {
+    switch (event.type) {
+      case "turnStarted":
+        turnCount = Math.max(turnCount, event.turnCount);
+        break;
+      case "ringUsed":
+        activeDamageOwnerId = event.playerId;
+        incrementSummaryEntry(ringsUsed, event.ringInstanceId, ringLabel(event.ringInstanceId));
+        break;
+      case "spellCast":
+        incrementSummaryEntry(spellsCast, event.spellId, spellLabel(event.spellId));
+        break;
+      case "monsterSummoned":
+        monsterDefinitionByInstanceId.set(event.monsterInstanceId, event.monsterId);
+        incrementSummaryEntry(
+          monstersSummoned,
+          event.monsterId,
+          monsterDefinitionLabel(event.monsterId),
+        );
+        break;
+      case "monsterUsed": {
+        activeDamageOwnerId = event.playerId;
+        const monsterDefinitionId = monsterDefinitionByInstanceId.get(event.monsterInstanceId);
+        const label = monsterDefinitionId
+          ? monsterDefinitionLabel(monsterDefinitionId)
+          : combatObjectLabel(event.monsterInstanceId);
+        incrementSummaryEntry(monstersUsed, label, label);
+        break;
+      }
+      case "damageDealt": {
+        const ownerId = sourceOwnerId(event.sourceId) ?? activeDamageOwnerId;
+        if (ownerId) {
+          damageByPlayerId.set(ownerId, (damageByPlayerId.get(ownerId) ?? 0) + event.amount);
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  return {
+    resultLabel: battleResultMessage(state.result),
+    turnCount,
+    actionCount: state.actionHistory.length,
+    damageByPlayer: state.players.map((player) => ({
+      playerId: player.id,
+      playerName: player.username,
+      damage: damageByPlayerId.get(player.id) ?? 0,
+    })),
+    ringsUsed: Array.from(ringsUsed.values()),
+    spellsCast: Array.from(spellsCast.values()),
+    monstersSummoned: Array.from(monstersSummoned.values()),
+    monstersUsed: Array.from(monstersUsed.values()),
+    itemXp: battleItemXpRewards(),
+    rewardsStatusKey: isReplayLocked()
+      ? "ui.rewardsUnavailableInReplay"
+      : battleRewardsClaimed
+        ? "ui.rewardsClaimed"
+        : "ui.rewardsUnclaimed",
+  };
+}
+
+function incrementSummaryEntry(
+  entries: Map<string, { id: string; label: string; count: number }>,
+  id: string,
+  label: string,
+): void {
+  const existing = entries.get(id);
+  entries.set(id, {
+    id,
+    label,
+    count: (existing?.count ?? 0) + 1,
+  });
+}
+
+function sourceOwnerId(sourceId: string): string | undefined {
+  for (const player of state.players) {
+    for (const ring of player.rings) {
+      if (ring.id === sourceId) {
+        return player.id;
+      }
+
+      if (
+        ring.gems.some(
+          (gem) => gem.enchantment?.type === "spell" && gem.enchantment.spellId === sourceId,
+        )
+      ) {
+        return player.id;
+      }
+    }
+
+    if (player.monsters.some((monster) => monster.id === sourceId)) {
+      return player.id;
+    }
+  }
+
+  return state.players.find((player) => sourceId.startsWith(`${player.id}.`))?.id;
 }
 
 function battleSourceMap(): BattleSourceMap {
@@ -3272,7 +3643,7 @@ function createDefaultLabRing(): BattleLabRingConfig {
   return {
     definitionId: definitions.rings[0]?.id ?? "",
     level: 1,
-    quality: 50,
+    quality: 0,
     gems: [],
   };
 }
@@ -3281,7 +3652,7 @@ function createDefaultLabGem(): BattleLabGemConfig {
   return {
     definitionId: definitions.gems[0]?.id ?? "",
     level: 1,
-    quality: 50,
+    quality: 0,
   };
 }
 
@@ -3293,7 +3664,7 @@ function createDefaultLabEnchantment(
     definitionId:
       type === "monster" ? (definitions.monsters[0]?.id ?? "") : (definitions.spells[0]?.id ?? ""),
     level: 1,
-    quality: 50,
+    quality: 0,
   };
 }
 
@@ -3519,7 +3890,7 @@ function renderManualActions(): string {
               <strong>${escapeHtml(t(ring.nameKey))}</strong>
               <span>
                 ${escapeHtml(t("ui.energy"))} ${ring.energyCost} /
-                ${escapeHtml(t("ui.damage"))} ${ringTotalDamage(ring)} /
+                ${escapeHtml(t("ui.damage"))} ${renderResolvedValue(ringTotalDamage(ring), baseRingTotalDamage(ring))} /
                 ${escapeHtml(t("ui.cooldown"))} ${ring.currentCooldown}/${ring.cooldown}
               </span>
             </button>
@@ -3540,9 +3911,9 @@ function renderManualActions(): string {
                     disabled ? "disabled" : ""
                   }>
                     ${renderElementBadge(monster.element)}
-                    ${escapeHtml(t(monster.nameKey))} - ${escapeHtml(t("ui.cooldown"))} ${
-                      monster.currentCooldown
-                    }
+                    ${escapeHtml(t(monster.nameKey))} -
+                    ${escapeHtml(t("ui.damage"))} ${renderResolvedValue(monster.damage, baseMonsterDamage(monster.definitionId))} /
+                    ${escapeHtml(t("ui.cooldown"))} ${monster.currentCooldown}
                   </button>
                 `;
               })
@@ -3626,12 +3997,96 @@ function renderBattleRewardsPanel(): string {
       <dl class="reward-summary">
         ${stat(t("ui.credits"), `+${rewards.credits}`)}
         ${stat(t("ui.materials"), materialLabels || t("ui.none"))}
-        ${stat(t("ui.itemXp"), itemXpLabels || t("ui.none"))}
+        ${stat(t("ui.itemXp"), itemXpLabels || t("ui.noSourceBackedItemXp"))}
       </dl>
       <button id="claimBattleRewards" ${battleRewardsClaimed ? "disabled" : ""}>
         ${escapeHtml(battleRewardsClaimed ? t("ui.rewardsClaimed") : t("ui.claimRewards"))}
       </button>
     </section>
+  `;
+}
+
+function renderBattleResultSummaryPanel(): string {
+  const summary = battleResultSummary();
+  if (!summary) {
+    return "";
+  }
+
+  const itemXpLabels = summary.itemXp
+    .map((reward) => {
+      const crafted = craftedItemById(reward.type, reward.sourceInstanceId);
+      const definition = crafted ? itemDefinition(crafted.type, crafted.item.definitionId) : null;
+      return `${definition ? t(definition.nameKey) : reward.sourceInstanceId} +${reward.xp} XP`;
+    })
+    .join(t("ui.listSeparator"));
+
+  return `
+    <section class="panel battle-result-summary">
+      <div>
+        <h2>${escapeHtml(t("ui.battleResultSummary"))}</h2>
+        <p>${escapeHtml(summary.resultLabel)}</p>
+      </div>
+      <dl class="result-summary-stats">
+        ${stat(t("ui.turns"), String(summary.turnCount))}
+        ${stat(t("ui.actionsPlayed"), String(summary.actionCount))}
+        ${stat(t("ui.rewardsStatus"), t(summary.rewardsStatusKey))}
+      </dl>
+      <div class="result-summary-grid">
+        <section>
+          <h3>${escapeHtml(t("ui.damageByPlayer"))}</h3>
+          <dl class="compact-stat-list">
+            ${summary.damageByPlayer
+              .map((entry) => stat(entry.playerName, String(entry.damage)))
+              .join("")}
+          </dl>
+        </section>
+        <section>
+          <h3>${escapeHtml(t("ui.ringsUsed"))}</h3>
+          ${renderResultUsageList(summary.ringsUsed)}
+        </section>
+        <section>
+          <h3>${escapeHtml(t("ui.spellsCast"))}</h3>
+          ${renderResultUsageList(summary.spellsCast)}
+        </section>
+        <section>
+          <h3>${escapeHtml(t("ui.monstersSummoned"))}</h3>
+          ${renderResultUsageList(summary.monstersSummoned)}
+        </section>
+        <section>
+          <h3>${escapeHtml(t("ui.monstersUsed"))}</h3>
+          ${renderResultUsageList(summary.monstersUsed)}
+        </section>
+        <section>
+          <h3>${escapeHtml(t("ui.itemXpGenerated"))}</h3>
+          <p class="result-summary-copy">
+            ${escapeHtml(itemXpLabels || t("ui.noSourceBackedItemXp"))}
+          </p>
+        </section>
+      </div>
+    </section>
+  `;
+}
+
+function renderResultUsageList(
+  entries: ReadonlyArray<{ id: string; label: string; count: number }>,
+): string {
+  if (entries.length === 0) {
+    return `<p class="result-summary-copy">${escapeHtml(t("ui.none"))}</p>`;
+  }
+
+  return `
+    <ul class="result-usage-list">
+      ${entries
+        .map(
+          (entry) => `
+            <li>
+              <span>${escapeHtml(entry.label)}</span>
+              <strong>x${entry.count}</strong>
+            </li>
+          `,
+        )
+        .join("")}
+    </ul>
   `;
 }
 
@@ -3717,8 +4172,8 @@ function renderMonsterSlot(player: BattlePlayerView, index: number): string {
       ${renderItemArtwork("monster", monster.definitionId)}
       <strong>${escapeHtml(t(monster.nameKey))}</strong>
       <span class="monster-stats">
-        <span>${escapeHtml(t("ui.damage"))} ${monster.damage}</span>
-        <span>${escapeHtml(t("ui.health"))} ${monster.health}/${monster.maxHealth}</span>
+        <span>${escapeHtml(t("ui.damage"))} ${renderResolvedValue(monster.damage, baseMonsterDamage(monster.definitionId))}</span>
+        <span>${escapeHtml(t("ui.health"))} ${renderResolvedValue(monster.health, baseMonsterHealth(monster.definitionId))}/${renderResolvedValue(monster.maxHealth, baseMonsterHealth(monster.definitionId))}</span>
         <span>${escapeHtml(t("ui.cooldown"))} ${monster.currentCooldown}/${monster.cooldown}</span>
       </span>
     </button>
@@ -3758,7 +4213,7 @@ function renderBoardRing(ring: RingView, activePlayer: BattlePlayerView | null):
       ${renderItemArtwork("ring", ring.definitionId)}
       <strong>${escapeHtml(t(ring.nameKey))}</strong>
       <span class="ring-stats">
-        <span>${escapeHtml(t("ui.damage"))} ${ringTotalDamage(ring)}</span>
+        <span>${escapeHtml(t("ui.damage"))} ${renderResolvedValue(ringTotalDamage(ring), baseRingTotalDamage(ring))}</span>
         <span>${escapeHtml(t("ui.energy"))} ${ring.energyCost}</span>
         <span>${escapeHtml(t("ui.cooldown"))} ${ring.currentCooldown}/${ring.cooldown}</span>
       </span>
@@ -3971,7 +4426,7 @@ function renderPlayer(player: BattlePlayerView): string {
                 <strong>${escapeHtml(t(ring.nameKey))}</strong>
                 <dl class="inline-stats">
                   ${stat(t("ui.energy"), String(ring.energyCost))}
-                  ${stat(t("ui.damage"), String(ringTotalDamage(ring)))}
+                  ${resolvedStat(t("ui.damage"), ringTotalDamage(ring), baseRingTotalDamage(ring))}
                   ${stat(t("ui.cooldown"), `${ring.currentCooldown}/${ring.cooldown}`)}
                 </dl>
                 ${renderGemList(ring)}
@@ -3992,7 +4447,8 @@ function renderPlayer(player: BattlePlayerView): string {
                       ${renderElementBadge(monster.element)}
                       ${renderItemArtwork("monster", monster.definitionId)}
                       <strong>${escapeHtml(t(monster.nameKey))}</strong>
-                      <span>${escapeHtml(t("ui.health"))} ${monster.health}/${monster.maxHealth}</span>
+                      <span>${escapeHtml(t("ui.health"))} ${renderResolvedValue(monster.health, baseMonsterHealth(monster.definitionId))}/${renderResolvedValue(monster.maxHealth, baseMonsterHealth(monster.definitionId))}</span>
+                      <span>${escapeHtml(t("ui.damage"))} ${renderResolvedValue(monster.damage, baseMonsterDamage(monster.definitionId))}</span>
                       <span>${escapeHtml(t("ui.cooldown"))} ${monster.currentCooldown}</span>
                       ${renderSkillBadges(monster)}
                     </li>
@@ -4027,7 +4483,7 @@ function renderSetupPlayer(player: BattlePlayerView): string {
                 <strong>${escapeHtml(t(ring.nameKey))}</strong>
                 <dl class="inline-stats">
                   ${stat(t("ui.energy"), String(ring.energyCost))}
-                  ${stat(t("ui.damage"), String(ringTotalDamage(ring)))}
+                  ${resolvedStat(t("ui.damage"), ringTotalDamage(ring), baseRingTotalDamage(ring))}
                   ${stat(t("ui.cooldown"), String(ring.cooldown))}
                 </dl>
                 ${renderGemList(ring)}
@@ -4059,7 +4515,7 @@ function renderGem(gem: GemView): string {
       ${renderItemArtwork("gem", gem.definitionId)}
       <strong>${escapeHtml(t(gem.nameKey))}</strong>
       <dl class="inline-stats compact">
-        ${stat(t("ui.damage"), String(gem.damage))}
+        ${resolvedStat(t("ui.damage"), gem.damage, baseGemDamage(gem.definitionId))}
         ${stat(t("ui.energyPenalty"), String(gem.energyPenalty))}
         ${stat(t("ui.cooldownPenalty"), String(gem.cooldownPenalty))}
       </dl>
@@ -4130,6 +4586,46 @@ function enchantmentLabel(gem: GemView): string {
 
 function ringTotalDamage(ring: RingView): number {
   return ring.damage + ring.gems.reduce((sum, gem) => sum + gem.damage, 0);
+}
+
+function baseRingTotalDamage(ring: RingView): number {
+  return (
+    baseRingDamage(ring.definitionId) +
+    ring.gems.reduce((sum, gem) => sum + baseGemDamage(gem.definitionId), 0)
+  );
+}
+
+function baseRingDamage(definitionId: string): number {
+  return definitions.rings.find((ring) => ring.id === definitionId)?.baseDamage ?? 0;
+}
+
+function baseGemDamage(definitionId: string): number {
+  return definitions.gems.find((gem) => gem.id === definitionId)?.baseDamage ?? 0;
+}
+
+function baseMonsterHealth(definitionId: string): number {
+  return definitions.monsters.find((monster) => monster.id === definitionId)?.baseHealth ?? 0;
+}
+
+function baseMonsterDamage(definitionId: string): number {
+  return definitions.monsters.find((monster) => monster.id === definitionId)?.baseDamage ?? 0;
+}
+
+function baseSpellDamage(definitionId: string): number {
+  const spell = definitions.spells.find((candidate) => candidate.id === definitionId);
+  return spell?.effects.reduce((sum, effect) => sum + effect.amount, 0) ?? 0;
+}
+
+function renderResolvedValue(value: number, baseValue: number): string {
+  const boosted = value > baseValue;
+  const title = boosted
+    ? ` title="${escapeHtml(formatMessage("ui.baseStatValue", { value: String(baseValue) }))}"`
+    : "";
+  return `<span class="${boosted ? "resolved-stat boosted" : "resolved-stat"}"${title}>${value}</span>`;
+}
+
+function resolvedStat(label: string, value: number, baseValue: number): string {
+  return statHtml(label, renderResolvedValue(value, baseValue));
 }
 
 function selectedBoardRing(): RingView | null {
@@ -4553,6 +5049,15 @@ function stat(label: string, value: string): string {
     <div>
       <dt>${escapeHtml(label)}</dt>
       <dd>${escapeHtml(value)}</dd>
+    </div>
+  `;
+}
+
+function statHtml(label: string, valueHtml: string): string {
+  return `
+    <div>
+      <dt>${escapeHtml(label)}</dt>
+      <dd>${valueHtml}</dd>
     </div>
   `;
 }

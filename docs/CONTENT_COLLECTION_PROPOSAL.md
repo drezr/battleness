@@ -54,7 +54,7 @@ All proposed values are level 0, quality 0 base values.
 Progression applies afterward:
 
 ```text
-bonusPercent = level * 2 + floor(quality / 4)
+bonusPercent = max(0, level - 1) * 2 + floor(quality / 4)
 resolvedStat = floor(baseStat * (100 + bonusPercent) / 100)
 ```
 
@@ -197,7 +197,7 @@ Each recipe consumes exactly three quantity-1 materials from the same crafting f
 - Rare output: rare, refined, common.
 - Legendary output: legendary, rare, refined.
 
-Initial crafted items are level 1 and quality 50. Crafted rings start with one socket. Development inventory starts with 1000 prototype credits. Quality improvement spends credits to add 5 quality points to a crafted item up to 100. Ring socket improvement spends credits to increase crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
+Initial crafted items are level 1 and quality 0. Crafted rings start with one socket. Development inventory starts with 1000 prototype credits. Quality improvement spends credits to add 5 quality points to a crafted item up to 100. Ring socket improvement spends credits to increase crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
 
 The prototype development inventory persists credits, crafted output, and material stock in browser `localStorage` and can be exported, imported, or reset from the setup screen. The setup screen also shows a complete inventory view with material quantities, crafted item cards, and type, rarity, and element filters. Battle Lab can use these crafted instances as an item source for development loadouts.
 
@@ -206,6 +206,8 @@ Development inventory instances now carry prototype socketing and enchantment st
 The setup screen also includes a browser-local development loadout builder. It stores named sets of up to 10 crafted ring instance IDs in `localStorage`, previews resolved speed, damage, energy, and cooldown efficiency through the regular Battle Lab setup pipeline, and can send the selected ring set to either Battle Lab player.
 
 Finished non-replay battles now feed the same browser-local development loop with deterministic prototype rewards. Winner rewards grant 150 credits plus one common material from each crafting family: `aluminium`, `hydrogen`, `pearl`, and `sand`. Draw rewards grant 90 credits plus `aluminium` and `pearl`. Source-backed equipped Battle Lab items gain 8 XP, and each actual ring use, socketed gem use, spell trigger, monster summon, or monster attack adds 20 XP to the matching crafted item instance. Hero XP is intentionally deferred until local player or account progression is modeled.
+
+The development inventory and loadout builder now expose item XP progression directly: derived level, current XP, next-level XP, and a compact progress bar are visible before sending a loadout to Battle Lab.
 
 ## Proposed Collection Totals
 

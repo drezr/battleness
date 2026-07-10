@@ -56,6 +56,18 @@ describe("battle board interactions", () => {
     ).toContain("/assets/items/materials-atlas.png");
   });
 
+  it("shows the content balance report in the setup screen", () => {
+    const report = getElement(".content-balance-report");
+
+    expect(report.textContent).toContain("Content balance report");
+    expect(report.textContent).toContain("Base");
+    expect(report.textContent).toContain("Mid");
+    expect(report.textContent).toContain("Max");
+    expect(report.textContent).toContain("Ember Loop");
+    expect(report.textContent).toContain("damage/energy");
+    expect(document.querySelectorAll(".balance-report-group")).toHaveLength(4);
+  });
+
   it("builds and starts a battle from an edited Battle Lab loadout", () => {
     selectValue("#setupMode", "battleLab");
 
@@ -222,7 +234,7 @@ describe("battle board interactions", () => {
     expect(getElement(".inventory-summary").textContent).toContain("1000");
     expect(
       getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
-    ).toContain("Quality: 50");
+    ).toContain("Quality: 0");
 
     getButton(
       '[data-improve-quality-type="ring"][data-improve-quality-id="forgePlayer.ring.emberLoop.crafted.1"]',
@@ -230,8 +242,8 @@ describe("battle board interactions", () => {
 
     expect(
       getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
-    ).toContain("Quality: 55");
-    expect(getElement(".development-inventory").textContent).toContain("925");
+    ).toContain("Quality: 5");
+    expect(getElement(".development-inventory").textContent).toContain("975");
 
     getButton('[data-improve-sockets-ring-id="forgePlayer.ring.emberLoop.crafted.1"]').click();
 
@@ -253,7 +265,7 @@ describe("battle board interactions", () => {
       getInput(
         '[data-lab-player-index="0"][data-lab-ring-index="0"][data-lab-ring-field="quality"]',
       ).value,
-    ).toBe("55");
+    ).toBe("5");
     expect(getElement(".battle-lab-editor").textContent).toContain("Sockets");
   });
 
@@ -370,14 +382,24 @@ describe("battle board interactions", () => {
 
     getButton("#manualConcede").click();
 
+    expect(getElement(".battle-result-summary").textContent).toContain("Battle result summary");
+    expect(getElement(".battle-result-summary").textContent).toContain(
+      "Player Two defeated Player One.",
+    );
+    expect(getElement(".battle-result-summary").textContent).toContain("Damage by player");
+    expect(getElement(".battle-result-summary").textContent).toContain("Unclaimed");
     expect(getElement(".battle-rewards").textContent).toContain("Battle rewards");
     expect(getElement(".battle-rewards").textContent).toContain("+150");
     expect(getElement(".battle-rewards").textContent).toContain("Aluminium x1");
+    expect(getElement(".battle-rewards").textContent).toContain(
+      "No source-backed inventory items in this battle.",
+    );
 
     getButton("#claimBattleRewards").click();
 
     expect(getButton("#claimBattleRewards").disabled).toBe(true);
     expect(getButton("#claimBattleRewards").textContent).toContain("Rewards claimed");
+    expect(getElement(".battle-result-summary").textContent).toContain("Rewards claimed");
     expect(localStorage.getItem("battleness.developmentInventory.v1")).toContain('"credits": 1150');
     expect(localStorage.getItem("battleness.developmentInventory.v1")).toContain('"aluminium": 3');
 
@@ -417,6 +439,12 @@ describe("battle board interactions", () => {
     getButton('[data-board-target-id="labPlayerTwo.hero"]').click();
     getButton("#manualConcede").click();
 
+    expect(getElement(".battle-result-summary").textContent).toContain("Rings used");
+    expect(getElement(".battle-result-summary").textContent).toContain("Ember Loop");
+    expect(getElement(".battle-result-summary").textContent).toContain("Spells cast");
+    expect(getElement(".battle-result-summary").textContent).toContain("Firebolt");
+    expect(getElement(".battle-result-summary").textContent).toContain("Item XP generated");
+    expect(getElement(".battle-result-summary").textContent).toContain("Ember Loop +28 XP");
     expect(getElement(".battle-rewards").textContent).toContain("Ember Loop +28 XP");
     expect(getElement(".battle-rewards").textContent).toContain("Ruby Shard +28 XP");
     expect(getElement(".battle-rewards").textContent).toContain("Firebolt +28 XP");
@@ -449,6 +477,18 @@ describe("battle board interactions", () => {
         (crafted) => crafted.item.id === "forgePlayer.spell.firebolt.crafted.3",
       )?.item.experience,
     ).toBe(128);
+
+    getButton("#backToSetup").click();
+
+    expect(
+      getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
+    ).toContain("XP 128/400");
+    expect(
+      getElement('[data-inventory-id="forgePlayer.gem.rubyShard.crafted.2"]').textContent,
+    ).toContain("XP 128/400");
+    expect(
+      getElement('[data-inventory-id="forgePlayer.spell.firebolt.crafted.3"]').textContent,
+    ).toContain("XP 128/400");
   });
 
   it("blocks non-Taunt enemy targets after a Taunt monster is summoned", () => {

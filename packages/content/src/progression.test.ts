@@ -29,10 +29,11 @@ describe("progression formulas", () => {
   });
 
   it("adds level and quality bonuses before applying floor rounding", () => {
-    expect(itemBonusPercent(10, 60)).toBe(35);
+    expect(itemBonusPercent(1, 0)).toBe(0);
+    expect(itemBonusPercent(10, 60)).toBe(33);
     expect(resolveItemStat(4, 10, 60)).toBe(5);
     expect(resolveItemStat(8, 10, 60)).toBe(10);
-    expect(resolveItemStat(4, 50, 100)).toBe(9);
+    expect(resolveItemStat(4, 50, 100)).toBe(8);
   });
 
   it("resolves hero health and spell penalties at their boundaries", () => {
@@ -40,9 +41,9 @@ describe("progression formulas", () => {
     expect(resolveHeroMaxHealth(25)).toBe(45);
     expect(resolveHeroMaxHealth(50)).toBe(60);
 
-    expect(spellPenaltyReduction(10, 60)).toBe(1);
-    expect(resolveSpellPenalty(3, 10, 60)).toBe(2);
-    expect(resolveSpellPenalty(2, 50, 100)).toBe(0);
+    expect(spellPenaltyReduction(10, 60)).toBe(0);
+    expect(resolveSpellPenalty(3, 10, 60)).toBe(3);
+    expect(resolveSpellPenalty(2, 50, 100)).toBe(2);
   });
 
   it("rejects invalid progression inputs", () => {
@@ -167,12 +168,20 @@ describe("battle setup stat resolution", () => {
       monsterId: "iceGuardian",
       resolvedDefinitionId: "progressedPlayer.monster.iceGuardian",
     });
-    expect(spell.baseEnergyPenalty).toBe(0);
+    expect(spell.baseEnergyPenalty).toBe(1);
+    expect(spell.effects[0]?.amount).toBe(5);
     expect(monster.baseHealth).toBe(9);
     expect(monster.baseDamage).toBe(2);
 
     let readyState = createBattleState(setup);
-    for (const playerId of ["progressedPlayer", "basePlayer", "progressedPlayer", "basePlayer"]) {
+    for (const playerId of [
+      "progressedPlayer",
+      "basePlayer",
+      "progressedPlayer",
+      "basePlayer",
+      "progressedPlayer",
+      "basePlayer",
+    ]) {
       readyState = applyBattleAction(readyState, {
         type: "endTurn",
         playerId,

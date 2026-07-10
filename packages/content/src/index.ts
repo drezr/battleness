@@ -30,20 +30,24 @@ import {
   ringDefinitionSchema,
   scenarioFixtureSchema,
   spellDefinitionSchema,
+  type GemDefinition,
   type MaterialDefinition,
+  type MonsterDefinition,
   type RecipeDefinition,
+  type RingDefinition,
+  type SpellDefinition,
 } from "./schemas";
 import { validateContentReferences } from "./references";
 
 export const contentVersion = "prototype-4";
 
 export const definitions = {
-  gems,
+  gems: gems as readonly GemDefinition[],
   materials: materials as readonly MaterialDefinition[],
-  monsters,
+  monsters: monsters as readonly MonsterDefinition[],
   recipes: recipes as unknown as readonly RecipeDefinition[],
-  rings,
-  spells,
+  rings: rings as readonly RingDefinition[],
+  spells: spells as readonly SpellDefinition[],
 } as const;
 
 export const fixtures = {
@@ -108,6 +112,7 @@ export function validateContent(): void {
 
 export * from "./battleSetup";
 export * from "./battleLab";
+export * from "./balanceReport";
 export * from "./progression";
 export * from "./references";
 export * from "./schemas";
