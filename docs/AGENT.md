@@ -37,17 +37,19 @@ These instructions are persistent project context for future agents working on B
 - Randomness should go through deterministic seeded state only.
 - JSON content should be validated with a TypeScript-friendly schema validation library such as Zod.
 - Run relational validation after schema validation so cross-file IDs, ownership, equipment, sockets, enchantments, and battle setup references fail before combat starts.
-- Use a TypeScript monorepo with separate workspaces for the combat engine, game content, and first prototype app.
+- Use a TypeScript monorepo with separate workspaces for the combat engine, game content, Dev Lab prototype app, and Nuxt Game App.
 - Use Vite with a simple DOM interface for the first local combat prototype.
 - Use pnpm as the package manager.
 - Use Vitest for engine unit tests and JSON scenario tests.
 - Use ESLint and Prettier for linting and formatting.
 - Do not build a backend for the first combat prototype.
-- Use Prisma as the ORM/database migration tool when persistence work begins.
+- Use Prisma as the intended ORM/database migration tool for the durable schema. The current Nuxt Game App scaffold may use a direct `node:sqlite` bootstrap store while app/API boundaries are still being validated.
 - The first combat prototype should be deployable as a simple static build after it becomes playable.
 - Use GitHub Actions for install, typecheck, lint, and tests.
 - Use the active Node.js LTS version at setup time and manage pnpm through Corepack.
-- Use `packages/engine`, `packages/content`, and `apps/prototype` as the initial workspace layout.
+- Use `packages/engine`, `packages/content`, `apps/prototype`, and `apps/web` as the current workspace layout.
+- Keep `apps/prototype` as a permanent Dev Lab. Do not replace or remove its debug-heavy interface when building the player-facing Game App.
+- Use `apps/web` as the Nuxt Game App scaffold for player-facing UI, backend routes, and persistence integration.
 - Use WebSocket as the primary future multiplayer transport.
 - Prefer OAuth login first, especially Google and Facebook, then add email and password authentication.
 - Build localization from the beginning: user-facing text should resolve through localization keys and translation JSON files, not hardcoded strings.
@@ -66,13 +68,14 @@ These instructions are persistent project context for future agents working on B
 - Prototype item XP rewards apply only to crafted development inventory instances referenced by Battle Lab source IDs. Equipped source-backed items gain 8 XP, and each actual ring use, socketed gem use, spell trigger, monster summon, or monster attack adds 20 XP to the matching crafted item instance. Hero XP remains deferred.
 - Finished battles should show a deterministic result summary derived from the battle log: result, turns, actions played, damage by player, rings used, spells cast, monsters summoned or used, item XP generated, and reward claim status. Replays may show the summary but must not make rewards claimable.
 - Development inventory cards and loadout builder ring summaries should keep showing derived level, current XP, next-level XP, and visual XP progress.
+- Keep a full starter development loop DOM test before campaign work: craft a ring, gem, and spell; improve quality; socket and enchant; send the inventory-backed ring to Battle Lab; use it in combat; claim rewards; and verify persisted credits, materials, item XP, quality, and combat summary output.
 - Multiplayer should eventually use an authoritative server, matchmaking, and turn-based real-time interaction.
 
 ## Current Discussion Status
 
-- The framework/engine has not been selected yet.
-- The architecture has not been selected yet.
-- The long-term frontend/backend framework choice has not been selected yet; Nuxt is the likely main app candidate and Phaser can be introduced for the combat view after the local engine works.
+- The initial Game App framework is Nuxt in `apps/web`.
+- The architecture keeps the pure engine and content packages separate from the Dev Lab and Game App.
+- Phaser can be introduced later for the combat view after the Nuxt app shell and engine integration are stable.
 - The long-term deployment platform has not been selected yet; a classic Node server or VPS is preferred if feasible.
 - The combat UI direction has not been selected yet; a simple UI is enough for the first prototype.
 - Tooling choices such as bundler, tests, linting, and asset pipeline have not been finalized yet.

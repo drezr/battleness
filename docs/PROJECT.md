@@ -452,8 +452,8 @@ This section separates executable game rules from implementation decisions. It i
 - Production database: PostgreSQL.
 - Multiplayer target: authoritative server with matchmaking and turn-based real-time interaction.
 - Data model: initial game content should be defined in JSON files.
-- Engine/framework: Vite with a simple DOM UI for the first combat prototype; Nuxt and Phaser remain long-term options.
-- Architecture: TypeScript monorepo with separate engine, content, and prototype app workspaces.
+- Engine/framework: Vite with a simple DOM UI for the Dev Lab prototype; Nuxt for the initial Game App; Phaser remains a later combat-presentation option.
+- Architecture: TypeScript monorepo with separate engine, content, Dev Lab prototype app, and Game App workspaces.
 - Tooling: TypeScript, pnpm, Vitest, ESLint, Prettier, Zod-style validation, Prisma, and an organized asset pipeline are decided.
 
 ## Technical Decisions
@@ -519,7 +519,7 @@ This section separates executable game rules from implementation decisions. It i
 #### Monorepo Architecture
 
 - Status: decided.
-- Decision: Use a TypeScript monorepo with separate workspaces for the combat engine, game content, and the first prototype app.
+- Decision: Use a TypeScript monorepo with separate workspaces for the combat engine, game content, Dev Lab prototype app, and Nuxt Game App.
 - Reason: The combat engine must stay independent from UI, framework, database, and networking concerns while still being easy to consume from a prototype UI.
 - Tradeoffs: A monorepo adds workspace setup up front, but it keeps boundaries explicit and should make later Nuxt, Phaser, backend, and testing work easier to integrate.
 
@@ -561,9 +561,9 @@ This section separates executable game rules from implementation decisions. It i
 #### ORM
 
 - Status: decided.
-- Decision: Use Prisma as the ORM/database migration tool when persistence work begins.
+- Decision: Use Prisma as the intended ORM/database migration tool for the durable database schema. The initial Nuxt Game App scaffold may use a direct `node:sqlite` bootstrap store while validating app and API boundaries.
 - Reason: Prisma supports TypeScript workflows and the selected SQL direction, including SQLite for development and PostgreSQL for production.
-- Tradeoffs: Prisma introduces schema generation and migration tooling. It should be introduced when persistence starts, not as a dependency of the pure combat engine.
+- Tradeoffs: Prisma introduces schema generation and migration tooling. A small direct SQLite bootstrap can move early UI/API work forward, but it should not become the long-term persistence layer without an explicit decision.
 
 #### Prototype Deployment
 
@@ -589,9 +589,9 @@ This section separates executable game rules from implementation decisions. It i
 #### Monorepo Layout
 
 - Status: decided.
-- Decision: Use `packages/engine`, `packages/content`, and `apps/prototype` as the initial workspace layout.
+- Decision: Use `packages/engine`, `packages/content`, `apps/prototype`, and `apps/web` as the current workspace layout.
 - Reason: This layout separates reusable domain packages from runnable applications.
-- Tradeoffs: More folders exist from the beginning, but the structure keeps future apps and packages easier to add.
+- Tradeoffs: More folders exist, but the structure keeps the diagnostic Dev Lab separate from the future player-facing Game App.
 
 #### Multiplayer Transport
 
@@ -667,6 +667,13 @@ This section separates executable game rules from implementation decisions. It i
 - Reason: JSON definitions are easy to review, generate, diff, validate, and version. Database import can support production needs without making the database the design source.
 - Tradeoffs: This requires import tooling and content version tracking so saved player item instances and match records remain compatible with content changes.
 
+#### Nuxt Game App
+
+- Status: decided.
+- Decision: Use Nuxt in `apps/web` for the initial player-facing Game App frontend/backend scaffold, including server routes and development persistence integration.
+- Reason: Nuxt can cover application screens such as forge, shop, inventory, account, and server APIs while still consuming the pure combat engine and content packages.
+- Tradeoffs: Nuxt adds framework conventions and server build output to the monorepo. The Dev Lab should remain available for low-level debugging, and Phaser should remain optional for the battle presentation.
+
 ### Proposed
 
 #### Authoritative Server For Multiplayer
@@ -676,18 +683,17 @@ This section separates executable game rules from implementation decisions. It i
 - Reason: Competitive turn-based games need consistent state, cheat resistance, reconnect support, and server-owned match outcomes.
 - Tradeoffs: Server authority increases backend complexity and requires clear action validation, latency handling, and match lifecycle management.
 
-#### Nuxt And Phaser Long-Term Application Shape
+#### Phaser Combat Presentation
 
 - Status: proposed.
-- Decision: Keep Nuxt as the likely main application frontend/backend candidate and introduce Phaser for the combat presentation once the local combat engine works and if the combat view needs canvas rendering, animation-heavy interactions, or game-scene tooling.
-- Reason: Nuxt can cover application screens such as forge, shop, inventory, account, and server routes, while Phaser can be isolated to the combat experience if needed.
+- Decision: Introduce Phaser for the combat presentation only if the battle view needs canvas rendering, animation-heavy interactions, or game-scene tooling.
+- Reason: Nuxt can handle the surrounding application UI, while Phaser can be isolated to the combat experience if it becomes useful.
 - Tradeoffs: Combining Nuxt and Phaser is feasible, but it adds integration complexity. The combat engine should remain framework-independent so this decision can be delayed.
 
 ### Not Decided Yet
 
 - Long-term deployment platform. A classic Node server or VPS is currently preferred if feasible, but this should be confirmed when backend and multiplayer requirements are clearer.
 - Combat UI direction beyond a simple prototype interface.
-- Long-term frontend/backend framework choice beyond the first Vite prototype.
 - Exact Phaser integration approach for the combat presentation.
 
 ## Open Technical Topics

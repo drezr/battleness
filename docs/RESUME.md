@@ -13,12 +13,14 @@ Read these files before making changes:
 ## Current Project State
 
 - Project name: BattleNess.
-- Current phase: first local deterministic combat prototype implementation.
+- Current phase: infrastructure split after the first local deterministic combat prototype became large enough to preserve as a Dev Lab.
 - User intent: clean rebuild of an already-started game.
-- A TypeScript monorepo is in place with `packages/engine`, `packages/content`, and `apps/prototype`.
+- A TypeScript monorepo is in place with `packages/engine`, `packages/content`, `apps/prototype`, and `apps/web`.
 - The prototype includes deterministic combat state creation, ring and monster actions, direct-damage spells, summons, all six current monster skills, first-turn protection, battle end checks, combat-start resolution, JSON scenarios, versioned battle-record export/import and replay, a battle setup screen, a first sketch-inspired battle board with prepare-action-then-target interaction for rings and monsters, both players' rings visible for development testing, manual browser controls, localized event-log rendering, Taunt-aware target selection, and DOM interaction tests for critical board flows.
+- `apps/prototype` should stay as a permanent Dev Lab for engine, content, inventory, reward, and combat diagnostics.
+- `apps/web` is the new Nuxt Game App scaffold for player-facing infrastructure. It currently has a local SQLite-backed development player state, `/api/player`, `/api/forge/craft`, a basic inventory/materials view, and a basic forge UI.
 - The user handles commits and pushes to GitHub themselves.
-- The first milestone is a local deterministic combat prototype focused on the combat engine.
+- The next infrastructure milestone is to harden the Game App data model and UI shell before moving into campaign work.
 
 ## Persistent Documentation Rules
 
@@ -72,17 +74,17 @@ The following are currently marked as decided in `docs/PROJECT.md`:
 - Keep the combat engine pure, deterministic, and independent from UI, database, sockets, and framework code.
 - Define early game content and test fixtures in JSON files.
 - First milestone: local browser combat prototype where one local user can control both sides through a simple UI.
-- Use a TypeScript monorepo with separate workspaces for the combat engine, game content, and first prototype app.
+- Use a TypeScript monorepo with separate workspaces for the combat engine, game content, Dev Lab prototype app, and Nuxt Game App.
 - Use Vite with a simple DOM interface for the first local combat prototype.
 - Use pnpm as the package manager.
 - Use Vitest for engine unit tests and JSON scenario tests.
 - Use ESLint and Prettier for linting and formatting.
 - Do not build a backend for the first combat prototype.
-- Use Prisma as the ORM/database migration tool when persistence work begins.
+- Use Prisma as the intended ORM/database migration tool for the durable schema. The first `apps/web` scaffold currently uses a direct `node:sqlite` bootstrap store to validate app/API boundaries quickly before adding formal migrations.
 - The first combat prototype should be deployable as a simple static build after it becomes playable.
 - Use GitHub Actions for install, typecheck, lint, and tests.
 - Use the active Node.js LTS version at setup time and manage pnpm through Corepack.
-- Use `packages/engine`, `packages/content`, and `apps/prototype` as the initial workspace layout.
+- Use `packages/engine`, `packages/content`, `apps/prototype`, and `apps/web` as the current workspace layout.
 - Use WebSocket as the primary future multiplayer transport.
 - Build live synchronous PvP first when multiplayer work starts, with asynchronous play left as a possible later addition.
 - Live matches should be preserved during disconnects and allow players to reconnect.
@@ -100,13 +102,12 @@ The following are currently marked as decided in `docs/PROJECT.md`:
 The following are proposals, not final decisions:
 
 - Use an authoritative server for multiplayer.
-- Keep Nuxt as the likely main application frontend/backend candidate and introduce Phaser for the combat presentation once the local combat engine works and if the combat view needs canvas rendering, animation-heavy interactions, or game-scene tooling.
+- Use Nuxt for the initial Game App frontend/backend scaffold. Phaser remains a possible later addition for the combat presentation if canvas rendering, animation-heavy interactions, or game-scene tooling become necessary.
 
 ## Not Decided Yet
 
-- Browser game framework or rendering approach.
-- Frontend application framework.
-- Backend framework.
+- Exact long-term deployment shape for the Nuxt Game App.
+- Exact Phaser integration approach for the combat presentation.
 - Long-term deployment platform. A classic Node server or VPS is currently preferred if feasible, but this should be confirmed when backend and multiplayer requirements are clearer.
 - Combat UI direction beyond a simple prototype interface.
 - Whether Phaser is needed for the combat presentation.
@@ -301,6 +302,7 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - Finished battles show a deterministic result summary derived from the battle log: result, turn count, actions played, damage by player, rings used, spells cast, monsters summoned or used, item XP generated, and reward claim status. Imported replays can show the summary but cannot claim rewards.
 - Development inventory cards show item level, XP toward the next level, and a progress bar. Loadout builder ring options and selected-ring summaries also show level and XP progress.
 - Prototype combat stats render in green when their resolved value is above the base definition value, with a tooltip showing the base value.
+- A full starter development loop DOM regression test now covers crafting a ring, gem, and spell; improving quality; socketing and enchanting; sending the inventory-backed ring to Battle Lab; using it in combat; claiming rewards; and verifying persisted credits, materials, item XP, quality, and combat summary output.
 - Stat colors: Damage uses pink-red, Health uses red, Energy uses green, Energy Penalty uses pale green, Cooldown uses light cyan, Cooldown Penalty uses cyan, Quality uses orange, Speed uses yellow, Skill uses magenta, and Rarity uses purple.
 
 ## Battle Layout Direction

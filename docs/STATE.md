@@ -53,8 +53,24 @@ This file records modifications made to the project during agent-assisted work.
 - Crafted item cards now show derived level, current XP, next-level XP, and a progress bar. Loadout builder ring rows and selected-ring summaries also show level and XP progress.
 - Scaled combat stats now render in green in the prototype when their resolved value is above the base definition value.
 - Added a content balance report that compares rings, gems, spells, and monsters across base, mid, and max progression profiles and flags high primary-metric outliers by item type and rarity. The setup screen now exposes this report for development review.
+- Added a full starter development loop DOM regression test covering craft, quality improvement, socketing, enchanting, Battle Lab inventory-backed combat, reward claiming, persisted credits and materials, item XP, and combat summary output.
+- The Vite prototype in `apps/prototype` is now treated as the permanent Dev Lab for engine, content, inventory, and combat diagnostics.
+- Added a separate Nuxt Game App scaffold in `apps/web` for the future player-facing application, keeping it parallel to the Dev Lab instead of replacing it.
+- The Nuxt app currently includes a local SQLite-backed development player state, player API, forge craft API, inventory view, material view, and basic forge UI.
+- BattleNess brand assets are copied into the Nuxt app so the new Game App can run independently from the prototype asset directory.
+- The root workspace now includes `dev:web` for starting the Nuxt app separately from the existing prototype `dev` script.
 
 ## Change Log
+
+### 2026-07-10
+
+- Added `apps/web` as a Nuxt workspace package for the future Game App while preserving `apps/prototype` as the Dev Lab.
+- Added a server-side local SQLite bootstrap store under the Nuxt app for the development player, material stock, and player-owned inventory item instances.
+- Added `/api/player` and `/api/forge/craft` server routes that reuse `packages/content` definitions and forge logic.
+- Added a first Game App page with BattleNess branding, player summary, persistent material stock, craftable recipes, and crafted inventory cards.
+- Copied the BattleNess logo and icon into `apps/web/public/assets/brand/`.
+- Added `dev:web` to the root package scripts and updated the workspace lockfile with Nuxt dependencies.
+- Verified the Nuxt scaffold with typecheck, lint, tests, content validation, web build, and full monorepo build.
 
 ### 2026-06-30
 

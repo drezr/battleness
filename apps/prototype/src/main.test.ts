@@ -365,6 +365,71 @@ describe("battle board interactions", () => {
     );
   });
 
+  it("runs the full starter development loop from craft to battle rewards", () => {
+    craftStarterRingGemAndSpell();
+
+    getButton(
+      '[data-improve-quality-type="ring"][data-improve-quality-id="forgePlayer.ring.emberLoop.crafted.1"]',
+    ).click();
+    getButton('[data-socket-gem-ring-id="forgePlayer.ring.emberLoop.crafted.1"]').click();
+    getButton('[data-enchant-gem-id="forgePlayer.gem.rubyShard.crafted.2"]').click();
+
+    expect(
+      getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
+    ).toContain("Quality: 5");
+    expect(
+      getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
+    ).toContain("Ruby Shard");
+    expect(
+      getElement('[data-inventory-id="forgePlayer.gem.rubyShard.crafted.2"]').textContent,
+    ).toContain("Spell: Firebolt");
+
+    selectValue("#setupMode", "battleLab");
+    selectValue("#battleLabItemSourceMode", "inventory");
+    selectValue(
+      '[data-lab-player-index="0"][data-lab-ring-index="0"][data-lab-ring-field="sourceInstanceId"]',
+      "forgePlayer.ring.emberLoop.crafted.1",
+    );
+
+    expect(
+      getInput(
+        '[data-lab-player-index="0"][data-lab-ring-index="0"][data-lab-ring-field="quality"]',
+      ).value,
+    ).toBe("5");
+    expect(getElement(".battle-lab-editor").textContent).toContain(
+      "forgePlayer.spell.firebolt.crafted.3",
+    );
+
+    getButton("#startBattle").click();
+    useLabPlayerOneStarterRingOnHero();
+    getButton("#manualConcede").click();
+
+    expect(getElement(".battle-result-summary").textContent).toContain("Ember Loop");
+    expect(getElement(".battle-result-summary").textContent).toContain("Firebolt");
+    expect(getElement(".battle-rewards").textContent).toContain("Ember Loop +28 XP");
+    expect(getElement(".battle-rewards").textContent).toContain("Ruby Shard +28 XP");
+    expect(getElement(".battle-rewards").textContent).toContain("Firebolt +28 XP");
+
+    getButton("#claimBattleRewards").click();
+
+    const persistedInventory = localStorage.getItem("battleness.developmentInventory.v1") ?? "";
+    expect(persistedInventory).toContain('"credits": 1125');
+    expect(persistedInventory).toContain('"aluminium": 2');
+
+    getButton("#backToSetup").click();
+
+    expect(getElement(".inventory-summary").textContent).toContain("1125");
+    expect(getElement('[data-inventory-material-id="aluminium"]').textContent).toContain(
+      "Quantity: 2",
+    );
+    expect(
+      getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
+    ).toContain("XP 128/400");
+    expect(
+      getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
+    ).toContain("Quality: 5");
+  });
+
   it("renders rare monster borders on the battle board", () => {
     startBattle("skillShowcase");
 
@@ -615,6 +680,24 @@ function summonIceGuardian(): void {
 function useBoardMonster(monsterInstanceId: string, targetId: string): void {
   getButton(`[data-board-monster-id="${monsterInstanceId}"]`).click();
   getButton(`[data-board-target-id="${targetId}"]`).click();
+}
+
+function craftStarterRingGemAndSpell(): void {
+  getButton("#craftSelectedRecipe").click();
+  selectValue("#forgeRecipeSelect", "craftGemRubyShard");
+  getButton("#craftSelectedRecipe").click();
+  selectValue("#forgeRecipeSelect", "craftSpellFirebolt");
+  getButton("#craftSelectedRecipe").click();
+}
+
+function useLabPlayerOneStarterRingOnHero(): void {
+  const ringSelector = '[data-board-ring-id="labPlayerOne.lab.ring.1"]';
+  for (let turn = 0; turn < 6 && getButton(ringSelector).disabled; turn += 1) {
+    getButton("#boardEndTurn").click();
+  }
+
+  getButton(ringSelector).click();
+  getButton('[data-board-target-id="labPlayerTwo.hero"]').click();
 }
 
 function ringAfterRender(ringInstanceId: string): HTMLButtonElement {

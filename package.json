@@ -10,6 +10,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "dev": "pnpm --filter @battleness/prototype dev",
+    "dev:web": "pnpm --filter @battleness/web dev",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
