@@ -21,27 +21,39 @@ body {
   min-height: 100vh;
 }
 
+a {
+  color: inherit;
+}
+
 button,
-select {
+select,
+input {
   font: inherit;
 }
 
-button {
+button,
+.button-link {
+  display: inline-flex;
   min-height: 38px;
+  align-items: center;
+  justify-content: center;
   border: 1px solid rgb(255 255 255 / 22%);
   border-radius: 8px;
   padding: 0 14px;
   color: #f7fbff;
   background: #196075;
   cursor: pointer;
+  text-decoration: none;
 }
 
-button:disabled {
+button:disabled,
+.button-link.disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
-select {
+select,
+input {
   width: 100%;
   min-height: 38px;
   border: 1px solid rgb(255 255 255 / 22%);
@@ -51,12 +63,118 @@ select {
   background: #172b38;
 }
 
+.app-shell {
+  min-height: 100vh;
+}
+
 .shell {
-  width: min(1180px, calc(100vw - 24px));
+  width: min(1220px, calc(100vw - 24px));
   margin: 0 auto;
   padding: 24px 0;
 }
 
+.app-header {
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+  background: rgb(12 29 39 / 70%);
+}
+
+.app-header-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  width: min(1220px, calc(100vw - 24px));
+  margin: 0 auto;
+  padding: 14px 0;
+}
+
+.brand-row {
+  display: flex;
+  min-width: 0;
+  gap: 14px;
+  align-items: center;
+}
+
+.brand-logo {
+  display: block;
+  width: 136px;
+  max-width: 38vw;
+  height: auto;
+}
+
+.brand-title {
+  display: grid;
+  gap: 2px;
+}
+
+.brand-title strong {
+  font-size: 1.02rem;
+}
+
+.brand-title span {
+  color: #cbd9df;
+  font-size: 0.78rem;
+}
+
+.player-strip {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 10px;
+  align-items: center;
+  justify-content: end;
+}
+
+.resource-chip {
+  display: grid;
+  min-width: 86px;
+  gap: 2px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: rgb(0 0 0 / 18%);
+}
+
+.resource-chip span {
+  color: #c6f8ff;
+  font-size: 0.66rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.resource-chip strong {
+  font-size: 0.92rem;
+}
+
+.main-nav {
+  display: flex;
+  gap: 8px;
+  width: min(1220px, calc(100vw - 24px));
+  margin: 0 auto;
+  padding: 0 0 12px;
+  overflow-x: auto;
+}
+
+.main-nav a,
+.section-nav a {
+  flex: 0 0 auto;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: #d8e7ed;
+  background: rgb(0 0 0 / 14%);
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.main-nav a.active,
+.section-nav a.active {
+  border-color: #25d7ff;
+  color: #f7fbff;
+  background: rgb(37 215 255 / 16%);
+}
+
+.view-header,
 .topbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -65,11 +183,17 @@ select {
   margin-bottom: 18px;
 }
 
-.brand-logo {
-  display: block;
-  width: min(190px, 45vw);
-  height: auto;
-  margin-bottom: 8px;
+.view-title {
+  display: grid;
+  gap: 8px;
+}
+
+.eyebrow,
+.field-label {
+  color: #c6f8ff;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 h1,
@@ -80,7 +204,7 @@ h3 {
 }
 
 h1 {
-  font-size: 1.85rem;
+  font-size: 1.9rem;
   line-height: 1.15;
 }
 
@@ -90,7 +214,7 @@ h2 {
 }
 
 h3 {
-  font-size: 0.95rem;
+  font-size: 0.96rem;
 }
 
 .muted {
@@ -98,7 +222,15 @@ h3 {
   color: #cbd9df;
 }
 
-.layout {
+.section-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+}
+
+.layout,
+.split-layout {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
   gap: 14px;
@@ -116,32 +248,35 @@ h3 {
   padding: 16px;
 }
 
-.player-panel {
-  min-width: min(360px, 100%);
-}
-
 .stack {
   display: grid;
   gap: 14px;
 }
 
 .summary-grid,
+.metric-grid,
 .card-grid,
-.item-grid {
+.item-grid,
+.dashboard-grid {
   display: grid;
   gap: 10px;
 }
 
-.summary-grid {
+.summary-grid,
+.metric-grid {
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
 }
 
 .card-grid {
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 .item-grid {
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.dashboard-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
 .stat {
@@ -154,19 +289,51 @@ h3 {
 .stat dt {
   color: #c6f8ff;
   font-size: 0.7rem;
-  font-weight: 800;
+  font-weight: 900;
   text-transform: uppercase;
 }
 
 .stat dd {
   margin: 0;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .card {
   display: grid;
   gap: 8px;
   padding: 12px;
+}
+
+.item-card {
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: start;
+}
+
+.item-card-body {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+
+.item-artwork {
+  display: block;
+  width: 64px;
+  aspect-ratio: 1;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 8px;
+  background-color: rgb(255 255 255 / 8%);
+  background-image: var(--item-atlas);
+  background-position: var(--item-atlas-position);
+  background-repeat: no-repeat;
+  background-size: var(--item-atlas-size);
+}
+
+.material-card .item-artwork {
+  width: 58px;
+}
+
+.item-card > .ingredient-list {
+  grid-column: 1 / -1;
 }
 
 .card-heading {
@@ -193,6 +360,12 @@ h3 {
   align-items: end;
 }
 
+.control-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .feedback {
   margin: 0;
   border: 1px solid #69e89b;
@@ -203,13 +376,12 @@ h3 {
   font-size: 0.86rem;
 }
 
-.field-label {
-  display: block;
-  margin-bottom: 6px;
-  color: #c6f8ff;
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
+.status-note {
+  border: 1px solid rgb(255 231 46 / 34%);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #fff5a7;
+  background: rgb(255 231 46 / 10%);
 }
 
 .pill {
@@ -225,6 +397,11 @@ h3 {
   text-transform: capitalize;
 }
 
+.pill.muted-pill {
+  color: #f7fbff;
+  background: rgb(255 255 255 / 12%);
+}
+
 .rarity-common {
   background: #f2f5f7;
 }
@@ -237,7 +414,7 @@ h3 {
   background: #ff7b22;
 }
 
-.rarity-legendary {
+.rarity-epic {
   color: #f7fbff;
   background: #6f41ff;
 }
@@ -254,7 +431,7 @@ h3 {
   border-color: #ff7b22;
 }
 
-.rarity-border-legendary {
+.rarity-border-epic {
   border-color: #6f41ff;
 }
 
@@ -270,20 +447,36 @@ h3 {
   background: #bdfaff;
 }
 
-.ingredient-list {
+.ingredient-list,
+.clean-list {
   display: grid;
   gap: 6px;
   margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.ingredient-list div {
+.ingredient-list div,
+.row-list-item {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
 }
 
-.ingredient-list dt {
+.ingredient-list dt,
+.row-list-item span {
   color: #cbd9df;
+}
+
+.ingredient-name {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ingredient-name .item-artwork {
+  width: 34px;
+  flex: 0 0 auto;
 }
 
 .ingredient-list dd {
@@ -291,14 +484,90 @@ h3 {
   font-weight: 900;
 }
 
-.ingredient-list dd.ready {
+.ingredient-list dd.ready,
+.positive {
   color: #69e89b;
 }
 
+.battlefield-mock {
+  display: grid;
+  gap: 12px;
+}
+
+.battle-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.45fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
+.monster-slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.slot,
+.hero-box {
+  min-height: 86px;
+  border: 1px dashed rgb(255 255 255 / 24%);
+  border-radius: 8px;
+  padding: 10px;
+  background: rgb(255 255 255 / 6%);
+}
+
+.ring-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 8px;
+}
+
+.filter-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.equipment-metrics {
+  margin-bottom: 14px;
+}
+
+.equipment-metrics .card {
+  gap: 6px;
+}
+
+.equipment-metrics strong {
+  font-size: 1.35rem;
+}
+
+.equipment-layout {
+  margin-top: 14px;
+}
+
+.equipment-slot-list,
+.equipment-ring-list {
+  display: grid;
+  gap: 10px;
+}
+
+.equipment-ring-card.equipped {
+  background: rgb(37 215 255 / 10%);
+}
+
 @media (max-width: 820px) {
+  .app-header-inner,
+  .view-header,
   .topbar,
   .layout,
-  .toolbar {
+  .split-layout,
+  .toolbar,
+  .battle-row {
     grid-template-columns: 1fr;
   }
+
+  .player-strip {
+    justify-content: stretch;
+  }
 }
+

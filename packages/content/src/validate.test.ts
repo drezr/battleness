@@ -185,7 +185,7 @@ describe("content package", () => {
       ...definitions.materials,
     ].map((definition) => definition.rarity);
 
-    expect(new Set(rarities)).toEqual(new Set(["common", "refined", "rare", "legendary"]));
+    expect(new Set(rarities)).toEqual(new Set(["common", "refined", "rare", "epic"]));
     expect(rarities).not.toContain("normal");
     expect(rarities).not.toContain("magic");
   });
@@ -347,3 +347,4 @@ describe("content package", () => {
     }
   });
 });
+

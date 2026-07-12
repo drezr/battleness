@@ -4,7 +4,7 @@
 
 This document records the implemented 70-material collection derived from the historical `mats` table in `datas.db`.
 
-The executable schema, JSON definitions, English and French locale entries, and initial prototype recipes are implemented in content version `prototype-4`. Historical SQLite recipes remain intentionally unimported because their result IDs do not match the current collectible collection.
+The executable schema, JSON definitions, English and French locale entries, and initial prototype recipes currently ship as content version `prototype-5`. Historical SQLite recipes remain intentionally unimported because their result IDs do not match the current collectible collection.
 
 ## Source Analysis
 
@@ -15,7 +15,7 @@ The historical database contains:
 - 14 materials described as spell-crafting materials.
 - 17 materials described as gem-crafting materials.
 - 16 materials described as monster-crafting materials.
-- Four historical rarity price tiers, now mapped to 100 for common, 400 for refined, 1,600 for rare, and 6,400 for legendary.
+- Four historical rarity price tiers, now mapped to 100 for common, 400 for refined, 1,600 for rare, and 6,400 for epic.
 - 151 recipes that reference historical material IDs.
 
 The collection already has a strong real-world foundation:
@@ -78,7 +78,7 @@ Rarity remains a gameplay property rather than a strict scientific abundance ran
 | Common    |        100 |
 | Refined   |        400 |
 | Rare      |      1,600 |
-| Legendary |      6,400 |
+| Epic |      6,400 |
 
 The four-times price progression from the historical database is preserved.
 
@@ -106,11 +106,11 @@ These 23 materials preserve the historical metal-focused ring family.
 | `gold`      | Gold      | Or        | Rare      | 1,600 | Au     |            79 | Preserved                         |
 | `platinum`  | Platinum  | Platine   | Rare      | 1,600 | Pt     |            78 | Corrects `platinium`              |
 | `tungsten`  | Tungsten  | Tungstène | Rare      | 1,600 | W      |            74 | Preserved                         |
-| `uranium`   | Uranium   | Uranium   | Rare      | 1,600 | U      |            92 | Moved from legendary              |
-| `iridium`   | Iridium   | Iridium   | Legendary | 6,400 | Ir     |            77 | Moved from rare                   |
-| `plutonium` | Plutonium | Plutonium | Legendary | 6,400 | Pu     |            94 | Preserved                         |
-| `neptunium` | Neptunium | Neptunium | Legendary | 6,400 | Np     |            93 | Preserved                         |
-| `radium`    | Radium    | Radium    | Legendary | 6,400 | Ra     |            88 | Preserved                         |
+| `uranium`   | Uranium   | Uranium   | Rare      | 1,600 | U      |            92 | Moved from epic              |
+| `iridium`   | Iridium   | Iridium   | Epic | 6,400 | Ir     |            77 | Moved from rare                   |
+| `plutonium` | Plutonium | Plutonium | Epic | 6,400 | Pu     |            94 | Preserved                         |
+| `neptunium` | Neptunium | Neptunium | Epic | 6,400 | Np     |            93 | Preserved                         |
+| `radium`    | Radium    | Radium    | Epic | 6,400 | Ra     |            88 | Preserved                         |
 
 ## Spell-Crafting Materials
 
@@ -128,10 +128,10 @@ These 14 materials use real reactive nonmetals, halogens, and noble gases.
 | `neon`     | Neon     | Néon      | Rare      | 1,600 | Ne     |            10 | Preserved               |
 | `argon`    | Argon    | Argon     | Rare      | 1,600 | Ar     |            18 | Preserved               |
 | `iodine`   | Iodine   | Iode      | Rare      | 1,600 | I      |            53 | Replaces `mysticfuel`   |
-| `krypton`  | Krypton  | Krypton   | Legendary | 6,400 | Kr     |            36 | Preserved               |
-| `xenon`    | Xenon    | Xénon     | Legendary | 6,400 | Xe     |            54 | Preserved               |
-| `radon`    | Radon    | Radon     | Legendary | 6,400 | Rn     |            86 | Replaces `mysticenergy` |
-| `astatine` | Astatine | Astate    | Legendary | 6,400 | At     |            85 | Replaces `mysticpower`  |
+| `krypton`  | Krypton  | Krypton   | Epic | 6,400 | Kr     |            36 | Preserved               |
+| `xenon`    | Xenon    | Xénon     | Epic | 6,400 | Xe     |            54 | Preserved               |
+| `radon`    | Radon    | Radon     | Epic | 6,400 | Rn     |            86 | Replaces `mysticenergy` |
+| `astatine` | Astatine | Astate    | Epic | 6,400 | At     |            85 | Replaces `mysticpower`  |
 
 ## Gem-Crafting Materials
 
@@ -153,9 +153,9 @@ These 17 materials preserve the historical gemstone and mineral family. They are
 | `ruby`        | Ruby        | Rubis            | Rare      | 1,600 | Corundum variety           | Preserved               |
 | `emerald`     | Emerald     | Émeraude         | Rare      | 1,600 | Beryl variety              | Preserved               |
 | `diamond`     | Diamond     | Diamant          | Rare      | 1,600 | Crystalline carbon         | Preserved               |
-| `redDiamond`  | Red Diamond | Diamant rouge    | Legendary | 6,400 | Rare diamond color variety | Commonizes `reddiamond` |
-| `blackOpal`   | Black Opal  | Opale noire      | Legendary | 6,400 | Dark opal variety          | Commonizes `blackopal`  |
-| `alexandrite` | Alexandrite | Alexandrite      | Legendary | 6,400 | Chrysoberyl variety        | Preserved               |
+| `redDiamond`  | Red Diamond | Diamant rouge    | Epic | 6,400 | Rare diamond color variety | Commonizes `reddiamond` |
+| `blackOpal`   | Black Opal  | Opale noire      | Epic | 6,400 | Dark opal variety          | Commonizes `blackopal`  |
+| `alexandrite` | Alexandrite | Alexandrite      | Epic | 6,400 | Chrysoberyl variety        | Preserved               |
 
 ## Monster-Crafting Materials
 
@@ -174,11 +174,11 @@ These 16 materials use real geological, industrial, biological, or high-energy s
 | `silk`       | Silk       | Soie       | Refined   |   400 | Protein fiber                          | Preserved                         |
 | `keratin`    | Keratin    | Kératine   | Refined   |   400 | Structural protein                     | Replaces `biofuel`                |
 | `silicon`    | Silicon    | Silicium   | Rare      | 1,600 | Chemical element, Si, atomic number 14 | Preserved                         |
-| `sulfur`     | Sulfur     | Soufre     | Rare      | 1,600 | Chemical element, S, atomic number 16  | Moved from legendary              |
-| `phosphorus` | Phosphorus | Phosphore  | Rare      | 1,600 | Chemical element, P, atomic number 15  | Moved from legendary              |
+| `sulfur`     | Sulfur     | Soufre     | Rare      | 1,600 | Chemical element, S, atomic number 16  | Moved from epic              |
+| `phosphorus` | Phosphorus | Phosphore  | Rare      | 1,600 | Chemical element, P, atomic number 15  | Moved from epic              |
 | `chitin`     | Chitin     | Chitine    | Rare      | 1,600 | Biopolymer                             | Replaces `bioenergy`              |
-| `plasma`     | Plasma     | Plasma     | Legendary | 6,400 | State of matter                        | Moved from rare                   |
-| `graphene`   | Graphene   | Graphène   | Legendary | 6,400 | Carbon allotrope                       | Replaces `biopower`               |
+| `plasma`     | Plasma     | Plasma     | Epic | 6,400 | State of matter                        | Moved from rare                   |
+| `graphene`   | Graphene   | Graphène   | Epic | 6,400 | Carbon allotrope                       | Replaces `biopower`               |
 
 ## Historical ID Migration
 
@@ -217,7 +217,7 @@ Reference sources:
 - All 70 material slots are implemented.
 - Material definitions include `craftingFamily`, `basePrice`, `realWorldType`, and optional atomic metadata.
 - The historical four-times rarity price progression is enforced by validation.
-- Rarities use `common`, `refined`, `rare`, and `legendary`.
+- Rarities use `common`, `refined`, `rare`, and `epic`.
 - The eight fictional `bio*` and `mystic*` materials are replaced.
 - The current prototype has 48 newly defined recipes for collectible rings, gems, monsters, and spells.
 - Historical recipe migrations are documented but not imported.

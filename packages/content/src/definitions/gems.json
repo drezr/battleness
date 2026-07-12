@@ -30,7 +30,7 @@
     "id": "sunforgeHeart",
     "nameKey": "gem.sunforgeHeart.name",
     "element": "fire",
-    "rarity": "legendary",
+    "rarity": "epic",
     "baseDamage": 7,
     "baseEnergyPenalty": 2,
     "baseCooldownPenalty": 2
@@ -66,7 +66,7 @@
     "id": "tempestEye",
     "nameKey": "gem.tempestEye.name",
     "element": "electric",
-    "rarity": "legendary",
+    "rarity": "epic",
     "baseDamage": 3,
     "baseEnergyPenalty": 0,
     "baseCooldownPenalty": 1
@@ -102,7 +102,7 @@
     "id": "absoluteZeroGem",
     "nameKey": "gem.absoluteZeroGem.name",
     "element": "ice",
-    "rarity": "legendary",
+    "rarity": "epic",
     "baseDamage": 5,
     "baseEnergyPenalty": 3,
     "baseCooldownPenalty": 0
@@ -117,3 +117,4 @@
     "baseCooldownPenalty": 0
   }
 ]
+

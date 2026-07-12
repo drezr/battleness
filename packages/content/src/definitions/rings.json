@@ -33,7 +33,7 @@
     "id": "solarCrown",
     "nameKey": "ring.solarCrown.name",
     "element": "fire",
-    "rarity": "legendary",
+    "rarity": "epic",
     "baseDamage": 9,
     "baseEnergyCost": 4,
     "baseCooldown": 3,
@@ -73,7 +73,7 @@
     "id": "tempestCircuit",
     "nameKey": "ring.tempestCircuit.name",
     "element": "electric",
-    "rarity": "legendary",
+    "rarity": "epic",
     "baseDamage": 5,
     "baseEnergyCost": 2,
     "baseCooldown": 1,
@@ -113,7 +113,7 @@
     "id": "winterCrown",
     "nameKey": "ring.winterCrown.name",
     "element": "ice",
-    "rarity": "legendary",
+    "rarity": "epic",
     "baseDamage": 7,
     "baseEnergyCost": 4,
     "baseCooldown": 1,
@@ -130,3 +130,4 @@
     "baseSpeed": 4
   }
 ]
+

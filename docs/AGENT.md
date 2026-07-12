@@ -31,7 +31,7 @@ These instructions are persistent project context for future agents working on B
 - Content objects should use readable camelCase string IDs.
 - Ring and gem definitions should describe base item types only; socketing, enchantments, total experience, quality, ownership, and equipped state belong to player-owned item instances. Levels are derived from total experience.
 - Monster and spell progression belongs to explicit player-owned instances referenced by gem enchantments and resolved before combat.
-- Use `common`, `refined`, `rare`, and `legendary` as the rarity identifiers; the previous `normal` and `magic` identifiers are obsolete.
+- Use `common`, `refined`, `rare`, and `epic` as the rarity identifiers; the previous `normal` and `magic` identifiers are obsolete.
 - The combat engine should not read JSON files directly. It should receive validated `BattleSetup` objects prepared from definitions, player fixtures or database rows, and inventory instances.
 - Combat engine actions should be typed command objects, and engine results should include detailed event logs.
 - Randomness should go through deterministic seeded state only.
@@ -43,7 +43,8 @@ These instructions are persistent project context for future agents working on B
 - Use Vitest for engine unit tests and JSON scenario tests.
 - Use ESLint and Prettier for linting and formatting.
 - Do not build a backend for the first combat prototype.
-- Use Prisma as the intended ORM/database migration tool for the durable schema. The current Nuxt Game App scaffold may use a direct `node:sqlite` bootstrap store while app/API boundaries are still being validated.
+- Use Prisma as the ORM/database migration tool for the Nuxt Game App durable schema. The current development datasource is local SQLite, with PostgreSQL still targeted for production.
+- Keep the Nuxt Game App on Prisma 6.x for now. Prisma 7 requires a SQLite driver adapter in application runtime, and the current Windows development environment should not depend on native `better-sqlite3` build tooling until that upgrade is intentionally planned.
 - The first combat prototype should be deployable as a simple static build after it becomes playable.
 - Use GitHub Actions for install, typecheck, lint, and tests.
 - Use the active Node.js LTS version at setup time and manage pnpm through Corepack.
@@ -55,7 +56,7 @@ These instructions are persistent project context for future agents working on B
 - Build localization from the beginning: user-facing text should resolve through localization keys and translation JSON files, not hardcoded strings.
 - Set up an organized asset pipeline from the beginning, even if early assets are AI-generated templates.
 - Keep versioned JSON content definitions as the source of truth and import them into the database if runtime querying, admin tooling, or production operations require it. Player-owned instances and progression data belong in the database.
-- Prototype forge recipes use exactly three quantity-1 materials from the matching crafting family. Ingredient rarity pattern is common/common/common for common outputs, refined/common/common for refined outputs, rare/refined/common for rare outputs, and legendary/rare/refined for legendary outputs. Crafted prototype items start at level 1 and quality 0; crafted rings start with one socket.
+- Prototype forge recipes use exactly three quantity-1 materials from the matching crafting family. Ingredient rarity pattern is common/common/common for common outputs, refined/common/common for refined outputs, rare/refined/common for rare outputs, and epic/rare/refined for epic outputs. Crafted prototype items start at level 1 and quality 0; crafted rings start with one socket.
 - Item stat scaling is conservative: item level adds +2% per level after level 1, quality adds a linear bonus from 0% at quality 0 to +25% at quality 100, and resolved values floor after applying the combined multiplier. Rings and gems scale damage, spells scale direct-damage effect amounts, and monsters scale health and damage. Energy, cooldown, speed, and penalties do not scale for now.
 - Keep the content balance report available for development balancing. It compares rings, gems, spells, and monsters across base (`level 1`, `quality 0`), mid (`level 10`, `quality 50`), and max (`level 50`, `quality 100`) progression profiles, and flags high primary-metric outliers within each item type and rarity group.
 - The prototype development inventory is browser-local and versioned JSON-backed. It persists prototype credits, forge material stock, crafted item instances, and the next crafted-instance sequence. Battle Lab can use either free-edit definitions or crafted development inventory instances as its item source.
@@ -79,3 +80,4 @@ These instructions are persistent project context for future agents working on B
 - The long-term deployment platform has not been selected yet; a classic Node server or VPS is preferred if feasible.
 - The combat UI direction has not been selected yet; a simple UI is enough for the first prototype.
 - Tooling choices such as bundler, tests, linting, and asset pipeline have not been finalized yet.
+

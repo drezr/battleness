@@ -120,7 +120,7 @@
   "rarity.common.name": "Common",
   "rarity.refined.name": "Refined",
   "rarity.rare.name": "Rare",
-  "rarity.legendary.name": "Legendary",
+  "rarity.epic.name": "Epic",
   "event.battleEnded.draw": "The battle ended in a draw.",
   "event.battleEnded.winner": "{winner} defeated {loser}.",
   "event.battleStarted": "Battle {battleId} started.",
@@ -340,7 +340,7 @@
   "ui.ready": "Ready",
   "ui.rarity": "Rarity",
   "ui.rarity.common": "Common",
-  "ui.rarity.legendary": "Legendary",
+  "ui.rarity.epic": "Epic",
   "ui.rarity.rare": "Rare",
   "ui.rarity.refined": "Refined",
   "ui.remainingActions": "Actions",
@@ -432,3 +432,4 @@
   "spell.solarFlare.name": "Solar Flare",
   "spell.spark.name": "Spark"
 }
+

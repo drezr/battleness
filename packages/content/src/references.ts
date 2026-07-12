@@ -124,7 +124,7 @@ function validateRecipes(
     common: ["common", "common", "common"],
     refined: ["refined", "common", "common"],
     rare: ["rare", "refined", "common"],
-    legendary: ["legendary", "rare", "refined"],
+    epic: ["epic", "rare", "refined"],
   } as const satisfies Record<string, readonly string[]>;
 
   for (const recipe of recipes) {
@@ -200,7 +200,7 @@ function validateMaterials(materials: Iterable<MaterialDefinition>, issues: stri
     common: 100,
     refined: 400,
     rare: 1600,
-    legendary: 6400,
+    epic: 6400,
   } as const;
   const atomicNumberOwner = new Map<number, string>();
   const chemicalSymbolOwner = new Map<string, string>();
@@ -520,3 +520,4 @@ function indexUnique<T extends { id: string }>(
 function capitalize(value: string): string {
   return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
 }
+

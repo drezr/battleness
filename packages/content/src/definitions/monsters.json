@@ -58,7 +58,7 @@
     "id": "solarDrake",
     "nameKey": "monster.solarDrake.name",
     "element": "fire",
-    "rarity": "legendary",
+    "rarity": "epic",
     "baseHealth": 9,
     "baseDamage": 9,
     "baseCooldown": 3,
@@ -124,7 +124,7 @@
     "id": "tempestTitan",
     "nameKey": "monster.tempestTitan.name",
     "element": "electric",
-    "rarity": "legendary",
+    "rarity": "epic",
     "baseHealth": 8,
     "baseDamage": 4,
     "baseCooldown": 1,
@@ -190,7 +190,7 @@
     "id": "eternalWarden",
     "nameKey": "monster.eternalWarden.name",
     "element": "ice",
-    "rarity": "legendary",
+    "rarity": "epic",
     "baseHealth": 14,
     "baseDamage": 3,
     "baseCooldown": 1,
@@ -198,3 +198,4 @@
     "skill": "taunt"
   }
 ]
+

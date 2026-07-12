@@ -18,7 +18,7 @@ Read these files before making changes:
 - A TypeScript monorepo is in place with `packages/engine`, `packages/content`, `apps/prototype`, and `apps/web`.
 - The prototype includes deterministic combat state creation, ring and monster actions, direct-damage spells, summons, all six current monster skills, first-turn protection, battle end checks, combat-start resolution, JSON scenarios, versioned battle-record export/import and replay, a battle setup screen, a first sketch-inspired battle board with prepare-action-then-target interaction for rings and monsters, both players' rings visible for development testing, manual browser controls, localized event-log rendering, Taunt-aware target selection, and DOM interaction tests for critical board flows.
 - `apps/prototype` should stay as a permanent Dev Lab for engine, content, inventory, reward, and combat diagnostics.
-- `apps/web` is the new Nuxt Game App scaffold for player-facing infrastructure. It currently has a local SQLite-backed development player state, `/api/player`, `/api/forge/craft`, a basic inventory/materials view, and a basic forge UI.
+- `apps/web` is the new Nuxt Game App scaffold for player-facing infrastructure. It currently has a Prisma-backed local SQLite development player state, `/api/player`, `/api/forge/craft`, a basic inventory/materials view, and a basic forge UI.
 - The user handles commits and pushes to GitHub themselves.
 - The next infrastructure milestone is to harden the Game App data model and UI shell before moving into campaign work.
 
@@ -80,7 +80,7 @@ The following are currently marked as decided in `docs/PROJECT.md`:
 - Use Vitest for engine unit tests and JSON scenario tests.
 - Use ESLint and Prettier for linting and formatting.
 - Do not build a backend for the first combat prototype.
-- Use Prisma as the intended ORM/database migration tool for the durable schema. The first `apps/web` scaffold currently uses a direct `node:sqlite` bootstrap store to validate app/API boundaries quickly before adding formal migrations.
+- Use Prisma as the ORM/database migration tool for the durable schema. The Nuxt Game App currently uses Prisma with local SQLite for development persistence.
 - The first combat prototype should be deployable as a simple static build after it becomes playable.
 - Use GitHub Actions for install, typecheck, lint, and tests.
 - Use the active Node.js LTS version at setup time and manage pnpm through Corepack.
@@ -271,7 +271,7 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 
 - Object colors: Ring uses pink, Gem uses cyan, Monster uses green, Spell uses magenta, and Material uses blue.
 - Element colors: Electric uses yellow, Fire uses pink-red, and Ice uses light cyan.
-- Rarity colors: Common uses white or light gray, Refined uses blue, Rare uses orange, and Legendary uses purple.
+- Rarity colors: Common uses white or light gray, Refined uses blue, Rare uses orange, and Epic uses purple.
 - The prototype applies those rarity colors to ring, gem, and monster borders on the battle board, detail panels, setup preview, and manual action controls.
 - Yellow selection outlines and red blocked-state indicators remain distinct from the rarity border.
 - Localized elemental badges appear in the top-right corner of ring, gem, and monster cards across those same views.
@@ -286,7 +286,8 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - The editor includes resolved stat comparisons and diagnostic warnings for efficiency differences of at least 50% or speed differences of at least 4.
 - The Battle Lab can run two deterministic greedy simulations that vary the preferred element-duel winner, respect current targeting and action constraints, and report timeouts at 500 actions.
 - Content version `prototype-4` adds 48 initial forge recipes for collectible rings, gems, monsters, and spells. `trainingFlameBand` and `plainQuartz` remain development-only and have no recipes.
-- Prototype recipes use exactly three quantity-1 materials from the matching crafting family. Common outputs use three common materials; refined outputs use one refined and two common materials; rare outputs use one rare, one refined, and one common material; legendary outputs use one legendary, one rare, and one refined material.
+- Content version `prototype-5` renames the highest rarity tier from `legendary` to `epic`.
+- Prototype recipes use exactly three quantity-1 materials from the matching crafting family. Common outputs use three common materials; refined outputs use one refined and two common materials; rare outputs use one rare, one refined, and one common material; epic outputs use one epic, one rare, and one refined material.
 - Crafted prototype items are level 1 and quality 0. Crafted rings start with one socket. The setup screen includes a development forge panel with material stock controls, real consumption, restock, improvement actions, and crafted-instance output.
 - The development forge persists credits, material stock, crafted item output, and the next crafted-instance sequence in browser `localStorage`.
 - Development inventory starts with 1000 prototype credits. Quality improvement spends credits to add 5 quality points to a crafted item up to 100. Ring socket improvement spends credits to increase crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
@@ -318,3 +319,4 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - Do not assume old code should be preserved.
 - Prefer documenting proposals and asking the user to confirm/correct them during the planning phase.
 - When implementation starts, keep the combat rules engine deterministic and separate from UI/framework/database concerns unless the user decides otherwise.
+

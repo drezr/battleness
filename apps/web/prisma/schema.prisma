@@ -1,0 +1,211 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("BATTLENESS_DATABASE_URL")
+}
+
+model Player {
+  id                 String           @id
+  username           String
+  experience         Int              @default(0)
+  credits            Int              @default(0)
+  nextItemSequence   Int              @default(1)
+  activeLoadoutId    String?
+  activeLoadout      Loadout?         @relation("ActivePlayerLoadout", fields: [activeLoadoutId], references: [id], onDelete: SetNull)
+  battleRecordsWon   BattleRecord[]   @relation("BattleRecordWinner")
+  battleRecordsAsOne BattleRecord[]   @relation("BattleRecordPlayerOne")
+  battleRecordsAsTwo BattleRecord[]   @relation("BattleRecordPlayerTwo")
+  equippedRings      EquippedRing[]
+  inventoryItems     InventoryItem[]
+  loadouts           Loadout[]        @relation("PlayerLoadouts")
+  materialStock      MaterialStock[]
+  rewardGrants       RewardGrant[]
+  ringSockets        RingSocket[]
+  gemEnchantments    GemEnchantment[]
+}
+
+model MaterialStock {
+  playerId   String
+  materialId String
+  quantity   Int
+  player     Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@id([playerId, materialId])
+  @@index([materialId])
+}
+
+model InventoryItem {
+  id                     String            @id
+  playerId               String
+  type                   String
+  definitionId           String
+  contentVersion         String?
+  experience             Int
+  quality                Int
+  socketCount            Int?
+  socketedGemInstanceIds String            @default("[]")
+  enchantment            String?
+  equipped               Boolean           @default(false)
+  createdAt              DateTime          @default(now())
+  player                 Player            @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  enchantedByGem         GemEnchantment?   @relation("GemEnchantmentTarget")
+  equippedRing           EquippedRing?
+  gemEnchantment         GemEnchantment?   @relation("GemEnchantmentGem")
+  loadoutRings           LoadoutRing[]
+  rewardGrantItems       RewardGrantItem[]
+  socketedAsGem          RingSocket?       @relation("RingSocketGem")
+  sockets                RingSocket[]      @relation("RingSocketRing")
+
+  @@index([playerId])
+  @@index([type])
+  @@index([definitionId])
+  @@index([contentVersion])
+}
+
+model RingSocket {
+  id          String        @id @default(cuid())
+  playerId    String
+  ringItemId  String
+  socketIndex Int
+  gemItemId   String
+  createdAt   DateTime      @default(now())
+  player      Player        @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  ringItem    InventoryItem @relation("RingSocketRing", fields: [ringItemId], references: [id], onDelete: Cascade)
+  gemItem     InventoryItem @relation("RingSocketGem", fields: [gemItemId], references: [id], onDelete: Cascade)
+
+  @@unique([ringItemId, socketIndex])
+  @@unique([gemItemId])
+  @@index([playerId])
+  @@index([ringItemId])
+}
+
+model GemEnchantment {
+  id           String        @id @default(cuid())
+  playerId     String
+  gemItemId    String        @unique
+  targetItemId String        @unique
+  targetType   String
+  createdAt    DateTime      @default(now())
+  player       Player        @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  gemItem      InventoryItem @relation("GemEnchantmentGem", fields: [gemItemId], references: [id], onDelete: Cascade)
+  targetItem   InventoryItem @relation("GemEnchantmentTarget", fields: [targetItemId], references: [id], onDelete: Cascade)
+
+  @@index([playerId])
+  @@index([targetType])
+}
+
+model EquippedRing {
+  playerId   String
+  ringItemId String        @unique
+  slotIndex  Int
+  createdAt  DateTime      @default(now())
+  player     Player        @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  ringItem   InventoryItem @relation(fields: [ringItemId], references: [id], onDelete: Cascade)
+
+  @@id([playerId, ringItemId])
+  @@unique([playerId, slotIndex])
+  @@index([playerId])
+}
+
+model Loadout {
+  id               String        @id @default(cuid())
+  playerId         String
+  name             String
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  activeForPlayers Player[]      @relation("ActivePlayerLoadout")
+  player           Player        @relation("PlayerLoadouts", fields: [playerId], references: [id], onDelete: Cascade)
+  rings            LoadoutRing[]
+
+  @@unique([playerId, name])
+  @@index([playerId])
+}
+
+model LoadoutRing {
+  loadoutId  String
+  ringItemId String
+  slotIndex  Int
+  loadout    Loadout       @relation(fields: [loadoutId], references: [id], onDelete: Cascade)
+  ringItem   InventoryItem @relation(fields: [ringItemId], references: [id], onDelete: Cascade)
+
+  @@id([loadoutId, ringItemId])
+  @@unique([loadoutId, slotIndex])
+  @@index([ringItemId])
+}
+
+model RewardGrant {
+  id             String                @id @default(cuid())
+  playerId       String
+  sourceType     String
+  sourceId       String?
+  battleRecordId String?
+  status         String                @default("unclaimed")
+  credits        Int                   @default(0)
+  heroExperience Int                   @default(0)
+  contentVersion String?
+  claimedAt      DateTime?
+  createdAt      DateTime              @default(now())
+  battleRecord   BattleRecord?         @relation(fields: [battleRecordId], references: [id], onDelete: SetNull)
+  items          RewardGrantItem[]
+  materials      RewardGrantMaterial[]
+  player         Player                @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId])
+  @@index([sourceType, sourceId])
+  @@index([battleRecordId])
+  @@index([status])
+}
+
+model RewardGrantMaterial {
+  rewardGrantId String
+  materialId    String
+  quantity      Int
+  rewardGrant   RewardGrant @relation(fields: [rewardGrantId], references: [id], onDelete: Cascade)
+
+  @@id([rewardGrantId, materialId])
+  @@index([materialId])
+}
+
+model RewardGrantItem {
+  rewardGrantId   String
+  inventoryItemId String
+  experience      Int           @default(0)
+  rewardGrant     RewardGrant   @relation(fields: [rewardGrantId], references: [id], onDelete: Cascade)
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+
+  @@id([rewardGrantId, inventoryItemId])
+  @@index([inventoryItemId])
+}
+
+model BattleRecord {
+  id                 String        @id @default(cuid())
+  mode               String
+  status             String        @default("finished")
+  result             String
+  playerOneId        String?
+  playerTwoId        String?
+  winnerPlayerId     String?
+  seed               String
+  rulesVersion       String
+  contentVersion     String
+  setupJson          String
+  actionLogJson      String
+  resultJson         String?
+  finalStateChecksum String?
+  turnCount          Int?
+  createdAt          DateTime      @default(now())
+  playerOne          Player?       @relation("BattleRecordPlayerOne", fields: [playerOneId], references: [id], onDelete: SetNull)
+  playerTwo          Player?       @relation("BattleRecordPlayerTwo", fields: [playerTwoId], references: [id], onDelete: SetNull)
+  rewardGrants       RewardGrant[]
+  winnerPlayer       Player?       @relation("BattleRecordWinner", fields: [winnerPlayerId], references: [id], onDelete: SetNull)
+
+  @@index([mode])
+  @@index([status])
+  @@index([playerOneId])
+  @@index([playerTwoId])
+  @@index([winnerPlayerId])
+  @@index([contentVersion])
+}

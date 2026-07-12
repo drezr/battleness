@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    return craftPlayerRecipe(body.recipeId);
+    return await craftPlayerRecipe(body.recipeId);
   } catch (error) {
     throw createError({
       statusCode: 400,

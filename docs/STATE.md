@@ -31,11 +31,11 @@ This file records modifications made to the project during agent-assisted work.
 - Monster and spell enchantments now reference explicit owned inventory instances with independent experience and quality.
 - Content startup validation now checks cross-file references, ownership, uniqueness, equipment, sockets, enchantments, and battle setup consistency after Zod shape validation.
 - A complete prototype content collection proposal now covers rings, gems, monsters, direct-damage spells, materials, elemental roles, base statistics, and development-only fixtures.
-- The confirmed prototype collection is implemented as content version `prototype-4` with `common`, `refined`, `rare`, and `legendary` rarity tiers.
+- The confirmed prototype collection is implemented as content version `prototype-5` with `common`, `refined`, `rare`, and `epic` rarity tiers.
 - Combat instances now retain rarity, and the prototype frames rings, gems, and monsters with their rarity color across board, setup, detail, and manual-action views.
 - Rings, gems, and monsters now show localized top-right elemental badges, and compact gem sockets combine elemental fill with rarity borders.
 - The content package now includes 48 forge recipes for the collectible rings, gems, monsters, and spells. Development-only `trainingFlameBand` and `plainQuartz` stay outside the recipe pool.
-- Prototype recipes always use exactly three quantity-1 materials from the matching crafting family. Material rarities scale by crafted item rarity: common uses three common materials, refined uses one refined and two common materials, rare uses one rare, one refined, and one common material, and legendary uses one legendary, one rare, and one refined material.
+- Prototype recipes always use exactly three quantity-1 materials from the matching crafting family. Material rarities scale by crafted item rarity: common uses three common materials, refined uses one refined and two common materials, rare uses one rare, one refined, and one common material, and epic uses one epic, one rare, and one refined material.
 - Crafted prototype items are created at level 1 and quality 0. Crafted rings start with one socket.
 - The setup screen now includes a development forge panel with recipe selection, required material stock controls, real material consumption, restock, and a list of crafted instances.
 - The development forge now persists credits, material stock, crafted item instances, and next crafted-instance sequence in browser `localStorage`.
@@ -56,11 +56,37 @@ This file records modifications made to the project during agent-assisted work.
 - Added a full starter development loop DOM regression test covering craft, quality improvement, socketing, enchanting, Battle Lab inventory-backed combat, reward claiming, persisted credits and materials, item XP, and combat summary output.
 - The Vite prototype in `apps/prototype` is now treated as the permanent Dev Lab for engine, content, inventory, and combat diagnostics.
 - Added a separate Nuxt Game App scaffold in `apps/web` for the future player-facing application, keeping it parallel to the Dev Lab instead of replacing it.
-- The Nuxt app currently includes a local SQLite-backed development player state, player API, forge craft API, inventory view, material view, and basic forge UI.
+- The Nuxt app currently includes a Prisma-backed local SQLite development player state, player API, forge craft API, inventory view, material view, and basic forge UI.
 - BattleNess brand assets are copied into the Nuxt app so the new Game App can run independently from the prototype asset directory.
 - The root workspace now includes `dev:web` for starting the Nuxt app separately from the existing prototype `dev` script.
+- Added technical, non-visual UI wireframes for the current Dev Lab and Game App views in `docs/UI_WIREFRAMES.md`.
+- Added a proposed player-facing Game App view structure in `docs/GAME_APP_VIEW_PROPOSAL.md`, including route hierarchy, section responsibilities, market/PvP staging, and recommended implementation order.
+- The Nuxt Game App now implements the proposed player-facing route structure with a shared shell, main navigation, live craft/items/materials views, and mock UI views for battle, campaign, PvP, socketing, quality improvement, equipment, loadouts, market, and profile sections.
+- The Nuxt Game App now reuses the item artwork atlases from the Dev Lab and renders item/material artwork in forge, inventory item, and material views.
+- Added a centralized project TODO in `docs/TODO.md` covering Game App persistence, inventory, forge, battle integration, campaign, rewards, market, profile, authentication, PvP, player market, presentation, production, and open design questions.
 
 ## Change Log
+
+### 2026-07-12
+
+- Added Prisma to the Nuxt Game App with a SQLite development datasource, `Player`, `MaterialStock`, and `InventoryItem` models, and the initial migration under `apps/web/prisma/migrations/`.
+- Replaced the direct `node:sqlite` Nuxt bootstrap store with Prisma-backed server utilities for `/api/player` and `/api/forge/craft`.
+- Added Prisma generation and migration scripts to `apps/web`.
+- Pinned the Nuxt Game App to Prisma 6.x for now because Prisma 7 requires a SQLite runtime adapter, which introduced native `better-sqlite3` binding requirements on the current Windows development environment.
+- Added durable Prisma models for normalized ring sockets, gem enchantments, equipped rings, saved loadouts, reward grants, reward materials, reward item XP, and battle records while preserving the current flat inventory fields for UI compatibility.
+- Added a reusable Nuxt server-side player game state validator for inventory ownership, item definitions, material stock, normalized ring sockets, gem enchantments, equipped rings, loadouts, and reward references. Existing player APIs now validate the Prisma-backed dev player state before returning it.
+- Added an isolated Nuxt API test suite for `/api/player`, `/api/forge/craft`, and the development reset route using a temporary Prisma SQLite database.
+- Added a development-only `/api/dev/reset` route that deletes and reseeds the Prisma-backed development player state.
+- Implemented the real Nuxt `/inventory/equipment` view backed by Prisma `EquippedRing` rows, with equip/unequip APIs, a 10-ring backend limit, owned-ring cards, equipped slots, and basic equipment summary metrics.
+
+### 2026-07-11
+
+- Added `docs/UI_WIREFRAMES.md` with technical wireframes for the proposed Game App shell, current Nuxt dashboard, Dev Lab setup modes, Battle Lab editor, forge, inventory, loadout builder, balance report, content collection, battle screen, rewards, and replay controls.
+- Added `docs/GAME_APP_VIEW_PROPOSAL.md` with a proposed Game App navigation and route model covering Home, Battle, Campaign, PvP, Forge, Inventory, Market, Profile, and staged implementation priorities.
+- Implemented the proposed Nuxt Game App route structure in `apps/web`, including a shared layout shell, top-level navigation, route-level section navigation, functional `/forge/craft`, `/inventory/items`, and `/inventory/materials` views, plus mock UI routes for the remaining battle, forge, inventory, market, and profile sections.
+- Copied the generated item artwork atlases into `apps/web/public/assets/items/`, added a Nuxt `ItemArtwork` component and atlas mapping utility, and rendered artwork on craft outputs, craft ingredients, inventory items, and material cards.
+- Renamed the top rarity tier from `legendary` to `epic` across schemas, content definitions, recipe validation, localization, UI classes, tests, docs, and content version `prototype-5`.
+- Added `docs/TODO.md` as the centralized working TODO list for upcoming BattleNess implementation phases and open design questions.
 
 ### 2026-07-10
 
@@ -182,3 +208,4 @@ This file records modifications made to the project during agent-assisted work.
 - Replaced the previous unrelated state history with a clean BattleNess baseline.
 - Added persistent agent instructions in `docs/AGENT.md`.
 - Added the initial project summary, rules summary, and technical baseline in `docs/PROJECT.md`.
+

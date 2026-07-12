@@ -4,7 +4,7 @@
 
 This document records the first coherent BattleNess content collection for engine testing and early balance work.
 
-The collection is implemented in the executable JSON definitions and locale files as content version `prototype-4`.
+The collection is implemented in the executable JSON definitions and locale files and currently ships as content version `prototype-5`.
 
 The collection deliberately uses only mechanics currently supported by the combat engine:
 
@@ -80,15 +80,15 @@ The main collection contains 12 rings: one ring for each element and rarity comb
 | `emberLoop`      | Ember Loop      | Fire     | Common    |      4 |      2 |        2 |     1 | Existing, adjust energy and cooldown | Entry fire damage                     |
 | `cinderSignet`   | Cinder Signet   | Fire     | Refined   |      5 |      2 |        2 |     1 | New                                  | Efficient fire pressure               |
 | `furnaceHalo`    | Furnace Halo    | Fire     | Rare      |      7 |      3 |        3 |     1 | New                                  | Heavy periodic attack                 |
-| `solarCrown`     | Solar Crown     | Fire     | Legendary |      9 |      4 |        3 |     2 | New                                  | Maximum direct ring damage            |
+| `solarCrown`     | Solar Crown     | Fire     | Epic |      9 |      4 |        3 |     2 | New                                  | Maximum direct ring damage            |
 | `sparkBand`      | Spark Band      | Electric | Common    |      2 |      1 |        1 |     3 | Existing                             | Fast, inexpensive action              |
 | `ironCircle`     | Iron Circle     | Electric | Refined   |      3 |      1 |        1 |     2 | Existing                             | Efficient general-purpose ring        |
 | `stormCoil`      | Storm Coil      | Electric | Rare      |      4 |      2 |        1 |     4 | Existing, adjust damage              | High-speed sustained pressure         |
-| `tempestCircuit` | Tempest Circuit | Electric | Legendary |      5 |      2 |        1 |     5 | New                                  | Premium speed and cadence             |
+| `tempestCircuit` | Tempest Circuit | Electric | Epic |      5 |      2 |        1 |     5 | New                                  | Premium speed and cadence             |
 | `frostSeal`      | Frost Seal      | Ice      | Common    |      3 |      2 |        1 |     0 | Existing                             | Entry ice ring                        |
 | `rimeClasp`      | Rime Clasp      | Ice      | Refined   |      4 |      2 |        1 |     0 | New                                  | Reliable ice damage                   |
 | `glacierRing`    | Glacier Ring    | Ice      | Rare      |      5 |      3 |        1 |     0 | Existing                             | High-cost repeated pressure           |
-| `winterCrown`    | Winter Crown    | Ice      | Legendary |      7 |      4 |        1 |     1 | New                                  | Strong damage with high energy demand |
+| `winterCrown`    | Winter Crown    | Ice      | Epic |      7 |      4 |        1 |     1 | New                                  | Strong damage with high energy demand |
 
 ### Development-Only Ring
 
@@ -103,15 +103,15 @@ The main collection contains 12 gems: one gem for each element and rarity combin
 | `rubyShard`       | Ruby Shard        | Fire     | Common    |      2 |              0 |                1 | Existing, adjust cooldown penalty | Entry fire damage boost                       |
 | `emberCore`       | Ember Core        | Fire     | Refined   |      3 |              1 |                1 | Existing                          | Balanced fire power                           |
 | `infernoOpal`     | Inferno Opal      | Fire     | Rare      |      5 |              1 |                2 | New                               | Large damage with delayed reuse               |
-| `sunforgeHeart`   | Sunforge Heart    | Fire     | Legendary |      7 |              2 |                2 | New                               | Maximum gem damage                            |
+| `sunforgeHeart`   | Sunforge Heart    | Fire     | Epic |      7 |              2 |                2 | New                               | Maximum gem damage                            |
 | `sparkPrism`      | Spark Prism       | Electric | Common    |      1 |              0 |                0 | Existing                          | Free low damage                               |
 | `staticPearl`     | Static Pearl      | Electric | Refined   |      1 |              0 |                0 | Existing                          | Flexible enchantment carrier                  |
 | `voltDiamond`     | Volt Diamond      | Electric | Rare      |      2 |              0 |                0 | New                               | Efficient damage without penalties            |
-| `tempestEye`      | Tempest Eye       | Electric | Legendary |      3 |              0 |                1 | New                               | Strong electric gem with a small cadence cost |
+| `tempestEye`      | Tempest Eye       | Electric | Epic |      3 |              0 |                1 | New                               | Strong electric gem with a small cadence cost |
 | `frostChip`       | Frost Chip        | Ice      | Common    |      1 |              1 |                0 | Existing, adjust energy penalty   | Entry ice enchantment carrier                 |
 | `rimeQuartz`      | Rime Quartz       | Ice      | Refined   |      2 |              1 |                0 | New                               | Moderate damage and energy demand             |
 | `glacierPearl`    | Glacier Pearl     | Ice      | Rare      |      3 |              2 |                0 | New                               | High-cost damage without cooldown cost        |
-| `absoluteZeroGem` | Absolute Zero Gem | Ice      | Legendary |      5 |              3 |                0 | New                               | Maximum ice gem damage                        |
+| `absoluteZeroGem` | Absolute Zero Gem | Ice      | Epic |      5 |              3 |                0 | New                               | Maximum ice gem damage                        |
 
 ### Development-Only Gem
 
@@ -130,7 +130,7 @@ The main collection contains 18 monsters: six per element. Every monster has at 
 | `rageSprite`    | Rage Sprite    | Refined   |      4 |      5 |        2 |     1 | Rage   | Existing | Aggressive Rage threat         |
 | `cinderRam`     | Cinder Ram     | Refined   |      6 |      5 |        2 |     1 | Pierce | New      | Durable Pierce attacker        |
 | `magmaColossus` | Magma Colossus | Rare      |      7 |      7 |        3 |     0 | Rage   | New      | Slow heavy attacker            |
-| `solarDrake`    | Solar Drake    | Legendary |      9 |      9 |        3 |     2 | Pierce | New      | Maximum single-target pressure |
+| `solarDrake`    | Solar Drake    | Epic |      9 |      9 |        3 |     2 | Pierce | New      | Maximum single-target pressure |
 
 ### Electric Monsters
 
@@ -141,7 +141,7 @@ The main collection contains 18 monsters: six per element. Every monster has at 
 | `arcStriker`    | Arc Striker    | Refined   |      5 |      2 |        1 |     3 | MultiHit | Existing | Stable MultiHit attacker   |
 | `coilLynx`      | Coil Lynx      | Refined   |      5 |      3 |        1 |     4 | Haste    | New      | Immediate tempo attacker   |
 | `thunderRaptor` | Thunder Raptor | Rare      |      6 |      3 |        1 |     5 | MultiHit | New      | Fast board control         |
-| `tempestTitan`  | Tempest Titan  | Legendary |      8 |      4 |        1 |     5 | Haste    | New      | Premium immediate pressure |
+| `tempestTitan`  | Tempest Titan  | Epic |      8 |      4 |        1 |     5 | Haste    | New      | Premium immediate pressure |
 
 ### Ice Monsters
 
@@ -152,13 +152,13 @@ The main collection contains 18 monsters: six per element. Every monster has at 
 | `frostBeetle`   | Frost Beetle   | Refined   |      8 |      1 |        1 |     0 | Shield | Existing | Defensive shield wall     |
 | `rimeGolem`     | Rime Golem     | Refined   |     10 |      2 |        1 |     0 | Taunt  | New      | Durable protector         |
 | `shieldWisp`    | Shield Wisp    | Rare      |      9 |      1 |        1 |     0 | Shield | Existing | Persistent protected body |
-| `eternalWarden` | Eternal Warden | Legendary |     14 |      3 |        1 |     0 | Taunt  | New      | Maximum defensive anchor  |
+| `eternalWarden` | Eternal Warden | Epic |     14 |      3 |        1 |     0 | Taunt  | New      | Maximum defensive anchor  |
 
 ## Spells
 
 The prototype collection contains only six spells because `dealDamage` is currently the only supported spell effect.
 
-Each element receives one common and one rare spell. Refined and legendary spells should be added after additional effect types exist, rather than filling those rarities with repetitive damage variants.
+Each element receives one common and one rare spell. Refined and epic spells should be added after additional effect types exist, rather than filling those rarities with repetitive damage variants.
 
 | ID             | Name          | Element  | Rarity | Damage | Energy penalty | Cooldown penalty | Status   | Intended role             |
 | -------------- | ------------- | -------- | ------ | -----: | -------------: | ---------------: | -------- | ------------------------- |
@@ -195,7 +195,7 @@ Each recipe consumes exactly three quantity-1 materials from the same crafting f
 - Common output: common, common, common.
 - Refined output: refined, common, common.
 - Rare output: rare, refined, common.
-- Legendary output: legendary, rare, refined.
+- Epic output: epic, rare, refined.
 
 Initial crafted items are level 1 and quality 0. Crafted rings start with one socket. Development inventory starts with 1000 prototype credits. Quality improvement spends credits to add 5 quality points to a crafted item up to 100. Ring socket improvement spends credits to increase crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
 
@@ -233,3 +233,4 @@ The development inventory and loadout builder now expose item XP progression dir
 2. Add focused scenario fixtures for representative elemental and rarity matchups.
 3. Adjust statistical outliers before introducing additional spell effects.
 4. Decide the next forge step: persistent inventory integration, quality improvement, or ring socket improvement.
+

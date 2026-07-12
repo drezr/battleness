@@ -120,7 +120,6 @@
   "rarity.common.name": "Commun",
   "rarity.refined.name": "Raffiné",
   "rarity.rare.name": "Rare",
-  "rarity.legendary.name": "Légendaire",
   "event.battleEnded.draw": "Le combat se termine sur une egalite.",
   "event.battleEnded.winner": "{winner} a vaincu {loser}.",
   "event.battleStarted": "Le combat {battleId} commence.",
@@ -340,7 +339,6 @@
   "ui.ready": "Pret",
   "ui.rarity": "Rarete",
   "ui.rarity.common": "Commun",
-  "ui.rarity.legendary": "Legendaire",
   "ui.rarity.rare": "Rare",
   "ui.rarity.refined": "Raffine",
   "ui.remainingActions": "Actions",
@@ -430,5 +428,7 @@
   "spell.glacialSpike.name": "Pic glaciaire",
   "spell.iceShard.name": "Éclat de glace",
   "spell.solarFlare.name": "Éruption solaire",
-  "spell.spark.name": "Étincelle"
+  "spell.spark.name": "Étincelle",
+  "rarity.epic.name": "Épique",
+  "ui.rarity.epic": "Épique"
 }

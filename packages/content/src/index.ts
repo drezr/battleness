@@ -39,7 +39,7 @@ import {
 } from "./schemas";
 import { validateContentReferences } from "./references";
 
-export const contentVersion = "prototype-4";
+export const contentVersion = "prototype-5";
 
 export const definitions = {
   gems: gems as readonly GemDefinition[],

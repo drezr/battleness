@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const elementSchema = z.enum(["electric", "fire", "ice"]);
-export const raritySchema = z.enum(["common", "refined", "rare", "legendary"]);
+export const raritySchema = z.enum(["common", "refined", "rare", "epic"]);
 
 export const skillSchema = z.enum(["haste", "multiHit", "pierce", "rage", "shield", "taunt"]);
 
@@ -302,3 +302,4 @@ export type MonsterInstance = z.infer<typeof monsterInstanceSchema>;
 export type SpellInstance = z.infer<typeof spellInstanceSchema>;
 export type BattleSetupFixture = z.infer<typeof battleSetupFixtureSchema>;
 export type ScenarioFixture = z.infer<typeof scenarioFixtureSchema>;
+

@@ -1,9 +1,8 @@
-import { mkdirSync } from "node:fs";
-import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { DatabaseSync } from "node:sqlite";
+import { Prisma, PrismaClient, type InventoryItem } from "@prisma/client";
 import {
   canCraftRecipe,
+  contentVersion,
   craftRecipe,
   createMaterialStock,
   definitions,
@@ -13,33 +12,9 @@ import {
   type MaterialDefinition,
   type MaterialStock,
   type RecipeDefinition,
+  type RingDefinition,
 } from "@battleness/content";
-
-type PlayerRow = {
-  id: string;
-  username: string;
-  experience: number;
-  credits: number;
-  next_item_sequence: number;
-};
-
-type MaterialStockRow = {
-  material_id: string;
-  quantity: number;
-};
-
-type InventoryItemRow = {
-  id: string;
-  player_id: string;
-  type: CraftableItemType;
-  definition_id: string;
-  experience: number;
-  quality: number;
-  socket_count: number | null;
-  socketed_gem_instance_ids: string;
-  enchantment: string | null;
-  equipped: number;
-};
+import { assertValidPlayerGameState } from "./gameStateValidation";
 
 type CraftableDefinition = {
   id: string;
@@ -48,19 +23,40 @@ type CraftableDefinition = {
   element: string;
 };
 
+type MaterialStockRow = {
+  materialId: string;
+  quantity: number;
+};
+
+type PrismaContext = PrismaClient | Prisma.TransactionClient;
+type EquipmentRingItem = ReturnType<typeof toEquipmentRingView>;
+
 const DEV_PLAYER_ID = "devPlayer";
-const databasePath =
-  process.env.BATTLENESS_DB_PATH ??
-  fileURLToPath(new URL("../../data/battleness.local.sqlite", import.meta.url));
+const maxEquippedRings = 10;
+const defaultDatabaseUrl = `file:${fileURLToPath(
+  new URL("../../data/battleness.prisma.sqlite", import.meta.url),
+).replace(/\\/g, "/")}`;
+const globalForPrisma = globalThis as typeof globalThis & {
+  battlenessPrisma?: PrismaClient;
+  battlenessPrismaUrl?: string;
+};
 
-let database: DatabaseSync | undefined;
+export type WebPlayerState = Awaited<ReturnType<typeof getPlayerState>>;
 
-export type WebPlayerState = ReturnType<typeof getPlayerState>;
+export async function getPlayerState() {
+  const prisma = usePrisma();
 
-export function getPlayerState() {
-  const db = useDatabase();
-  const player = getPlayer(db);
-  const stock = getMaterialStock(db, player.id);
+  await seedDevelopmentPlayer(prisma);
+  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+
+  const player = await prisma.player.findUniqueOrThrow({
+    where: { id: DEV_PLAYER_ID },
+    include: {
+      inventoryItems: { orderBy: { createdAt: "desc" } },
+      materialStock: true,
+    },
+  });
+  const stock = materialStockFromRows(player.materialStock);
 
   return {
     player: {
@@ -80,192 +76,346 @@ export function getPlayerState() {
       atomicNumber: material.atomicNumber ?? null,
       quantity: stock[material.id] ?? 0,
     })),
-    inventory: getInventoryRows(db, player.id).map(toInventoryView),
+    inventory: player.inventoryItems.map(toInventoryView),
     recipes: definitions.recipes.map((recipe) => toRecipeView(recipe, stock)),
   };
 }
 
-export function craftPlayerRecipe(recipeId: string) {
-  const db = useDatabase();
+export async function craftPlayerRecipe(recipeId: string) {
+  const prisma = usePrisma();
   const recipe = definitions.recipes.find((candidate) => candidate.id === recipeId);
 
   if (!recipe) {
     throw new Error(`Unknown recipe "${recipeId}".`);
   }
 
-  const player = getPlayer(db);
-  const stock = getMaterialStock(db, player.id);
-  const result = craftRecipe({
-    recipe,
-    ownerId: player.id,
-    stock,
-    instanceSequence: player.next_item_sequence,
+  await seedDevelopmentPlayer(prisma);
+
+  const crafted = await prisma.$transaction(async (transaction) => {
+    const player = await transaction.player.findUniqueOrThrow({
+      where: { id: DEV_PLAYER_ID },
+      include: { materialStock: true },
+    });
+    const stock = materialStockFromRows(player.materialStock);
+    const result = craftRecipe({
+      recipe,
+      ownerId: player.id,
+      stock,
+      instanceSequence: player.nextItemSequence,
+    });
+
+    await saveMaterialStock(transaction, player.id, result.stock);
+    await insertCraftedItem(transaction, player.id, result.crafted);
+    await transaction.player.update({
+      where: { id: player.id },
+      data: { nextItemSequence: player.nextItemSequence + 1 },
+    });
+
+    return result.crafted;
   });
 
-  db.exec("BEGIN IMMEDIATE");
-  try {
-    saveMaterialStock(db, player.id, result.stock);
-    insertCraftedItem(db, player.id, result.crafted);
-    db.prepare("UPDATE players SET next_item_sequence = ? WHERE id = ?").run(
-      player.next_item_sequence + 1,
-      player.id,
-    );
-    db.exec("COMMIT");
-  } catch (error) {
-    db.exec("ROLLBACK");
-    throw error;
-  }
-
   return {
-    crafted: toCraftedItemView(result.crafted),
-    state: getPlayerState(),
+    crafted: toCraftedItemView(crafted),
+    state: await getPlayerState(),
   };
 }
 
-function useDatabase(): DatabaseSync {
-  if (database) {
-    return database;
-  }
+export async function getPlayerEquipmentState() {
+  const prisma = usePrisma();
 
-  mkdirSync(dirname(databasePath), { recursive: true });
-  database = new DatabaseSync(databasePath);
-  database.exec("PRAGMA foreign_keys = ON");
-  migrate(database);
-  seed(database);
-  return database;
+  await seedDevelopmentPlayer(prisma);
+  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+
+  const player = await prisma.player.findUniqueOrThrow({
+    where: { id: DEV_PLAYER_ID },
+    include: {
+      equippedRings: {
+        include: { ringItem: true },
+        orderBy: { slotIndex: "asc" },
+      },
+      inventoryItems: {
+        where: { type: "ring" },
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+  const equippedRingIds = new Set(player.equippedRings.map((entry) => entry.ringItemId));
+  const equippedRings = player.equippedRings.map((entry) =>
+    toEquipmentRingView(entry.ringItem, entry.slotIndex, true),
+  );
+  const availableRings = player.inventoryItems.map((ring) =>
+    toEquipmentRingView(ring, player.equippedRings.find((entry) => entry.ringItemId === ring.id)?.slotIndex ?? null, equippedRingIds.has(ring.id)),
+  );
+
+  return {
+    player: {
+      id: player.id,
+      username: player.username,
+    },
+    maxEquippedRings,
+    equippedRings,
+    availableRings,
+    summary: toEquipmentSummary(equippedRings),
+  };
 }
 
-function migrate(db: DatabaseSync): void {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS players (
-      id TEXT PRIMARY KEY,
-      username TEXT NOT NULL,
-      experience INTEGER NOT NULL DEFAULT 0,
-      credits INTEGER NOT NULL DEFAULT 0,
-      next_item_sequence INTEGER NOT NULL DEFAULT 1
+export async function equipPlayerRing(ringItemId: string) {
+  const prisma = usePrisma();
+
+  await seedDevelopmentPlayer(prisma);
+
+  await prisma.$transaction(async (transaction) => {
+    const ring = await transaction.inventoryItem.findUnique({
+      where: { id: ringItemId },
+    });
+
+    if (!ring || ring.playerId !== DEV_PLAYER_ID || ring.type !== "ring") {
+      throw new Error(`Ring item "${ringItemId}" is not available for this player.`);
+    }
+
+    const existing = await transaction.equippedRing.findUnique({
+      where: { ringItemId },
+    });
+
+    if (existing) {
+      return;
+    }
+
+    const equippedRings = await transaction.equippedRing.findMany({
+      where: { playerId: DEV_PLAYER_ID },
+      select: { slotIndex: true },
+      orderBy: { slotIndex: "asc" },
+    });
+
+    if (equippedRings.length >= maxEquippedRings) {
+      throw new Error(`A player can equip at most ${maxEquippedRings} rings.`);
+    }
+
+    const usedSlots = new Set(equippedRings.map((entry) => entry.slotIndex));
+    const slotIndex = Array.from({ length: maxEquippedRings }, (_, index) => index).find(
+      (candidate) => !usedSlots.has(candidate),
     );
 
-    CREATE TABLE IF NOT EXISTS material_stock (
-      player_id TEXT NOT NULL,
-      material_id TEXT NOT NULL,
-      quantity INTEGER NOT NULL,
-      PRIMARY KEY (player_id, material_id),
-      FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
-    );
+    if (slotIndex === undefined) {
+      throw new Error("No equipment slot is available.");
+    }
 
-    CREATE TABLE IF NOT EXISTS inventory_items (
-      id TEXT PRIMARY KEY,
-      player_id TEXT NOT NULL,
-      type TEXT NOT NULL,
-      definition_id TEXT NOT NULL,
-      experience INTEGER NOT NULL,
-      quality INTEGER NOT NULL,
-      socket_count INTEGER,
-      socketed_gem_instance_ids TEXT NOT NULL DEFAULT '[]',
-      enchantment TEXT,
-      equipped INTEGER NOT NULL DEFAULT 0,
-      FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
-    );
-  `);
+    await transaction.equippedRing.create({
+      data: {
+        playerId: DEV_PLAYER_ID,
+        ringItemId,
+        slotIndex,
+      },
+    });
+    await transaction.inventoryItem.update({
+      where: { id: ringItemId },
+      data: { equipped: true },
+    });
+  });
+
+  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  return getPlayerEquipmentState();
 }
 
-function seed(db: DatabaseSync): void {
-  db.prepare(
-    "INSERT OR IGNORE INTO players (id, username, experience, credits, next_item_sequence) VALUES (?, ?, ?, ?, ?)",
-  ).run(DEV_PLAYER_ID, "Dev Player", 0, 1000, 1);
+export async function unequipPlayerRing(ringItemId: string) {
+  const prisma = usePrisma();
 
-  const existingStock = db
-    .prepare("SELECT COUNT(*) AS count FROM material_stock WHERE player_id = ?")
-    .get(DEV_PLAYER_ID) as { count: number };
+  await seedDevelopmentPlayer(prisma);
 
-  if (existingStock.count > 0) {
+  await prisma.$transaction(async (transaction) => {
+    const ring = await transaction.inventoryItem.findUnique({
+      where: { id: ringItemId },
+    });
+
+    if (!ring || ring.playerId !== DEV_PLAYER_ID || ring.type !== "ring") {
+      throw new Error(`Ring item "${ringItemId}" is not available for this player.`);
+    }
+
+    await transaction.equippedRing.deleteMany({
+      where: { playerId: DEV_PLAYER_ID, ringItemId },
+    });
+    await transaction.inventoryItem.update({
+      where: { id: ringItemId },
+      data: { equipped: false },
+    });
+  });
+
+  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  return getPlayerEquipmentState();
+}
+
+export async function resetDevelopmentPlayerState() {
+  const prisma = usePrisma();
+
+  await prisma.player.deleteMany({ where: { id: DEV_PLAYER_ID } });
+  await seedDevelopmentPlayer(prisma);
+  return getPlayerState();
+}
+
+export async function disconnectGameStateClientForTests(): Promise<void> {
+  if (!globalForPrisma.battlenessPrisma) {
     return;
   }
 
-  const startingStock = createMaterialStock(definitions.materials, 2);
-  saveMaterialStock(db, DEV_PLAYER_ID, startingStock);
+  await globalForPrisma.battlenessPrisma.$disconnect();
+  globalForPrisma.battlenessPrisma = undefined;
+  globalForPrisma.battlenessPrismaUrl = undefined;
 }
 
-function getPlayer(db: DatabaseSync): PlayerRow {
-  return db.prepare("SELECT * FROM players WHERE id = ?").get(DEV_PLAYER_ID) as PlayerRow;
-}
+function usePrisma(): PrismaClient {
+  const databaseUrl = process.env.BATTLENESS_DATABASE_URL ?? defaultDatabaseUrl;
 
-function getMaterialStock(db: DatabaseSync, playerId: string): MaterialStock {
-  const rows = db
-    .prepare("SELECT material_id, quantity FROM material_stock WHERE player_id = ?")
-    .all(playerId) as MaterialStockRow[];
-
-  return Object.fromEntries(rows.map((row) => [row.material_id, row.quantity]));
-}
-
-function saveMaterialStock(db: DatabaseSync, playerId: string, stock: MaterialStock): void {
-  const statement = db.prepare(`
-    INSERT INTO material_stock (player_id, material_id, quantity)
-    VALUES (?, ?, ?)
-    ON CONFLICT(player_id, material_id) DO UPDATE SET quantity = excluded.quantity
-  `);
-
-  for (const material of definitions.materials) {
-    statement.run(playerId, material.id, stock[material.id] ?? 0);
+  if (
+    globalForPrisma.battlenessPrisma &&
+    globalForPrisma.battlenessPrismaUrl === databaseUrl
+  ) {
+    return globalForPrisma.battlenessPrisma;
   }
+
+  const client = new PrismaClient({
+    datasources: {
+      db: { url: databaseUrl },
+    },
+  });
+
+  if (process.env.NODE_ENV !== "production") {
+    globalForPrisma.battlenessPrisma = client;
+    globalForPrisma.battlenessPrismaUrl = databaseUrl;
+  }
+
+  return client;
 }
 
-function getInventoryRows(db: DatabaseSync, playerId: string): InventoryItemRow[] {
-  return db
-    .prepare("SELECT * FROM inventory_items WHERE player_id = ? ORDER BY rowid DESC")
-    .all(playerId) as InventoryItemRow[];
+async function seedDevelopmentPlayer(client: PrismaContext): Promise<void> {
+  await client.player.upsert({
+    where: { id: DEV_PLAYER_ID },
+    create: {
+      id: DEV_PLAYER_ID,
+      username: "Dev Player",
+      experience: 0,
+      credits: 1000,
+      nextItemSequence: 1,
+    },
+    update: {},
+  });
+
+  const existingStockCount = await client.materialStock.count({
+    where: { playerId: DEV_PLAYER_ID },
+  });
+
+  if (existingStockCount > 0) {
+    return;
+  }
+
+  await saveMaterialStock(client, DEV_PLAYER_ID, createMaterialStock(definitions.materials, 2));
 }
 
-function insertCraftedItem(
-  db: DatabaseSync,
+async function saveMaterialStock(
+  client: PrismaContext,
   playerId: string,
-  crafted: CraftedItemInstance,
-): void {
-  const item = crafted.item;
-  db.prepare(`
-    INSERT INTO inventory_items (
-      id,
-      player_id,
-      type,
-      definition_id,
-      experience,
-      quality,
-      socket_count,
-      socketed_gem_instance_ids,
-      enchantment,
-      equipped
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    item.id,
-    playerId,
-    crafted.type,
-    item.definitionId,
-    item.experience,
-    item.quality,
-    crafted.type === "ring" ? crafted.item.socketCount : null,
-    crafted.type === "ring" ? JSON.stringify(crafted.item.socketedGemInstanceIds) : "[]",
-    crafted.type === "gem" && crafted.item.enchantment
-      ? JSON.stringify(crafted.item.enchantment)
-      : null,
-    crafted.type === "ring" && crafted.item.equipped ? 1 : 0,
+  stock: MaterialStock,
+): Promise<void> {
+  await Promise.all(
+    definitions.materials.map((material) =>
+      client.materialStock.upsert({
+        where: { playerId_materialId: { playerId, materialId: material.id } },
+        create: {
+          playerId,
+          materialId: material.id,
+          quantity: stock[material.id] ?? 0,
+        },
+        update: { quantity: stock[material.id] ?? 0 },
+      }),
+    ),
   );
 }
 
-function toInventoryView(row: InventoryItemRow) {
-  const definition = getCraftableDefinition(row.type, row.definition_id);
+async function insertCraftedItem(
+  client: PrismaContext,
+  playerId: string,
+  crafted: CraftedItemInstance,
+): Promise<void> {
+  const commonData = {
+    id: crafted.item.id,
+    playerId,
+    type: crafted.type,
+    definitionId: crafted.item.definitionId,
+    contentVersion,
+    experience: crafted.item.experience,
+    quality: crafted.item.quality,
+  };
+
+  await client.inventoryItem.create({
+    data: {
+      ...commonData,
+      socketCount: crafted.type === "ring" ? crafted.item.socketCount : null,
+      socketedGemInstanceIds:
+        crafted.type === "ring" ? JSON.stringify(crafted.item.socketedGemInstanceIds) : "[]",
+      enchantment:
+        crafted.type === "gem" && crafted.item.enchantment
+          ? JSON.stringify(crafted.item.enchantment)
+          : null,
+      equipped: crafted.type === "ring" ? crafted.item.equipped : false,
+    },
+  });
+}
+
+function materialStockFromRows(rows: readonly MaterialStockRow[]): MaterialStock {
+  return Object.fromEntries(rows.map((row) => [row.materialId, row.quantity]));
+}
+
+function toInventoryView(row: InventoryItem) {
+  const type = row.type as CraftableItemType;
+  const definition = getCraftableDefinition(type, row.definitionId);
 
   return {
     id: row.id,
-    type: row.type,
-    definitionId: row.definition_id,
+    type,
+    definitionId: row.definitionId,
     label: label(definition.nameKey),
     rarity: definition.rarity,
     element: definition.element,
     experience: row.experience,
     quality: row.quality,
-    socketCount: row.socket_count,
-    equipped: row.equipped === 1,
+    socketCount: row.socketCount,
+    equipped: row.equipped,
+  };
+}
+
+function toEquipmentRingView(row: InventoryItem, slotIndex: number | null, equipped: boolean) {
+  const definition = getRingDefinition(row.definitionId);
+
+  return {
+    id: row.id,
+    definitionId: row.definitionId,
+    label: label(definition.nameKey),
+    rarity: definition.rarity,
+    element: definition.element,
+    experience: row.experience,
+    quality: row.quality,
+    socketCount: row.socketCount,
+    equipped,
+    slotIndex,
+    baseDamage: definition.baseDamage,
+    baseEnergyCost: definition.baseEnergyCost,
+    baseCooldown: definition.baseCooldown,
+    baseSpeed: definition.baseSpeed,
+  };
+}
+
+function toEquipmentSummary(equippedRings: readonly EquipmentRingItem[]) {
+  const totalSpeed = equippedRings.reduce((total, ring) => total + ring.baseSpeed, 0);
+  const totalDamage = equippedRings.reduce((total, ring) => total + ring.baseDamage, 0);
+  const totalEnergyCost = equippedRings.reduce((total, ring) => total + ring.baseEnergyCost, 0);
+  const totalCooldown = equippedRings.reduce((total, ring) => total + ring.baseCooldown, 0);
+  const ringCount = equippedRings.length;
+
+  return {
+    ringCount,
+    totalSpeed,
+    totalDamage,
+    averageEnergyCost: ringCount === 0 ? 0 : Number((totalEnergyCost / ringCount).toFixed(1)),
+    averageCooldown: ringCount === 0 ? 0 : Number((totalCooldown / ringCount).toFixed(1)),
   };
 }
 
@@ -319,6 +469,16 @@ function getCraftableDefinition(type: CraftableItemType, definitionId: string): 
 
   if (!definition) {
     throw new Error(`Unknown ${type} definition "${definitionId}".`);
+  }
+
+  return definition;
+}
+
+function getRingDefinition(definitionId: string): RingDefinition {
+  const definition = definitions.rings.find((candidate) => candidate.id === definitionId);
+
+  if (!definition) {
+    throw new Error(`Unknown ring definition "${definitionId}".`);
   }
 
   return definition;

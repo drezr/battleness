@@ -1016,7 +1016,7 @@ function renderDevelopmentInventoryPanel(): string {
           <span>${escapeHtml(t("ui.rarity"))}</span>
           <select id="inventoryRarityFilter">
             ${renderFilterOption("all", t("ui.all"), inventoryRarityFilter)}
-            ${(["common", "refined", "rare", "legendary"] as const)
+            ${(["common", "refined", "rare", "epic"] as const)
               .map((rarity) =>
                 renderFilterOption(rarity, t(`ui.rarity.${rarity}`), inventoryRarityFilter),
               )
@@ -5070,3 +5070,4 @@ function escapeHtml(value: string): string {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+

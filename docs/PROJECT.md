@@ -41,7 +41,7 @@ The game is a one-versus-one, turn-based combat game. Each player controls a her
 - Elemental types are electric, fire, and ice.
 - Electric beats fire, fire beats ice, and ice beats electric.
 - Gems, monsters, and spells can add energy and cooldown penalties to the ring that contains them.
-- Item rarity, from least rare to most rare, is common, refined, rare, and legendary.
+- Item rarity, from least rare to most rare, is common, refined, rare, and epic.
 
 ### Economy And Modes
 
@@ -95,7 +95,7 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 
 ### Item Stats
 
-- Rarity: An item's scarcity and value tier. Current rarity order is common, refined, rare, legendary.
+- Rarity: An item's scarcity and value tier. Current rarity order is common, refined, rare, epic.
 - Quality: A 0 to 100% item value that improves some item characteristics.
 - Level: An item or hero progression value from 0 to 50.
 - Experience: Progress earned by heroes or items that contributes to level.
@@ -122,7 +122,7 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 
 - Object colors: Ring uses pink, Gem uses cyan, Monster uses green, Spell uses magenta, and Material uses blue.
 - Element colors: Electric uses yellow, Fire uses pink-red, and Ice uses light cyan.
-- Rarity colors: Common uses white or light gray, Refined uses blue, Rare uses orange, and Legendary uses purple.
+- Rarity colors: Common uses white or light gray, Refined uses blue, Rare uses orange, and Epic uses purple.
 - Stat colors: Damage uses pink-red, Health uses red, Energy uses green, Energy Penalty uses pale green, Cooldown uses light cyan, Cooldown Penalty uses cyan, Quality uses orange, Speed uses yellow, Skill uses magenta, and Rarity uses purple.
 
 ### Item Artwork
@@ -152,7 +152,7 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - The battle screen should eventually follow the user's sketch direction: heroes anchored on the left, the monster battlefield occupying the center, rings arranged as a bottom hand or equipment row, and energy bars visible at the top and bottom.
 - Monster cards should expose skill, damage, and health zones clearly.
 - Ring cards should expose damage and energy/cost information, with socketed gems visible along the bottom of each ring.
-- Ring, gem, and monster frames identify rarity consistently: common uses light gray, refined uses blue, rare uses orange, and legendary uses purple.
+- Ring, gem, and monster frames identify rarity consistently: common uses light gray, refined uses blue, rare uses orange, and epic uses purple.
 - Selection, targeting, and blocked-state indicators remain separate from rarity framing so interaction state does not replace item identity.
 - Ring, gem, and monster cards also display a localized elemental badge in the top-right corner: Electric uses yellow, Fire uses pink-red, and Ice uses light cyan.
 - Compact socketed gems use their elemental fill color while retaining rarity on the surrounding border.
@@ -170,7 +170,7 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - Shop: The game vendor where players can buy materials and sell items.
 - Player Market: A future economy system where players can list items for sale and buy items listed by other players.
 - Initial prototype recipes always consume exactly three quantity-1 materials from the matching crafting family.
-- Material rarities scale by crafted item rarity: common items use three common materials; refined items use one refined and two common materials; rare items use one rare, one refined, and one common material; legendary items use one legendary, one rare, and one refined material.
+- Material rarities scale by crafted item rarity: common items use three common materials; refined items use one refined and two common materials; rare items use one rare, one refined, and one common material; epic items use one epic, one rare, and one refined material.
 - Initial crafted items are level 1 and quality 0. Crafted rings start with one socket.
 - The prototype development forge persists credits, material stock, crafted item instances, and the next crafted-instance sequence in browser `localStorage`.
 - Development inventory starts with 1000 prototype credits. Quality improvement spends credits to add 5 quality points to a crafted item up to 100. Ring socket improvement spends credits to increase crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
@@ -383,7 +383,7 @@ This section separates executable game rules from implementation decisions. It i
 - Inventory fixtures contain player-owned ring, gem, monster, and spell instances. Every item instance stores `id`, `definitionId`, `ownerId`, `experience`, and `quality`.
 - Ring instances additionally store `socketCount`, `socketedGemInstanceIds`, and `equipped`.
 - Gem instances may contain an enchantment with either `monsterInstanceId` or `spellInstanceId`.
-- Content version `prototype-2` introduced experience-derived levels and independently progressable monster and spell instances. Content version `prototype-3` adds the confirmed collection, new rarity identifiers, and enriched materials.
+- Content version `prototype-2` introduced experience-derived levels and independently progressable monster and spell instances. Content version `prototype-3` adds the confirmed collection, new rarity identifiers, and enriched materials. Content version `prototype-5` renames the highest rarity tier from `legendary` to `epic`.
 - The initial `BattleSetup` should contain `id`, `seed`, two players, resolved combat stats, equipped ring instances, socketed gem instances, referenced definitions, and optional initial status for first-player element choice.
 - The initial `BattleAction` union should include `chooseElement`, `useRing`, `useMonster`, `endTurn`, and `concede`.
 - The version 1 `BattleRecord` shape includes `format`, `formatVersion`, `rulesVersion`, `contentVersion`, `setup`, `actions`, `result`, and `finalStateChecksum`.
@@ -434,7 +434,7 @@ This section separates executable game rules from implementation decisions. It i
 
 ### Prototype Content Collection
 
-- The first balance collection is documented in `docs/CONTENT_COLLECTION_PROPOSAL.md` and implemented as content version `prototype-4`.
+- The first balance collection is documented in `docs/CONTENT_COLLECTION_PROPOSAL.md` and currently implemented as content version `prototype-5`.
 - The collection contains 12 collectible rings, 12 collectible gems, 18 monsters, 6 direct-damage spells, and 70 materials.
 - `trainingFlameBand` and `plainQuartz` remain development-only definitions outside the collectible pool.
 - The collection contains 48 initial recipes: one recipe for every collectible ring, gem, monster, and spell. Development-only definitions are intentionally excluded.
@@ -561,9 +561,9 @@ This section separates executable game rules from implementation decisions. It i
 #### ORM
 
 - Status: decided.
-- Decision: Use Prisma as the intended ORM/database migration tool for the durable database schema. The initial Nuxt Game App scaffold may use a direct `node:sqlite` bootstrap store while validating app and API boundaries.
+- Decision: Use Prisma as the ORM/database migration tool for the durable database schema. The Nuxt Game App now uses Prisma with a local SQLite development datasource.
 - Reason: Prisma supports TypeScript workflows and the selected SQL direction, including SQLite for development and PostgreSQL for production.
-- Tradeoffs: Prisma introduces schema generation and migration tooling. A small direct SQLite bootstrap can move early UI/API work forward, but it should not become the long-term persistence layer without an explicit decision.
+- Tradeoffs: Prisma introduces schema generation and migration tooling. SQLite keeps development lightweight, but PostgreSQL production readiness still requires attention to migration compatibility, concurrency assumptions, and deployment configuration. The Nuxt Game App is pinned to Prisma 6.x for now because Prisma 7 requires a SQLite runtime adapter and the current Windows development environment should not depend on native `better-sqlite3` build tooling until that upgrade is planned.
 
 #### Prototype Deployment
 
@@ -707,3 +707,4 @@ This section separates executable game rules from implementation decisions. It i
 - Content authoring workflow.
 - Testing strategy for deterministic game rules.
 - Deployment strategy.
+

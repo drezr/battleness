@@ -9,7 +9,7 @@ import type {
   SpellInstance,
 } from "./schemas";
 
-export type ImprovementRarity = "common" | "refined" | "rare" | "legendary";
+export type ImprovementRarity = "common" | "refined" | "rare" | "epic";
 export type MaterialStock = Record<string, number>;
 
 export type CraftedItemInstance =
@@ -174,7 +174,7 @@ function rarityBaseCost(rarity: ImprovementRarity): number {
     common: 25,
     refined: 50,
     rare: 100,
-    legendary: 200,
+    epic: 200,
   } satisfies Record<ImprovementRarity, number>;
   return costs[rarity];
 }
@@ -209,3 +209,4 @@ function assertEnoughCredits(credits: number, cost: number): void {
     throw new Error("Not enough credits.");
   }
 }
+
