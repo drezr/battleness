@@ -67,6 +67,10 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Change Log
 
+### 2026-07-13
+
+- Fixed the Nuxt API test database setup so it runs cross-platform in GitHub Actions. The test now uses `cmd.exe` only on Windows and calls `pnpm` directly on Linux and macOS, with an explicit Vitest hook timeout for Prisma setup.
+
 ### 2026-07-12
 
 - Added Prisma to the Nuxt Game App with a SQLite development datasource, `Player`, `MaterialStock`, and `InventoryItem` models, and the initial migration under `apps/web/prisma/migrations/`.

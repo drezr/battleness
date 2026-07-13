@@ -64,20 +64,7 @@ describe("Nuxt Game App APIs", () => {
   beforeAll(async () => {
     installNuxtHandlerGlobals();
     process.env.BATTLENESS_DATABASE_URL = testDatabaseUrl;
-    execFileSync(
-      "cmd.exe",
-      [
-        "/d",
-        "/s",
-        "/c",
-        "pnpm.cmd --filter @battleness/web exec prisma db push --schema prisma/schema.prisma --skip-generate",
-      ],
-      {
-        cwd: projectRoot,
-        env: { ...process.env, BATTLENESS_DATABASE_URL: testDatabaseUrl, RUST_LOG: "info" },
-        stdio: "pipe",
-      },
-    );
+    pushPrismaSchemaToTestDatabase();
     prisma = new PrismaClient({
       datasources: {
         db: { url: testDatabaseUrl },
@@ -106,7 +93,7 @@ describe("Nuxt Game App APIs", () => {
     equipmentPostHandler = equipmentPostModule.default;
     resetHandler = resetModule.default;
     disconnectGameStateClientForTests = gameStateModule.disconnectGameStateClientForTests;
-  });
+  }, 30_000);
 
   beforeEach(async () => {
     await resetHandler({});
@@ -276,6 +263,44 @@ function installNuxtHandlerGlobals(): void {
       statusCode: input.statusCode,
       statusMessage: input.statusMessage,
     });
+}
+
+function pushPrismaSchemaToTestDatabase(): void {
+  const options = {
+    cwd: projectRoot,
+    env: { ...process.env, BATTLENESS_DATABASE_URL: testDatabaseUrl, RUST_LOG: "info" },
+    stdio: "pipe" as const,
+  };
+
+  if (process.platform === "win32") {
+    execFileSync(
+      "cmd.exe",
+      [
+        "/d",
+        "/s",
+        "/c",
+        "pnpm.cmd --filter @battleness/web exec prisma db push --schema prisma/schema.prisma --skip-generate",
+      ],
+      options,
+    );
+    return;
+  }
+
+  execFileSync(
+    "pnpm",
+    [
+      "--filter",
+      "@battleness/web",
+      "exec",
+      "prisma",
+      "db",
+      "push",
+      "--schema",
+      "prisma/schema.prisma",
+      "--skip-generate",
+    ],
+    options,
+  );
 }
 
 function materialQuantity(response: PlayerApiResponse, materialId: string): number | undefined {
