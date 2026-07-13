@@ -8,23 +8,42 @@ datasource db {
 }
 
 model Player {
-  id                 String           @id
+  id                 String              @id
   username           String
-  experience         Int              @default(0)
-  credits            Int              @default(0)
-  nextItemSequence   Int              @default(1)
+  experience         Int                 @default(0)
+  credits            Int                 @default(0)
+  nextItemSequence   Int                 @default(1)
   activeLoadoutId    String?
-  activeLoadout      Loadout?         @relation("ActivePlayerLoadout", fields: [activeLoadoutId], references: [id], onDelete: SetNull)
-  battleRecordsWon   BattleRecord[]   @relation("BattleRecordWinner")
-  battleRecordsAsOne BattleRecord[]   @relation("BattleRecordPlayerOne")
-  battleRecordsAsTwo BattleRecord[]   @relation("BattleRecordPlayerTwo")
+  activeLoadout      Loadout?            @relation("ActivePlayerLoadout", fields: [activeLoadoutId], references: [id], onDelete: SetNull)
+  battleRecordsWon   BattleRecord[]      @relation("BattleRecordWinner")
+  battleRecordsAsOne BattleRecord[]      @relation("BattleRecordPlayerOne")
+  battleRecordsAsTwo BattleRecord[]      @relation("BattleRecordPlayerTwo")
   equippedRings      EquippedRing[]
   inventoryItems     InventoryItem[]
-  loadouts           Loadout[]        @relation("PlayerLoadouts")
+  loadouts           Loadout[]           @relation("PlayerLoadouts")
+  marketTransactions MarketTransaction[]
   materialStock      MaterialStock[]
   rewardGrants       RewardGrant[]
   ringSockets        RingSocket[]
   gemEnchantments    GemEnchantment[]
+}
+
+model MarketTransaction {
+  id           String   @id @default(cuid())
+  requestId    String   @unique
+  playerId     String
+  action       String
+  resourceType String
+  resourceId   String
+  quantity     Int
+  unitPrice    Int
+  creditsDelta Int
+  createdAt    DateTime @default(now())
+  player       Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, createdAt])
+  @@index([resourceType, resourceId])
+  @@index([action])
 }
 
 model MaterialStock {

@@ -46,25 +46,44 @@
         </label>
       </div>
 
-      <section class="card-grid">
-        <article
-          v-for="material in filteredMaterials"
-          :key="material.id"
-          :class="['card', 'item-card', 'material-card', `rarity-border-${material.rarity}`]"
-        >
-          <ItemArtwork :definition-id="material.id" kind="material" />
-          <div class="item-card-body">
-            <div class="card-heading">
-              <h3>{{ material.label }}</h3>
-              <span :class="['pill', `rarity-${material.rarity}`]">{{ material.rarity }}</span>
+      <section class="detail-layout">
+        <div class="card-grid">
+          <article
+            v-for="material in filteredMaterials"
+            :key="material.id"
+            :class="[
+              'card',
+              'item-card',
+              'material-card',
+              `rarity-border-${material.rarity}`,
+              { selected: selectedMaterial?.id === material.id },
+            ]"
+          >
+            <ItemArtwork :definition-id="material.id" kind="material" />
+            <div class="item-card-body">
+              <div class="card-heading">
+                <h3>{{ material.label }}</h3>
+                <span :class="['pill', `rarity-${material.rarity}`]">{{ material.rarity }}</span>
+              </div>
+              <p class="muted">
+                {{ material.chemicalSymbol ?? material.realWorldType }} -
+                {{ material.craftingFamily }}
+              </p>
+              <strong>{{ material.quantity }}</strong>
+              <div class="control-row">
+                <button class="secondary-button" @click="selectedMaterialId = material.id">
+                  Inspect
+                </button>
+              </div>
             </div>
-            <p class="muted">
-              {{ material.chemicalSymbol ?? material.realWorldType }} -
-              {{ material.craftingFamily }}
-            </p>
-            <strong>{{ material.quantity }}</strong>
-          </div>
-        </article>
+          </article>
+        </div>
+
+        <ItemDetailPanel
+          :item="selectedMaterial"
+          title="Material Detail"
+          @clear="selectedMaterialId = ''"
+        />
       </section>
     </template>
   </main>
@@ -78,6 +97,7 @@ const route = useRoute();
 const { data: state, error, pending } = await useFetch<PlayerState>("/api/player");
 const familyFilter = ref("all");
 const rarityFilter = ref("all");
+const selectedMaterialId = ref("");
 
 const filteredMaterials = computed(() =>
   (state.value?.materials ?? []).filter((material) => {
@@ -87,5 +107,17 @@ const filteredMaterials = computed(() =>
     return matchesFamily && matchesRarity;
   }),
 );
+const selectedMaterial = computed(
+  () => state.value?.materials.find((material) => material.id === selectedMaterialId.value) ?? null,
+);
+
+watchEffect(() => {
+  if (
+    selectedMaterialId.value &&
+    !filteredMaterials.value.some((material) => material.id === selectedMaterialId.value)
+  ) {
+    selectedMaterialId.value = "";
+  }
+});
 </script>
 

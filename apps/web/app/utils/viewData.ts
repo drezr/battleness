@@ -103,7 +103,7 @@ export const viewsByPath: Record<string, MockView> = {
       {
         title: "Battle History",
         body: "Review completed matches and replay records.",
-        status: "Mock until match persistence exists.",
+        status: "Persistent development records and rewards available.",
         actions: [{ label: "Open History", to: "/battle/history" }],
       },
     ],
@@ -176,7 +176,11 @@ export const viewsByPath: Record<string, MockView> = {
       {
         title: "Join Match",
         body: "Enter a code provided by another player.",
-        items: ["Code input placeholder", "Loadout validation required", "Match starts after both players confirm"],
+        items: [
+          "Code input placeholder",
+          "Loadout validation required",
+          "Match starts after both players confirm",
+        ],
       },
     ],
   },
@@ -212,12 +216,12 @@ export const viewsByPath: Record<string, MockView> = {
     eyebrow: "Battle",
     title: "Battle History",
     description: "Completed battle records and replay links.",
-    status: notBuilt,
+    status: "Live Prisma-backed history and reward claims.",
     links: sectionLinks.battle,
     sections: [
       {
         title: "Recent Records",
-        body: "This will list persisted battle records once match storage exists.",
+        body: "Lists persisted battle results, reward grants, and replay verification metadata.",
         items: ["Result", "Mode", "Turn count", "Replay/action log link"],
       },
     ],
@@ -236,13 +240,11 @@ export const viewsByPath: Record<string, MockView> = {
       {
         title: "Socket",
         body: "Add or remove gems from owned rings.",
-        status: notBuilt,
         actions: [{ label: "Open Socket", to: "/forge/socket" }],
       },
       {
         title: "Quality",
         body: "Spend credits to improve item quality.",
-        status: notBuilt,
         actions: [{ label: "Open Quality", to: "/forge/quality" }],
       },
     ],
@@ -251,7 +253,6 @@ export const viewsByPath: Record<string, MockView> = {
     eyebrow: "Forge",
     title: "Socket",
     description: "Manage gems inside rings.",
-    status: notBuilt,
     links: sectionLinks.forge,
     sections: [
       {
@@ -270,7 +271,6 @@ export const viewsByPath: Record<string, MockView> = {
     eyebrow: "Forge",
     title: "Quality",
     description: "Improve item quality with credits.",
-    status: notBuilt,
     links: sectionLinks.forge,
     sections: [
       {
@@ -304,7 +304,6 @@ export const viewsByPath: Record<string, MockView> = {
       {
         title: "Loadouts",
         body: "Save and activate reusable ring sets.",
-        status: notBuilt,
         actions: [{ label: "Open Loadouts", to: "/inventory/loadouts" }],
       },
     ],
@@ -319,7 +318,12 @@ export const viewsByPath: Record<string, MockView> = {
       {
         title: "Current Equipment",
         body: "Up to 10 rings can be equipped for combat.",
-        items: ["Equipped ring slots", "Total speed", "Loadout validation", "Equip and unequip actions"],
+        items: [
+          "Equipped ring slots",
+          "Total speed",
+          "Loadout validation",
+          "Equip and unequip actions",
+        ],
       },
     ],
   },
@@ -327,7 +331,6 @@ export const viewsByPath: Record<string, MockView> = {
     eyebrow: "Inventory",
     title: "Loadouts",
     description: "Save, edit, and activate ring loadouts.",
-    status: notBuilt,
     links: sectionLinks.inventory,
     sections: [
       {
@@ -345,8 +348,8 @@ export const viewsByPath: Record<string, MockView> = {
     sections: [
       {
         title: "Game Market",
-        body: "Fixed economy for buying and selling materials and items.",
-        status: notBuilt,
+        body: "Fixed economy with persistent material buying, selling, and transaction history.",
+        status: "Material trading available",
         actions: [{ label: "Open Game Market", to: "/market/game" }],
       },
       {
@@ -361,18 +364,18 @@ export const viewsByPath: Record<string, MockView> = {
     eyebrow: "Market",
     title: "Game Market",
     description: "Buy and sell against the game economy.",
-    status: notBuilt,
+    status: "Material buying and selling available",
     links: sectionLinks.market,
     sections: [
       {
         title: "Buy Materials",
-        body: "Material purchase mockup.",
+        body: "Persistent material purchases against the fixed game economy.",
         items: ["Material filters", "Unit price", "Quantity selector", "Credits preview"],
       },
       {
         title: "Sell Resources",
-        body: "Sell owned materials or items for credits.",
-        items: ["Owned resource selector", "Sell price", "Quantity", "Transaction preview"],
+        body: "Sell owned materials for credits with persistent transaction history.",
+        items: ["Owned stock validation", "Sell price", "Quantity", "Transaction preview"],
       },
     ],
   },
@@ -422,7 +425,7 @@ export const viewsByPath: Record<string, MockView> = {
     sections: [
       {
         title: "Hero XP",
-        body: "Hero XP rewards are deferred, but the view is reserved.",
+        body: "Hero XP is persisted by battle rewards; the dedicated progression view remains to be implemented.",
         items: ["Current level", "Current XP", "Next level", "Unlocks"],
       },
     ],
@@ -431,12 +434,12 @@ export const viewsByPath: Record<string, MockView> = {
     eyebrow: "Profile",
     title: "Match History",
     description: "Personal history of battles and rewards.",
-    status: notBuilt,
+    status: "Live Prisma-backed battle and reward history.",
     links: sectionLinks.profile,
     sections: [
       {
         title: "History List",
-        body: "Will reuse persisted battle records once available.",
+        body: "Reuses persisted battle records and supports outstanding reward claims.",
         items: ["Mode", "Result", "Rewards", "Replay link"],
       },
     ],
@@ -475,7 +478,13 @@ export function viewForPath(path: string): MockView {
         {
           title: "Battlefield",
           body: "The final Game App battle screen should hide opponent rings unless a future reveal rule exposes them.",
-          items: ["Opponent hero", "Opponent monsters", "Player hero", "Player monsters", "Player ring row"],
+          items: [
+            "Opponent hero",
+            "Opponent monsters",
+            "Player hero",
+            "Player monsters",
+            "Player ring row",
+          ],
         },
         {
           title: "Action Context",

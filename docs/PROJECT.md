@@ -415,11 +415,17 @@ This section separates executable game rules from implementation decisions. It i
 - After combat, rewards may include experience, credits, and materials.
 - Equipped items gain experience after combat.
 - The current prototype implements claimable deterministic rewards for credits, materials, and source-backed item XP. Replays do not grant rewards.
+- The Nuxt Game App implements the same initial deterministic settlement values through persisted `BattleRecord` and `RewardGrant` rows. A development-only result generator creates genuine engine records, verifies them by replay, and requires an active persisted loadout. It is a bridge to the future authoritative live battle lifecycle, not a production battle endpoint.
+- The first live battle slice snapshots the development player's active Prisma loadout into an engine `BattleSetup`, including normalized ring sockets and gem enchantments, and persists the setup plus action log in a `BattleRecord`. A temporary fixture-backed training opponent is used until campaign opponent content exists. The live API reconstructs state through the pure engine and intentionally returns only the opponent ring count, never opponent ring identities or stats.
+- Live clients submit commands without a player ID. The server assigns the development-player identity, verifies the client's expected action count, applies the command through the pure engine, and conditionally replaces the persisted journal so concurrent or duplicate submissions cannot overwrite a newer state. Finished battles receive their deterministic result JSON and replay checksum. The temporary training adapter only chooses deterministic first-player duel elements and passes opponent turns; it is not campaign AI.
 - Prototype winner rewards grant 150 credits plus one common material from each crafting family: `aluminium`, `hydrogen`, `pearl`, and `sand`.
 - Prototype draw rewards grant 90 credits plus `aluminium` and `pearl`.
+- Nuxt Game App development victories grant 150 credits, 100 hero XP, and one each of `aluminium`, `hydrogen`, `pearl`, and `sand`. Draw settlement is defined as 90 credits, 60 hero XP, `aluminium`, and `pearl`; losses grant 30 credits and 25 hero XP without materials.
+- Nuxt reward claims are atomic and idempotent. Claiming a persisted reward updates player credits, material stock, hero experience, and eligible inventory item experience exactly once.
+- Each ring in the active persisted loadout, its socketed gems, and their spell or monster enchantments receive 8 participation XP. The existing 20 XP action bonuses will be moved from Dev Lab behavior when the authoritative server action pipeline is implemented.
 - Prototype item XP applies only to crafted development inventory instances referenced by Battle Lab `sourceInstanceId` values, regardless of whether those source-backed items are assigned to Player One or Player Two.
 - Source-backed equipped rings, socketed gems, and gem enchantments gain 8 XP when rewards are claimed. Each ring use adds 20 XP to the ring and each of its socketed gems. Each spell trigger adds 20 XP to the spell. Each monster summon and monster attack adds 20 XP to the matching monster source instance.
-- Hero XP is intentionally deferred until local player or account progression is modeled.
+- Hero XP is persisted on the Nuxt `Player` model and is awarded by Game App development battle settlement. Campaign, casual PvP, and ranked formulas remain mode-specific future decisions.
 - The prototype battle screen shows a deterministic result summary after finished battles. The summary is derived from the battle log and covers the result, turns, actions played, damage by player, rings used, spells cast, monsters summoned or used, item XP generated, and reward claim status. Imported replays can show this summary but cannot claim rewards.
 - In solo campaign, each opponent defines its fixed victory rewards in content data and victory unlocks the next opponent.
 - In solo campaign, defeat grants only a small amount of item experience.
@@ -707,4 +713,3 @@ This section separates executable game rules from implementation decisions. It i
 - Content authoring workflow.
 - Testing strategy for deterministic game rules.
 - Deployment strategy.
-

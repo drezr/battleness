@@ -133,6 +133,18 @@ export function createBattleSetup(
   };
 }
 
+export function createBattlePlayerFromInventory(
+  player: PlayerFixture,
+  inventory: InventoryFixture,
+  resolvedDefinitions: BattleSetup["definitions"],
+): BattlePlayer {
+  return createBattlePlayer(
+    playerFixtureSchema.parse(player),
+    inventoryFixtureSchema.parse(inventory),
+    resolvedDefinitions,
+  );
+}
+
 function createBattlePlayer(
   player: PlayerFixture,
   inventory: InventoryFixture,

@@ -67,7 +67,9 @@
 
         <article class="panel">
           <h2>Market</h2>
-          <p class="muted">Game market and player market are staged as mockups.</p>
+          <p class="muted">
+            Material buying and selling are available. Player listings remain planned.
+          </p>
           <div class="control-row">
             <NuxtLink class="button-link" to="/market/game">Game Market</NuxtLink>
             <NuxtLink class="button-link" to="/market/players">Player Market</NuxtLink>

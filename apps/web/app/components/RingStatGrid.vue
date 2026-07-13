@@ -2,15 +2,30 @@
   <dl class="summary-grid">
     <div class="stat">
       <dt>Damage</dt>
-      <dd>{{ ring.baseDamage }}</dd>
+      <dd>
+        {{ ring.damage }}
+        <span v-if="ring.damage > ring.baseDamage" class="positive"
+          >+{{ ring.damage - ring.baseDamage }}</span
+        >
+      </dd>
     </div>
     <div class="stat">
       <dt>Energy</dt>
-      <dd>{{ ring.baseEnergyCost }}</dd>
+      <dd>
+        {{ ring.energyCost }}
+        <span v-if="ring.energyPenalty > 0" class="status-note-inline"
+          >+{{ ring.energyPenalty }}</span
+        >
+      </dd>
     </div>
     <div class="stat">
       <dt>Cooldown</dt>
-      <dd>{{ ring.baseCooldown }}</dd>
+      <dd>
+        {{ ring.cooldown }}
+        <span v-if="ring.cooldownPenalty > 0" class="status-note-inline"
+          >+{{ ring.cooldownPenalty }}</span
+        >
+      </dd>
     </div>
     <div class="stat">
       <dt>Speed</dt>
@@ -18,7 +33,11 @@
     </div>
     <div class="stat">
       <dt>Sockets</dt>
-      <dd>{{ ring.socketCount ?? 0 }}</dd>
+      <dd>{{ ring.gems.length }} / {{ ring.socketCount ?? 0 }}</dd>
+    </div>
+    <div class="stat">
+      <dt>Level</dt>
+      <dd>{{ ring.level }}</dd>
     </div>
     <div class="stat">
       <dt>Quality</dt>

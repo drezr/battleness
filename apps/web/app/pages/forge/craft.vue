@@ -22,9 +22,10 @@
     <p v-if="pending" class="panel">Loading forge state...</p>
     <p v-else-if="error" class="panel">Unable to load forge state.</p>
 
-    <div v-else-if="state" class="split-layout">
-      <section class="stack">
-        <div class="panel">
+    <section v-else-if="state" class="detail-layout">
+      <div class="split-layout">
+        <section class="stack">
+          <div class="panel">
           <h2>Recipe</h2>
           <form class="toolbar" @submit.prevent="craftSelectedRecipe">
             <label>
@@ -71,10 +72,10 @@
           </article>
 
           <p v-if="feedback" class="feedback">{{ feedback }}</p>
-        </div>
-      </section>
+          </div>
+        </section>
 
-      <section class="panel">
+        <section class="panel">
         <h2>Recent Inventory</h2>
         <p v-if="state.inventory.length === 0" class="muted">
           Craft an item to populate the persistent inventory.
@@ -83,7 +84,12 @@
           <article
             v-for="item in state.inventory.slice(0, 8)"
             :key="item.id"
-            :class="['card', 'item-card', `rarity-border-${item.rarity}`]"
+            :class="[
+              'card',
+              'item-card',
+              `rarity-border-${item.rarity}`,
+              { selected: selectedDetailItem?.id === item.id },
+            ]"
           >
             <ItemArtwork :definition-id="item.definitionId" :kind="item.type" />
             <div class="item-card-body">
@@ -94,12 +100,24 @@
               <p class="muted">
                 {{ item.type }} - quality {{ item.quality }} - XP {{ item.experience }}
               </p>
+              <div class="control-row">
+                <button class="secondary-button" @click="selectedDetailItemId = item.id">
+                  Inspect
+                </button>
+              </div>
               <code>{{ item.id }}</code>
             </div>
           </article>
         </div>
-      </section>
-    </div>
+        </section>
+      </div>
+
+      <ItemDetailPanel
+        :item="selectedDetailItem"
+        title="Recent Item Detail"
+        @clear="selectedDetailItemId = ''"
+      />
+    </section>
   </main>
 </template>
 
@@ -112,9 +130,13 @@ const { data: state, error, pending, refresh } = await useFetch<PlayerState>("/a
 const selectedRecipeId = ref("");
 const crafting = ref(false);
 const feedback = ref("");
+const selectedDetailItemId = ref("");
 
 const selectedRecipe = computed(() =>
   state.value?.recipes.find((recipe) => recipe.id === selectedRecipeId.value),
+);
+const selectedDetailItem = computed(
+  () => state.value?.inventory.find((item) => item.id === selectedDetailItemId.value) ?? null,
 );
 
 watchEffect(() => {
@@ -132,12 +154,13 @@ async function craftSelectedRecipe(): Promise<void> {
   feedback.value = "";
 
   try {
-    const result = await $fetch<{ crafted: { label: string } }>("/api/forge/craft", {
+    const result = await $fetch<{ crafted: { id: string; label: string } }>("/api/forge/craft", {
       method: "POST",
       body: { recipeId: selectedRecipe.value.id },
     });
     feedback.value = `${result.crafted.label} crafted.`;
     await refresh();
+    selectedDetailItemId.value = result.crafted.id;
   } catch (craftError) {
     feedback.value = craftError instanceof Error ? craftError.message : "Crafting failed.";
   } finally {

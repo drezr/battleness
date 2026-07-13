@@ -4,6 +4,11 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- The Nuxt Game App can now start a persistent live training battle from the development player's active Prisma loadout. The server snapshots owned rings, sockets, gems, and enchantments into an engine setup, reconstructs current state from the persisted setup and action log, and exposes a player-facing live view without opponent ring details.
+- The Nuxt Game App now persists verified development battle records and deterministic reward grants. Battle and profile history views expose replay metadata and atomic reward claims that update credits, materials, hero XP, and active-loadout item XP exactly once.
+- The Nuxt Game Market now supports persistent material buying and selling with rarity-based fixed
+  prices, quantity and credit previews, stock validation, atomic Prisma updates, persistent
+  transaction history, and idempotent request IDs that prevent duplicate economic operations.
 - BattleNess is being restarted as a clean rebuild.
 - A TypeScript monorepo skeleton is in place with `packages/engine`, `packages/content`, and `apps/prototype`.
 - The first deterministic local combat prototype is implemented with JSON-backed content, scenario fixtures, localization files, and a Vite browser UI.
@@ -69,7 +74,21 @@ This file records modifications made to the project during agent-assisted work.
 
 ### 2026-07-13
 
+- Added the first authoritative Game App live battle slice: database-owned active-loadout setup generation, persistent training battle creation, idempotent start requests, server-side state reconstruction, `/battle/live/:battleId`, hidden opponent rings, and API regression coverage.
+- Added authoritative live action submission for element choice, rings, monsters, turn ending, and concession. The server assigns the authenticated development-player identity, validates every command through the pure engine, rejects stale action counts, uses optimistic journal writes, and persists final results plus replay checksums.
+- Added target selection and action controls to the live Nuxt battle view, with server event feedback and disabled states for energy, cooldown, turn ownership, and finished battles.
+- Added a temporary passive training-opponent adapter that chooses deterministic duel elements when required and otherwise only ends its turn. This keeps the training loop testable without defining campaign opponent AI early.
+- Added Prisma-backed development battle settlement with engine-generated and replay-verified battle records, deterministic win/loss rewards, atomic duplicate-safe claims, persistent hero and item XP, battle history, profile history, and player-facing result views.
 - Fixed the Nuxt API test database setup so it runs cross-platform in GitHub Actions. The test now uses `cmd.exe` only on Windows and calls `pnpm` directly on Linux and macOS, with an explicit Vitest hook timeout for Prisma setup.
+- Extended the Nuxt Equipment API and `/inventory/equipment` view with resolved equipment metrics, including item level and quality scaling, socketed gem damage, spell or monster enchantment damage, energy and cooldown penalties, and loadout damage breakdowns.
+- Implemented the real Nuxt `/inventory/loadouts` view backed by Prisma `Loadout` and `LoadoutRing` rows, with save-from-current-equipment, activation, deletion, resolved loadout summaries, and API regression coverage.
+- Implemented the real Nuxt `/battle` hub so it reads the active persisted loadout, displays resolved readiness metrics and ring details, and redirects players without an active loadout toward loadout selection before campaign or PvP entry.
+- Implemented the real Nuxt `/forge/socket` view backed by Prisma `RingSocket` rows, with socket and unsocket APIs, one-ring-per-gem enforcement, socket-capacity checks, legacy socket JSON synchronization, and API regression coverage.
+- Extended the Nuxt `/forge/socket` view with Prisma-backed gem enchantment management for spell and monster item instances, including enchant and unenchant APIs, one-gem-per-target enforcement, resolved target previews, and API regression coverage.
+- Implemented the real Nuxt `/forge/quality` view with Prisma-backed item quality improvement, credit spending, resolved before/after stat previews, maximum-quality handling, insufficient-credit handling, and API regression coverage.
+- Extended the Nuxt `/forge/socket` view with Prisma-backed ring socket-count improvement, credit spending, maximum-socket handling, insufficient-credit handling, and API regression coverage.
+- Raised the Nuxt development player's starting credits to 1,000,000 so manual forge, socket, and quality testing is not blocked by early economy limits.
+- Added a reusable Nuxt item detail side panel and integrated it into Battle Hub, Forge Craft, Forge Socket, Forge Quality, Inventory Items, Inventory Materials, Inventory Equipment, and Inventory Loadouts for inspecting stats, progression, sockets, enchantments, material metadata, usage state, and technical IDs.
 
 ### 2026-07-12
 
@@ -212,4 +231,3 @@ This file records modifications made to the project during agent-assisted work.
 - Replaced the previous unrelated state history with a clean BattleNess baseline.
 - Added persistent agent instructions in `docs/AGENT.md`.
 - Added the initial project summary, rules summary, and technical baseline in `docs/PROJECT.md`.
-
