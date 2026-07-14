@@ -1,3 +1,4 @@
+import { definePlayerHandler } from "../../utils/playerHandler";
 import { getPlayerEquipmentState } from "../../utils/gameState";
 
-export default defineEventHandler(async () => getPlayerEquipmentState());
+export default definePlayerHandler(async () => getPlayerEquipmentState());

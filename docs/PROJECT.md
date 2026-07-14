@@ -281,6 +281,7 @@ This section separates executable game rules from implementation decisions. It i
 - Spell effects must be specified as explicit engine effects, not free-form text.
 - The initial direct-damage spell can target heroes or monsters, allies or enemies. The player decides how to use it, including self-damage or damaging their own monsters.
 - Spells do not directly add damage to the ring that triggers them. They resolve after ring and gem damage and can apply their own effects afterward.
+- All spell targets attached to a ring action are validated before energy is spent. If earlier ring or gem damage destroys a previously valid spell target during that same action, the dependent spell expires without an error and is not redirected automatically.
 
 ### Cooldowns
 
@@ -415,19 +416,21 @@ This section separates executable game rules from implementation decisions. It i
 - After combat, rewards may include experience, credits, and materials.
 - Equipped items gain experience after combat.
 - The current prototype implements claimable deterministic rewards for credits, materials, and source-backed item XP. Replays do not grant rewards.
-- The Nuxt Game App implements the same initial deterministic settlement values through persisted `BattleRecord` and `RewardGrant` rows. A development-only result generator creates genuine engine records, verifies them by replay, and requires an active persisted loadout. It is a bridge to the future authoritative live battle lifecycle, not a production battle endpoint.
-- The first live battle slice snapshots the development player's active Prisma loadout into an engine `BattleSetup`, including normalized ring sockets and gem enchantments, and persists the setup plus action log in a `BattleRecord`. A temporary fixture-backed training opponent is used until campaign opponent content exists. The live API reconstructs state through the pure engine and intentionally returns only the opponent ring count, never opponent ring identities or stats.
-- Live clients submit commands without a player ID. The server assigns the development-player identity, verifies the client's expected action count, applies the command through the pure engine, and conditionally replaces the persisted journal so concurrent or duplicate submissions cannot overwrite a newer state. Finished battles receive their deterministic result JSON and replay checksum. The temporary training adapter only chooses deterministic first-player duel elements and passes opponent turns; it is not campaign AI.
+- The Nuxt Game App implements the same initial deterministic settlement values through persisted `BattleRecord` and `RewardGrant` rows. Development result generation remains available for focused testing, while authoritative live battles now create their reward grant in the same transaction as the finishing action, final result, and replay checksum.
+- Live battles snapshot the development player's active Prisma loadout into an engine `BattleSetup`, including normalized ring sockets and gem enchantments, and persist the setup plus action log in a `BattleRecord`. Training retains its fixture-backed passive opponent, while campaign mode resolves its selected game-owned content loadout into deterministic engine instances. The live API reconstructs state through the pure engine and intentionally returns only the opponent ring count, never opponent ring identities or stats.
+- Live clients submit commands without a player ID. The server assigns the development-player identity, verifies the client's expected action count, applies the command through the pure engine, and conditionally replaces the persisted journal so concurrent or duplicate submissions cannot overwrite a newer state. Finished battles receive their deterministic result JSON and replay checksum. Campaign opponents choose deterministic legal actions server-side; the development training adapter remains passive.
 - Prototype winner rewards grant 150 credits plus one common material from each crafting family: `aluminium`, `hydrogen`, `pearl`, and `sand`.
 - Prototype draw rewards grant 90 credits plus `aluminium` and `pearl`.
 - Nuxt Game App development victories grant 150 credits, 100 hero XP, and one each of `aluminium`, `hydrogen`, `pearl`, and `sand`. Draw settlement is defined as 90 credits, 60 hero XP, `aluminium`, and `pearl`; losses grant 30 credits and 25 hero XP without materials.
 - Nuxt reward claims are atomic and idempotent. Claiming a persisted reward updates player credits, material stock, hero experience, and eligible inventory item experience exactly once.
-- Each ring in the active persisted loadout, its socketed gems, and their spell or monster enchantments receive 8 participation XP. The existing 20 XP action bonuses will be moved from Dev Lab behavior when the authoritative server action pipeline is implemented.
+- Each ring in the active persisted loadout, its socketed gems, and their spell or monster enchantments receive 8 participation XP. Authoritative live settlement also grants 20 XP for each effective ring and socketed-gem use, spell trigger, successful monster summon, and monster attack. Rewards remain unclaimed until the player explicitly claims them.
 - Prototype item XP applies only to crafted development inventory instances referenced by Battle Lab `sourceInstanceId` values, regardless of whether those source-backed items are assigned to Player One or Player Two.
 - Source-backed equipped rings, socketed gems, and gem enchantments gain 8 XP when rewards are claimed. Each ring use adds 20 XP to the ring and each of its socketed gems. Each spell trigger adds 20 XP to the spell. Each monster summon and monster attack adds 20 XP to the matching monster source instance.
 - Hero XP is persisted on the Nuxt `Player` model and is awarded by Game App development battle settlement. Campaign, casual PvP, and ranked formulas remain mode-specific future decisions.
-- The prototype battle screen shows a deterministic result summary after finished battles. The summary is derived from the battle log and covers the result, turns, actions played, damage by player, rings used, spells cast, monsters summoned or used, item XP generated, and reward claim status. Imported replays can show this summary but cannot claim rewards.
+- The prototype and Nuxt Game App show deterministic result summaries after finished battles. Nuxt summaries are reconstructed from persisted actions through the engine and cover turns, actions played, damage and action contribution by player, rings used, spells cast, monsters summoned or used, item XP generated, and reward claim status. Imported Dev Lab replays can show the summary but cannot claim rewards.
 - In solo campaign, each opponent defines its fixed victory rewards in content data and victory unlocks the next opponent.
+- The initial campaign track is linear: `emberTrial` at recommended level 1, `stormInitiate` at level 3, and `frostGate` at level 5. Each opponent is repeatable and owns a validated content loadout plus separate first-clear and repeat-victory rewards.
+- Campaign completion is persisted as one `CampaignProgress` row per player and opponent. Victory count distinguishes first-clear from repeat settlement, and the selected opponent ID is stored as the battle mode reference.
 - In solo campaign, defeat grants only a small amount of item experience.
 - In PvP, rewards will vary based on player level and opponent level.
 - In PvP defeat, the player receives a small amount of experience, credits, and 1 to 2 low-rarity materials.
@@ -436,11 +439,10 @@ This section separates executable game rules from implementation decisions. It i
 ### Rule Questions To Resolve
 
 - What are the exact PvP and ranked reward formulas?
-- What fixed reward values should each solo campaign opponent grant? Campaign opponent design is intentionally deferred.
 
 ### Prototype Content Collection
 
-- The first balance collection is documented in `docs/CONTENT_COLLECTION_PROPOSAL.md` and currently implemented as content version `prototype-5`.
+- The first balance collection is documented in `docs/CONTENT_COLLECTION_PROPOSAL.md` and campaign content is currently implemented as content version `prototype-6`.
 - The collection contains 12 collectible rings, 12 collectible gems, 18 monsters, 6 direct-damage spells, and 70 materials.
 - `trainingFlameBand` and `plainQuartz` remain development-only definitions outside the collectible pool.
 - The collection contains 48 initial recipes: one recipe for every collectible ring, gem, monster, and spell. Development-only definitions are intentionally excluded.
@@ -456,8 +458,11 @@ This section separates executable game rules from implementation decisions. It i
 - Persistence target: SQL database.
 - Development database: SQLite.
 - Production database: PostgreSQL.
+- PostgreSQL readiness uses a generated provider-specific mirror of the canonical SQLite Prisma model, an independent PostgreSQL migration history, an optional local Docker Compose service, and a CI service that deploys migrations, detects schema drift, and runs transactional persistence checks.
+- Player profiles retain an immutable technical username plus a separately editable display name, public/private visibility, creation time, and last activity time. A one-to-one preference record stores account locale, system/dark/light theme, comfortable/compact density, reduced motion, mute state, and master/music/effects volumes.
 - Multiplayer target: authoritative server with matchmaking and turn-based real-time interaction.
 - Data model: initial game content should be defined in JSON files.
+- Content provenance: each JSON content version is registered in Prisma with a SHA-256 checksum and definition-count manifest. Durable gameplay rows retain the version that created or most recently resolved them; legacy rows use `legacy-unversioned`, and a version identifier cannot be reused for changed definitions.
 - Engine/framework: Vite with a simple DOM UI for the Dev Lab prototype; Nuxt for the initial Game App; Phaser remains a later combat-presentation option.
 - Architecture: TypeScript monorepo with separate engine, content, Dev Lab prototype app, and Game App workspaces.
 - Tooling: TypeScript, pnpm, Vitest, ESLint, Prettier, Zod-style validation, Prisma, and an organized asset pipeline are decided.
@@ -602,9 +607,10 @@ This section separates executable game rules from implementation decisions. It i
 #### Multiplayer Transport
 
 - Status: decided.
-- Decision: Use WebSocket as the primary future multiplayer transport.
+- Decision: Use authenticated WebSocket invalidation events as the primary live multiplayer transport while HTTP APIs and Prisma remain the authoritative state and command boundary.
 - Reason: Live turn-based PvP needs bidirectional communication for turn events, reconnects, timers, and match state updates.
-- Tradeoffs: WebSocket hosting and scaling are more involved than simple HTTP-only APIs.
+- Implementation: Nitro accepts the existing player session during the WebSocket upgrade. Server transactions publish lobby or battle invalidations to every connected tab owned by each participant, and clients reload the relevant HTTP resource. Automatic reconnect, heartbeat, and slower polling fallback protect against transient connection or event delivery failures.
+- Tradeoffs: The first connection registry is process-local. Multi-instance deployment requires shared pub/sub so an event produced by one server reaches sockets connected to another server.
 
 #### Multiplayer Mode Direction
 
@@ -622,17 +628,20 @@ This section separates executable game rules from implementation decisions. It i
 
 #### Initial PvP Entry Point
 
-- Status: decided.
+- Status: implemented with persistent HTTP state and authenticated WebSocket invalidation.
 - Decision: The first future PvP mode should support private matches by code before automatic matchmaking.
+- Implementation: Prisma stores private matches and their two participants. The host creates a two-hour code, the guest joins it, each player locks an owned non-empty loadout, and the server atomically snapshots both loadouts into a `private_pvp` battle when both participants are ready. The authenticated session is the reconnect identity. Active turns have a persisted five-minute deadline that continues during disconnection and expires as a server-side concession. The unresolved opening element duel remains untimed because no active player can yet be assigned fairly. Lobby and battle changes are delivered as WebSocket invalidations with HTTP polling fallback; PvP rewards remain separate work.
 - Reason: Private codes are simpler than matchmaking and make early multiplayer testing easier.
 - Tradeoffs: This delays casual/ranked matchmaking. Ranked mode is still desired later, alongside solo/campaign.
 
 #### Authentication
 
-- Status: decided.
+- Status: foundation and Google provider implemented; provider credentials pending per environment.
 - Decision: Prefer OAuth login first, especially Google and Facebook, then add email and password authentication.
+- Implementation: Prisma now stores provider identities separately from players and stores revocable, expiring sessions with only a SHA-256 token hash. Player-owned Nuxt APIs resolve a request-scoped player from an HttpOnly SameSite session cookie. Development builds can explicitly create a local `devPlayer` session, and logout suppresses automatic development bootstrap until the player signs in again.
+- Google implementation: The Game App uses a server-side authorization-code exchange with browser-bound hashed state, PKCE S256, a ten-minute one-time database attempt, and the OpenID Connect UserInfo endpoint. Google access tokens are used only for the immediate UserInfo request and are not persisted. Accounts are keyed by Google `sub`; verified email is metadata and never an automatic cross-provider merge key.
 - Reason: Accounts should be persistent to avoid frustrating data loss. OAuth can reduce account creation friction while email/password remains useful as a fallback or later option.
-- Tradeoffs: OAuth adds provider setup and account-linking concerns. Email/password adds credential security and recovery flows.
+- Tradeoffs: Google Cloud consent and credentials remain operational configuration. Explicit account-link conflict handling, Facebook, email verification, password hashing, recovery flows, and production session cleanup remain separate implementation work.
 
 #### Localization
 

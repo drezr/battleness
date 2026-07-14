@@ -13,12 +13,12 @@ Read these files before making changes:
 ## Current Project State
 
 - Project name: BattleNess.
-- Current phase: infrastructure split after the first local deterministic combat prototype became large enough to preserve as a Dev Lab.
+- Current phase: authenticated Game App infrastructure with the first persistent private PvP lifecycle, while the original deterministic prototype remains a permanent Dev Lab.
 - User intent: clean rebuild of an already-started game.
 - A TypeScript monorepo is in place with `packages/engine`, `packages/content`, `apps/prototype`, and `apps/web`.
 - The prototype includes deterministic combat state creation, ring and monster actions, direct-damage spells, summons, all six current monster skills, first-turn protection, battle end checks, combat-start resolution, JSON scenarios, versioned battle-record export/import and replay, a battle setup screen, a first sketch-inspired battle board with prepare-action-then-target interaction for rings and monsters, both players' rings visible for development testing, manual browser controls, localized event-log rendering, Taunt-aware target selection, and DOM interaction tests for critical board flows.
 - `apps/prototype` should stay as a permanent Dev Lab for engine, content, inventory, reward, and combat diagnostics.
-- `apps/web` is the new Nuxt Game App scaffold for player-facing infrastructure. It currently has a Prisma-backed local SQLite development player state, `/api/player`, `/api/forge/craft`, a basic inventory/materials view, and a basic forge UI.
+- `apps/web` is the Nuxt Game App. It has Prisma-backed player state, inventory, forge, market, campaign, authenticated live battles, Google OAuth support, and a persistent private PvP lobby using invitation codes. Private lobby and battle changes use authenticated WebSocket invalidations with HTTP polling fallback. Private active turns use a persisted five-minute deadline that continues through disconnects and expires as a server-side concession; the unresolved opening element duel is not timed yet.
 - The user handles commits and pushes to GitHub themselves.
 - The next infrastructure milestone is to harden the Game App data model and UI shell before moving into campaign work.
 
@@ -85,7 +85,7 @@ The following are currently marked as decided in `docs/PROJECT.md`:
 - Use GitHub Actions for install, typecheck, lint, and tests.
 - Use the active Node.js LTS version at setup time and manage pnpm through Corepack.
 - Use `packages/engine`, `packages/content`, `apps/prototype`, and `apps/web` as the current workspace layout.
-- Use WebSocket as the primary future multiplayer transport.
+- Use authenticated WebSocket invalidations as the primary multiplayer transport while HTTP/Prisma remain authoritative and polling remains a fallback. The current event hub is process-local and requires shared pub/sub before multi-instance deployment.
 - Build live synchronous PvP first when multiplayer work starts, with asynchronous play left as a possible later addition.
 - Live matches should be preserved during disconnects and allow players to reconnect.
 - The first future PvP mode should support private matches by code before automatic matchmaking; ranked mode is desired later alongside solo/campaign.
@@ -320,3 +320,17 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - Prefer documenting proposals and asking the user to confirm/correct them during the planning phase.
 - When implementation starts, keep the combat rules engine deterministic and separate from UI/framework/database concerns unless the user decides otherwise.
 
+## Latest Campaign Work
+
+- Nuxt localization infrastructure is active with English and French catalogues, cookie-backed language selection, translated shared navigation and primary profile/dashboard surfaces, and tests that reject missing or empty locale entries. Remaining workflow copy still needs migration from hardcoded strings.
+- All current Nuxt pages, components, layouts, hubs, and mock routes now resolve user-facing copy through English/French localization keys. Persisted content names and descriptions resolve through the shared content package catalogues, and an automated template guard rejects new hardcoded copy or accessible labels.
+- Phase 6 progression presentation is complete: `/profile/progression`, inventory cards, and item details expose server-calculated hero/item levels, XP thresholds, quality, and scalable-stat bonuses.
+- Spell targets are validated before ring resolution. If ring and gem damage destroys a valid target before an attached spell resolves, that spell expires without failing the whole action or retargeting another combatant.
+- Content version `prototype-6` adds the first validated campaign catalogue: `emberTrial`, `stormInitiate`, and `frostGate`.
+- Campaign opponents are game-owned content records rather than database inventory owners. Their nested ring, gem, and enchantment configuration can later be converted into engine battle instances.
+- The initial unlock track is linear, every opponent is repeatable, and each defines fixed first-clear and repeat-victory rewards.
+- `/api/campaign` and `/battle/campaign` now expose the data-backed catalogue, active-loadout readiness, opponent details, known loadouts, and reward previews.
+- Campaign selection now starts an authoritative `campaign` battle. The server converts the selected content loadout into engine instances and stores the opponent ID as the battle mode reference.
+- Campaign opponents take deterministic legal turns and respect energy, cooldown, and Taunt. Opponent rings remain hidden in the live player view.
+- `CampaignProgress` persists victory counts. The first victory issues the opponent's first-clear reward and unlocks the next opponent; later victories issue the repeat reward. Campaign defeats grant only item participation and usage XP.
+- The next recommended product area is campaign presentation and balance iteration, or the next non-campaign phase in `TODO.md`; the minimum campaign lifecycle itself is now complete.

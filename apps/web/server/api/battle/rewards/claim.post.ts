@@ -1,6 +1,7 @@
+import { definePlayerHandler } from "../../../utils/playerHandler";
 import { claimBattleReward } from "../../../utils/gameState";
 
-export default defineEventHandler(async (event) => {
+export default definePlayerHandler(async (event) => {
   const body = await readBody<{ rewardGrantId?: string }>(event);
 
   if (!body.rewardGrantId) {

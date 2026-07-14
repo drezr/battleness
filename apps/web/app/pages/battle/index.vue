@@ -1,71 +1,75 @@
 <template>
   <main class="shell">
-    <nav class="section-nav" aria-label="Battle navigation">
+    <nav class="section-nav" :aria-label="t('accessibility.battleNavigation')">
       <NuxtLink
         v-for="link in sectionLinks.battle"
         :key="link.to"
         :class="{ active: route.path === link.to }"
         :to="link.to"
       >
-        {{ link.label }}
+        {{ $t(link.labelKey) }}
       </NuxtLink>
     </nav>
 
     <header class="view-header">
       <div class="view-title">
-        <span class="eyebrow">Battle</span>
-        <h1>Battle Hub</h1>
-        <p class="muted">Choose a combat mode and verify that the active loadout is ready.</p>
+        <span class="eyebrow">{{ t("battle.section") }}</span>
+        <h1>{{ t("battle.hub.title") }}</h1>
+        <p class="muted">{{ t("battle.hub.description") }}</p>
       </div>
       <p :class="['status-note', activeLoadout ? 'ready-note' : '']">
-        {{ activeLoadout ? "Active loadout ready." : "No active loadout selected." }}
+        {{ activeLoadout ? t("battle.hub.loadoutReady") : t("battle.hub.noActiveLoadout") }}
       </p>
     </header>
 
-    <p v-if="pending" class="panel">Loading battle readiness...</p>
-    <p v-else-if="error" class="panel">Unable to load battle readiness.</p>
+    <p v-if="pending" class="panel">{{ t("battle.hub.loading") }}</p>
+    <p v-else-if="error" class="panel">{{ t("battle.hub.loadError") }}</p>
 
     <template v-else-if="loadouts">
       <section class="detail-layout">
         <section class="panel">
           <div class="card-heading">
             <div>
-              <h2>Active Loadout</h2>
+              <h2>{{ t("battle.hub.activeLoadout") }}</h2>
               <p class="muted">
-                This ring set will be used when Game App battles are generated from the database.
+                {{ t("battle.hub.activeLoadoutDescription") }}
               </p>
             </div>
-            <NuxtLink class="button-link" to="/inventory/loadouts"> Manage Loadouts </NuxtLink>
+            <NuxtLink class="button-link" to="/inventory/loadouts">{{
+              t("battle.hub.manageLoadouts")
+            }}</NuxtLink>
           </div>
 
           <p v-if="!activeLoadout" class="status-note">
-            Save and activate a loadout before starting campaign or PvP battles.
+            {{ t("battle.hub.loadoutRequired") }}
           </p>
 
           <template v-else>
             <div class="active-loadout-heading">
               <div>
-                <span class="eyebrow">Selected</span>
+                <span class="eyebrow">{{ t("battle.hub.selected") }}</span>
                 <h3>{{ activeLoadout.name }}</h3>
               </div>
-              <span class="pill element-electric">{{ activeLoadout.ringCount }} rings</span>
+              <span class="pill element-electric">{{
+                t("battle.hub.ringCount", { count: activeLoadout.ringCount })
+              }}</span>
             </div>
 
             <section class="metric-grid equipment-metrics">
               <article class="card">
-                <span class="eyebrow">Speed</span>
+                <span class="eyebrow">{{ t("stats.speed") }}</span>
                 <strong>{{ activeLoadout.summary.totalSpeed }}</strong>
               </article>
               <article class="card">
-                <span class="eyebrow">Damage</span>
+                <span class="eyebrow">{{ t("stats.damage") }}</span>
                 <strong>{{ activeLoadout.summary.totalDamage }}</strong>
               </article>
               <article class="card">
-                <span class="eyebrow">Avg Energy</span>
+                <span class="eyebrow">{{ t("battle.hub.averageEnergy") }}</span>
                 <strong>{{ activeLoadout.summary.averageEnergyCost }}</strong>
               </article>
               <article class="card">
-                <span class="eyebrow">Avg Cooldown</span>
+                <span class="eyebrow">{{ t("battle.hub.averageCooldown") }}</span>
                 <strong>{{ activeLoadout.summary.averageCooldown }}</strong>
               </article>
             </section>
@@ -84,11 +88,17 @@
                 <div>
                   <strong>{{ (ring.slotIndex ?? 0) + 1 }}. {{ ring.label }}</strong>
                   <small>
-                    {{ ring.element }} - damage {{ ring.damage }} - energy {{ ring.energyCost }} -
-                    cooldown {{ ring.cooldown }}
+                    {{
+                      t("battle.hub.ringStats", {
+                        element: t(`element.${ring.element}`),
+                        damage: ring.damage,
+                        energy: ring.energyCost,
+                        cooldown: ring.cooldown,
+                      })
+                    }}
                   </small>
                   <button class="secondary-button" @click="selectedDetailRingId = ring.id">
-                    Inspect
+                    {{ t("common.inspect") }}
                   </button>
                 </div>
               </article>
@@ -98,63 +108,65 @@
 
         <ItemDetailPanel
           :item="selectedDetailRing"
-          title="Battle Ring Detail"
+          :title="t('battle.hub.ringDetail')"
           @clear="selectedDetailRingId = ''"
         />
       </section>
 
       <section class="dashboard-grid">
         <article class="panel">
-          <h2>Training Battle</h2>
-          <p class="muted">Live server state using the active database loadout.</p>
-          <p class="status-note">Opponent: Player Two training fixture.</p>
+          <h2>{{ t("battle.hub.training") }}</h2>
+          <p class="muted">{{ t("battle.hub.trainingDescription") }}</p>
+          <p class="status-note">{{ t("battle.hub.trainingOpponent") }}</p>
           <button
             :disabled="!activeLoadout || creatingBattle"
             type="button"
             @click="startTrainingBattle"
           >
-            {{ creatingBattle ? "Starting..." : "Start Battle" }}
+            {{ t(creatingBattle ? "battle.campaign.starting" : "battle.campaign.start") }}
           </button>
           <p v-if="battleFeedback" class="feedback">{{ battleFeedback }}</p>
         </article>
 
         <article class="panel">
-          <h2>Campaign</h2>
-          <p class="muted">Solo battles against game-owned opponents.</p>
-          <p class="status-note">Next major gameplay mode.</p>
+          <h2>{{ t("navigation.campaign") }}</h2>
+          <p class="muted">{{ t("battle.hub.campaignDescription") }}</p>
+          <p class="status-note">{{ t("battle.hub.campaignStatus") }}</p>
           <NuxtLink
             :class="['button-link', { disabled: !activeLoadout }]"
             :aria-disabled="!activeLoadout"
             :to="activeLoadout ? '/battle/campaign' : '/inventory/loadouts'"
           >
-            {{ activeLoadout ? "Open Campaign" : "Select Loadout" }}
+            {{ t(activeLoadout ? "battle.hub.openCampaign" : "battle.campaign.selectLoadout") }}
           </NuxtLink>
         </article>
 
         <article class="panel">
-          <h2>PvP</h2>
-          <p class="muted">Private, casual, and ranked multiplayer entry points.</p>
-          <p class="status-note">Requires authoritative server work.</p>
+          <h2>{{ t("navigation.pvp") }}</h2>
+          <p class="muted">{{ t("battle.hub.pvpDescription") }}</p>
+          <p class="status-note">{{ t("battle.hub.pvpStatus") }}</p>
           <NuxtLink
             :class="['button-link', { disabled: !activeLoadout }]"
             :aria-disabled="!activeLoadout"
             :to="activeLoadout ? '/battle/pvp' : '/inventory/loadouts'"
           >
-            {{ activeLoadout ? "Open PvP" : "Select Loadout" }}
+            {{ t(activeLoadout ? "battle.hub.openPvp" : "battle.campaign.selectLoadout") }}
           </NuxtLink>
         </article>
 
         <article class="panel">
-          <h2>Battle History</h2>
-          <p class="muted">Review completed matches and replay records.</p>
-          <p class="status-note">Persistent records and reward claims are available.</p>
-          <NuxtLink class="button-link" to="/battle/history"> Open History </NuxtLink>
+          <h2>{{ t("battle.hub.historyTitle") }}</h2>
+          <p class="muted">{{ t("battle.hub.historyDescription") }}</p>
+          <p class="status-note">{{ t("battle.hub.historyStatus") }}</p>
+          <NuxtLink class="button-link" to="/battle/history">{{
+            t("battle.hub.openHistory")
+          }}</NuxtLink>
         </article>
 
         <article v-if="isDevelopment" class="panel">
-          <h2>Development Result Test</h2>
+          <h2>{{ t("battle.hub.developmentTest") }}</h2>
           <p class="muted">
-            Generate a verified finished record until campaign and PvP provide live results.
+            {{ t("battle.hub.developmentDescription") }}
           </p>
           <div class="control-row">
             <button
@@ -162,7 +174,7 @@
               type="button"
               @click="createTestResult('win')"
             >
-              Test Victory
+              {{ t("battle.hub.testVictory") }}
             </button>
             <button
               class="secondary-button"
@@ -170,7 +182,7 @@
               type="button"
               @click="createTestResult('loss')"
             >
-              Test Defeat
+              {{ t("battle.hub.testDefeat") }}
             </button>
           </div>
           <p v-if="resultFeedback" class="feedback">{{ resultFeedback }}</p>
@@ -185,6 +197,7 @@ import type { LoadoutState } from "~/utils/playerState";
 import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
+const { t } = useI18n();
 const { data: loadouts, error, pending } = await useFetch<LoadoutState>("/api/inventory/loadouts");
 const selectedDetailRingId = ref("");
 const creatingBattle = ref(false);
@@ -216,7 +229,7 @@ async function startTrainingBattle(): Promise<void> {
     await navigateTo(`/battle/live/${battle.id}`);
   } catch (battleError) {
     battleFeedback.value =
-      battleError instanceof Error ? battleError.message : "Battle creation failed.";
+      battleError instanceof Error ? battleError.message : t("battle.hub.creationError");
   } finally {
     creatingBattle.value = false;
   }
@@ -241,7 +254,7 @@ async function createTestResult(outcome: "win" | "loss"): Promise<void> {
     await navigateTo(`/battle/result/${response.recordId}`);
   } catch (resultError) {
     resultFeedback.value =
-      resultError instanceof Error ? resultError.message : "Battle result creation failed.";
+      resultError instanceof Error ? resultError.message : t("battle.hub.resultCreationError");
   } finally {
     creatingResult.value = false;
   }

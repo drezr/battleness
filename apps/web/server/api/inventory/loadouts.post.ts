@@ -1,10 +1,11 @@
+import { definePlayerHandler } from "../../utils/playerHandler";
 import {
   activatePlayerLoadout,
   deletePlayerLoadout,
   savePlayerLoadoutFromEquipped,
 } from "../../utils/gameState";
 
-export default defineEventHandler(async (event) => {
+export default definePlayerHandler(async (event) => {
   const body = await readBody<{ action?: string; loadoutId?: string; name?: string }>(event);
 
   try {

@@ -1,4 +1,10 @@
 {
+  "campaign.emberTrial.description": "A direct-damage fire specialist introducing rings, gems, and summoned monsters.",
+  "campaign.emberTrial.name": "Ember Trial",
+  "campaign.frostGate.description": "A resilient ice specialist built around health and Shield.",
+  "campaign.frostGate.name": "Frost Gate",
+  "campaign.stormInitiate.description": "A fast electric specialist using low energy costs and Haste.",
+  "campaign.stormInitiate.name": "Storm Initiate",
   "gem.absoluteZeroGem.name": "Absolute Zero Gem",
   "gem.emberCore.name": "Ember Core",
   "gem.frostChip.name": "Frost Chip",
@@ -432,4 +438,3 @@
   "spell.solarFlare.name": "Solar Flare",
   "spell.spark.name": "Spark"
 }
-

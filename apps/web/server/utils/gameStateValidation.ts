@@ -106,7 +106,9 @@ export async function assertValidPlayerGameState(
   client: PrismaContext,
   playerId: string,
 ): Promise<void> {
-  const issues = validatePlayerGameStateSnapshot(await loadPlayerGameStateSnapshot(client, playerId));
+  const issues = validatePlayerGameStateSnapshot(
+    await loadPlayerGameStateSnapshot(client, playerId),
+  );
 
   if (issues.length > 0) {
     throw new GameStateValidationError(issues);
@@ -309,7 +311,9 @@ function validateGemEnchantments(
 
   for (const enchantment of snapshot.gemEnchantments) {
     if (enchantment.playerId !== snapshot.player.id) {
-      issues.push(`Gem enchantment for gem "${enchantment.gemItemId}" is owned by "${enchantment.playerId}".`);
+      issues.push(
+        `Gem enchantment for gem "${enchantment.gemItemId}" is owned by "${enchantment.playerId}".`,
+      );
     }
 
     const gem = inventoryById.get(enchantment.gemItemId);
@@ -329,7 +333,9 @@ function validateGemEnchantments(
       issues.push(`Gem enchantment references missing target item "${enchantment.targetItemId}".`);
     } else {
       if (target.playerId !== snapshot.player.id) {
-        issues.push(`Gem enchantment references foreign target item "${enchantment.targetItemId}".`);
+        issues.push(
+          `Gem enchantment references foreign target item "${enchantment.targetItemId}".`,
+        );
       }
       if (target.type !== enchantment.targetType) {
         issues.push(`Gem enchantment target "${target.id}" does not match target type.`);
@@ -353,7 +359,9 @@ function validateEquippedRings(
 
   for (const equippedRing of snapshot.equippedRings) {
     if (equippedRing.playerId !== snapshot.player.id) {
-      issues.push(`Equipped ring "${equippedRing.ringItemId}" is owned by "${equippedRing.playerId}".`);
+      issues.push(
+        `Equipped ring "${equippedRing.ringItemId}" is owned by "${equippedRing.playerId}".`,
+      );
     }
     validateRingReference(
       equippedRing.ringItemId,
@@ -362,7 +370,11 @@ function validateEquippedRings(
       issues,
       "Equipped ring",
     );
-    if (!Number.isInteger(equippedRing.slotIndex) || equippedRing.slotIndex < 0 || equippedRing.slotIndex >= maxEquippedRings) {
+    if (
+      !Number.isInteger(equippedRing.slotIndex) ||
+      equippedRing.slotIndex < 0 ||
+      equippedRing.slotIndex >= maxEquippedRings
+    ) {
       issues.push(`Equipped ring "${equippedRing.ringItemId}" has invalid slot index.`);
     }
   }
@@ -388,7 +400,9 @@ function validateLoadouts(
 
     for (const loadoutRing of loadout.rings) {
       if (loadoutRing.loadoutId !== loadout.id) {
-        issues.push(`Loadout ring references loadout "${loadoutRing.loadoutId}" from loadout "${loadout.id}".`);
+        issues.push(
+          `Loadout ring references loadout "${loadoutRing.loadoutId}" from loadout "${loadout.id}".`,
+        );
       }
       validateRingReference(
         loadoutRing.ringItemId,
@@ -397,7 +411,11 @@ function validateLoadouts(
         issues,
         "Loadout ring",
       );
-      if (!Number.isInteger(loadoutRing.slotIndex) || loadoutRing.slotIndex < 0 || loadoutRing.slotIndex >= maxLoadoutRings) {
+      if (
+        !Number.isInteger(loadoutRing.slotIndex) ||
+        loadoutRing.slotIndex < 0 ||
+        loadoutRing.slotIndex >= maxLoadoutRings
+      ) {
         issues.push(`Loadout ring "${loadoutRing.ringItemId}" has invalid slot index.`);
       }
     }
@@ -437,9 +455,13 @@ function validateRewards(
     for (const itemReward of reward.items) {
       const item = inventoryById.get(itemReward.inventoryItemId);
       if (!item) {
-        issues.push(`Reward item references missing inventory item "${itemReward.inventoryItemId}".`);
+        issues.push(
+          `Reward item references missing inventory item "${itemReward.inventoryItemId}".`,
+        );
       } else if (item.playerId !== snapshot.player.id) {
-        issues.push(`Reward item references foreign inventory item "${itemReward.inventoryItemId}".`);
+        issues.push(
+          `Reward item references foreign inventory item "${itemReward.inventoryItemId}".`,
+        );
       }
       if (!Number.isInteger(itemReward.experience) || itemReward.experience < 0) {
         issues.push(`Reward item "${itemReward.inventoryItemId}" has invalid experience.`);

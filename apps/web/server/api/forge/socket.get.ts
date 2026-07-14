@@ -1,3 +1,4 @@
+import { definePlayerHandler } from "../../utils/playerHandler";
 import { getPlayerSocketState } from "../../utils/gameState";
 
-export default defineEventHandler(async () => getPlayerSocketState());
+export default definePlayerHandler(async () => getPlayerSocketState());

@@ -1,3 +1,4 @@
+import { definePlayerHandler } from "../../utils/playerHandler";
 import {
   enchantPlayerGem,
   improvePlayerRingSocketCount,
@@ -6,7 +7,7 @@ import {
   unsocketPlayerGem,
 } from "../../utils/gameState";
 
-export default defineEventHandler(async (event) => {
+export default definePlayerHandler(async (event) => {
   const body = await readBody<{
     action?: string;
     gemItemId?: string;

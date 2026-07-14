@@ -1,29 +1,29 @@
 <template>
   <main class="shell">
-    <nav class="section-nav" aria-label="Battle navigation">
+    <nav class="section-nav" :aria-label="t('accessibility.battleNavigation')">
       <NuxtLink
         v-for="link in sectionLinks.battle"
         :key="link.to"
         :class="{ active: route.path === link.to }"
         :to="link.to"
       >
-        {{ link.label }}
+        {{ $t(link.labelKey) }}
       </NuxtLink>
     </nav>
 
     <header class="view-header">
       <div class="view-title">
-        <span class="eyebrow">Battle</span>
-        <h1>Battle History</h1>
-        <p class="muted">Completed matches, deterministic records, and reward claims.</p>
+        <span class="eyebrow">{{ t("battle.section") }}</span>
+        <h1>{{ t("battle.history.title") }}</h1>
+        <p class="muted">{{ t("battle.history.description") }}</p>
       </div>
       <p v-if="state" class="status-note">
-        {{ state.records.length }} records - {{ unclaimedCount }} rewards pending
+        {{ t("battle.history.status", { records: state.records.length, rewards: unclaimedCount }) }}
       </p>
     </header>
 
-    <p v-if="pending" class="panel">Loading battle history...</p>
-    <p v-else-if="error" class="panel">Unable to load battle history.</p>
+    <p v-if="pending" class="panel">{{ t("battle.history.loading") }}</p>
+    <p v-else-if="error" class="panel">{{ t("battle.history.loadError") }}</p>
 
     <template v-else-if="state">
       <p v-if="feedback" class="feedback">{{ feedback }}</p>
@@ -41,6 +41,7 @@ import type { BattleHistoryState } from "~/utils/playerState";
 import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
+const { t } = useI18n();
 const { data: state, error, pending } = await useFetch<BattleHistoryState>("/api/battle/history");
 const claimingRewardId = ref("");
 const feedback = ref("");
@@ -58,10 +59,11 @@ async function claimReward(rewardGrantId: string): Promise<void> {
       method: "POST",
       body: { rewardGrantId },
     });
-    feedback.value = "Battle rewards claimed.";
+    feedback.value = t("profile.history.claimed");
     await refreshNuxtData();
   } catch (claimError) {
-    feedback.value = claimError instanceof Error ? claimError.message : "Reward claim failed.";
+    feedback.value =
+      claimError instanceof Error ? claimError.message : t("profile.history.claimError");
   } finally {
     claimingRewardId.value = "";
   }

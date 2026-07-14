@@ -3,8 +3,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
+import { IncomingMessage, ServerResponse } from "node:http";
+import { Socket } from "node:net";
 import { PrismaClient } from "@prisma/client";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { createEvent, type H3Event } from "h3";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 type TestEvent = {
   body?: unknown;
@@ -14,6 +17,7 @@ type TestEvent = {
 };
 
 type ApiHandler = (event: TestEvent) => Promise<unknown> | unknown;
+type H3ApiHandler = (event: H3Event) => Promise<unknown> | unknown;
 
 type TestGlobal = typeof globalThis & {
   createError?: (input: { statusCode: number; statusMessage: string }) => Error;
@@ -23,9 +27,30 @@ type TestGlobal = typeof globalThis & {
 };
 
 type PlayerApiResponse = {
-  player: { id: string; credits: number };
-  materials: { id: string; quantity: number }[];
-  inventory: { id: string; type: string; definitionId: string }[];
+  content: { version: string; checksum: string };
+  player: {
+    id: string;
+    displayName: string;
+    credits: number;
+    experience: number;
+    level: number;
+    maxHealth: number;
+    progression: {
+      nextLevelExperience: number | null;
+      experienceRemaining: number;
+      progressPercent: number;
+    };
+  };
+  materials: { id: string; quantity: number; contentVersion: string }[];
+  inventory: {
+    id: string;
+    type: string;
+    definitionId: string;
+    contentVersion: string;
+    level: number;
+    bonusPercent: number;
+    progression: { nextLevelExperience: number | null; progressPercent: number };
+  }[];
   recipes: { id: string; canCraft: boolean }[];
 };
 
@@ -160,6 +185,7 @@ type QualityApiResponse = {
 };
 
 type GameMarketApiResponse = {
+  content: { version: string; checksum: string };
   player: {
     id: string;
     credits: number;
@@ -168,6 +194,7 @@ type GameMarketApiResponse = {
     id: string;
     rarity: string;
     quantity: number;
+    contentVersion: string;
     buyPrice: number;
     sellPrice: number;
   }[];
@@ -179,8 +206,31 @@ type GameMarketApiResponse = {
     quantity: number;
     unitPrice: number;
     creditsDelta: number;
+    contentVersion: string;
     createdAt: string;
   }[];
+};
+
+type ProfileSettingsApiResponse = {
+  profile: {
+    id: string;
+    username: string;
+    displayName: string;
+    visibility: "public" | "private";
+    createdAt: string;
+    lastActiveAt: string;
+  };
+  preferences: {
+    locale: "en" | "fr";
+    theme: "system" | "dark" | "light";
+    reducedMotion: boolean;
+    interfaceDensity: "comfortable" | "compact";
+    muted: boolean;
+    masterVolume: number;
+    musicVolume: number;
+    effectsVolume: number;
+    updatedAt: string | null;
+  };
 };
 
 type BattleHistoryApiResponse = {
@@ -197,6 +247,7 @@ type BattleHistoryApiResponse = {
     actionCount: number;
     finalStateChecksum: string | null;
     replayAvailable: boolean;
+    summary: BattleResultSummaryApiResponse | null;
     reward: null | {
       id: string;
       status: "unclaimed" | "claimed";
@@ -207,6 +258,16 @@ type BattleHistoryApiResponse = {
       items: { inventoryItemId: string; experience: number }[];
     };
   }[];
+};
+
+type BattleResultSummaryApiResponse = {
+  turnCount: number;
+  actionCount: number;
+  players: { playerId: string; username: string; damage: number; actionCount: number }[];
+  ringsUsed: { id: string; label: string; playerId: string; count: number }[];
+  spellsCast: { id: string; label: string; playerId: string; count: number }[];
+  monstersSummoned: { id: string; label: string; playerId: string; count: number }[];
+  monstersUsed: { id: string; label: string; playerId: string; count: number }[];
 };
 
 type DevelopmentBattleResultApiResponse = {
@@ -229,6 +290,9 @@ type LiveBattleApiResponse = {
       id: string;
       definitionId: string;
       damage: number;
+      energyCost: number;
+      cooldown: number;
+      currentCooldown: number;
     }[];
   };
   opponent: {
@@ -238,11 +302,52 @@ type LiveBattleApiResponse = {
     rings?: unknown[];
   };
   result: null | { type: "draw" } | { type: "winner"; winnerId: string; loserId: string };
+  reward: null | {
+    id: string;
+    status: "unclaimed" | "claimed";
+    credits: number;
+    heroExperience: number;
+    materials: { materialId: string; quantity: number }[];
+    items: { inventoryItemId: string; experience: number }[];
+  };
+  summary: BattleResultSummaryApiResponse | null;
 };
 
 type LiveBattleActionApiResponse = {
   battle: LiveBattleApiResponse;
   events: { type: string }[];
+};
+
+type CampaignApiResponse = {
+  player: { id: string; level: number; activeLoadoutId: string | null };
+  progress: { completedCount: number; unlockedCount: number; totalCount: number };
+  opponents: {
+    id: string;
+    label: string;
+    status: "available" | "locked" | "completed";
+    victoryCount: number;
+    prerequisite: { id: string; label: string } | null;
+    rings: {
+      definitionId: string;
+      gems: { definitionId: string; enchantment: { definitionId: string } | null }[];
+    }[];
+    firstClearReward: {
+      credits: number;
+      materials: { materialId: string; label: string; quantity: number }[];
+    };
+  }[];
+};
+
+type PrivateMatchApiResponse = {
+  playerId: string;
+  match: null | {
+    id: string;
+    code: string;
+    status: string;
+    battleId: string | null;
+    participants: { playerId: string; slot: string; ready: boolean; loadoutId: string | null }[];
+  };
+  loadouts: { id: string; name: string; ringCount: number }[];
 };
 
 const projectRoot = fileURLToPath(new URL("../../../..", import.meta.url));
@@ -263,12 +368,26 @@ let qualityPostHandler: ApiHandler;
 let marketGameGetHandler: ApiHandler;
 let marketGamePostHandler: ApiHandler;
 let battleHistoryGetHandler: ApiHandler;
+let campaignGetHandler: ApiHandler;
+let campaignStartHandler: ApiHandler;
+let privateMatchGetHandler: H3ApiHandler;
+let privateMatchPostHandler: H3ApiHandler;
 let battleStartHandler: ApiHandler;
 let battleLiveGetHandler: ApiHandler;
 let battleActionHandler: ApiHandler;
 let battleRewardClaimHandler: ApiHandler;
 let developmentBattleResultHandler: ApiHandler;
+let profileSettingsGetHandler: ApiHandler;
+let profileSettingsPostHandler: ApiHandler;
 let resetHandler: ApiHandler;
+let authSessionHandler: H3ApiHandler;
+let authLogoutHandler: H3ApiHandler;
+let googleStartHandler: H3ApiHandler;
+let googleCallbackHandler: H3ApiHandler;
+let createPlayerSession: (
+  event: H3Event,
+  playerId: string,
+) => Promise<{ id: string; player: { id: string } }>;
 let disconnectGameStateClientForTests: () => Promise<void>;
 let prisma: PrismaClient;
 
@@ -297,12 +416,23 @@ describe("Nuxt Game App APIs", () => {
       marketGameGetModule,
       marketGamePostModule,
       battleHistoryGetModule,
+      campaignGetModule,
+      campaignStartModule,
+      privateMatchGetModule,
+      privateMatchPostModule,
       battleStartModule,
       battleLiveGetModule,
       battleActionModule,
       battleRewardClaimModule,
       developmentBattleResultModule,
+      profileSettingsGetModule,
+      profileSettingsPostModule,
       resetModule,
+      authSessionModule,
+      authLogoutModule,
+      authSessionUtilityModule,
+      googleStartModule,
+      googleCallbackModule,
       gameStateModule,
     ] = await Promise.all([
       import("./player.get"),
@@ -318,12 +448,23 @@ describe("Nuxt Game App APIs", () => {
       import("./market/game.get"),
       import("./market/game.post"),
       import("./battle/history.get"),
+      import("./campaign.get"),
+      import("./battle/campaign/start.post"),
+      import("./pvp/private.get"),
+      import("./pvp/private.post"),
       import("./battle/start.post"),
       import("./battle/live/[battleId].get"),
       import("./battle/live/[battleId]/actions.post"),
       import("./battle/rewards/claim.post"),
       import("./dev/battle-result.post"),
+      import("./profile/settings.get"),
+      import("./profile/settings.post"),
       import("./dev/reset.post"),
+      import("./auth/session.get"),
+      import("./auth/logout.post"),
+      import("../utils/authSession"),
+      import("./auth/google.get"),
+      import("./auth/google/callback.get"),
       import("../utils/gameState"),
     ]);
 
@@ -340,12 +481,23 @@ describe("Nuxt Game App APIs", () => {
     marketGameGetHandler = marketGameGetModule.default;
     marketGamePostHandler = marketGamePostModule.default;
     battleHistoryGetHandler = battleHistoryGetModule.default;
+    campaignGetHandler = campaignGetModule.default;
+    campaignStartHandler = campaignStartModule.default;
+    privateMatchGetHandler = privateMatchGetModule.default;
+    privateMatchPostHandler = privateMatchPostModule.default;
     battleStartHandler = battleStartModule.default;
     battleLiveGetHandler = battleLiveGetModule.default;
     battleActionHandler = battleActionModule.default;
     battleRewardClaimHandler = battleRewardClaimModule.default;
     developmentBattleResultHandler = developmentBattleResultModule.default;
+    profileSettingsGetHandler = profileSettingsGetModule.default;
+    profileSettingsPostHandler = profileSettingsPostModule.default;
     resetHandler = resetModule.default;
+    authSessionHandler = authSessionModule.default;
+    authLogoutHandler = authLogoutModule.default;
+    createPlayerSession = authSessionUtilityModule.createPlayerSession;
+    googleStartHandler = googleStartModule.default;
+    googleCallbackHandler = googleCallbackModule.default;
     disconnectGameStateClientForTests = gameStateModule.disconnectGameStateClientForTests;
   }, 30_000);
 
@@ -362,11 +514,687 @@ describe("Nuxt Game App APIs", () => {
   it("returns seeded player state", async () => {
     const response = (await playerHandler({})) as PlayerApiResponse;
 
+    expect(response.content.version).toBe("prototype-6");
+    expect(response.content.checksum).toMatch(/^[a-f0-9]{64}$/);
     expect(response.player).toMatchObject({ id: "devPlayer", credits: 1_000_000 });
     expect(response.materials).toHaveLength(70);
     expect(response.inventory).toHaveLength(0);
     expect(response.recipes).toHaveLength(48);
     expect(response.recipes.every((recipe) => recipe.canCraft)).toBe(true);
+    expect(response.materials.every((material) => material.contentVersion === "prototype-6")).toBe(
+      true,
+    );
+
+    const release = await prisma.contentRelease.findUniqueOrThrow({
+      where: { version: "prototype-6" },
+    });
+    expect(release.checksum).toBe(response.content.checksum);
+    expect(JSON.parse(release.manifestJson)).toMatchObject({
+      materials: 70,
+      recipes: 48,
+    });
+  });
+
+  it("creates hashed development sessions and revokes them on logout", async () => {
+    const initial = createH3TestEvent();
+    const response = (await authSessionHandler(initial.event)) as {
+      authenticated: boolean;
+      session: { id: string; player: { id: string } };
+    };
+    const sessionCookie = responseCookie(initial.response, "battleness_session");
+    const rawToken = sessionCookie.split("=")[1];
+
+    expect(response.authenticated).toBe(true);
+    expect(response.session.player.id).toBe("devPlayer");
+    expect(rawToken).toBeTruthy();
+
+    const storedSession = await prisma.playerSession.findUniqueOrThrow({
+      where: { id: response.session.id },
+    });
+    expect(storedSession.tokenHash).toHaveLength(64);
+    expect(storedSession.tokenHash).not.toBe(rawToken);
+
+    await prisma.playerSession.update({
+      where: { id: response.session.id },
+      data: { expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1_000) },
+    });
+    const renewal = createH3TestEvent(sessionCookie);
+    await authSessionHandler(renewal.event);
+    const renewedSession = await prisma.playerSession.findUniqueOrThrow({
+      where: { id: response.session.id },
+    });
+    expect(renewedSession.expiresAt.getTime()).toBeGreaterThan(
+      Date.now() + 29 * 24 * 60 * 60 * 1_000,
+    );
+    expect(responseCookie(renewal.response, "battleness_session")).toBe(sessionCookie);
+
+    const logout = createH3TestEvent(sessionCookie);
+    await authLogoutHandler(logout.event);
+    await expect(
+      prisma.playerSession.findUniqueOrThrow({ where: { id: response.session.id } }),
+    ).resolves.toMatchObject({ revokedAt: expect.any(Date) });
+
+    const signedOut = createH3TestEvent(responseCookie(logout.response, "battleness_signed_out"));
+    const signedOutResponse = (await authSessionHandler(signedOut.event)) as {
+      authenticated: boolean;
+      session: null;
+    };
+    expect(signedOutResponse).toMatchObject({ authenticated: false, session: null });
+
+    const expiredLogin = createH3TestEvent();
+    const expiredSession = await createPlayerSession(expiredLogin.event, "devPlayer");
+    const expiredCookie = responseCookie(expiredLogin.response, "battleness_session");
+    await prisma.playerSession.update({
+      where: { id: expiredSession.id },
+      data: { expiresAt: new Date(Date.now() - 1_000) },
+    });
+    process.env.BATTLENESS_DEV_AUTH = "disabled";
+    try {
+      const expired = createH3TestEvent(expiredCookie);
+      await expect(authSessionHandler(expired.event)).resolves.toMatchObject({
+        authenticated: false,
+        session: null,
+      });
+    } finally {
+      delete process.env.BATTLENESS_DEV_AUTH;
+    }
+  });
+
+  it("isolates profile state between authenticated players", async () => {
+    await prisma.player.create({
+      data: {
+        id: "secondPlayer",
+        username: "Second Player",
+        displayName: "Second Player",
+        credits: 500,
+        preferences: { create: {} },
+      },
+    });
+
+    const login = createH3TestEvent();
+    await createPlayerSession(login.event, "secondPlayer");
+    const sessionCookie = responseCookie(login.response, "battleness_session");
+    const update = createH3TestEvent(sessionCookie, {
+      displayName: "Isolated Player",
+      profileVisibility: "private",
+      locale: "fr",
+      theme: "dark",
+      reducedMotion: true,
+      interfaceDensity: "compact",
+      muted: true,
+      masterVolume: 40,
+      musicVolume: 30,
+      effectsVolume: 20,
+    });
+
+    const updated = (await profileSettingsPostHandler(update.event as unknown as TestEvent)) as {
+      profile: { id: string; displayName: string };
+    };
+    expect(updated.profile).toMatchObject({ id: "secondPlayer", displayName: "Isolated Player" });
+    await expect(
+      prisma.player.findUniqueOrThrow({ where: { id: "devPlayer" } }),
+    ).resolves.toMatchObject({ displayName: "Dev Player" });
+    await prisma.player.delete({ where: { id: "secondPlayer" } });
+  });
+
+  it("creates and starts a persistent private match for two authenticated players", async () => {
+    const hostRingId = "devPlayer.ring.private";
+    const guestId = "privateGuest";
+    const guestRingId = `${guestId}.ring.private`;
+
+    await prisma.player.create({
+      data: {
+        id: guestId,
+        username: "Private Guest",
+        displayName: "Private Guest",
+        credits: 1_000,
+        preferences: { create: {} },
+      },
+    });
+    await prisma.inventoryItem.createMany({
+      data: [
+        {
+          id: hostRingId,
+          playerId: "devPlayer",
+          type: "ring",
+          definitionId: "trainingFlameBand",
+          contentVersion: "prototype-6",
+          experience: 0,
+          quality: 0,
+          socketCount: 1,
+          socketedGemInstanceIds: "[]",
+        },
+        {
+          id: guestRingId,
+          playerId: guestId,
+          type: "ring",
+          definitionId: "trainingFlameBand",
+          contentVersion: "prototype-6",
+          experience: 0,
+          quality: 0,
+          socketCount: 1,
+          socketedGemInstanceIds: "[]",
+        },
+      ],
+    });
+    const [hostLoadout, guestLoadout] = await Promise.all([
+      prisma.loadout.create({
+        data: {
+          playerId: "devPlayer",
+          name: "Private Host",
+          rings: { create: { ringItemId: hostRingId, slotIndex: 0 } },
+        },
+      }),
+      prisma.loadout.create({
+        data: {
+          playerId: guestId,
+          name: "Private Guest",
+          rings: { create: { ringItemId: guestRingId, slotIndex: 0 } },
+        },
+      }),
+    ]);
+
+    const hostLogin = createH3TestEvent();
+    await createPlayerSession(hostLogin.event, "devPlayer");
+    const hostCookie = responseCookie(hostLogin.response, "battleness_session");
+    const guestLogin = createH3TestEvent();
+    await createPlayerSession(guestLogin.event, guestId);
+    const guestCookie = responseCookie(guestLogin.response, "battleness_session");
+
+    const createdEvent = createH3TestEvent(hostCookie, { action: "create" });
+    const created = (await privateMatchPostHandler(createdEvent.event)) as PrivateMatchApiResponse;
+    expect(created.match?.code).toMatch(/^BN-[A-Z2-9]{6}$/);
+    expect(created.match?.participants).toHaveLength(1);
+    const reloaded = (await privateMatchGetHandler(
+      createH3TestEvent(hostCookie).event,
+    )) as PrivateMatchApiResponse;
+    expect(reloaded.match?.id).toBe(created.match?.id);
+
+    const joinedEvent = createH3TestEvent(guestCookie, {
+      action: "join",
+      code: created.match?.code.toLowerCase(),
+    });
+    const joined = (await privateMatchPostHandler(joinedEvent.event)) as PrivateMatchApiResponse;
+    expect(joined.match?.participants.map((participant) => participant.playerId)).toEqual([
+      "devPlayer",
+      guestId,
+    ]);
+
+    const guestReadyEvent = createH3TestEvent(guestCookie, {
+      action: "ready",
+      loadoutId: guestLoadout.id,
+      ready: true,
+    });
+    const guestReady = (await privateMatchPostHandler(
+      guestReadyEvent.event,
+    )) as PrivateMatchApiResponse;
+    expect(guestReady.match?.status).toBe("waiting");
+
+    const hostReadyEvent = createH3TestEvent(hostCookie, {
+      action: "ready",
+      loadoutId: hostLoadout.id,
+      ready: true,
+    });
+    const started = (await privateMatchPostHandler(
+      hostReadyEvent.event,
+    )) as PrivateMatchApiResponse;
+    expect(started.match).toMatchObject({ status: "active", battleId: expect.any(String) });
+
+    const hostBattleEvent = createH3TestEvent(hostCookie);
+    hostBattleEvent.event.context.params = { battleId: started.match!.battleId! };
+    const hostBattle = (await battleLiveGetHandler(
+      hostBattleEvent.event as unknown as TestEvent,
+    )) as LiveBattleApiResponse;
+    const guestBattleEvent = createH3TestEvent(guestCookie);
+    guestBattleEvent.event.context.params = { battleId: started.match!.battleId! };
+    const guestBattle = (await battleLiveGetHandler(
+      guestBattleEvent.event as unknown as TestEvent,
+    )) as LiveBattleApiResponse;
+
+    expect(hostBattle).toMatchObject({ mode: "private_pvp", viewer: { id: "devPlayer" } });
+    expect(guestBattle).toMatchObject({ mode: "private_pvp", viewer: { id: guestId } });
+    expect(hostBattle.opponent.rings).toBeUndefined();
+    expect(guestBattle.opponent.rings).toBeUndefined();
+
+    let activeBattle = hostBattle;
+    if (activeBattle.status === "choosingFirstPlayer") {
+      const hostChoiceEvent = createH3TestEvent(hostCookie, {
+        expectedActionCount: activeBattle.actionCount,
+        action: { type: "chooseElement", element: "fire" },
+      });
+      hostChoiceEvent.event.context.params = { battleId: activeBattle.id };
+      const hostChoice = (await battleActionHandler(
+        hostChoiceEvent.event as unknown as TestEvent,
+      )) as LiveBattleActionApiResponse;
+      const guestChoiceEvent = createH3TestEvent(guestCookie, {
+        expectedActionCount: hostChoice.battle.actionCount,
+        action: { type: "chooseElement", element: "ice" },
+      });
+      guestChoiceEvent.event.context.params = { battleId: activeBattle.id };
+      activeBattle = (
+        (await battleActionHandler(
+          guestChoiceEvent.event as unknown as TestEvent,
+        )) as LiveBattleActionApiResponse
+      ).battle;
+    }
+
+    expect(activeBattle.status).toBe("active");
+    expect(activeBattle.activePlayerId).toBeTruthy();
+    const timedOutPlayerId = activeBattle.activePlayerId!;
+    await prisma.privateMatch.update({
+      where: { id: started.match!.id },
+      data: {
+        turnPlayerId: timedOutPlayerId,
+        turnDeadlineAt: new Date(Date.now() - 1_000),
+      },
+    });
+
+    const timeoutObserverCookie = timedOutPlayerId === "devPlayer" ? guestCookie : hostCookie;
+    const timedOutBattleEvent = createH3TestEvent(timeoutObserverCookie);
+    timedOutBattleEvent.event.context.params = { battleId: activeBattle.id };
+    const timedOutBattle = (await battleLiveGetHandler(
+      timedOutBattleEvent.event as unknown as TestEvent,
+    )) as LiveBattleApiResponse;
+    expect(timedOutBattle.status).toBe("finished");
+    expect(timedOutBattle.result).toMatchObject({
+      type: "winner",
+      loserId: timedOutPlayerId,
+    });
+    await expect(
+      prisma.privateMatch.findUniqueOrThrow({ where: { id: started.match!.id } }),
+    ).resolves.toMatchObject({
+      status: "finished",
+      turnPlayerId: null,
+      turnDeadlineAt: null,
+    });
+
+    await prisma.privateMatch.delete({ where: { id: started.match!.id } });
+    await prisma.battleRecord.delete({ where: { id: started.match!.battleId! } });
+    await prisma.player.delete({ where: { id: guestId } });
+  });
+
+  it("completes Google OAuth with browser-bound state, PKCE, and stable account identity", async () => {
+    const originalFetch = globalThis.fetch;
+    process.env.GOOGLE_OAUTH_CLIENT_ID = "google-client-id";
+    process.env.GOOGLE_OAUTH_CLIENT_SECRET = "google-client-secret";
+    process.env.GOOGLE_OAUTH_REDIRECT_URI = "http://127.0.0.1:3000/api/auth/google/callback";
+
+    try {
+      const start = createH3TestEvent(undefined, undefined, "/api/auth/google?returnTo=%2Fprofile");
+      await googleStartHandler(start.event);
+      const authorizationLocation = String(start.response.getHeader("location"));
+      const authorizationUrl = new URL(authorizationLocation);
+      const state = authorizationUrl.searchParams.get("state");
+      const codeChallenge = authorizationUrl.searchParams.get("code_challenge");
+      const bindingCookie = responseCookie(start.response, "battleness_oauth_binding");
+
+      expect(authorizationUrl.origin).toBe("https://accounts.google.com");
+      expect(authorizationUrl.searchParams.get("scope")).toBe("openid profile email");
+      expect(authorizationUrl.searchParams.get("code_challenge_method")).toBe("S256");
+      expect(state).toBeTruthy();
+      expect(codeChallenge).toMatch(/^[A-Za-z0-9_-]{43}$/);
+
+      const storedAttempt = await prisma.oAuthLoginAttempt.findFirstOrThrow();
+      expect(storedAttempt.stateHash).toHaveLength(64);
+      expect(storedAttempt.stateHash).not.toBe(state);
+      expect(storedAttempt.returnTo).toBe("/profile");
+      expect(storedAttempt.codeVerifier.length).toBeGreaterThanOrEqual(43);
+
+      const fetchMock = vi
+        .fn<typeof fetch>()
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ access_token: "temporary-google-token" }), {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          }),
+        )
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({
+              sub: "google-account-123",
+              email: "player@example.com",
+              email_verified: true,
+              name: "Google Player",
+            }),
+            { status: 200, headers: { "content-type": "application/json" } },
+          ),
+        );
+      globalThis.fetch = fetchMock;
+
+      const callbackUrl = `/api/auth/google/callback?code=authorization-code&state=${encodeURIComponent(state!)}`;
+      const callback = createH3TestEvent(bindingCookie, undefined, callbackUrl);
+      await googleCallbackHandler(callback.event);
+
+      expect(callback.response.getHeader("location")).toBe("/profile");
+      expect(responseCookie(callback.response, "battleness_session")).toContain(
+        "battleness_session=",
+      );
+      expect(await prisma.oAuthLoginAttempt.count()).toBe(0);
+      const identity = await prisma.authIdentity.findUniqueOrThrow({
+        where: {
+          provider_providerAccountId: {
+            provider: "google",
+            providerAccountId: "google-account-123",
+          },
+        },
+        include: { player: { include: { materialStock: true } } },
+      });
+      expect(identity.email).toBe("player@example.com");
+      expect(identity.player.displayName).toBe("Google Player");
+      expect(identity.player.materialStock.length).toBeGreaterThan(0);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(String(fetchMock.mock.calls[0]?.[1]?.body)).toContain("code_verifier=");
+      expect(fetchMock.mock.calls[1]?.[1]?.headers).toMatchObject({
+        authorization: "Bearer temporary-google-token",
+      });
+
+      await prisma.player.delete({ where: { id: identity.playerId } });
+    } finally {
+      globalThis.fetch = originalFetch;
+      delete process.env.GOOGLE_OAUTH_CLIENT_ID;
+      delete process.env.GOOGLE_OAUTH_CLIENT_SECRET;
+      delete process.env.GOOGLE_OAUTH_REDIRECT_URI;
+    }
+  });
+
+  it("rejects reusing a content version for different definitions", async () => {
+    const state = (await playerHandler({})) as PlayerApiResponse;
+    await prisma.contentRelease.update({
+      where: { version: state.content.version },
+      data: { checksum: "different-definitions" },
+    });
+
+    try {
+      await expect(playerHandler({})).rejects.toThrow(
+        'Content version "prototype-6" is already registered with different definitions.',
+      );
+    } finally {
+      await prisma.contentRelease.update({
+        where: { version: state.content.version },
+        data: { checksum: state.content.checksum },
+      });
+    }
+  });
+
+  it("marks legacy inventory rows that predate content provenance", async () => {
+    await prisma.inventoryItem.create({
+      data: {
+        id: "legacy-ring",
+        playerId: "devPlayer",
+        type: "ring",
+        definitionId: "emberLoop",
+        contentVersion: null,
+        experience: 0,
+        quality: 0,
+        socketCount: 1,
+      },
+    });
+
+    const state = (await playerHandler({})) as PlayerApiResponse;
+    expect(state.inventory.find((item) => item.id === "legacy-ring")?.contentVersion).toBe(
+      "legacy-unversioned",
+    );
+    await expect(
+      prisma.inventoryItem.findUniqueOrThrow({ where: { id: "legacy-ring" } }),
+    ).resolves.toMatchObject({ contentVersion: "legacy-unversioned" });
+  });
+
+  it("returns and persists profile display, localization, and audio preferences", async () => {
+    const initial = (await profileSettingsGetHandler({})) as ProfileSettingsApiResponse;
+    expect(initial).toMatchObject({
+      profile: {
+        id: "devPlayer",
+        username: "Dev Player",
+        displayName: "Dev Player",
+        visibility: "public",
+      },
+      preferences: {
+        locale: "en",
+        theme: "system",
+        reducedMotion: false,
+        interfaceDensity: "comfortable",
+        muted: false,
+        masterVolume: 100,
+        musicVolume: 70,
+        effectsVolume: 80,
+      },
+    });
+
+    const updated = (await profileSettingsPostHandler({
+      body: {
+        displayName: "  Arena Tester  ",
+        profileVisibility: "private",
+        locale: "fr",
+        theme: "dark",
+        reducedMotion: true,
+        interfaceDensity: "compact",
+        muted: true,
+        masterVolume: 65,
+        musicVolume: 40,
+        effectsVolume: 75,
+      },
+    })) as ProfileSettingsApiResponse;
+
+    expect(updated).toMatchObject({
+      profile: { displayName: "Arena Tester", visibility: "private" },
+      preferences: {
+        locale: "fr",
+        theme: "dark",
+        reducedMotion: true,
+        interfaceDensity: "compact",
+        muted: true,
+        masterVolume: 65,
+        musicVolume: 40,
+        effectsVolume: 75,
+      },
+    });
+    expect(updated.preferences.updatedAt).not.toBeNull();
+    await expect(
+      prisma.player.findUniqueOrThrow({ where: { id: "devPlayer" } }),
+    ).resolves.toMatchObject({ displayName: "Arena Tester", profileVisibility: "private" });
+    await expect(
+      prisma.playerPreferences.findUniqueOrThrow({ where: { playerId: "devPlayer" } }),
+    ).resolves.toMatchObject({ locale: "fr", theme: "dark", masterVolume: 65 });
+  });
+
+  it("rejects invalid profile settings without partially updating the player", async () => {
+    const initial = (await profileSettingsGetHandler({})) as ProfileSettingsApiResponse;
+
+    await expect(
+      profileSettingsPostHandler({
+        body: {
+          displayName: "X",
+          profileVisibility: "public",
+          locale: "en",
+          theme: "system",
+          reducedMotion: false,
+          interfaceDensity: "comfortable",
+          muted: false,
+          masterVolume: 101,
+          musicVolume: 70,
+          effectsVolume: 80,
+        },
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      statusMessage: "displayName must contain between 2 and 32 printable characters.",
+    });
+
+    const unchanged = (await profileSettingsGetHandler({})) as ProfileSettingsApiResponse;
+    expect(unchanged.profile.displayName).toBe(initial.profile.displayName);
+    expect(unchanged.preferences.masterVolume).toBe(initial.preferences.masterVolume);
+  });
+
+  it("returns the validated campaign catalogue with initial unlock state", async () => {
+    const response = (await campaignGetHandler({})) as CampaignApiResponse;
+
+    expect(response.player).toMatchObject({
+      id: "devPlayer",
+      level: 0,
+      activeLoadoutId: null,
+    });
+    expect(response.progress).toEqual({ completedCount: 0, unlockedCount: 1, totalCount: 3 });
+    expect(response.opponents.map((opponent) => opponent.status)).toEqual([
+      "available",
+      "locked",
+      "locked",
+    ]);
+    expect(response.opponents[0]).toMatchObject({
+      id: "emberTrial",
+      label: "Ember Trial",
+      prerequisite: null,
+      rings: [
+        {
+          definitionId: "emberLoop",
+          gems: [
+            {
+              definitionId: "rubyShard",
+              enchantment: { definitionId: "emberImp" },
+            },
+          ],
+        },
+      ],
+      firstClearReward: {
+        credits: 200,
+        materials: expect.arrayContaining([
+          expect.objectContaining({ materialId: "aluminium", label: "Aluminium", quantity: 1 }),
+        ]),
+      },
+    });
+    expect(response.opponents[1]?.prerequisite).toEqual({
+      id: "emberTrial",
+      label: "Ember Trial",
+    });
+  });
+
+  it("starts campaign battles, advances the opponent, and persists first-clear progression", async () => {
+    const ringItemId = await createAndActivateCampaignTestLoadout();
+
+    await expect(
+      campaignStartHandler({
+        body: { opponentId: "stormInitiate", requestId: "locked-campaign-start" },
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      statusMessage: 'Campaign opponent "stormInitiate" is locked until "emberTrial" is cleared.',
+    });
+
+    let battle = (await campaignStartHandler({
+      body: { opponentId: "emberTrial", requestId: "ember-first-clear" },
+    })) as LiveBattleApiResponse;
+
+    expect(battle).toMatchObject({
+      id: "ember-first-clear",
+      mode: "campaign",
+      status: "active",
+      activePlayerId: "devPlayer",
+      viewer: { rings: [{ id: ringItemId, definitionId: "trainingFlameBand" }] },
+      opponent: {
+        id: "campaign.emberTrial",
+        username: "Ember Trial",
+        ringCount: 1,
+      },
+    });
+    expect(battle.opponent.rings).toBeUndefined();
+
+    const persistedStart = await prisma.battleRecord.findUniqueOrThrow({
+      where: { id: battle.id },
+    });
+    expect(persistedStart).toMatchObject({
+      mode: "campaign",
+      modeReferenceId: "emberTrial",
+      playerOneId: "devPlayer",
+    });
+    expect(JSON.parse(persistedStart.setupJson)).toMatchObject({
+      id: "campaign.emberTrial.ember-first-clear",
+      players: [
+        { id: "devPlayer" },
+        {
+          id: "campaign.emberTrial",
+          rings: [
+            {
+              id: "campaign.emberTrial.ring.emberLoop.1",
+              gems: [
+                {
+                  id: "campaign.emberTrial.gem.rubyShard.1.1",
+                  enchantment: {
+                    type: "monster",
+                    resolvedDefinitionId: "campaign.emberTrial.monster.emberImp.1.1",
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const nextTurn = (await battleActionHandler({
+      context: { params: { battleId: battle.id } },
+      body: {
+        expectedActionCount: battle.actionCount,
+        action: { type: "endTurn" },
+      },
+    })) as LiveBattleActionApiResponse;
+    battle = nextTurn.battle;
+    expect(battle).toMatchObject({
+      status: "active",
+      activePlayerId: "devPlayer",
+      actionCount: 2,
+      viewer: { energy: { current: 2, maxForTurn: 2, turnCount: 2 } },
+    });
+    expect(nextTurn.events.map((event) => event.type)).toEqual([
+      "turnEnded",
+      "turnStarted",
+      "turnEnded",
+      "turnStarted",
+    ]);
+
+    const victory = await finishCampaignBattle(battle, ringItemId);
+
+    expect(victory).toMatchObject({
+      status: "finished",
+      result: { type: "winner", winnerId: "devPlayer" },
+      reward: {
+        status: "unclaimed",
+        credits: 200,
+        heroExperience: 150,
+        materials: expect.arrayContaining([
+          expect.objectContaining({ materialId: "aluminium", quantity: 1 }),
+          expect.objectContaining({ materialId: "sand", quantity: 1 }),
+        ]),
+      },
+    });
+    expect(
+      await prisma.campaignProgress.findUniqueOrThrow({
+        where: {
+          playerId_opponentId: { playerId: "devPlayer", opponentId: "emberTrial" },
+        },
+      }),
+    ).toMatchObject({ victoryCount: 1, contentVersion: "prototype-6" });
+
+    const campaign = (await campaignGetHandler({})) as CampaignApiResponse;
+    expect(campaign.progress).toEqual({ completedCount: 1, unlockedCount: 2, totalCount: 3 });
+    expect(campaign.opponents[0]).toMatchObject({ status: "completed", victoryCount: 1 });
+    expect(campaign.opponents[1]).toMatchObject({ status: "available", victoryCount: 0 });
+
+    const repeatedStart = (await campaignStartHandler({
+      body: { opponentId: "emberTrial", requestId: "ember-repeat-clear" },
+    })) as LiveBattleApiResponse;
+    const repeatedVictory = await finishCampaignBattle(repeatedStart, ringItemId);
+    expect(repeatedVictory.reward).toMatchObject({
+      status: "unclaimed",
+      credits: 80,
+      heroExperience: 60,
+      materials: [{ materialId: "aluminium", quantity: 1 }],
+    });
+    expect(
+      await prisma.campaignProgress.findUniqueOrThrow({
+        where: {
+          playerId_opponentId: { playerId: "devPlayer", opponentId: "emberTrial" },
+        },
+      }),
+    ).toMatchObject({ victoryCount: 2 });
   });
 
   it("crafts a recipe and persists the crafted item plus consumed materials", async () => {
@@ -382,6 +1210,7 @@ describe("Nuxt Game App APIs", () => {
     expect(response.state.inventory[0]).toMatchObject({
       type: "ring",
       definitionId: "emberLoop",
+      contentVersion: "prototype-6",
     });
     expect(materialQuantity(response.state, "aluminium")).toBe(1);
     expect(materialQuantity(response.state, "iron")).toBe(1);
@@ -390,6 +1219,18 @@ describe("Nuxt Game App APIs", () => {
     const reloadedState = (await playerHandler({})) as PlayerApiResponse;
     expect(reloadedState.inventory).toHaveLength(1);
     expect(reloadedState.inventory[0]?.id).toBe(response.crafted.id);
+    expect(reloadedState.player).toMatchObject({
+      experience: 0,
+      level: 0,
+      maxHealth: 30,
+      progression: { nextLevelExperience: 100, experienceRemaining: 100, progressPercent: 0 },
+    });
+    expect(reloadedState.inventory[0]).toMatchObject({
+      level: 1,
+      contentVersion: "prototype-6",
+      bonusPercent: 0,
+      progression: { nextLevelExperience: 400, progressPercent: 0 },
+    });
   });
 
   it("rejects an unknown recipe without changing persisted state", async () => {
@@ -968,6 +1809,7 @@ describe("Nuxt Game App APIs", () => {
     const response = (await marketGameGetHandler({})) as GameMarketApiResponse;
 
     expect(response.player).toMatchObject({ id: "devPlayer", credits: 1_000_000 });
+    expect(response.content.version).toBe("prototype-6");
     expect(response.materials).toHaveLength(70);
     expect(response.materials.find((material) => material.id === "aluminium")).toMatchObject({
       rarity: "common",
@@ -1001,6 +1843,7 @@ describe("Nuxt Game App APIs", () => {
     });
     expect(player.credits).toBe(999_970);
     expect(stock.quantity).toBe(5);
+    expect(stock.contentVersion).toBe("prototype-6");
     expect(response.transactions[0]).toMatchObject({
       requestId: "buy-aluminium-3",
       action: "buy",
@@ -1008,6 +1851,7 @@ describe("Nuxt Game App APIs", () => {
       quantity: 3,
       unitPrice: 10,
       creditsDelta: -30,
+      contentVersion: "prototype-6",
     });
     expect(await prisma.marketTransaction.count()).toBe(1);
   });
@@ -1353,7 +2197,7 @@ describe("Nuxt Game App APIs", () => {
   });
 
   it("persists a finished and replayable live battle after the viewer concedes", async () => {
-    await createAndActivateRingLoadout();
+    const { ringItemId } = await createAndActivateRingLoadout();
     const started = (await battleStartHandler({
       body: { requestId: "conceded-live-battle" },
     })) as LiveBattleApiResponse;
@@ -1369,6 +2213,24 @@ describe("Nuxt Game App APIs", () => {
       status: "finished",
       actionCount: started.actionCount + 1,
       result: { type: "winner", winnerId: "playerTwo", loserId: "devPlayer" },
+      reward: {
+        status: "unclaimed",
+        credits: 30,
+        heroExperience: 25,
+        materials: [],
+        items: [{ inventoryItemId: ringItemId, experience: 8 }],
+      },
+      summary: {
+        actionCount: started.actionCount + 1,
+        players: expect.arrayContaining([
+          expect.objectContaining({ playerId: "devPlayer", damage: 0 }),
+          expect.objectContaining({ playerId: "playerTwo", damage: 0 }),
+        ]),
+        ringsUsed: [],
+        spellsCast: [],
+        monstersSummoned: [],
+        monstersUsed: [],
+      },
     });
     const persisted = await prisma.battleRecord.findUniqueOrThrow({ where: { id: started.id } });
     expect(persisted).toMatchObject({
@@ -1377,13 +2239,100 @@ describe("Nuxt Game App APIs", () => {
       winnerPlayerId: null,
     });
     expect(persisted.finalStateChecksum).toMatch(/^fnv1a32:/);
+    expect(await prisma.rewardGrant.count()).toBe(1);
 
     const history = (await battleHistoryGetHandler({})) as BattleHistoryApiResponse;
     expect(history.records[0]).toMatchObject({
       id: started.id,
       outcome: "loss",
       replayAvailable: true,
+      reward: {
+        status: "unclaimed",
+        credits: 30,
+        heroExperience: 25,
+        items: [{ inventoryItemId: ringItemId, experience: 8 }],
+      },
     });
+  });
+
+  it("settles live participation and ring-use XP exactly once when claimed", async () => {
+    const { ringItemId, gemItemId, spellItemId } = await createAndActivateEnchantedRingLoadout();
+    let battle = (await battleStartHandler({
+      body: { requestId: "live-item-experience" },
+    })) as LiveBattleApiResponse;
+
+    for (let turnIndex = 0; turnIndex < 2; turnIndex += 1) {
+      const turn = (await battleActionHandler({
+        context: { params: { battleId: battle.id } },
+        body: { expectedActionCount: battle.actionCount, action: { type: "endTurn" } },
+      })) as LiveBattleActionApiResponse;
+      battle = turn.battle;
+    }
+    expect(battle.viewer.energy.current).toBe(3);
+
+    const ringUse = (await battleActionHandler({
+      context: { params: { battleId: battle.id } },
+      body: {
+        expectedActionCount: battle.actionCount,
+        action: {
+          type: "useRing",
+          ringInstanceId: ringItemId,
+          targetId: battle.opponent.id + ".hero",
+        },
+      },
+    })) as LiveBattleActionApiResponse;
+    battle = ringUse.battle;
+
+    const finished = (await battleActionHandler({
+      context: { params: { battleId: battle.id } },
+      body: { expectedActionCount: battle.actionCount, action: { type: "concede" } },
+    })) as LiveBattleActionApiResponse;
+    const reward = finished.battle.reward;
+
+    expect(reward).toMatchObject({
+      status: "unclaimed",
+      credits: 30,
+      heroExperience: 25,
+      items: expect.arrayContaining([
+        expect.objectContaining({ inventoryItemId: ringItemId, experience: 28 }),
+        expect.objectContaining({ inventoryItemId: gemItemId, experience: 28 }),
+        expect.objectContaining({ inventoryItemId: spellItemId, experience: 28 }),
+      ]),
+    });
+    expect(finished.battle.summary).toMatchObject({
+      actionCount: finished.battle.actionCount,
+      players: expect.arrayContaining([
+        expect.objectContaining({ playerId: "devPlayer", damage: 10 }),
+        expect.objectContaining({ playerId: "playerTwo", damage: 0 }),
+      ]),
+      ringsUsed: [expect.objectContaining({ id: ringItemId, label: "Ember Loop", count: 1 })],
+      spellsCast: [expect.objectContaining({ id: "firebolt", label: "Firebolt", count: 1 })],
+      monstersSummoned: [],
+      monstersUsed: [],
+    });
+    if (!reward) {
+      throw new Error("Expected a live battle reward.");
+    }
+
+    await battleRewardClaimHandler({ body: { rewardGrantId: reward.id } });
+    await battleRewardClaimHandler({ body: { rewardGrantId: reward.id } });
+
+    const [player, rewardedItems, claimedReward] = await Promise.all([
+      prisma.player.findUniqueOrThrow({ where: { id: "devPlayer" } }),
+      prisma.inventoryItem.findMany({
+        where: { id: { in: [ringItemId, gemItemId, spellItemId] } },
+      }),
+      prisma.rewardGrant.findUniqueOrThrow({ where: { id: reward.id } }),
+    ]);
+    expect(player).toMatchObject({ credits: 1_000_030, experience: 25 });
+    expect(rewardedItems).toHaveLength(3);
+    expect(rewardedItems.every((item) => item.experience === 28)).toBe(true);
+    expect(claimedReward.status).toBe("claimed");
+
+    const reloaded = (await battleLiveGetHandler({
+      context: { params: { battleId: battle.id } },
+    })) as LiveBattleApiResponse;
+    expect(reloaded.reward).toMatchObject({ status: "claimed", items: reward.items });
   });
 
   it("makes live battle creation idempotent and protects player ownership", async () => {
@@ -1571,6 +2520,35 @@ function installNuxtHandlerGlobals(): void {
     });
 }
 
+function createH3TestEvent(
+  body?: unknown,
+  requestBody?: unknown,
+  requestUrl = "/",
+): {
+  event: H3Event;
+  response: ServerResponse;
+} {
+  const request = new IncomingMessage(new Socket());
+  request.url = requestUrl;
+  if (typeof body === "string") {
+    request.headers.cookie = body;
+  }
+  const response = new ServerResponse(request);
+  const event = createEvent(request, response);
+  Object.assign(event, { body: requestBody });
+  return { event, response };
+}
+
+function responseCookie(response: ServerResponse, name: string): string {
+  const header = response.getHeader("set-cookie");
+  const values = Array.isArray(header) ? header : header ? [String(header)] : [];
+  const cookie = values.find((value) => value.startsWith(`${name}=`));
+  if (!cookie) {
+    throw new Error(`Expected response cookie "${name}".`);
+  }
+  return cookie.split(";", 1)[0] ?? "";
+}
+
 function pushPrismaSchemaToTestDatabase(): void {
   const options = {
     cwd: projectRoot,
@@ -1637,6 +2615,144 @@ async function createAndActivateRingLoadout(): Promise<{ ringItemId: string; loa
   await loadoutsPostHandler({ body: { action: "activate", loadoutId } });
 
   return { ringItemId: crafted.crafted.id, loadoutId };
+}
+
+async function createAndActivateCampaignTestLoadout(): Promise<string> {
+  const ringItemId = "devPlayer.ring.trainingFlameBand.campaign";
+  await prisma.inventoryItem.create({
+    data: {
+      id: ringItemId,
+      playerId: "devPlayer",
+      type: "ring",
+      definitionId: "trainingFlameBand",
+      contentVersion: "prototype-6",
+      experience: 250_000,
+      quality: 100,
+      socketCount: 1,
+      socketedGemInstanceIds: "[]",
+    },
+  });
+  const loadout = await prisma.loadout.create({
+    data: {
+      playerId: "devPlayer",
+      name: "Campaign Test",
+      rings: { create: { ringItemId, slotIndex: 0 } },
+    },
+  });
+  await prisma.player.update({
+    where: { id: "devPlayer" },
+    data: { activeLoadoutId: loadout.id },
+  });
+  return ringItemId;
+}
+
+async function finishCampaignBattle(
+  initialBattle: LiveBattleApiResponse,
+  ringItemId: string,
+): Promise<LiveBattleApiResponse> {
+  let battle = initialBattle;
+
+  for (let step = 0; step < 20 && battle.status !== "finished"; step += 1) {
+    const ring = battle.viewer.rings?.find((candidate) => candidate.id === ringItemId);
+    if (!ring) {
+      throw new Error("Expected the campaign test ring in the viewer loadout.");
+    }
+    const canUseRing =
+      ring.currentCooldown === 0 && ring.energyCost <= battle.viewer.energy.current;
+    const response = (await battleActionHandler({
+      context: { params: { battleId: battle.id } },
+      body: {
+        expectedActionCount: battle.actionCount,
+        action: canUseRing
+          ? {
+              type: "useRing",
+              ringInstanceId: ringItemId,
+              targetId: battle.opponent.id + ".hero",
+            }
+          : { type: "endTurn" },
+      },
+    })) as LiveBattleActionApiResponse;
+    battle = response.battle;
+  }
+
+  if (battle.status !== "finished") {
+    throw new Error("Campaign test battle did not finish within 20 viewer actions.");
+  }
+  return battle;
+}
+
+async function createAndActivateEnchantedRingLoadout(): Promise<{
+  ringItemId: string;
+  gemItemId: string;
+  spellItemId: string;
+  loadoutId: string;
+}> {
+  const ringItemId = "devPlayer.ring.emberLoop.liveXp";
+  const gemItemId = "devPlayer.gem.rubyShard.liveXp";
+  const spellItemId = "devPlayer.spell.firebolt.liveXp";
+
+  await prisma.inventoryItem.createMany({
+    data: [
+      {
+        id: ringItemId,
+        playerId: "devPlayer",
+        type: "ring",
+        definitionId: "emberLoop",
+        contentVersion: "prototype-5",
+        experience: 0,
+        quality: 0,
+        socketCount: 1,
+        socketedGemInstanceIds: "[]",
+      },
+      {
+        id: gemItemId,
+        playerId: "devPlayer",
+        type: "gem",
+        definitionId: "rubyShard",
+        contentVersion: "prototype-5",
+        experience: 0,
+        quality: 0,
+        socketedGemInstanceIds: "[]",
+      },
+      {
+        id: spellItemId,
+        playerId: "devPlayer",
+        type: "spell",
+        definitionId: "firebolt",
+        contentVersion: "prototype-5",
+        experience: 0,
+        quality: 0,
+        socketedGemInstanceIds: "[]",
+      },
+    ],
+  });
+  await prisma.ringSocket.create({
+    data: {
+      playerId: "devPlayer",
+      ringItemId,
+      socketIndex: 0,
+      gemItemId,
+    },
+  });
+  await prisma.gemEnchantment.create({
+    data: {
+      playerId: "devPlayer",
+      gemItemId,
+      targetItemId: spellItemId,
+      targetType: "spell",
+    },
+  });
+  await equipmentPostHandler({ body: { action: "equip", ringItemId } });
+  const saved = (await loadoutsPostHandler({
+    body: { action: "saveFromEquipped", name: "Live XP Test" },
+  })) as LoadoutsApiResponse;
+  const loadoutId = saved.loadouts[0]?.id;
+  if (!loadoutId) {
+    throw new Error("Expected the live XP test loadout to be created.");
+  }
+  await loadoutsPostHandler({ body: { action: "activate", loadoutId } });
+
+  return { ringItemId, gemItemId, spellItemId, loadoutId };
 }
 
 async function expectLegacySocketedGemIds(

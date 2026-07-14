@@ -22,3 +22,37 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
+
+  postgresql:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: battleness
+          POSTGRES_USER: battleness
+          POSTGRES_PASSWORD: battleness
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U battleness -d battleness"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      BATTLENESS_DATABASE_URL: postgresql://battleness:battleness@localhost:5432/battleness?schema=public
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @battleness/web prisma:postgres:check
+      - run: pnpm --filter @battleness/web prisma:postgres:validate
+      - run: pnpm --filter @battleness/web prisma:postgres:generate
+      - run: pnpm --filter @battleness/web prisma:postgres:migrate:deploy
+      - run: pnpm --filter @battleness/web prisma:postgres:migrate:status
+      - run: pnpm --filter @battleness/web prisma:postgres:drift:check
+      - run: pnpm --filter @battleness/web prisma:postgres:smoke

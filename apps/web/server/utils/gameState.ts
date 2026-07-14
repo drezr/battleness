@@ -1,20 +1,28 @@
+import { createHash, randomBytes } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { Prisma, PrismaClient, type InventoryItem } from "@prisma/client";
 import {
   canCraftRecipe,
   contentVersion,
   craftRecipe,
+  createCampaignOpponentBattlePlayer,
   createBattlePlayerFromInventory,
   createBattleSetupFromFixture,
   createMaterialStock,
   definitions,
+  experienceForLevel,
+  itemBonusPercent,
   levelFromExperience,
   locales,
+  MAX_LEVEL,
   QUALITY_IMPROVEMENT_STEP,
   qualityImprovementCost,
   resolveItemStat,
+  resolveHeroMaxHealth,
   socketImprovementCost,
   type CraftableItemType,
+  type CampaignOpponent,
+  type CampaignReward,
   type CraftedItemInstance,
   type GemDefinition,
   type ImprovementRarity,
@@ -41,6 +49,8 @@ import {
   type TargetId,
 } from "@battleness/engine";
 import { assertValidPlayerGameState } from "./gameStateValidation";
+import { publishGameRealtimeEvent } from "./gameRealtime";
+import { currentPlayerId, developmentPlayerId } from "./playerContext";
 
 type CraftableDefinition = {
   id: string;
@@ -52,9 +62,11 @@ type CraftableDefinition = {
 type MaterialStockRow = {
   materialId: string;
   quantity: number;
+  contentVersion: string;
 };
 
 type PrismaContext = PrismaClient | Prisma.TransactionClient;
+const privateTurnDurationMs = 5 * 60 * 1_000;
 
 export type LiveBattleActionCommand =
   | { type: "chooseElement"; element: ElementType }
@@ -137,6 +149,10 @@ type LoadoutRow = {
   rings: readonly LoadoutRingRow[];
 };
 
+type ProfileSettingsPlayer = Prisma.PlayerGetPayload<{
+  include: { preferences: true };
+}>;
+
 type LiveBattlePlayerSource = {
   id: string;
   username: string;
@@ -149,13 +165,41 @@ type LiveBattlePlayerSource = {
   gemEnchantments: readonly GemEnchantmentRow[];
 };
 
+type RewardGrantViewSource = {
+  id: string;
+  status: string;
+  credits: number;
+  heroExperience: number;
+  contentVersion: string | null;
+  claimedAt: Date | null;
+  materials: readonly { materialId: string; quantity: number }[];
+  items: readonly {
+    inventoryItemId: string;
+    experience: number;
+    inventoryItem: { definitionId: string; type: string };
+  }[];
+};
+
 type BattleOutcome = "win" | "draw" | "loss";
 
-const DEV_PLAYER_ID = "devPlayer";
 const developmentStartingCredits = 1_000_000;
 const maxEquippedRings = 10;
 const maxLoadoutRings = 10;
 const maxRingSockets = 3;
+const participationItemExperience = 8;
+const usedItemExperience = 20;
+const legacyContentVersion = "legacy-unversioned";
+const contentManifest = {
+  campaignOpponents: definitions.campaignOpponents.length,
+  gems: definitions.gems.length,
+  materials: definitions.materials.length,
+  monsters: definitions.monsters.length,
+  recipes: definitions.recipes.length,
+  rings: definitions.rings.length,
+  spells: definitions.spells.length,
+} as const;
+const contentManifestJson = JSON.stringify(contentManifest);
+const contentChecksum = createHash("sha256").update(JSON.stringify(definitions)).digest("hex");
 const defaultDatabaseUrl = `file:${fileURLToPath(
   new URL("../../data/battleness.prisma.sqlite", import.meta.url),
 ).replace(/\\/g, "/")}`;
@@ -165,6 +209,19 @@ const globalForPrisma = globalThis as typeof globalThis & {
 };
 
 export type WebPlayerState = Awaited<ReturnType<typeof getPlayerState>>;
+
+export type ProfileSettingsInput = {
+  displayName: string;
+  profileVisibility: string;
+  locale: string;
+  theme: string;
+  reducedMotion: boolean;
+  interfaceDensity: string;
+  muted: boolean;
+  masterVolume: number;
+  musicVolume: number;
+  effectsVolume: number;
+};
 
 const materialBuyPrices: Record<string, number> = {
   common: 10,
@@ -177,10 +234,10 @@ export async function getPlayerState() {
   const prisma = usePrisma();
 
   await seedDevelopmentPlayer(prisma);
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
 
   const player = await prisma.player.findUniqueOrThrow({
-    where: { id: DEV_PLAYER_ID },
+    where: { id: currentPlayerId() },
     include: {
       inventoryItems: { orderBy: { createdAt: "desc" } },
       materialStock: true,
@@ -189,10 +246,18 @@ export async function getPlayerState() {
   const stock = materialStockFromRows(player.materialStock);
 
   return {
+    content: {
+      version: contentVersion,
+      checksum: contentChecksum,
+    },
     player: {
       id: player.id,
       username: player.username,
+      displayName: player.displayName ?? player.username,
       experience: player.experience,
+      level: levelFromExperience(player.experience),
+      maxHealth: resolveHeroMaxHealth(levelFromExperience(player.experience)),
+      progression: toExperienceProgression(player.experience),
       credits: player.credits,
     },
     materials: definitions.materials.map((material) => ({
@@ -205,20 +270,78 @@ export async function getPlayerState() {
       chemicalSymbol: material.chemicalSymbol ?? null,
       atomicNumber: material.atomicNumber ?? null,
       quantity: stock[material.id] ?? 0,
+      contentVersion:
+        player.materialStock.find((row) => row.materialId === material.id)?.contentVersion ??
+        legacyContentVersion,
     })),
     inventory: player.inventoryItems.map(toInventoryView),
     recipes: definitions.recipes.map((recipe) => toRecipeView(recipe, stock)),
   };
 }
 
+export async function getProfileSettings() {
+  const prisma = usePrisma();
+
+  await seedDevelopmentPlayer(prisma);
+  const player = await prisma.player.findUniqueOrThrow({
+    where: { id: currentPlayerId() },
+    include: { preferences: true },
+  });
+
+  return toProfileSettingsView(player);
+}
+
+export async function updateProfileSettings(input: ProfileSettingsInput) {
+  const settings = normalizeProfileSettingsInput(input);
+  const prisma = usePrisma();
+
+  await seedDevelopmentPlayer(prisma);
+  await prisma.$transaction(async (transaction) => {
+    await transaction.player.update({
+      where: { id: currentPlayerId() },
+      data: {
+        displayName: settings.displayName,
+        profileVisibility: settings.profileVisibility,
+        lastActiveAt: new Date(),
+      },
+    });
+    await transaction.playerPreferences.upsert({
+      where: { playerId: currentPlayerId() },
+      create: {
+        playerId: currentPlayerId(),
+        locale: settings.locale,
+        theme: settings.theme,
+        reducedMotion: settings.reducedMotion,
+        interfaceDensity: settings.interfaceDensity,
+        muted: settings.muted,
+        masterVolume: settings.masterVolume,
+        musicVolume: settings.musicVolume,
+        effectsVolume: settings.effectsVolume,
+      },
+      update: {
+        locale: settings.locale,
+        theme: settings.theme,
+        reducedMotion: settings.reducedMotion,
+        interfaceDensity: settings.interfaceDensity,
+        muted: settings.muted,
+        masterVolume: settings.masterVolume,
+        musicVolume: settings.musicVolume,
+        effectsVolume: settings.effectsVolume,
+      },
+    });
+  });
+
+  return getProfileSettings();
+}
+
 export async function getGameMarketState() {
   const prisma = usePrisma();
 
   await seedDevelopmentPlayer(prisma);
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
 
   const player = await prisma.player.findUniqueOrThrow({
-    where: { id: DEV_PLAYER_ID },
+    where: { id: currentPlayerId() },
     include: {
       materialStock: true,
       marketTransactions: {
@@ -230,6 +353,10 @@ export async function getGameMarketState() {
   const stock = materialStockFromRows(player.materialStock);
 
   return {
+    content: {
+      version: contentVersion,
+      checksum: contentChecksum,
+    },
     player: {
       id: player.id,
       username: player.username,
@@ -245,6 +372,9 @@ export async function getGameMarketState() {
       chemicalSymbol: material.chemicalSymbol ?? null,
       atomicNumber: material.atomicNumber ?? null,
       quantity: stock[material.id] ?? 0,
+      contentVersion:
+        player.materialStock.find((row) => row.materialId === material.id)?.contentVersion ??
+        legacyContentVersion,
       buyPrice: materialBuyPrice(material),
       sellPrice: materialSellPrice(material),
     })),
@@ -261,6 +391,7 @@ export async function getGameMarketState() {
         quantity: transaction.quantity,
         unitPrice: transaction.unitPrice,
         creditsDelta: transaction.creditsDelta,
+        contentVersion: transaction.contentVersion,
         createdAt: transaction.createdAt.toISOString(),
       };
     }),
@@ -296,7 +427,7 @@ export async function buyGameMarketMaterial(
 
     const payment = await transaction.player.updateMany({
       where: {
-        id: DEV_PLAYER_ID,
+        id: currentPlayerId(),
         credits: { gte: totalCost },
       },
       data: { credits: { decrement: totalCost } },
@@ -309,33 +440,35 @@ export async function buyGameMarketMaterial(
     await transaction.materialStock.upsert({
       where: {
         playerId_materialId: {
-          playerId: DEV_PLAYER_ID,
+          playerId: currentPlayerId(),
           materialId,
         },
       },
       create: {
-        playerId: DEV_PLAYER_ID,
+        playerId: currentPlayerId(),
         materialId,
         quantity,
+        contentVersion,
       },
-      update: { quantity: { increment: quantity } },
+      update: { quantity: { increment: quantity }, contentVersion },
     });
 
     await transaction.marketTransaction.create({
       data: {
         requestId,
-        playerId: DEV_PLAYER_ID,
+        playerId: currentPlayerId(),
         action: "buy",
         resourceType: "material",
         resourceId: materialId,
         quantity,
         unitPrice,
         creditsDelta: -totalCost,
+        contentVersion,
       },
     });
   });
 
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
   return getGameMarketState();
 }
 
@@ -368,11 +501,11 @@ export async function sellGameMarketMaterial(
 
     const stockUpdate = await transaction.materialStock.updateMany({
       where: {
-        playerId: DEV_PLAYER_ID,
+        playerId: currentPlayerId(),
         materialId,
         quantity: { gte: quantity },
       },
-      data: { quantity: { decrement: quantity } },
+      data: { quantity: { decrement: quantity }, contentVersion },
     });
 
     if (stockUpdate.count !== 1) {
@@ -380,24 +513,25 @@ export async function sellGameMarketMaterial(
     }
 
     await transaction.player.update({
-      where: { id: DEV_PLAYER_ID },
+      where: { id: currentPlayerId() },
       data: { credits: { increment: totalCredits } },
     });
     await transaction.marketTransaction.create({
       data: {
         requestId,
-        playerId: DEV_PLAYER_ID,
+        playerId: currentPlayerId(),
         action: "sell",
         resourceType: "material",
         resourceId: materialId,
         quantity,
         unitPrice,
         creditsDelta: totalCredits,
+        contentVersion,
       },
     });
   });
 
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
   return getGameMarketState();
 }
 
@@ -405,20 +539,20 @@ export async function getBattleHistoryState() {
   const prisma = usePrisma();
 
   await seedDevelopmentPlayer(prisma);
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
 
   const [player, records] = await Promise.all([
-    prisma.player.findUniqueOrThrow({ where: { id: DEV_PLAYER_ID } }),
+    prisma.player.findUniqueOrThrow({ where: { id: currentPlayerId() } }),
     prisma.battleRecord.findMany({
       where: {
         status: "finished",
-        OR: [{ playerOneId: DEV_PLAYER_ID }, { playerTwoId: DEV_PLAYER_ID }],
+        OR: [{ playerOneId: currentPlayerId() }, { playerTwoId: currentPlayerId() }],
       },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       take: 50,
       include: {
         rewardGrants: {
-          where: { playerId: DEV_PLAYER_ID },
+          where: { playerId: currentPlayerId() },
           include: {
             materials: true,
             items: {
@@ -440,12 +574,16 @@ export async function getBattleHistoryState() {
     },
     records: records.map((record) => {
       const reward = record.rewardGrants[0] ?? null;
+      const state = rebuildBattleState(record.setupJson, record.actionLogJson);
 
       return {
         id: record.id,
         mode: record.mode,
         status: record.status,
-        outcome: record.result as BattleOutcome,
+        outcome:
+          record.mode === "private_pvp"
+            ? privateBattleOutcome(record, currentPlayerId())
+            : (record.result as BattleOutcome),
         seed: record.seed,
         rulesVersion: record.rulesVersion,
         contentVersion: record.contentVersion,
@@ -454,40 +592,312 @@ export async function getBattleHistoryState() {
         finalStateChecksum: record.finalStateChecksum,
         replayAvailable: Boolean(record.finalStateChecksum),
         createdAt: record.createdAt.toISOString(),
-        reward: reward
-          ? {
-              id: reward.id,
-              status: reward.status as "unclaimed" | "claimed",
-              credits: reward.credits,
-              heroExperience: reward.heroExperience,
-              claimedAt: reward.claimedAt?.toISOString() ?? null,
-              materials: reward.materials.map((material) => {
-                const definition = getMaterialDefinition(material.materialId);
-                return {
-                  materialId: material.materialId,
-                  label: label(definition.nameKey),
-                  quantity: material.quantity,
-                };
-              }),
-              items: reward.items.map((itemReward) => {
-                const item = itemReward.inventoryItem;
-                const definition = getCraftableDefinition(
-                  item.type as CraftableItemType,
-                  item.definitionId,
-                );
-                return {
-                  inventoryItemId: item.id,
-                  definitionId: item.definitionId,
-                  type: item.type,
-                  label: label(definition.nameKey),
-                  experience: itemReward.experience,
-                };
-              }),
-            }
-          : null,
+        reward: toBattleRewardView(reward),
+        summary: battleResultSummary(state),
       };
     }),
   };
+}
+
+export async function getPrivateMatchState() {
+  const prisma = usePrisma();
+  await seedDevelopmentPlayer(prisma);
+  await expirePrivateMatches(prisma);
+  const activeMatch = await prisma.privateMatch.findFirst({
+    where: {
+      status: "active",
+      battleRecordId: { not: null },
+      participants: { some: { playerId: currentPlayerId() } },
+    },
+    select: { battleRecordId: true },
+  });
+  if (activeMatch?.battleRecordId) {
+    await settleExpiredPrivateBattle(prisma, activeMatch.battleRecordId);
+  }
+
+  const [match, loadouts] = await Promise.all([
+    prisma.privateMatch.findFirst({
+      where: { participants: { some: { playerId: currentPlayerId() } } },
+      orderBy: { updatedAt: "desc" },
+      include: {
+        participants: {
+          orderBy: { slot: "asc" },
+          include: { player: true, loadout: { include: { rings: true } } },
+        },
+      },
+    }),
+    prisma.loadout.findMany({
+      where: { playerId: currentPlayerId() },
+      orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
+      include: { rings: true },
+    }),
+  ]);
+
+  return {
+    playerId: currentPlayerId(),
+    match: match
+      ? {
+          id: match.id,
+          code: match.code,
+          status: match.status,
+          battleId: match.battleRecordId,
+          turnPlayerId: match.turnPlayerId,
+          turnDeadlineAt: match.turnDeadlineAt?.toISOString() ?? null,
+          expiresAt: match.expiresAt.toISOString(),
+          participants: [...match.participants]
+            .sort((left, right) => (left.slot === "host" ? -1 : right.slot === "host" ? 1 : 0))
+            .map((participant) => ({
+              playerId: participant.playerId,
+              username: participant.player.username,
+              slot: participant.slot as "host" | "guest",
+              ready: participant.ready,
+              loadoutId: participant.loadoutId,
+              loadoutName: participant.loadout?.name ?? null,
+              ringCount: participant.loadout?.rings.length ?? 0,
+            })),
+        }
+      : null,
+    loadouts: loadouts.map((loadout) => ({
+      id: loadout.id,
+      name: loadout.name,
+      ringCount: loadout.rings.length,
+    })),
+  };
+}
+
+export async function createPrivateMatch() {
+  const prisma = usePrisma();
+  await seedDevelopmentPlayer(prisma);
+  await expirePrivateMatches(prisma);
+
+  const existing = await prisma.privateMatch.findFirst({
+    where: {
+      status: { in: ["waiting", "starting", "active"] },
+      participants: { some: { playerId: currentPlayerId() } },
+    },
+  });
+  if (existing) {
+    throw new Error("Leave the current private match before creating another one.");
+  }
+
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const code = privateMatchCode();
+    try {
+      const match = await prisma.privateMatch.create({
+        data: {
+          code,
+          expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1_000),
+          participants: {
+            create: { playerId: currentPlayerId(), slot: "host" },
+          },
+        },
+      });
+      const state = await getPrivateMatchState();
+      publishGameRealtimeEvent([currentPlayerId()], {
+        type: "privateMatchChanged",
+        matchId: match.id,
+        reason: "created",
+      });
+      return state;
+    } catch (error) {
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") {
+        throw error;
+      }
+    }
+  }
+  throw new Error("Could not allocate a unique private match code.");
+}
+
+export async function joinPrivateMatch(rawCode: string) {
+  assertNonEmptyId(rawCode, "code");
+  const code = rawCode.trim().toUpperCase();
+  const prisma = usePrisma();
+  await seedDevelopmentPlayer(prisma);
+  await expirePrivateMatches(prisma);
+
+  const matchId = await prisma.$transaction(async (transaction) => {
+    const existing = await transaction.privateMatch.findFirst({
+      where: {
+        status: { in: ["waiting", "starting", "active"] },
+        participants: { some: { playerId: currentPlayerId() } },
+      },
+    });
+    if (existing) {
+      throw new Error("Leave the current private match before joining another one.");
+    }
+
+    const match = await transaction.privateMatch.findUnique({
+      where: { code },
+      include: { participants: true },
+    });
+    if (!match || match.status !== "waiting" || match.expiresAt.getTime() <= Date.now()) {
+      throw new Error("This private match code is invalid or expired.");
+    }
+    if (match.participants.length >= 2) {
+      throw new Error("This private match is already full.");
+    }
+    await transaction.privateMatchParticipant.create({
+      data: { matchId: match.id, playerId: currentPlayerId(), slot: "guest" },
+    });
+    return match.id;
+  });
+
+  const state = await getPrivateMatchState();
+  publishGameRealtimeEvent(
+    state.match?.participants.map((participant) => participant.playerId) ?? [currentPlayerId()],
+    { type: "privateMatchChanged", matchId, reason: "joined" },
+  );
+  return state;
+}
+
+export async function setPrivateMatchReady(loadoutId: string, ready: boolean) {
+  assertNonEmptyId(loadoutId, "loadoutId");
+  const prisma = usePrisma();
+  await seedDevelopmentPlayer(prisma);
+
+  const matchId = await prisma.$transaction(async (transaction) => {
+    const loadout = await transaction.loadout.findFirst({
+      where: { id: loadoutId, playerId: currentPlayerId() },
+      include: { rings: true },
+    });
+    if (!loadout || loadout.rings.length === 0) {
+      throw new Error("Select a loadout containing at least one ring.");
+    }
+
+    const participant = await transaction.privateMatchParticipant.findFirst({
+      where: {
+        playerId: currentPlayerId(),
+        match: { status: "waiting", expiresAt: { gt: new Date() } },
+      },
+    });
+    if (!participant) {
+      throw new Error("No waiting private match is available for this player.");
+    }
+    await transaction.privateMatchParticipant.update({
+      where: {
+        matchId_playerId: { matchId: participant.matchId, playerId: currentPlayerId() },
+      },
+      data: { loadoutId, ready },
+    });
+
+    const match = await transaction.privateMatch.findUniqueOrThrow({
+      where: { id: participant.matchId },
+      include: {
+        participants: {
+          orderBy: { slot: "asc" },
+          include: {
+            loadout: { include: { rings: { orderBy: { slotIndex: "asc" } } } },
+            player: {
+              include: {
+                inventoryItems: true,
+                ringSockets: { orderBy: [{ ringItemId: "asc" }, { socketIndex: "asc" }] },
+                gemEnchantments: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (match.participants.length !== 2 || !match.participants.every((entry) => entry.ready)) {
+      return match.id;
+    }
+    if (match.participants.some((entry) => !entry.loadout)) {
+      throw new Error("Both players must select a valid loadout.");
+    }
+
+    const claimed = await transaction.privateMatch.updateMany({
+      where: { id: match.id, status: "waiting", battleRecordId: null },
+      data: { status: "starting" },
+    });
+    if (claimed.count !== 1) {
+      return match.id;
+    }
+
+    const host = match.participants.find((entry) => entry.slot === "host");
+    const guest = match.participants.find((entry) => entry.slot === "guest");
+    if (!host || !guest) {
+      throw new Error("Private match participants are incomplete.");
+    }
+    const setup = livePrivateBattleSetup(match.id, host, guest);
+    const initialState = createBattleState(setup);
+    const battle = await transaction.battleRecord.create({
+      data: {
+        mode: "private_pvp",
+        modeReferenceId: match.id,
+        status: initialState.status,
+        result: "pending",
+        playerOneId: host.playerId,
+        playerTwoId: guest.playerId,
+        seed: setup.seed,
+        rulesVersion,
+        contentVersion,
+        setupJson: JSON.stringify(setup),
+        actionLogJson: JSON.stringify(initialState.actionHistory),
+        turnCount: Math.max(...initialState.players.map((player) => player.energy.turnCount)),
+      },
+    });
+    await transaction.privateMatch.update({
+      where: { id: match.id },
+      data: {
+        status: "active",
+        battleRecordId: battle.id,
+        turnPlayerId: initialState.activePlayerId,
+        turnDeadlineAt: privateTurnDeadline(initialState.activePlayerId),
+      },
+    });
+    return match.id;
+  });
+
+  const state = await getPrivateMatchState();
+  publishGameRealtimeEvent(
+    state.match?.participants.map((participant) => participant.playerId) ?? [currentPlayerId()],
+    {
+      type: "privateMatchChanged",
+      matchId,
+      reason: state.match?.status === "active" ? "started" : "ready",
+    },
+  );
+  return state;
+}
+
+export async function leavePrivateMatch() {
+  const prisma = usePrisma();
+  const participant = await prisma.privateMatchParticipant.findFirst({
+    where: {
+      playerId: currentPlayerId(),
+      match: { status: "waiting" },
+    },
+    include: { match: { include: { participants: true } } },
+  });
+  if (!participant) {
+    throw new Error("No waiting private match is available to leave.");
+  }
+
+  if (participant.slot === "host") {
+    await prisma.privateMatch.update({
+      where: { id: participant.matchId },
+      data: { status: "cancelled" },
+    });
+  } else {
+    await prisma.$transaction([
+      prisma.privateMatchParticipant.delete({
+        where: {
+          matchId_playerId: { matchId: participant.matchId, playerId: currentPlayerId() },
+        },
+      }),
+      prisma.privateMatchParticipant.updateMany({
+        where: { matchId: participant.matchId, slot: "host" },
+        data: { ready: false },
+      }),
+    ]);
+  }
+  const state = await getPrivateMatchState();
+  publishGameRealtimeEvent(
+    participant.match.participants.map((entry) => entry.playerId),
+    { type: "privateMatchChanged", matchId: participant.matchId, reason: "left" },
+  );
+  return state;
 }
 
 export async function createLiveTrainingBattle(requestId: string) {
@@ -500,14 +910,14 @@ export async function createLiveTrainingBattle(requestId: string) {
     const existing = await transaction.battleRecord.findUnique({ where: { id: requestId } });
 
     if (existing) {
-      if (existing.mode !== "training" || existing.playerOneId !== DEV_PLAYER_ID) {
+      if (existing.mode !== "training" || existing.playerOneId !== currentPlayerId()) {
         throw new Error("requestId was already used for a different battle.");
       }
       return;
     }
 
     const player = await transaction.player.findUniqueOrThrow({
-      where: { id: DEV_PLAYER_ID },
+      where: { id: currentPlayerId() },
       include: {
         activeLoadout: {
           include: { rings: { orderBy: { slotIndex: "asc" } } },
@@ -536,7 +946,73 @@ export async function createLiveTrainingBattle(requestId: string) {
         mode: "training",
         status: state.status,
         result: "pending",
-        playerOneId: DEV_PLAYER_ID,
+        playerOneId: currentPlayerId(),
+        seed: setup.seed,
+        rulesVersion,
+        contentVersion,
+        setupJson: JSON.stringify(setup),
+        actionLogJson: JSON.stringify(state.actionHistory),
+        turnCount: Math.max(...state.players.map((battlePlayer) => battlePlayer.energy.turnCount)),
+      },
+    });
+  });
+
+  return getLiveBattleState(requestId);
+}
+
+export async function createLiveCampaignBattle(opponentId: string, requestId: string) {
+  assertNonEmptyId(opponentId, "opponentId");
+  assertMarketRequestId(requestId);
+  const opponent = getCampaignOpponent(opponentId);
+  const prisma = usePrisma();
+
+  await seedDevelopmentPlayer(prisma);
+
+  await prisma.$transaction(async (transaction) => {
+    const existing = await transaction.battleRecord.findUnique({ where: { id: requestId } });
+
+    if (existing) {
+      if (
+        existing.mode !== "campaign" ||
+        existing.modeReferenceId !== opponent.id ||
+        existing.playerOneId !== currentPlayerId()
+      ) {
+        throw new Error("requestId was already used for a different battle.");
+      }
+      return;
+    }
+
+    const player = await transaction.player.findUniqueOrThrow({
+      where: { id: currentPlayerId() },
+      include: {
+        activeLoadout: {
+          include: { rings: { orderBy: { slotIndex: "asc" } } },
+        },
+        inventoryItems: true,
+        ringSockets: { orderBy: [{ ringItemId: "asc" }, { socketIndex: "asc" }] },
+        gemEnchantments: true,
+        campaignProgress: true,
+      },
+    });
+
+    if (!player.activeLoadout || player.activeLoadout.rings.length === 0) {
+      throw new Error("An active loadout with at least one ring is required.");
+    }
+
+    assertCampaignOpponentAvailable(opponent, player.campaignProgress);
+    const setup = liveCampaignBattleSetup({ requestId, player, opponent });
+    const initialState = createBattleState(setup);
+    const advanced = advanceCampaignOpponent(initialState, opponent);
+    const state = advanced.state;
+
+    await transaction.battleRecord.create({
+      data: {
+        id: requestId,
+        mode: "campaign",
+        modeReferenceId: opponent.id,
+        status: state.status,
+        result: "pending",
+        playerOneId: currentPlayerId(),
         seed: setup.seed,
         rulesVersion,
         contentVersion,
@@ -554,11 +1030,22 @@ export async function getLiveBattleState(battleId: string) {
   const prisma = usePrisma();
 
   await seedDevelopmentPlayer(prisma);
+  await settleExpiredPrivateBattle(prisma, battleId);
 
   const record = await prisma.battleRecord.findFirst({
     where: {
       id: battleId,
-      OR: [{ playerOneId: DEV_PLAYER_ID }, { playerTwoId: DEV_PLAYER_ID }],
+      OR: [{ playerOneId: currentPlayerId() }, { playerTwoId: currentPlayerId() }],
+    },
+    include: {
+      rewardGrants: {
+        where: { playerId: currentPlayerId() },
+        include: {
+          materials: true,
+          items: { include: { inventoryItem: true } },
+        },
+      },
+      privateMatch: true,
     },
   });
 
@@ -567,8 +1054,8 @@ export async function getLiveBattleState(battleId: string) {
   }
 
   const state = rebuildBattleState(record.setupJson, record.actionLogJson);
-  const viewer = state.players.find((player) => player.id === DEV_PLAYER_ID);
-  const opponent = state.players.find((player) => player.id !== DEV_PLAYER_ID);
+  const viewer = state.players.find((player) => player.id === currentPlayerId());
+  const opponent = state.players.find((player) => player.id !== currentPlayerId());
 
   if (!viewer || !opponent) {
     throw new Error(`Battle "${battleId}" has invalid participants.`);
@@ -584,9 +1071,13 @@ export async function getLiveBattleState(battleId: string) {
     contentVersion: record.contentVersion,
     actionCount: state.actionHistory.length,
     turnCount: Math.max(...state.players.map((player) => player.energy.turnCount)),
+    turnPlayerId: record.privateMatch?.turnPlayerId ?? null,
+    turnDeadlineAt: record.privateMatch?.turnDeadlineAt?.toISOString() ?? null,
     viewer: toLiveBattlePlayerView(viewer, true),
     opponent: toLiveBattlePlayerView(opponent, false),
     result: state.result,
+    reward: toBattleRewardView(record.rewardGrants[0] ?? null),
+    summary: battleResultSummary(state),
   };
 }
 
@@ -603,20 +1094,29 @@ export async function submitLiveBattleAction(
 
   const prisma = usePrisma();
   await seedDevelopmentPlayer(prisma);
+  await settleExpiredPrivateBattle(prisma, battleId);
 
-  const events = await prisma.$transaction(async (transaction) => {
+  const submitted = await prisma.$transaction(async (transaction) => {
     const record = await transaction.battleRecord.findFirst({
       where: {
         id: battleId,
-        OR: [{ playerOneId: DEV_PLAYER_ID }, { playerTwoId: DEV_PLAYER_ID }],
+        OR: [{ playerOneId: currentPlayerId() }, { playerTwoId: currentPlayerId() }],
       },
+      include: { privateMatch: true },
     });
 
     if (!record) {
       throw new Error(`Battle "${battleId}" is not available for this player.`);
     }
-    if (record.mode !== "training") {
-      throw new Error("Only live training battles currently accept actions.");
+    if (record.mode !== "training" && record.mode !== "campaign" && record.mode !== "private_pvp") {
+      throw new Error("This battle mode does not accept live actions.");
+    }
+    if (
+      record.mode === "private_pvp" &&
+      record.privateMatch?.turnDeadlineAt &&
+      record.privateMatch.turnDeadlineAt.getTime() <= Date.now()
+    ) {
+      throw new Error("The turn deadline has expired. Reload the battle state.");
     }
 
     const state = rebuildBattleState(record.setupJson, record.actionLogJson);
@@ -626,7 +1126,12 @@ export async function submitLiveBattleAction(
 
     const viewerAction = toViewerBattleAction(command);
     const applied = applyBattleAction(state, viewerAction);
-    const advanced = advanceTrainingOpponent(applied.state);
+    const advanced =
+      record.mode === "campaign"
+        ? advanceCampaignOpponent(applied.state, getCampaignOpponent(record.modeReferenceId ?? ""))
+        : record.mode === "training"
+          ? advanceTrainingOpponent(applied.state)
+          : { state: applied.state, events: [] };
     const nextState = advanced.state;
     const nextActionsJson = JSON.stringify(nextState.actionHistory);
     const finishedRecord =
@@ -642,14 +1147,23 @@ export async function submitLiveBattleAction(
       },
       data: {
         status: nextState.status,
-        result: outcome,
+        result:
+          record.mode === "private_pvp" && nextState.status === "finished"
+            ? nextState.result?.type === "draw"
+              ? "draw"
+              : "finished"
+            : outcome,
         actionLogJson: nextActionsJson,
         resultJson: finishedRecord ? JSON.stringify(finishedRecord.result) : null,
         finalStateChecksum: finishedRecord?.finalStateChecksum ?? null,
         winnerPlayerId:
-          nextState.result?.type === "winner" && nextState.result.winnerId === DEV_PLAYER_ID
-            ? DEV_PLAYER_ID
-            : null,
+          nextState.result?.type !== "winner"
+            ? null
+            : record.mode === "private_pvp"
+              ? nextState.result.winnerId
+              : nextState.result.winnerId === currentPlayerId()
+                ? currentPlayerId()
+                : null,
         turnCount: Math.max(...nextState.players.map((player) => player.energy.turnCount)),
       },
     });
@@ -660,12 +1174,84 @@ export async function submitLiveBattleAction(
       );
     }
 
-    return [...applied.events, ...advanced.events];
+    if (nextState.status === "finished" && record.mode === "private_pvp") {
+      await transaction.privateMatch.updateMany({
+        where: { battleRecordId: record.id },
+        data: { status: "finished", turnPlayerId: null, turnDeadlineAt: null },
+      });
+    } else if (record.mode === "private_pvp") {
+      await transaction.privateMatch.updateMany({
+        where: { battleRecordId: record.id, status: "active" },
+        data: {
+          turnPlayerId: nextState.activePlayerId,
+          turnDeadlineAt: privateTurnDeadline(nextState.activePlayerId),
+        },
+      });
+    }
+
+    if (nextState.status === "finished" && record.mode !== "private_pvp") {
+      if (outcome === "pending") {
+        throw new Error("Finished battle does not have a settlement outcome.");
+      }
+      const reward =
+        record.mode === "campaign"
+          ? await settleCampaignOutcome(
+              transaction,
+              getCampaignOpponent(record.modeReferenceId ?? ""),
+              outcome,
+            )
+          : battleRewardDefinition(outcome);
+      const itemExperience = liveBattleItemExperience(nextState);
+
+      await transaction.rewardGrant.create({
+        data: {
+          playerId: currentPlayerId(),
+          sourceType: record.mode === "campaign" ? "campaignBattle" : "battle",
+          sourceId: record.mode === "campaign" ? record.modeReferenceId : record.id,
+          battleRecordId: record.id,
+          status: "unclaimed",
+          credits: reward.credits,
+          heroExperience: reward.heroExperience,
+          contentVersion,
+          materials: { create: reward.materials },
+          items: { create: itemExperience },
+        },
+      });
+    }
+
+    return {
+      events: [...applied.events, ...advanced.events],
+      matchId: record.privateMatch?.id ?? null,
+      mode: record.mode,
+      playerIds: [record.playerOneId, record.playerTwoId].filter((playerId): playerId is string =>
+        Boolean(playerId),
+      ),
+      finished: nextState.status === "finished",
+    };
   });
+
+  if (submitted.events.some((event) => event.type === "battleEnded")) {
+    await assertValidPlayerGameState(prisma, currentPlayerId());
+  }
+
+  if (submitted.mode === "private_pvp") {
+    publishGameRealtimeEvent(submitted.playerIds, {
+      type: "battleChanged",
+      battleId,
+      reason: "action",
+    });
+    if (submitted.finished && submitted.matchId) {
+      publishGameRealtimeEvent(submitted.playerIds, {
+        type: "privateMatchChanged",
+        matchId: submitted.matchId,
+        reason: "finished",
+      });
+    }
+  }
 
   return {
     battle: await getLiveBattleState(battleId),
-    events,
+    events: submitted.events,
   };
 }
 
@@ -692,7 +1278,7 @@ export async function createDevelopmentBattleResult(
     }
 
     const player = await transaction.player.findUniqueOrThrow({
-      where: { id: DEV_PLAYER_ID },
+      where: { id: currentPlayerId() },
       include: {
         activeLoadout: {
           include: { rings: { orderBy: { slotIndex: "asc" } } },
@@ -723,8 +1309,8 @@ export async function createDevelopmentBattleResult(
         mode: "development",
         status: "finished",
         result: outcome,
-        playerOneId: DEV_PLAYER_ID,
-        winnerPlayerId: outcome === "win" ? DEV_PLAYER_ID : null,
+        playerOneId: currentPlayerId(),
+        winnerPlayerId: outcome === "win" ? currentPlayerId() : null,
         seed: record.setup.seed,
         rulesVersion: record.rulesVersion,
         contentVersion: record.contentVersion,
@@ -737,7 +1323,7 @@ export async function createDevelopmentBattleResult(
     });
     await transaction.rewardGrant.create({
       data: {
-        playerId: DEV_PLAYER_ID,
+        playerId: currentPlayerId(),
         sourceType: "battle",
         sourceId: requestId,
         battleRecordId: requestId,
@@ -758,7 +1344,7 @@ export async function createDevelopmentBattleResult(
     });
   });
 
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
   return {
     recordId: requestId,
     state: await getBattleHistoryState(),
@@ -776,7 +1362,7 @@ export async function claimBattleReward(rewardGrantId: string) {
       include: { materials: true, items: true },
     });
 
-    if (!reward || reward.playerId !== DEV_PLAYER_ID) {
+    if (!reward || reward.playerId !== currentPlayerId()) {
       throw new Error(`Reward grant "${rewardGrantId}" is not available for this player.`);
     }
 
@@ -785,7 +1371,7 @@ export async function claimBattleReward(rewardGrantId: string) {
     }
 
     const claimed = await transaction.rewardGrant.updateMany({
-      where: { id: rewardGrantId, playerId: DEV_PLAYER_ID, status: "unclaimed" },
+      where: { id: rewardGrantId, playerId: currentPlayerId(), status: "unclaimed" },
       data: { status: "claimed", claimedAt: new Date() },
     });
 
@@ -794,7 +1380,7 @@ export async function claimBattleReward(rewardGrantId: string) {
     }
 
     await transaction.player.update({
-      where: { id: DEV_PLAYER_ID },
+      where: { id: currentPlayerId() },
       data: {
         credits: { increment: reward.credits },
         experience: { increment: reward.heroExperience },
@@ -805,22 +1391,23 @@ export async function claimBattleReward(rewardGrantId: string) {
       await transaction.materialStock.upsert({
         where: {
           playerId_materialId: {
-            playerId: DEV_PLAYER_ID,
+            playerId: currentPlayerId(),
             materialId: material.materialId,
           },
         },
         create: {
-          playerId: DEV_PLAYER_ID,
+          playerId: currentPlayerId(),
           materialId: material.materialId,
           quantity: material.quantity,
+          contentVersion,
         },
-        update: { quantity: { increment: material.quantity } },
+        update: { quantity: { increment: material.quantity }, contentVersion },
       });
     }
 
     for (const itemReward of reward.items) {
       const updated = await transaction.inventoryItem.updateMany({
-        where: { id: itemReward.inventoryItemId, playerId: DEV_PLAYER_ID },
+        where: { id: itemReward.inventoryItemId, playerId: currentPlayerId() },
         data: { experience: { increment: itemReward.experience } },
       });
 
@@ -830,7 +1417,7 @@ export async function claimBattleReward(rewardGrantId: string) {
     }
   });
 
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
   return getBattleHistoryState();
 }
 
@@ -846,7 +1433,7 @@ export async function craftPlayerRecipe(recipeId: string) {
 
   const crafted = await prisma.$transaction(async (transaction) => {
     const player = await transaction.player.findUniqueOrThrow({
-      where: { id: DEV_PLAYER_ID },
+      where: { id: currentPlayerId() },
       include: { materialStock: true },
     });
     const stock = materialStockFromRows(player.materialStock);
@@ -877,10 +1464,10 @@ export async function getPlayerEquipmentState() {
   const prisma = usePrisma();
 
   await seedDevelopmentPlayer(prisma);
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
 
   const player = await prisma.player.findUniqueOrThrow({
-    where: { id: DEV_PLAYER_ID },
+    where: { id: currentPlayerId() },
     include: {
       equippedRings: {
         orderBy: { slotIndex: "asc" },
@@ -945,10 +1532,10 @@ export async function getPlayerLoadoutState() {
   const prisma = usePrisma();
 
   await seedDevelopmentPlayer(prisma);
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
 
   const player = await prisma.player.findUniqueOrThrow({
-    where: { id: DEV_PLAYER_ID },
+    where: { id: currentPlayerId() },
     include: {
       equippedRings: {
         orderBy: { slotIndex: "asc" },
@@ -1013,6 +1600,144 @@ export async function getPlayerLoadoutState() {
   };
 }
 
+export async function getCampaignState() {
+  const loadoutState = await getPlayerLoadoutState();
+  const prisma = usePrisma();
+  const [player, persistedProgress] = await Promise.all([
+    prisma.player.findUniqueOrThrow({ where: { id: currentPlayerId() } }),
+    prisma.campaignProgress.findMany({ where: { playerId: currentPlayerId() } }),
+  ]);
+  const progressByOpponentId = new Map(
+    persistedProgress.map((progress) => [progress.opponentId, progress]),
+  );
+  const campaignLabels = new Map(
+    definitions.campaignOpponents.map((opponent) => [opponent.id, label(opponent.nameKey)]),
+  );
+  const ringDefinitions = new Map(
+    definitions.rings.map((definition) => [definition.id, definition]),
+  );
+  const gemDefinitions = new Map(definitions.gems.map((definition) => [definition.id, definition]));
+  const monsterDefinitions = new Map(
+    definitions.monsters.map((definition) => [definition.id, definition]),
+  );
+  const spellDefinitions = new Map(
+    definitions.spells.map((definition) => [definition.id, definition]),
+  );
+  const materialDefinitions = new Map(
+    definitions.materials.map((definition) => [definition.id, definition]),
+  );
+
+  return {
+    player: {
+      id: loadoutState.player.id,
+      username: loadoutState.player.username,
+      level: levelFromExperience(player.experience),
+      activeLoadoutId: loadoutState.player.activeLoadoutId,
+    },
+    progress: {
+      completedCount: persistedProgress.filter((progress) => progress.victoryCount > 0).length,
+      unlockedCount: definitions.campaignOpponents.filter(
+        (opponent) =>
+          !opponent.prerequisiteOpponentId ||
+          (progressByOpponentId.get(opponent.prerequisiteOpponentId)?.victoryCount ?? 0) > 0,
+      ).length,
+      totalCount: definitions.campaignOpponents.length,
+    },
+    opponents: definitions.campaignOpponents.map((opponent) => ({
+      id: opponent.id,
+      order: opponent.order,
+      label: label(opponent.nameKey),
+      description: label(opponent.descriptionKey),
+      element: opponent.element,
+      recommendedLevel: opponent.recommendedLevel,
+      opponentLevel: levelFromExperience(opponent.experience),
+      victoryCount: progressByOpponentId.get(opponent.id)?.victoryCount ?? 0,
+      status:
+        (progressByOpponentId.get(opponent.id)?.victoryCount ?? 0) > 0
+          ? ("completed" as const)
+          : !opponent.prerequisiteOpponentId ||
+              (progressByOpponentId.get(opponent.prerequisiteOpponentId)?.victoryCount ?? 0) > 0
+            ? ("available" as const)
+            : ("locked" as const),
+      repeatable: opponent.repeatable,
+      prerequisite: opponent.prerequisiteOpponentId
+        ? {
+            id: opponent.prerequisiteOpponentId,
+            label:
+              campaignLabels.get(opponent.prerequisiteOpponentId) ??
+              opponent.prerequisiteOpponentId,
+          }
+        : null,
+      loadoutVisibility: opponent.loadoutVisibility,
+      rings: opponent.rings.map((ring) => {
+        const definition = requiredContentDefinition(ringDefinitions, ring.definitionId, "ring");
+        return {
+          definitionId: definition.id,
+          label: label(definition.nameKey),
+          element: definition.element,
+          rarity: definition.rarity,
+          level: levelFromExperience(ring.experience),
+          quality: ring.quality,
+          gems: ring.gems.map((gem) => {
+            const gemDefinition = requiredContentDefinition(
+              gemDefinitions,
+              gem.definitionId,
+              "gem",
+            );
+            const enchantmentDefinition = gem.enchantment
+              ? gem.enchantment.type === "monster"
+                ? requiredContentDefinition(
+                    monsterDefinitions,
+                    gem.enchantment.definitionId,
+                    "monster",
+                  )
+                : requiredContentDefinition(spellDefinitions, gem.enchantment.definitionId, "spell")
+              : null;
+            return {
+              definitionId: gemDefinition.id,
+              label: label(gemDefinition.nameKey),
+              element: gemDefinition.element,
+              rarity: gemDefinition.rarity,
+              enchantment: gem.enchantment
+                ? {
+                    type: gem.enchantment.type,
+                    definitionId: gem.enchantment.definitionId,
+                    label: label(enchantmentDefinition?.nameKey ?? gem.enchantment.definitionId),
+                  }
+                : null,
+            };
+          }),
+        };
+      }),
+      firstClearReward: campaignRewardPreview(opponent.firstClearReward),
+      repeatVictoryReward: campaignRewardPreview(opponent.repeatVictoryReward),
+    })),
+  };
+
+  function campaignRewardPreview(reward: {
+    credits: number;
+    heroExperience: number;
+    materials: readonly { materialId: string; quantity: number }[];
+  }) {
+    return {
+      credits: reward.credits,
+      heroExperience: reward.heroExperience,
+      materials: reward.materials.map((material) => {
+        const definition = requiredContentDefinition(
+          materialDefinitions,
+          material.materialId,
+          "material",
+        );
+        return {
+          materialId: material.materialId,
+          label: label(definition.nameKey),
+          quantity: material.quantity,
+        };
+      }),
+    };
+  }
+}
+
 export async function savePlayerLoadoutFromEquipped(name: string) {
   const prisma = usePrisma();
   const normalizedName = normalizeLoadoutName(name);
@@ -1021,7 +1746,7 @@ export async function savePlayerLoadoutFromEquipped(name: string) {
 
   await prisma.$transaction(async (transaction) => {
     const equippedRings = await transaction.equippedRing.findMany({
-      where: { playerId: DEV_PLAYER_ID },
+      where: { playerId: currentPlayerId() },
       orderBy: { slotIndex: "asc" },
     });
 
@@ -1032,12 +1757,12 @@ export async function savePlayerLoadoutFromEquipped(name: string) {
     const loadout = await transaction.loadout.upsert({
       where: {
         playerId_name: {
-          playerId: DEV_PLAYER_ID,
+          playerId: currentPlayerId(),
           name: normalizedName,
         },
       },
       create: {
-        playerId: DEV_PLAYER_ID,
+        playerId: currentPlayerId(),
         name: normalizedName,
       },
       update: {
@@ -1057,7 +1782,7 @@ export async function savePlayerLoadoutFromEquipped(name: string) {
     });
   });
 
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
   return getPlayerLoadoutState();
 }
 
@@ -1067,7 +1792,7 @@ export async function activatePlayerLoadout(loadoutId: string) {
   await seedDevelopmentPlayer(prisma);
 
   const loadout = await prisma.loadout.findFirst({
-    where: { id: loadoutId, playerId: DEV_PLAYER_ID },
+    where: { id: loadoutId, playerId: currentPlayerId() },
   });
 
   if (!loadout) {
@@ -1075,11 +1800,11 @@ export async function activatePlayerLoadout(loadoutId: string) {
   }
 
   await prisma.player.update({
-    where: { id: DEV_PLAYER_ID },
+    where: { id: currentPlayerId() },
     data: { activeLoadoutId: loadout.id },
   });
 
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
   return getPlayerLoadoutState();
 }
 
@@ -1090,7 +1815,7 @@ export async function deletePlayerLoadout(loadoutId: string) {
 
   await prisma.$transaction(async (transaction) => {
     const loadout = await transaction.loadout.findFirst({
-      where: { id: loadoutId, playerId: DEV_PLAYER_ID },
+      where: { id: loadoutId, playerId: currentPlayerId() },
     });
 
     if (!loadout) {
@@ -1098,7 +1823,7 @@ export async function deletePlayerLoadout(loadoutId: string) {
     }
 
     await transaction.player.updateMany({
-      where: { id: DEV_PLAYER_ID, activeLoadoutId: loadout.id },
+      where: { id: currentPlayerId(), activeLoadoutId: loadout.id },
       data: { activeLoadoutId: null },
     });
     await transaction.loadout.delete({
@@ -1106,7 +1831,7 @@ export async function deletePlayerLoadout(loadoutId: string) {
     });
   });
 
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
   return getPlayerLoadoutState();
 }
 
@@ -1114,10 +1839,10 @@ export async function getPlayerSocketState() {
   const prisma = usePrisma();
 
   await seedDevelopmentPlayer(prisma);
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
 
   const player = await prisma.player.findUniqueOrThrow({
-    where: { id: DEV_PLAYER_ID },
+    where: { id: currentPlayerId() },
     include: {
       inventoryItems: {
         orderBy: { createdAt: "desc" },
@@ -1190,10 +1915,10 @@ export async function socketPlayerGem(ringItemId: string, gemItemId: string) {
       transaction.inventoryItem.findUnique({ where: { id: gemItemId } }),
     ]);
 
-    if (!ring || ring.playerId !== DEV_PLAYER_ID || ring.type !== "ring") {
+    if (!ring || ring.playerId !== currentPlayerId() || ring.type !== "ring") {
       throw new Error(`Ring item "${ringItemId}" is not available for this player.`);
     }
-    if (!gem || gem.playerId !== DEV_PLAYER_ID || gem.type !== "gem") {
+    if (!gem || gem.playerId !== currentPlayerId() || gem.type !== "gem") {
       throw new Error(`Gem item "${gemItemId}" is not available for this player.`);
     }
     if (ring.socketCount === null) {
@@ -1201,7 +1926,7 @@ export async function socketPlayerGem(ringItemId: string, gemItemId: string) {
     }
 
     const existingGemSocket = await transaction.ringSocket.findFirst({
-      where: { playerId: DEV_PLAYER_ID, gemItemId },
+      where: { playerId: currentPlayerId(), gemItemId },
     });
 
     if (existingGemSocket) {
@@ -1209,7 +1934,7 @@ export async function socketPlayerGem(ringItemId: string, gemItemId: string) {
     }
 
     const existingSockets = await transaction.ringSocket.findMany({
-      where: { playerId: DEV_PLAYER_ID, ringItemId },
+      where: { playerId: currentPlayerId(), ringItemId },
       orderBy: { socketIndex: "asc" },
     });
 
@@ -1228,7 +1953,7 @@ export async function socketPlayerGem(ringItemId: string, gemItemId: string) {
 
     await transaction.ringSocket.create({
       data: {
-        playerId: DEV_PLAYER_ID,
+        playerId: currentPlayerId(),
         ringItemId,
         gemItemId,
         socketIndex,
@@ -1237,7 +1962,7 @@ export async function socketPlayerGem(ringItemId: string, gemItemId: string) {
     await syncLegacySocketedGemIds(transaction, ringItemId);
   });
 
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
   return getPlayerSocketState();
 }
 
@@ -1248,7 +1973,7 @@ export async function unsocketPlayerGem(gemItemId: string) {
 
   await prisma.$transaction(async (transaction) => {
     const socket = await transaction.ringSocket.findFirst({
-      where: { playerId: DEV_PLAYER_ID, gemItemId },
+      where: { playerId: currentPlayerId(), gemItemId },
     });
 
     if (!socket) {
@@ -1256,12 +1981,12 @@ export async function unsocketPlayerGem(gemItemId: string) {
     }
 
     await transaction.ringSocket.deleteMany({
-      where: { playerId: DEV_PLAYER_ID, gemItemId },
+      where: { playerId: currentPlayerId(), gemItemId },
     });
     await syncLegacySocketedGemIds(transaction, socket.ringItemId);
   });
 
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
   return getPlayerSocketState();
 }
 
@@ -1273,14 +1998,14 @@ export async function improvePlayerRingSocketCount(ringItemId: string) {
   await prisma.$transaction(async (transaction) => {
     const [player, ring] = await Promise.all([
       transaction.player.findUniqueOrThrow({
-        where: { id: DEV_PLAYER_ID },
+        where: { id: currentPlayerId() },
       }),
       transaction.inventoryItem.findUnique({
         where: { id: ringItemId },
       }),
     ]);
 
-    if (!ring || ring.playerId !== DEV_PLAYER_ID || ring.type !== "ring") {
+    if (!ring || ring.playerId !== currentPlayerId() || ring.type !== "ring") {
       throw new Error(`Ring item "${ringItemId}" is not available for this player.`);
     }
     if (ring.socketCount === null) {
@@ -1295,7 +2020,7 @@ export async function improvePlayerRingSocketCount(ringItemId: string) {
     }
 
     await transaction.player.update({
-      where: { id: DEV_PLAYER_ID },
+      where: { id: currentPlayerId() },
       data: { credits: player.credits - cost },
     });
     await transaction.inventoryItem.update({
@@ -1304,7 +2029,7 @@ export async function improvePlayerRingSocketCount(ringItemId: string) {
     });
   });
 
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
   return getPlayerSocketState();
 }
 
@@ -1327,10 +2052,10 @@ export async function enchantPlayerGem(
       transaction.inventoryItem.findUnique({ where: { id: targetItemId } }),
     ]);
 
-    if (!gem || gem.playerId !== DEV_PLAYER_ID || gem.type !== "gem") {
+    if (!gem || gem.playerId !== currentPlayerId() || gem.type !== "gem") {
       throw new Error(`Gem item "${gemItemId}" is not available for this player.`);
     }
-    if (!target || target.playerId !== DEV_PLAYER_ID || target.type !== targetType) {
+    if (!target || target.playerId !== currentPlayerId() || target.type !== targetType) {
       throw new Error(
         `${capitalize(targetType)} item "${targetItemId}" is not available for this player.`,
       );
@@ -1356,7 +2081,7 @@ export async function enchantPlayerGem(
 
     await transaction.gemEnchantment.create({
       data: {
-        playerId: DEV_PLAYER_ID,
+        playerId: currentPlayerId(),
         gemItemId,
         targetItemId,
         targetType,
@@ -1364,7 +2089,7 @@ export async function enchantPlayerGem(
     });
   });
 
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
   return getPlayerSocketState();
 }
 
@@ -1387,7 +2112,7 @@ export async function unenchantPlayerGem(gemItemId: string) {
     });
   });
 
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
   return getPlayerSocketState();
 }
 
@@ -1395,10 +2120,10 @@ export async function getPlayerQualityState() {
   const prisma = usePrisma();
 
   await seedDevelopmentPlayer(prisma);
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
 
   const player = await prisma.player.findUniqueOrThrow({
-    where: { id: DEV_PLAYER_ID },
+    where: { id: currentPlayerId() },
     include: {
       inventoryItems: {
         orderBy: { createdAt: "desc" },
@@ -1425,14 +2150,14 @@ export async function improvePlayerItemQuality(itemId: string) {
   await prisma.$transaction(async (transaction) => {
     const [player, item] = await Promise.all([
       transaction.player.findUniqueOrThrow({
-        where: { id: DEV_PLAYER_ID },
+        where: { id: currentPlayerId() },
       }),
       transaction.inventoryItem.findUnique({
         where: { id: itemId },
       }),
     ]);
 
-    if (!item || item.playerId !== DEV_PLAYER_ID) {
+    if (!item || item.playerId !== currentPlayerId()) {
       throw new Error(`Inventory item "${itemId}" is not available for this player.`);
     }
 
@@ -1444,7 +2169,7 @@ export async function improvePlayerItemQuality(itemId: string) {
     }
 
     await transaction.player.update({
-      where: { id: DEV_PLAYER_ID },
+      where: { id: currentPlayerId() },
       data: { credits: player.credits - cost },
     });
     await transaction.inventoryItem.update({
@@ -1455,7 +2180,7 @@ export async function improvePlayerItemQuality(itemId: string) {
     });
   });
 
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
   return getPlayerQualityState();
 }
 
@@ -1469,7 +2194,7 @@ export async function equipPlayerRing(ringItemId: string) {
       where: { id: ringItemId },
     });
 
-    if (!ring || ring.playerId !== DEV_PLAYER_ID || ring.type !== "ring") {
+    if (!ring || ring.playerId !== currentPlayerId() || ring.type !== "ring") {
       throw new Error(`Ring item "${ringItemId}" is not available for this player.`);
     }
 
@@ -1482,7 +2207,7 @@ export async function equipPlayerRing(ringItemId: string) {
     }
 
     const equippedRings = await transaction.equippedRing.findMany({
-      where: { playerId: DEV_PLAYER_ID },
+      where: { playerId: currentPlayerId() },
       select: { slotIndex: true },
       orderBy: { slotIndex: "asc" },
     });
@@ -1502,7 +2227,7 @@ export async function equipPlayerRing(ringItemId: string) {
 
     await transaction.equippedRing.create({
       data: {
-        playerId: DEV_PLAYER_ID,
+        playerId: currentPlayerId(),
         ringItemId,
         slotIndex,
       },
@@ -1513,7 +2238,7 @@ export async function equipPlayerRing(ringItemId: string) {
     });
   });
 
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
   return getPlayerEquipmentState();
 }
 
@@ -1527,12 +2252,12 @@ export async function unequipPlayerRing(ringItemId: string) {
       where: { id: ringItemId },
     });
 
-    if (!ring || ring.playerId !== DEV_PLAYER_ID || ring.type !== "ring") {
+    if (!ring || ring.playerId !== currentPlayerId() || ring.type !== "ring") {
       throw new Error(`Ring item "${ringItemId}" is not available for this player.`);
     }
 
     await transaction.equippedRing.deleteMany({
-      where: { playerId: DEV_PLAYER_ID, ringItemId },
+      where: { playerId: currentPlayerId(), ringItemId },
     });
     await transaction.inventoryItem.update({
       where: { id: ringItemId },
@@ -1540,7 +2265,7 @@ export async function unequipPlayerRing(ringItemId: string) {
     });
   });
 
-  await assertValidPlayerGameState(prisma, DEV_PLAYER_ID);
+  await assertValidPlayerGameState(prisma, currentPlayerId());
   return getPlayerEquipmentState();
 }
 
@@ -1548,16 +2273,19 @@ export async function resetDevelopmentPlayerState() {
   const prisma = usePrisma();
 
   await prisma.$transaction(async (transaction) => {
+    await transaction.privateMatch.deleteMany({
+      where: { participants: { some: { playerId: currentPlayerId() } } },
+    });
     await transaction.battleRecord.deleteMany({
       where: {
         OR: [
-          { playerOneId: DEV_PLAYER_ID },
-          { playerTwoId: DEV_PLAYER_ID },
-          { winnerPlayerId: DEV_PLAYER_ID },
+          { playerOneId: currentPlayerId() },
+          { playerTwoId: currentPlayerId() },
+          { winnerPlayerId: currentPlayerId() },
         ],
       },
     });
-    await transaction.player.deleteMany({ where: { id: DEV_PLAYER_ID } });
+    await transaction.player.deleteMany({ where: { id: currentPlayerId() } });
   });
   await seedDevelopmentPlayer(prisma);
   return getPlayerState();
@@ -1573,7 +2301,7 @@ export async function disconnectGameStateClientForTests(): Promise<void> {
   globalForPrisma.battlenessPrismaUrl = undefined;
 }
 
-function usePrisma(): PrismaClient {
+export function usePrisma(): PrismaClient {
   const databaseUrl = process.env.BATTLENESS_DATABASE_URL ?? defaultDatabaseUrl;
 
   if (globalForPrisma.battlenessPrisma && globalForPrisma.battlenessPrismaUrl === databaseUrl) {
@@ -1594,28 +2322,78 @@ function usePrisma(): PrismaClient {
   return client;
 }
 
-async function seedDevelopmentPlayer(client: PrismaContext): Promise<void> {
-  await client.player.upsert({
-    where: { id: DEV_PLAYER_ID },
+async function registerCurrentContentRelease(client: PrismaContext): Promise<void> {
+  await client.contentRelease.upsert({
+    where: { version: legacyContentVersion },
     create: {
-      id: DEV_PLAYER_ID,
-      username: "Dev Player",
-      experience: 0,
-      credits: developmentStartingCredits,
-      nextItemSequence: 1,
+      version: legacyContentVersion,
+      checksum: "unknown",
+      manifestJson: JSON.stringify({ legacy: true }),
     },
     update: {},
   });
 
+  const release = await client.contentRelease.upsert({
+    where: { version: contentVersion },
+    create: {
+      version: contentVersion,
+      checksum: contentChecksum,
+      manifestJson: contentManifestJson,
+    },
+    update: {},
+  });
+
+  if (release.checksum !== contentChecksum || release.manifestJson !== contentManifestJson) {
+    throw new Error(
+      `Content version "${contentVersion}" is already registered with different definitions.`,
+    );
+  }
+
+  await Promise.all([
+    client.inventoryItem.updateMany({
+      where: { contentVersion: null },
+      data: { contentVersion: legacyContentVersion },
+    }),
+    client.rewardGrant.updateMany({
+      where: { contentVersion: null },
+      data: { contentVersion: legacyContentVersion },
+    }),
+  ]);
+}
+
+export async function seedDevelopmentPlayer(client: PrismaContext): Promise<void> {
+  await registerCurrentContentRelease(client);
+
+  const playerId = currentPlayerId();
+  const isDefaultDevelopmentPlayer = playerId === developmentPlayerId;
+
+  await client.player.upsert({
+    where: { id: playerId },
+    create: {
+      id: playerId,
+      username: isDefaultDevelopmentPlayer ? "Dev Player" : "Dev Player 2",
+      displayName: isDefaultDevelopmentPlayer ? "Dev Player" : "Dev Player 2",
+      experience: 0,
+      credits: developmentStartingCredits,
+      nextItemSequence: 1,
+    },
+    update: { lastActiveAt: new Date() },
+  });
+  await client.playerPreferences.upsert({
+    where: { playerId },
+    create: { playerId },
+    update: {},
+  });
+
   const existingStockCount = await client.materialStock.count({
-    where: { playerId: DEV_PLAYER_ID },
+    where: { playerId },
   });
 
   if (existingStockCount > 0) {
     return;
   }
 
-  await saveMaterialStock(client, DEV_PLAYER_ID, createMaterialStock(definitions.materials, 2));
+  await saveMaterialStock(client, playerId, createMaterialStock(definitions.materials, 2));
 }
 
 async function saveMaterialStock(
@@ -1631,11 +2409,88 @@ async function saveMaterialStock(
           playerId,
           materialId: material.id,
           quantity: stock[material.id] ?? 0,
+          contentVersion,
         },
-        update: { quantity: stock[material.id] ?? 0 },
+        update: { quantity: stock[material.id] ?? 0, contentVersion },
       }),
     ),
   );
+}
+
+function toProfileSettingsView(player: ProfileSettingsPlayer) {
+  const preferences = player.preferences;
+
+  return {
+    profile: {
+      id: player.id,
+      username: player.username,
+      displayName: player.displayName ?? player.username,
+      visibility: player.profileVisibility as "public" | "private",
+      createdAt: player.createdAt.toISOString(),
+      lastActiveAt: player.lastActiveAt.toISOString(),
+    },
+    preferences: {
+      locale: (preferences?.locale ?? "en") as "en" | "fr",
+      theme: (preferences?.theme ?? "system") as "system" | "dark" | "light",
+      reducedMotion: preferences?.reducedMotion ?? false,
+      interfaceDensity: (preferences?.interfaceDensity ?? "comfortable") as
+        | "comfortable"
+        | "compact",
+      muted: preferences?.muted ?? false,
+      masterVolume: preferences?.masterVolume ?? 100,
+      musicVolume: preferences?.musicVolume ?? 70,
+      effectsVolume: preferences?.effectsVolume ?? 80,
+      updatedAt: preferences?.updatedAt.toISOString() ?? null,
+    },
+  };
+}
+
+function normalizeProfileSettingsInput(input: ProfileSettingsInput): ProfileSettingsInput {
+  if (!input || typeof input !== "object") {
+    throw new Error("Profile settings are required.");
+  }
+
+  const displayName = typeof input.displayName === "string" ? input.displayName.trim() : "";
+  if (
+    displayName.length < 2 ||
+    displayName.length > 32 ||
+    [...displayName].some((character) => {
+      const code = character.charCodeAt(0);
+      return code < 32 || code === 127;
+    })
+  ) {
+    throw new Error("displayName must contain between 2 and 32 printable characters.");
+  }
+
+  assertProfileSettingOption(input.profileVisibility, ["public", "private"], "visibility");
+  assertProfileSettingOption(input.locale, ["en", "fr"], "locale");
+  assertProfileSettingOption(input.theme, ["system", "dark", "light"], "theme");
+  assertProfileSettingOption(
+    input.interfaceDensity,
+    ["comfortable", "compact"],
+    "interfaceDensity",
+  );
+  if (typeof input.reducedMotion !== "boolean" || typeof input.muted !== "boolean") {
+    throw new Error("reducedMotion and muted must be boolean values.");
+  }
+
+  for (const [name, value] of [
+    ["masterVolume", input.masterVolume],
+    ["musicVolume", input.musicVolume],
+    ["effectsVolume", input.effectsVolume],
+  ] as const) {
+    if (!Number.isInteger(value) || value < 0 || value > 100) {
+      throw new Error(`${name} must be an integer between 0 and 100.`);
+    }
+  }
+
+  return { ...input, displayName };
+}
+
+function assertProfileSettingOption(value: string, allowed: readonly string[], name: string): void {
+  if (!allowed.includes(value)) {
+    throw new Error(`${name} must be one of: ${allowed.join(", ")}.`);
+  }
 }
 
 async function insertCraftedItem(
@@ -1675,18 +2530,47 @@ function materialStockFromRows(rows: readonly MaterialStockRow[]): MaterialStock
 function toInventoryView(row: InventoryItem) {
   const type = row.type as CraftableItemType;
   const definition = getCraftableDefinition(type, row.definitionId);
+  const level = levelFromExperience(row.experience);
 
   return {
     id: row.id,
     type,
     definitionId: row.definitionId,
+    contentVersion: row.contentVersion ?? legacyContentVersion,
     label: label(definition.nameKey),
     rarity: definition.rarity,
     element: definition.element,
     experience: row.experience,
+    level,
+    progression: toExperienceProgression(row.experience),
     quality: row.quality,
+    bonusPercent: itemBonusPercent(level, row.quality),
     socketCount: row.socketCount,
     equipped: row.equipped,
+  };
+}
+
+function toExperienceProgression(experience: number) {
+  const level = levelFromExperience(experience);
+  const currentLevelExperience = experienceForLevel(level);
+  const nextLevelExperience = level < MAX_LEVEL ? experienceForLevel(level + 1) : null;
+  const experienceIntoLevel = experience - currentLevelExperience;
+  const experienceForNextLevel =
+    nextLevelExperience === null ? null : nextLevelExperience - currentLevelExperience;
+
+  return {
+    level,
+    maxLevel: MAX_LEVEL,
+    currentLevelExperience,
+    nextLevelExperience,
+    experienceIntoLevel,
+    experienceForNextLevel,
+    experienceRemaining:
+      nextLevelExperience === null ? 0 : Math.max(0, nextLevelExperience - experience),
+    progressPercent:
+      experienceForNextLevel === null
+        ? 100
+        : Math.floor((experienceIntoLevel * 100) / experienceForNextLevel),
   };
 }
 
@@ -2437,6 +3321,90 @@ function liveTrainingBattleSetup(input: {
   };
 }
 
+function liveCampaignBattleSetup(input: {
+  requestId: string;
+  player: LiveBattlePlayerSource;
+  opponent: CampaignOpponent;
+}): BattleSetup {
+  const trainingSetup = liveTrainingBattleSetup({
+    requestId: input.requestId,
+    player: input.player,
+  });
+  const campaignOpponent = createCampaignOpponentBattlePlayer({
+    opponent: input.opponent,
+    username: label(input.opponent.nameKey),
+    resolvedDefinitions: trainingSetup.definitions,
+  });
+
+  return {
+    ...trainingSetup,
+    id: `campaign.${input.opponent.id}.${input.requestId}`,
+    seed: `campaign.${input.opponent.id}.${input.requestId}`,
+    players: [trainingSetup.players[0], campaignOpponent],
+  };
+}
+
+type PrivateBattleParticipantSource = {
+  playerId: string;
+  loadout: { rings: readonly { ringItemId: string }[] } | null;
+  player: Omit<LiveBattlePlayerSource, "activeLoadout">;
+};
+
+function livePrivateBattleSetup(
+  matchId: string,
+  host: PrivateBattleParticipantSource,
+  guest: PrivateBattleParticipantSource,
+): BattleSetup {
+  if (!host.loadout || !guest.loadout) {
+    throw new Error("Both private match participants require a loadout.");
+  }
+  const hostSetup = liveTrainingBattleSetup({
+    requestId: `${matchId}.host`,
+    player: { ...host.player, activeLoadout: host.loadout },
+  });
+  const guestSetup = liveTrainingBattleSetup({
+    requestId: `${matchId}.guest`,
+    player: { ...guest.player, activeLoadout: guest.loadout },
+  });
+
+  return {
+    ...hostSetup,
+    id: `private.${matchId}`,
+    seed: `private.${matchId}`,
+    players: [hostSetup.players[0]!, guestSetup.players[0]!],
+  };
+}
+
+function getCampaignOpponent(opponentId: string): CampaignOpponent {
+  const opponent = definitions.campaignOpponents.find((candidate) => candidate.id === opponentId);
+  if (!opponent) {
+    throw new Error(`Unknown campaign opponent "${opponentId}".`);
+  }
+  return opponent;
+}
+
+function assertCampaignOpponentAvailable(
+  opponent: CampaignOpponent,
+  progress: readonly { opponentId: string; victoryCount: number }[],
+): void {
+  const victoryCount =
+    progress.find((entry) => entry.opponentId === opponent.id)?.victoryCount ?? 0;
+  if (victoryCount > 0 && !opponent.repeatable) {
+    throw new Error(`Campaign opponent "${opponent.id}" cannot be repeated.`);
+  }
+  if (!opponent.prerequisiteOpponentId) {
+    return;
+  }
+  const prerequisiteVictories =
+    progress.find((entry) => entry.opponentId === opponent.prerequisiteOpponentId)?.victoryCount ??
+    0;
+  if (prerequisiteVictories === 0) {
+    throw new Error(
+      `Campaign opponent "${opponent.id}" is locked until "${opponent.prerequisiteOpponentId}" is cleared.`,
+    );
+  }
+}
+
 function rebuildBattleState(setupJson: string, actionLogJson: string): BattleState {
   const setup = JSON.parse(setupJson) as BattleSetup;
   const actions = JSON.parse(actionLogJson) as BattleAction[];
@@ -2456,11 +3424,11 @@ function rebuildBattleState(setupJson: string, actionLogJson: string): BattleSta
 function toViewerBattleAction(command: LiveBattleActionCommand): BattleAction {
   switch (command.type) {
     case "chooseElement":
-      return { type: command.type, playerId: DEV_PLAYER_ID, element: command.element };
+      return { type: command.type, playerId: currentPlayerId(), element: command.element };
     case "useRing":
       return {
         type: command.type,
-        playerId: DEV_PLAYER_ID,
+        playerId: currentPlayerId(),
         ringInstanceId: command.ringInstanceId,
         targetId: command.targetId as TargetId,
         ...(command.enchantmentTargets
@@ -2477,13 +3445,13 @@ function toViewerBattleAction(command: LiveBattleActionCommand): BattleAction {
     case "useMonster":
       return {
         type: command.type,
-        playerId: DEV_PLAYER_ID,
+        playerId: currentPlayerId(),
         monsterInstanceId: command.monsterInstanceId,
         targetId: command.targetId as TargetId,
       };
     case "endTurn":
     case "concede":
-      return { type: command.type, playerId: DEV_PLAYER_ID };
+      return { type: command.type, playerId: currentPlayerId() };
   }
 }
 
@@ -2493,7 +3461,7 @@ function advanceTrainingOpponent(initialState: BattleState): {
 } {
   let state = initialState;
   const events: ReturnType<typeof applyBattleAction>["events"] = [];
-  const opponent = state.players.find((player) => player.id !== DEV_PLAYER_ID);
+  const opponent = state.players.find((player) => player.id !== currentPlayerId());
   if (!opponent) {
     return { state, events };
   }
@@ -2523,6 +3491,96 @@ function advanceTrainingOpponent(initialState: BattleState): {
   return { state, events };
 }
 
+function advanceCampaignOpponent(
+  initialState: BattleState,
+  opponentDefinition: CampaignOpponent,
+): {
+  state: BattleState;
+  events: ReturnType<typeof applyBattleAction>["events"];
+} {
+  let state = initialState;
+  const events: ReturnType<typeof applyBattleAction>["events"] = [];
+  const opponentId = state.players.find((player) => player.id !== currentPlayerId())?.id;
+  if (!opponentId) {
+    return { state, events };
+  }
+
+  for (let step = 0; step < 50 && state.status !== "finished"; step += 1) {
+    let automaticAction: BattleAction | null = null;
+    const opponent = state.players.find((player) => player.id === opponentId);
+    if (!opponent) {
+      throw new Error(`Campaign opponent "${opponentId}" left the battle state.`);
+    }
+
+    if (state.status === "choosingFirstPlayer" && !state.firstPlayerChoices?.[opponent.id]) {
+      automaticAction = {
+        type: "chooseElement",
+        playerId: opponent.id,
+        element: campaignOpponentElement(state, opponent.id, opponentDefinition.element),
+      };
+    } else if (state.status === "active" && state.activePlayerId === opponent.id) {
+      const targetId = campaignOpponentTarget(state, opponent.id);
+      const monster = opponent.monsters.find((candidate) => candidate.currentCooldown === 0);
+      const ring = opponent.rings.find(
+        (candidate) =>
+          candidate.currentCooldown === 0 && candidate.energyCost <= opponent.energy.current,
+      );
+
+      automaticAction = monster
+        ? {
+            type: "useMonster",
+            playerId: opponent.id,
+            monsterInstanceId: monster.id,
+            targetId,
+          }
+        : ring
+          ? {
+              type: "useRing",
+              playerId: opponent.id,
+              ringInstanceId: ring.id,
+              targetId,
+            }
+          : { type: "endTurn", playerId: opponent.id };
+    }
+
+    if (!automaticAction) {
+      break;
+    }
+
+    const applied = applyBattleAction(state, automaticAction);
+    state = applied.state;
+    events.push(...applied.events);
+  }
+
+  return { state, events };
+}
+
+function campaignOpponentElement(
+  state: BattleState,
+  opponentId: string,
+  preferredElement: ElementType,
+): ElementType {
+  const elements: ElementType[] = [
+    preferredElement,
+    ...(["electric", "fire", "ice"] as ElementType[]).filter(
+      (element) => element !== preferredElement,
+    ),
+  ];
+  const previousChoices = state.actionHistory.filter(
+    (action) => action.type === "chooseElement" && action.playerId === opponentId,
+  ).length;
+  return elements[previousChoices % elements.length]!;
+}
+
+function campaignOpponentTarget(state: BattleState, opponentId: string): TargetId {
+  const defender = state.players.find((player) => player.id !== opponentId);
+  if (!defender) {
+    throw new Error(`Campaign opponent "${opponentId}" has no defender.`);
+  }
+  const tauntMonster = defender.monsters.find((monster) => monster.skill === "taunt");
+  return (tauntMonster?.id ?? `${defender.id}.hero`) as TargetId;
+}
+
 function trainingOpponentElement(state: BattleState, opponentId: string): ElementType {
   const choices: ElementType[] = ["electric", "fire", "ice"];
   const previousChoices = state.actionHistory.filter(
@@ -2538,7 +3596,172 @@ function liveBattleOutcome(state: BattleState): BattleOutcome | "pending" {
   if (state.result.type === "draw") {
     return "draw";
   }
-  return state.result.winnerId === DEV_PLAYER_ID ? "win" : "loss";
+  return state.result.winnerId === currentPlayerId() ? "win" : "loss";
+}
+
+function privateBattleOutcome(
+  record: { result: string; winnerPlayerId: string | null },
+  playerId: string,
+): BattleOutcome {
+  if (record.result === "draw") {
+    return "draw";
+  }
+  return record.winnerPlayerId === playerId ? "win" : "loss";
+}
+
+function privateMatchCode(): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = randomBytes(6);
+  return `BN-${Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join("")}`;
+}
+
+async function expirePrivateMatches(client: PrismaContext): Promise<void> {
+  await client.privateMatch.updateMany({
+    where: { status: "waiting", expiresAt: { lte: new Date() } },
+    data: { status: "cancelled" },
+  });
+}
+
+function privateTurnDeadline(playerId: string | null): Date | null {
+  return playerId ? new Date(Date.now() + privateTurnDurationMs) : null;
+}
+
+async function settleExpiredPrivateBattle(client: PrismaClient, battleId: string): Promise<void> {
+  const settled = await client.$transaction(async (transaction) => {
+    const match = await transaction.privateMatch.findFirst({
+      where: {
+        battleRecordId: battleId,
+        status: "active",
+        turnPlayerId: { not: null },
+        turnDeadlineAt: { lte: new Date() },
+      },
+      include: { battleRecord: true, participants: true },
+    });
+    if (!match?.battleRecord || !match.turnPlayerId) {
+      return null;
+    }
+
+    const claimed = await transaction.privateMatch.updateMany({
+      where: {
+        id: match.id,
+        status: "active",
+        turnPlayerId: match.turnPlayerId,
+        turnDeadlineAt: match.turnDeadlineAt,
+      },
+      data: { status: "timing_out" },
+    });
+    if (claimed.count !== 1) {
+      return null;
+    }
+
+    const state = rebuildBattleState(
+      match.battleRecord.setupJson,
+      match.battleRecord.actionLogJson,
+    );
+    if (state.status !== "active" || state.activePlayerId !== match.turnPlayerId) {
+      await transaction.privateMatch.update({
+        where: { id: match.id },
+        data: {
+          status: state.status === "finished" ? "finished" : "active",
+          turnPlayerId: state.status === "active" ? state.activePlayerId : null,
+          turnDeadlineAt:
+            state.status === "active" ? privateTurnDeadline(state.activePlayerId) : null,
+        },
+      });
+      return null;
+    }
+
+    const timedOut = applyBattleAction(state, {
+      type: "concede",
+      playerId: match.turnPlayerId,
+    }).state;
+    const finishedRecord = createBattleRecord(timedOut, { rulesVersion, contentVersion });
+    const winnerPlayerId = timedOut.result?.type === "winner" ? timedOut.result.winnerId : null;
+
+    await transaction.battleRecord.update({
+      where: { id: match.battleRecord.id },
+      data: {
+        status: "finished",
+        result: timedOut.result?.type === "draw" ? "draw" : "finished",
+        actionLogJson: JSON.stringify(timedOut.actionHistory),
+        resultJson: JSON.stringify(finishedRecord.result),
+        finalStateChecksum: finishedRecord.finalStateChecksum,
+        winnerPlayerId,
+        turnCount: Math.max(...timedOut.players.map((player) => player.energy.turnCount)),
+      },
+    });
+    await transaction.privateMatch.update({
+      where: { id: match.id },
+      data: {
+        status: "finished",
+        turnPlayerId: null,
+        turnDeadlineAt: null,
+      },
+    });
+    return {
+      matchId: match.id,
+      playerIds: match.participants.map((participant) => participant.playerId),
+    };
+  });
+
+  if (settled) {
+    publishGameRealtimeEvent(settled.playerIds, {
+      type: "battleChanged",
+      battleId,
+      reason: "timeout",
+    });
+    publishGameRealtimeEvent(settled.playerIds, {
+      type: "privateMatchChanged",
+      matchId: settled.matchId,
+      reason: "finished",
+    });
+  }
+}
+
+async function settleCampaignOutcome(
+  transaction: Prisma.TransactionClient,
+  opponent: CampaignOpponent,
+  outcome: BattleOutcome,
+): Promise<CampaignReward> {
+  if (outcome !== "win") {
+    return { credits: 0, heroExperience: 0, materials: [] };
+  }
+
+  const progress = await transaction.campaignProgress.findUnique({
+    where: {
+      playerId_opponentId: {
+        playerId: currentPlayerId(),
+        opponentId: opponent.id,
+      },
+    },
+  });
+  const firstClear = !progress || progress.victoryCount === 0;
+  const now = new Date();
+
+  await transaction.campaignProgress.upsert({
+    where: {
+      playerId_opponentId: {
+        playerId: currentPlayerId(),
+        opponentId: opponent.id,
+      },
+    },
+    create: {
+      playerId: currentPlayerId(),
+      opponentId: opponent.id,
+      contentVersion,
+      victoryCount: 1,
+      firstClearedAt: now,
+      lastVictoryAt: now,
+    },
+    update: {
+      contentVersion,
+      victoryCount: { increment: 1 },
+      lastVictoryAt: now,
+      ...(firstClear ? { firstClearedAt: now } : {}),
+    },
+  });
+
+  return firstClear ? opponent.firstClearReward : opponent.repeatVictoryReward;
 }
 
 function assertLiveBattleActionCommand(
@@ -2641,6 +3864,264 @@ function toLiveBattlePlayerView(player: BattleState["players"][number], revealRi
       })),
     })),
   };
+}
+
+function toBattleRewardView(reward: RewardGrantViewSource | null) {
+  if (!reward) {
+    return null;
+  }
+
+  return {
+    id: reward.id,
+    contentVersion: reward.contentVersion ?? legacyContentVersion,
+    status: reward.status as "unclaimed" | "claimed",
+    credits: reward.credits,
+    heroExperience: reward.heroExperience,
+    claimedAt: reward.claimedAt?.toISOString() ?? null,
+    materials: reward.materials.map((material) => {
+      const definition = getMaterialDefinition(material.materialId);
+      return {
+        materialId: material.materialId,
+        label: label(definition.nameKey),
+        quantity: material.quantity,
+      };
+    }),
+    items: reward.items.map((itemReward) => {
+      const definition = getCraftableDefinition(
+        itemReward.inventoryItem.type as CraftableItemType,
+        itemReward.inventoryItem.definitionId,
+      );
+      return {
+        inventoryItemId: itemReward.inventoryItemId,
+        definitionId: itemReward.inventoryItem.definitionId,
+        type: itemReward.inventoryItem.type,
+        label: label(definition.nameKey),
+        experience: itemReward.experience,
+      };
+    }),
+  };
+}
+
+function liveBattleItemExperience(state: BattleState): {
+  inventoryItemId: string;
+  experience: number;
+}[] {
+  const viewer = state.initialSetup.players.find((player) => player.id === currentPlayerId());
+  if (!viewer) {
+    return [];
+  }
+
+  const experienceByItemId = new Map<string, number>();
+  const ringById = new Map(viewer.rings.map((ring) => [ring.id, ring]));
+  const gemById = new Map(
+    viewer.rings.flatMap((ring) => ring.gems.map((gem) => [gem.id, gem] as const)),
+  );
+  const summonedMonsterSources = new Map<string, string>();
+  let pendingMonsterSources: { definitionId: string; inventoryItemId: string }[] = [];
+
+  const addExperience = (inventoryItemId: string | undefined, amount: number) => {
+    if (!inventoryItemId) {
+      return;
+    }
+    experienceByItemId.set(
+      inventoryItemId,
+      (experienceByItemId.get(inventoryItemId) ?? 0) + amount,
+    );
+  };
+
+  for (const ring of viewer.rings) {
+    addExperience(ring.id, participationItemExperience);
+    for (const gem of ring.gems) {
+      addExperience(gem.id, participationItemExperience);
+      addExperience(gem.enchantment?.resolvedDefinitionId, participationItemExperience);
+    }
+  }
+
+  for (const event of state.log) {
+    if (event.type === "ringUsed" && event.playerId === currentPlayerId()) {
+      const ring = ringById.get(event.ringInstanceId);
+      if (!ring) {
+        continue;
+      }
+
+      addExperience(ring.id, usedItemExperience);
+      pendingMonsterSources = [];
+      for (const gem of ring.gems) {
+        addExperience(gem.id, usedItemExperience);
+        if (gem.enchantment?.type === "monster" && gem.enchantment.resolvedDefinitionId) {
+          pendingMonsterSources.push({
+            definitionId: gem.enchantment.monsterId,
+            inventoryItemId: gem.enchantment.resolvedDefinitionId,
+          });
+        }
+      }
+      continue;
+    }
+
+    if (event.type === "spellCast") {
+      const enchantment = gemById.get(event.sourceGemId)?.enchantment;
+      if (enchantment?.type === "spell") {
+        addExperience(enchantment.resolvedDefinitionId, usedItemExperience);
+      }
+      continue;
+    }
+
+    if (event.type === "monsterSummoned" && event.playerId === currentPlayerId()) {
+      const sourceIndex = pendingMonsterSources.findIndex(
+        (source) => source.definitionId === event.monsterId,
+      );
+      const source = pendingMonsterSources[sourceIndex];
+      if (source) {
+        pendingMonsterSources.splice(sourceIndex, 1);
+        summonedMonsterSources.set(event.monsterInstanceId, source.inventoryItemId);
+        addExperience(source.inventoryItemId, usedItemExperience);
+      }
+      continue;
+    }
+
+    if (event.type === "monsterUsed" && event.playerId === currentPlayerId()) {
+      addExperience(summonedMonsterSources.get(event.monsterInstanceId), usedItemExperience);
+    }
+  }
+
+  return [...experienceByItemId.entries()]
+    .map(([inventoryItemId, experience]) => ({ inventoryItemId, experience }))
+    .sort((left, right) => left.inventoryItemId.localeCompare(right.inventoryItemId));
+}
+
+type BattleSummaryActivity = {
+  id: string;
+  label: string;
+  playerId: string;
+  count: number;
+};
+
+function battleResultSummary(state: BattleState) {
+  if (state.status !== "finished" || !state.result) {
+    return null;
+  }
+
+  const damageByPlayerId = new Map(state.players.map((player) => [player.id, 0]));
+  const actionCountByPlayerId = new Map(state.players.map((player) => [player.id, 0]));
+  const ringById = new Map(
+    state.initialSetup.players.flatMap((player) =>
+      player.rings.map((ring) => [ring.id, { playerId: player.id, ring }] as const),
+    ),
+  );
+  const monsterDefinitionByInstanceId = new Map<string, string>();
+  const monsterOwnerByInstanceId = new Map<string, string>();
+  const ringsUsed = new Map<string, BattleSummaryActivity>();
+  const spellsCast = new Map<string, BattleSummaryActivity>();
+  const monstersSummoned = new Map<string, BattleSummaryActivity>();
+  const monstersUsed = new Map<string, BattleSummaryActivity>();
+  let activeDamageOwnerId: string | undefined;
+
+  for (const player of state.initialSetup.players) {
+    for (const monster of player.monsters) {
+      monsterDefinitionByInstanceId.set(monster.id, monster.definitionId);
+      monsterOwnerByInstanceId.set(monster.id, player.id);
+    }
+  }
+
+  for (const action of state.actionHistory) {
+    actionCountByPlayerId.set(
+      action.playerId,
+      (actionCountByPlayerId.get(action.playerId) ?? 0) + 1,
+    );
+  }
+
+  for (const event of state.log) {
+    switch (event.type) {
+      case "ringUsed": {
+        activeDamageOwnerId = event.playerId;
+        const source = ringById.get(event.ringInstanceId);
+        incrementBattleSummaryActivity(
+          ringsUsed,
+          event.ringInstanceId,
+          source ? label(source.ring.nameKey) : event.ringInstanceId,
+          event.playerId,
+        );
+        break;
+      }
+      case "spellCast": {
+        const definition = state.definitions.spells[event.spellId];
+        incrementBattleSummaryActivity(
+          spellsCast,
+          event.spellId,
+          definition ? label(definition.nameKey) : event.spellId,
+          activeDamageOwnerId ?? "unknown",
+        );
+        break;
+      }
+      case "monsterSummoned": {
+        monsterDefinitionByInstanceId.set(event.monsterInstanceId, event.monsterId);
+        monsterOwnerByInstanceId.set(event.monsterInstanceId, event.playerId);
+        const definition = state.definitions.monsters[event.monsterId];
+        incrementBattleSummaryActivity(
+          monstersSummoned,
+          event.monsterId,
+          definition ? label(definition.nameKey) : event.monsterId,
+          event.playerId,
+        );
+        break;
+      }
+      case "monsterUsed": {
+        activeDamageOwnerId = event.playerId;
+        const definitionId = monsterDefinitionByInstanceId.get(event.monsterInstanceId);
+        const definition = definitionId ? state.definitions.monsters[definitionId] : undefined;
+        incrementBattleSummaryActivity(
+          monstersUsed,
+          definitionId ?? event.monsterInstanceId,
+          definition ? label(definition.nameKey) : (definitionId ?? event.monsterInstanceId),
+          event.playerId,
+        );
+        break;
+      }
+      case "damageDealt": {
+        const ownerId =
+          ringById.get(event.sourceId)?.playerId ??
+          monsterOwnerByInstanceId.get(event.sourceId) ??
+          activeDamageOwnerId;
+        if (ownerId && damageByPlayerId.has(ownerId)) {
+          damageByPlayerId.set(ownerId, (damageByPlayerId.get(ownerId) ?? 0) + event.amount);
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  return {
+    turnCount: Math.max(...state.players.map((player) => player.energy.turnCount)),
+    actionCount: state.actionHistory.length,
+    players: state.players.map((player) => ({
+      playerId: player.id,
+      username: player.username,
+      damage: damageByPlayerId.get(player.id) ?? 0,
+      actionCount: actionCountByPlayerId.get(player.id) ?? 0,
+    })),
+    ringsUsed: [...ringsUsed.values()],
+    spellsCast: [...spellsCast.values()],
+    monstersSummoned: [...monstersSummoned.values()],
+    monstersUsed: [...monstersUsed.values()],
+  };
+}
+
+function incrementBattleSummaryActivity(
+  entries: Map<string, BattleSummaryActivity>,
+  id: string,
+  activityLabel: string,
+  playerId: string,
+): void {
+  const key = `${playerId}:${id}`;
+  const existing = entries.get(key);
+  entries.set(key, {
+    id,
+    label: activityLabel,
+    playerId,
+    count: (existing?.count ?? 0) + 1,
+  });
 }
 
 function developmentBattleRecord(outcome: Exclude<BattleOutcome, "draw">): BattleRecord {
@@ -2756,7 +4237,7 @@ function assertMatchingMarketTransaction(
   },
 ): void {
   const matches =
-    transaction.playerId === DEV_PLAYER_ID &&
+    transaction.playerId === currentPlayerId() &&
     transaction.action === expected.action &&
     transaction.resourceType === "material" &&
     transaction.resourceId === expected.materialId &&
@@ -2788,4 +4269,16 @@ function capitalize(value: string): string {
 
 function label(key: string): string {
   return (locales.en as Record<string, string>)[key] ?? key;
+}
+
+function requiredContentDefinition<T extends { id: string }>(
+  values: ReadonlyMap<string, T>,
+  id: string,
+  kind: string,
+): T {
+  const value = values.get(id);
+  if (!value) {
+    throw new Error(`Validated campaign content references unknown ${kind} "${id}".`);
+  }
+  return value;
 }

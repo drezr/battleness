@@ -8,52 +8,143 @@ datasource db {
 }
 
 model Player {
-  id                 String              @id
-  username           String
-  experience         Int                 @default(0)
-  credits            Int                 @default(0)
-  nextItemSequence   Int                 @default(1)
-  activeLoadoutId    String?
-  activeLoadout      Loadout?            @relation("ActivePlayerLoadout", fields: [activeLoadoutId], references: [id], onDelete: SetNull)
-  battleRecordsWon   BattleRecord[]      @relation("BattleRecordWinner")
-  battleRecordsAsOne BattleRecord[]      @relation("BattleRecordPlayerOne")
-  battleRecordsAsTwo BattleRecord[]      @relation("BattleRecordPlayerTwo")
-  equippedRings      EquippedRing[]
-  inventoryItems     InventoryItem[]
-  loadouts           Loadout[]           @relation("PlayerLoadouts")
-  marketTransactions MarketTransaction[]
-  materialStock      MaterialStock[]
-  rewardGrants       RewardGrant[]
-  ringSockets        RingSocket[]
-  gemEnchantments    GemEnchantment[]
+  id                  String                    @id
+  username            String
+  displayName         String?
+  profileVisibility   String                    @default("public")
+  experience          Int                       @default(0)
+  credits             Int                       @default(0)
+  nextItemSequence    Int                       @default(1)
+  createdAt           DateTime                  @default(now())
+  lastActiveAt        DateTime                  @default(now())
+  activeLoadoutId     String?
+  activeLoadout       Loadout?                  @relation("ActivePlayerLoadout", fields: [activeLoadoutId], references: [id], onDelete: SetNull)
+  authIdentities      AuthIdentity[]
+  battleRecordsWon    BattleRecord[]            @relation("BattleRecordWinner")
+  battleRecordsAsOne  BattleRecord[]            @relation("BattleRecordPlayerOne")
+  battleRecordsAsTwo  BattleRecord[]            @relation("BattleRecordPlayerTwo")
+  campaignProgress    CampaignProgress[]
+  equippedRings       EquippedRing[]
+  inventoryItems      InventoryItem[]
+  loadouts            Loadout[]                 @relation("PlayerLoadouts")
+  marketTransactions  MarketTransaction[]
+  materialStock       MaterialStock[]
+  preferences         PlayerPreferences?
+  privateMatchEntries PrivateMatchParticipant[]
+  rewardGrants        RewardGrant[]
+  ringSockets         RingSocket[]
+  gemEnchantments     GemEnchantment[]
+  sessions            PlayerSession[]
+}
+
+model AuthIdentity {
+  id                String    @id @default(cuid())
+  playerId          String
+  provider          String
+  providerAccountId String
+  email             String?
+  emailVerifiedAt   DateTime?
+  passwordHash      String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  player            Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([playerId])
+  @@index([email])
+}
+
+model PlayerSession {
+  id         String    @id @default(cuid())
+  playerId   String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime  @default(now())
+  revokedAt  DateTime?
+  player     Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId])
+  @@index([expiresAt])
+}
+
+model OAuthLoginAttempt {
+  stateHash          String   @id
+  provider           String
+  browserBindingHash String
+  codeVerifier       String
+  returnTo           String
+  expiresAt          DateTime
+  createdAt          DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+model PlayerPreferences {
+  playerId         String   @id
+  locale           String   @default("en")
+  theme            String   @default("system")
+  reducedMotion    Boolean  @default(false)
+  interfaceDensity String   @default("comfortable")
+  muted            Boolean  @default(false)
+  masterVolume     Int      @default(100)
+  musicVolume      Int      @default(70)
+  effectsVolume    Int      @default(80)
+  updatedAt        DateTime @updatedAt
+  player           Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+model CampaignProgress {
+  playerId       String
+  opponentId     String
+  contentVersion String    @default("legacy-unversioned")
+  victoryCount   Int       @default(0)
+  firstClearedAt DateTime?
+  lastVictoryAt  DateTime?
+  player         Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@id([playerId, opponentId])
+  @@index([opponentId])
+  @@index([contentVersion])
+}
+
+model ContentRelease {
+  version      String   @id
+  checksum     String
+  manifestJson String
+  importedAt   DateTime @default(now())
 }
 
 model MarketTransaction {
-  id           String   @id @default(cuid())
-  requestId    String   @unique
-  playerId     String
-  action       String
-  resourceType String
-  resourceId   String
-  quantity     Int
-  unitPrice    Int
-  creditsDelta Int
-  createdAt    DateTime @default(now())
-  player       Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  id             String   @id @default(cuid())
+  requestId      String   @unique
+  playerId       String
+  action         String
+  resourceType   String
+  resourceId     String
+  quantity       Int
+  unitPrice      Int
+  creditsDelta   Int
+  contentVersion String   @default("legacy-unversioned")
+  createdAt      DateTime @default(now())
+  player         Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   @@index([playerId, createdAt])
   @@index([resourceType, resourceId])
   @@index([action])
+  @@index([contentVersion])
 }
 
 model MaterialStock {
-  playerId   String
-  materialId String
-  quantity   Int
-  player     Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  playerId       String
+  materialId     String
+  quantity       Int
+  contentVersion String @default("legacy-unversioned")
+  player         Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   @@id([playerId, materialId])
   @@index([materialId])
+  @@index([contentVersion])
 }
 
 model InventoryItem {
@@ -130,14 +221,15 @@ model EquippedRing {
 }
 
 model Loadout {
-  id               String        @id @default(cuid())
-  playerId         String
-  name             String
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  activeForPlayers Player[]      @relation("ActivePlayerLoadout")
-  player           Player        @relation("PlayerLoadouts", fields: [playerId], references: [id], onDelete: Cascade)
-  rings            LoadoutRing[]
+  id                  String                    @id @default(cuid())
+  playerId            String
+  name                String
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  activeForPlayers    Player[]                  @relation("ActivePlayerLoadout")
+  player              Player                    @relation("PlayerLoadouts", fields: [playerId], references: [id], onDelete: Cascade)
+  rings               LoadoutRing[]
+  privateMatchEntries PrivateMatchParticipant[]
 
   @@unique([playerId, name])
   @@index([playerId])
@@ -202,6 +294,7 @@ model RewardGrantItem {
 model BattleRecord {
   id                 String        @id @default(cuid())
   mode               String
+  modeReferenceId    String?
   status             String        @default("finished")
   result             String
   playerOneId        String?
@@ -220,11 +313,49 @@ model BattleRecord {
   playerTwo          Player?       @relation("BattleRecordPlayerTwo", fields: [playerTwoId], references: [id], onDelete: SetNull)
   rewardGrants       RewardGrant[]
   winnerPlayer       Player?       @relation("BattleRecordWinner", fields: [winnerPlayerId], references: [id], onDelete: SetNull)
+  privateMatch       PrivateMatch?
 
   @@index([mode])
+  @@index([mode, modeReferenceId])
   @@index([status])
   @@index([playerOneId])
   @@index([playerTwoId])
   @@index([winnerPlayerId])
   @@index([contentVersion])
+}
+
+model PrivateMatch {
+  id             String                    @id @default(cuid())
+  code           String                    @unique
+  status         String                    @default("waiting")
+  battleRecordId String?                   @unique
+  turnPlayerId   String?
+  turnDeadlineAt DateTime?
+  expiresAt      DateTime
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  battleRecord   BattleRecord?             @relation(fields: [battleRecordId], references: [id], onDelete: SetNull)
+  participants   PrivateMatchParticipant[]
+
+  @@index([status])
+  @@index([expiresAt])
+  @@index([turnDeadlineAt])
+}
+
+model PrivateMatchParticipant {
+  matchId   String
+  playerId  String
+  slot      String
+  loadoutId String?
+  ready     Boolean      @default(false)
+  joinedAt  DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  match     PrivateMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player    Player       @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  loadout   Loadout?     @relation(fields: [loadoutId], references: [id], onDelete: SetNull)
+
+  @@id([matchId, playerId])
+  @@unique([matchId, slot])
+  @@index([playerId])
+  @@index([loadoutId])
 }

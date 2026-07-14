@@ -1,22 +1,24 @@
 <template>
   <main class="shell">
-    <nav class="section-nav" aria-label="Battle navigation">
+    <nav class="section-nav" :aria-label="t('accessibility.battleNavigation')">
       <NuxtLink v-for="link in sectionLinks.battle" :key="link.to" :to="link.to">
-        {{ link.label }}
+        {{ $t(link.labelKey) }}
       </NuxtLink>
     </nav>
 
     <header class="view-header">
       <div class="view-title">
-        <span class="eyebrow">Battle Result</span>
-        <h1>{{ record ? record.outcome : "Result" }}</h1>
-        <p class="muted">Verified battle record and persistent rewards.</p>
+        <span class="eyebrow">{{ t("battle.result.section") }}</span>
+        <h1>{{ record ? t(`battle.outcome.${record.outcome}`) : t("battle.result.title") }}</h1>
+        <p class="muted">{{ t("battle.result.description") }}</p>
       </div>
-      <NuxtLink class="button-link secondary-button" to="/battle/history">History</NuxtLink>
+      <NuxtLink class="button-link secondary-button" to="/battle/history">{{
+        t("navigation.history")
+      }}</NuxtLink>
     </header>
 
-    <p v-if="pending" class="panel">Loading battle result...</p>
-    <p v-else-if="error || !record" class="panel">Battle result not found.</p>
+    <p v-if="pending" class="panel">{{ t("battle.result.loading") }}</p>
+    <p v-else-if="error || !record" class="panel">{{ t("battle.result.notFound") }}</p>
 
     <template v-else>
       <p v-if="feedback" class="feedback">{{ feedback }}</p>
@@ -25,31 +27,36 @@
         :claiming-reward-id="claimingRewardId"
         @claim="claimReward"
       />
+      <BattleResultSummary
+        v-if="record.summary"
+        :summary="record.summary"
+        :reward="record.reward"
+      />
       <section class="panel battle-record-technical">
-        <h2>Record Verification</h2>
+        <h2>{{ t("battle.result.verification") }}</h2>
         <dl class="summary-grid">
           <div class="stat">
-            <dt>Record ID</dt>
+            <dt>{{ t("battle.result.recordId") }}</dt>
             <dd>
               <code>{{ record.id }}</code>
             </dd>
           </div>
           <div class="stat">
-            <dt>Seed</dt>
+            <dt>{{ t("battle.result.seed") }}</dt>
             <dd>
               <code>{{ record.seed }}</code>
             </dd>
           </div>
           <div class="stat">
-            <dt>Rules</dt>
+            <dt>{{ t("battle.result.rules") }}</dt>
             <dd>{{ record.rulesVersion }}</dd>
           </div>
           <div class="stat">
-            <dt>Content</dt>
+            <dt>{{ t("battle.result.content") }}</dt>
             <dd>{{ record.contentVersion }}</dd>
           </div>
           <div class="stat">
-            <dt>Checksum</dt>
+            <dt>{{ t("battle.result.checksum") }}</dt>
             <dd>
               <code>{{ record.finalStateChecksum }}</code>
             </dd>
@@ -65,6 +72,7 @@ import type { BattleHistoryState } from "~/utils/playerState";
 import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
+const { t } = useI18n();
 const { data: state, error, pending } = await useFetch<BattleHistoryState>("/api/battle/history");
 const claimingRewardId = ref("");
 const feedback = ref("");
@@ -82,10 +90,11 @@ async function claimReward(rewardGrantId: string): Promise<void> {
       method: "POST",
       body: { rewardGrantId },
     });
-    feedback.value = "Battle rewards claimed.";
+    feedback.value = t("profile.history.claimed");
     await refreshNuxtData();
   } catch (claimError) {
-    feedback.value = claimError instanceof Error ? claimError.message : "Reward claim failed.";
+    feedback.value =
+      claimError instanceof Error ? claimError.message : t("profile.history.claimError");
   } finally {
     claimingRewardId.value = "";
   }

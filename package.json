@@ -11,6 +11,7 @@
     "build": "pnpm -r build",
     "dev": "pnpm --filter @battleness/prototype dev",
     "dev:web": "pnpm --filter @battleness/web dev",
+    "dev:web:oauth": "pnpm --filter @battleness/web dev:oauth",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

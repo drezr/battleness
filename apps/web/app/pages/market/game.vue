@@ -1,48 +1,50 @@
 <template>
   <main class="shell">
-    <nav class="section-nav" aria-label="Market navigation">
+    <nav class="section-nav" :aria-label="t('accessibility.marketNavigation')">
       <NuxtLink
         v-for="link in sectionLinks.market"
         :key="link.to"
         :class="{ active: route.path === link.to }"
         :to="link.to"
       >
-        {{ link.label }}
+        {{ $t(link.labelKey) }}
       </NuxtLink>
     </nav>
 
     <header class="view-header">
       <div class="view-title">
-        <span class="eyebrow">Market</span>
-        <h1>Game Market</h1>
-        <p class="muted">Buy and sell crafting materials through the fixed game economy.</p>
+        <span class="eyebrow">{{ t("market.section") }}</span>
+        <h1>{{ t("market.game.title") }}</h1>
+        <p class="muted">{{ t("market.game.description") }}</p>
       </div>
-      <p v-if="state" class="status-note">Credits: {{ state.player.credits }}</p>
+      <p v-if="state" class="status-note">
+        {{ t("common.creditCount", { count: state.player.credits }) }}
+      </p>
     </header>
 
-    <p v-if="pending" class="panel">Loading game market...</p>
-    <p v-else-if="error" class="panel">Unable to load game market.</p>
+    <p v-if="pending" class="panel">{{ t("market.game.loading") }}</p>
+    <p v-else-if="error" class="panel">{{ t("market.game.loadError") }}</p>
 
     <template v-else-if="state">
       <div class="filter-bar">
         <label>
-          <span class="field-label">Crafting Family</span>
+          <span class="field-label">{{ t("inventory.materials.craftingFamily") }}</span>
           <select v-model="familyFilter">
-            <option value="all">All</option>
-            <option value="ring">Ring</option>
-            <option value="gem">Gem</option>
-            <option value="monster">Monster</option>
-            <option value="spell">Spell</option>
+            <option value="all">{{ t("common.all") }}</option>
+            <option value="ring">{{ t("itemType.ring") }}</option>
+            <option value="gem">{{ t("itemType.gem") }}</option>
+            <option value="monster">{{ t("itemType.monster") }}</option>
+            <option value="spell">{{ t("itemType.spell") }}</option>
           </select>
         </label>
         <label>
-          <span class="field-label">Rarity</span>
+          <span class="field-label">{{ t("inventory.materials.rarity") }}</span>
           <select v-model="rarityFilter">
-            <option value="all">All</option>
-            <option value="common">Common</option>
-            <option value="refined">Refined</option>
-            <option value="rare">Rare</option>
-            <option value="epic">Epic</option>
+            <option value="all">{{ t("common.all") }}</option>
+            <option value="common">{{ t("rarity.common") }}</option>
+            <option value="refined">{{ t("rarity.refined") }}</option>
+            <option value="rare">{{ t("rarity.rare") }}</option>
+            <option value="epic">{{ t("rarity.epic") }}</option>
           </select>
         </label>
       </div>
@@ -63,32 +65,32 @@
             <ItemArtwork :definition-id="material.id" kind="material" />
             <div class="item-card-body">
               <div class="card-heading">
-                <h3>{{ material.label }}</h3>
+                <h3>{{ materialName(material.id, material.label) }}</h3>
                 <span :class="['pill', `rarity-${material.rarity}`]">
-                  {{ material.rarity }}
+                  {{ t(`rarity.${material.rarity}`) }}
                 </span>
               </div>
               <p class="muted">
                 {{ material.chemicalSymbol ?? material.realWorldType }} -
-                {{ material.craftingFamily }}
+                {{ t(`itemType.${material.craftingFamily}`) }}
               </p>
               <dl class="summary-grid item-detail-grid">
                 <div class="stat">
-                  <dt>Owned</dt>
+                  <dt>{{ t("market.game.owned") }}</dt>
                   <dd>{{ material.quantity }}</dd>
                 </div>
                 <div class="stat">
-                  <dt>Buy</dt>
+                  <dt>{{ t("market.game.buy") }}</dt>
                   <dd>{{ material.buyPrice }}</dd>
                 </div>
                 <div class="stat">
-                  <dt>Sell</dt>
+                  <dt>{{ t("market.game.sell") }}</dt>
                   <dd>{{ material.sellPrice }}</dd>
                 </div>
               </dl>
               <div class="control-row">
                 <button class="secondary-button" type="button" @click="selectMaterial(material.id)">
-                  Inspect
+                  {{ t("common.inspect") }}
                 </button>
               </div>
             </div>
@@ -98,45 +100,57 @@
         <div class="stack market-detail-column">
           <ItemDetailPanel
             :item="selectedMaterial"
-            title="Material Detail"
+            :title="t('inventory.materials.detail')"
             @clear="selectedMaterialId = ''"
           />
 
           <section class="panel">
             <div class="card-heading">
               <div>
-                <span class="eyebrow">Transaction</span>
-                <h2>{{ marketAction === "buy" ? "Buy Material" : "Sell Material" }}</h2>
+                <span class="eyebrow">{{ t("market.game.transaction") }}</span>
+                <h2>
+                  {{
+                    t(
+                      marketAction === "buy"
+                        ? "market.game.buyMaterial"
+                        : "market.game.sellMaterial",
+                    )
+                  }}
+                </h2>
               </div>
               <span v-if="selectedMaterial" class="pill muted-pill">
-                {{ transactionUnitPrice }} each
+                {{ t("market.game.each", { price: transactionUnitPrice }) }}
               </span>
             </div>
 
-            <div class="segmented-control" role="group" aria-label="Market action">
+            <div
+              class="segmented-control"
+              role="group"
+              :aria-label="t('accessibility.marketAction')"
+            >
               <button
                 :class="{ active: marketAction === 'buy' }"
                 type="button"
                 @click="selectMarketAction('buy')"
               >
-                Buy
+                {{ t("market.game.buy") }}
               </button>
               <button
                 :class="{ active: marketAction === 'sell' }"
                 type="button"
                 @click="selectMarketAction('sell')"
               >
-                Sell
+                {{ t("market.game.sell") }}
               </button>
             </div>
 
             <p v-if="!selectedMaterial" class="muted">
-              Select a material to prepare a transaction.
+              {{ t("market.game.selectMaterial") }}
             </p>
 
             <div v-else class="stack">
               <label>
-                <span class="field-label">Quantity</span>
+                <span class="field-label">{{ t("itemDetail.quantity") }}</span>
                 <input
                   v-model.number="transactionQuantity"
                   min="1"
@@ -147,15 +161,23 @@
               </label>
               <dl class="summary-grid">
                 <div class="stat">
-                  <dt>{{ marketAction === "buy" ? "Total Cost" : "Credits Earned" }}</dt>
+                  <dt>
+                    {{
+                      t(
+                        marketAction === "buy"
+                          ? "market.game.totalCost"
+                          : "market.game.creditsEarned",
+                      )
+                    }}
+                  </dt>
                   <dd>{{ transactionTotal }}</dd>
                 </div>
                 <div class="stat">
-                  <dt>Credits After</dt>
+                  <dt>{{ t("market.game.creditsAfter") }}</dt>
                   <dd :class="{ positive: canTransact }">{{ creditsAfterTransaction }}</dd>
                 </div>
                 <div v-if="marketAction === 'sell'" class="stat">
-                  <dt>Stock After</dt>
+                  <dt>{{ t("market.game.stockAfter") }}</dt>
                   <dd>{{ stockAfterTransaction }}</dd>
                 </div>
               </dl>
@@ -164,13 +186,17 @@
                 type="button"
                 @click="submitMarketTransaction"
               >
-                {{ processing ? "Processing" : marketAction === "buy" ? "Buy" : "Sell" }}
+                {{
+                  processing
+                    ? t("market.game.processing")
+                    : t(marketAction === "buy" ? "market.game.buy" : "market.game.sell")
+                }}
               </button>
               <small v-if="validQuantity && marketAction === 'buy' && !canAfford">
-                Not enough credits.
+                {{ t("forge.notEnoughCredits") }}
               </small>
               <small v-if="validQuantity && marketAction === 'sell' && !hasEnoughStock">
-                Not enough material stock.
+                {{ t("market.game.notEnoughStock") }}
               </small>
             </div>
 
@@ -180,19 +206,29 @@
           <section class="panel">
             <div class="card-heading">
               <div>
-                <span class="eyebrow">History</span>
-                <h2>Recent Transactions</h2>
+                <span class="eyebrow">{{ t("navigation.history") }}</span>
+                <h2>{{ t("market.game.recentTransactions") }}</h2>
               </div>
               <span class="pill muted-pill">{{ state.transactions.length }}</span>
             </div>
-            <p v-if="state.transactions.length === 0" class="muted">No market activity yet.</p>
+            <p v-if="state.transactions.length === 0" class="muted">
+              {{ t("market.game.noActivity") }}
+            </p>
             <ul v-else class="clean-list market-history">
               <li v-for="transaction in state.transactions" :key="transaction.id">
                 <div>
-                  <strong>{{ transaction.action }} {{ transaction.resourceLabel }}</strong>
+                  <strong
+                    >{{ t(`market.game.action.${transaction.action}`) }}
+                    {{ materialName(transaction.resourceId, transaction.resourceLabel) }}</strong
+                  >
                   <small>
-                    {{ transaction.quantity }} at {{ transaction.unitPrice }} each -
-                    {{ formatTransactionDate(transaction.createdAt) }}
+                    {{
+                      t("market.game.historyLine", {
+                        quantity: transaction.quantity,
+                        price: transaction.unitPrice,
+                        date: formatTransactionDate(transaction.createdAt),
+                      })
+                    }}
                   </small>
                 </div>
                 <strong :class="transaction.creditsDelta > 0 ? 'positive' : 'negative'">
@@ -212,6 +248,8 @@ import type { GameMarketState } from "~/utils/playerState";
 import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
+const { t, locale } = useI18n();
+const contentText = useContentText();
 const { data: state, error, pending } = await useFetch<GameMarketState>("/api/market/game");
 const familyFilter = ref("all");
 const rarityFilter = ref("all");
@@ -220,6 +258,10 @@ const marketAction = ref<"buy" | "sell">("buy");
 const transactionQuantity = ref(1);
 const processing = ref(false);
 const feedback = ref("");
+
+function materialName(id: string, fallback: string): string {
+  return contentText(`material.${id}.name`, fallback);
+}
 
 const filteredMaterials = computed(() =>
   (state.value?.materials ?? []).filter((material) => {
@@ -310,17 +352,20 @@ async function submitMarketTransaction(): Promise<void> {
         requestId: crypto.randomUUID(),
       },
     });
-    feedback.value = `${quantity} ${materialLabel} ${action === "buy" ? "purchased" : "sold"}.`;
+    feedback.value = t(action === "buy" ? "market.game.purchased" : "market.game.sold", {
+      quantity,
+      material: materialName(selectedMaterial.value.id, materialLabel),
+    });
     await refreshNuxtData();
   } catch (transactionError) {
     feedback.value =
-      transactionError instanceof Error ? transactionError.message : "Market transaction failed.";
+      transactionError instanceof Error ? transactionError.message : t("market.game.actionError");
   } finally {
     processing.value = false;
   }
 }
 
 function formatTransactionDate(value: string): string {
-  return new Date(value).toLocaleString();
+  return new Date(value).toLocaleString(locale.value);
 }
 </script>

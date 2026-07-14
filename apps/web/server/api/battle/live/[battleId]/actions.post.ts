@@ -1,6 +1,7 @@
+import { definePlayerHandler } from "../../../../utils/playerHandler";
 import { submitLiveBattleAction, type LiveBattleActionCommand } from "../../../../utils/gameState";
 
-export default defineEventHandler(async (event) => {
+export default definePlayerHandler(async (event) => {
   const battleId = getRouterParam(event, "battleId");
   const body = await readBody<{
     expectedActionCount?: number;

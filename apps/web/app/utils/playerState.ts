@@ -1,13 +1,56 @@
 export type PlayerState = {
+  content: ContentReleaseView;
   player: {
     id: string;
     username: string;
+    displayName: string;
     experience: number;
+    level: number;
+    maxHealth: number;
+    progression: ExperienceProgressView;
     credits: number;
   };
   materials: MaterialView[];
   inventory: InventoryItemView[];
   recipes: RecipeView[];
+};
+
+export type ProfileSettingsState = {
+  profile: {
+    id: string;
+    username: string;
+    displayName: string;
+    visibility: "public" | "private";
+    createdAt: string;
+    lastActiveAt: string;
+  };
+  preferences: {
+    locale: "en" | "fr";
+    theme: "system" | "dark" | "light";
+    reducedMotion: boolean;
+    interfaceDensity: "comfortable" | "compact";
+    muted: boolean;
+    masterVolume: number;
+    musicVolume: number;
+    effectsVolume: number;
+    updatedAt: string | null;
+  };
+};
+
+export type ContentReleaseView = {
+  version: string;
+  checksum: string;
+};
+
+export type ExperienceProgressView = {
+  level: number;
+  maxLevel: number;
+  currentLevelExperience: number;
+  nextLevelExperience: number | null;
+  experienceIntoLevel: number;
+  experienceForNextLevel: number | null;
+  experienceRemaining: number;
+  progressPercent: number;
 };
 
 export type MaterialView = {
@@ -20,6 +63,7 @@ export type MaterialView = {
   chemicalSymbol: string | null;
   atomicNumber: number | null;
   quantity: number;
+  contentVersion: string;
 };
 
 export type GameMarketMaterialView = MaterialView & {
@@ -37,10 +81,12 @@ export type GameMarketTransactionView = {
   quantity: number;
   unitPrice: number;
   creditsDelta: number;
+  contentVersion: string;
   createdAt: string;
 };
 
 export type GameMarketState = {
+  content: ContentReleaseView;
   player: {
     id: string;
     username: string;
@@ -52,6 +98,7 @@ export type GameMarketState = {
 
 export type BattleRewardView = {
   id: string;
+  contentVersion: string;
   status: "unclaimed" | "claimed";
   credits: number;
   heroExperience: number;
@@ -70,6 +117,28 @@ export type BattleRewardView = {
   }[];
 };
 
+export type BattleResultSummaryActivityView = {
+  id: string;
+  label: string;
+  playerId: string;
+  count: number;
+};
+
+export type BattleResultSummaryView = {
+  turnCount: number;
+  actionCount: number;
+  players: {
+    playerId: string;
+    username: string;
+    damage: number;
+    actionCount: number;
+  }[];
+  ringsUsed: BattleResultSummaryActivityView[];
+  spellsCast: BattleResultSummaryActivityView[];
+  monstersSummoned: BattleResultSummaryActivityView[];
+  monstersUsed: BattleResultSummaryActivityView[];
+};
+
 export type BattleHistoryRecordView = {
   id: string;
   mode: string;
@@ -84,6 +153,7 @@ export type BattleHistoryRecordView = {
   replayAvailable: boolean;
   createdAt: string;
   reward: BattleRewardView | null;
+  summary: BattleResultSummaryView | null;
 };
 
 export type BattleHistoryState = {
@@ -95,6 +165,94 @@ export type BattleHistoryState = {
     level: number;
   };
   records: BattleHistoryRecordView[];
+};
+
+export type PrivateMatchState = {
+  playerId: string;
+  match: null | {
+    id: string;
+    code: string;
+    status: "waiting" | "starting" | "active" | "finished" | "cancelled";
+    battleId: string | null;
+    turnPlayerId: string | null;
+    turnDeadlineAt: string | null;
+    expiresAt: string;
+    participants: {
+      playerId: string;
+      username: string;
+      slot: "host" | "guest";
+      ready: boolean;
+      loadoutId: string | null;
+      loadoutName: string | null;
+      ringCount: number;
+    }[];
+  };
+  loadouts: {
+    id: string;
+    name: string;
+    ringCount: number;
+  }[];
+};
+
+export type CampaignRewardPreview = {
+  credits: number;
+  heroExperience: number;
+  materials: {
+    materialId: string;
+    label: string;
+    quantity: number;
+  }[];
+};
+
+export type CampaignOpponentView = {
+  id: string;
+  order: number;
+  label: string;
+  description: string;
+  element: string;
+  recommendedLevel: number;
+  opponentLevel: number;
+  victoryCount: number;
+  status: "available" | "locked" | "completed";
+  repeatable: boolean;
+  prerequisite: { id: string; label: string } | null;
+  loadoutVisibility: "hidden" | "summary" | "full";
+  rings: {
+    definitionId: string;
+    label: string;
+    element: string;
+    rarity: string;
+    level: number;
+    quality: number;
+    gems: {
+      definitionId: string;
+      label: string;
+      element: string;
+      rarity: string;
+      enchantment: null | {
+        type: "monster" | "spell";
+        definitionId: string;
+        label: string;
+      };
+    }[];
+  }[];
+  firstClearReward: CampaignRewardPreview;
+  repeatVictoryReward: CampaignRewardPreview;
+};
+
+export type CampaignState = {
+  player: {
+    id: string;
+    username: string;
+    level: number;
+    activeLoadoutId: string | null;
+  };
+  progress: {
+    completedCount: number;
+    unlockedCount: number;
+    totalCount: number;
+  };
+  opponents: CampaignOpponentView[];
 };
 
 export type LiveBattleMonsterView = {
@@ -165,9 +323,13 @@ export type LiveBattleState = {
   contentVersion: string;
   actionCount: number;
   turnCount: number;
+  turnPlayerId: string | null;
+  turnDeadlineAt: string | null;
   viewer: LiveBattlePlayerView;
   opponent: LiveBattlePlayerView;
   result: null | { type: "draw" } | { type: "winner"; winnerId: string; loserId: string };
+  reward: BattleRewardView | null;
+  summary: BattleResultSummaryView | null;
 };
 
 export type LiveBattleActionCommand =
@@ -186,11 +348,15 @@ export type InventoryItemView = {
   id: string;
   type: string;
   definitionId: string;
+  contentVersion: string;
   label: string;
   rarity: string;
   element: string;
   experience: number;
+  level: number;
+  progression: ExperienceProgressView;
   quality: number;
+  bonusPercent: number;
   socketCount: number | null;
   equipped: boolean;
 };

@@ -1,0 +1,139 @@
+[
+  {
+    "id": "emberTrial",
+    "nameKey": "campaign.emberTrial.name",
+    "descriptionKey": "campaign.emberTrial.description",
+    "order": 1,
+    "recommendedLevel": 1,
+    "element": "fire",
+    "experience": 100,
+    "loadoutVisibility": "full",
+    "repeatable": true,
+    "rings": [
+      {
+        "definitionId": "emberLoop",
+        "experience": 100,
+        "quality": 0,
+        "socketCount": 1,
+        "gems": [
+          {
+            "definitionId": "rubyShard",
+            "experience": 100,
+            "quality": 0,
+            "enchantment": {
+              "type": "monster",
+              "definitionId": "emberImp",
+              "experience": 100,
+              "quality": 0
+            }
+          }
+        ]
+      }
+    ],
+    "firstClearReward": {
+      "credits": 200,
+      "heroExperience": 150,
+      "materials": [
+        { "materialId": "aluminium", "quantity": 1 },
+        { "materialId": "sand", "quantity": 1 }
+      ]
+    },
+    "repeatVictoryReward": {
+      "credits": 80,
+      "heroExperience": 60,
+      "materials": [{ "materialId": "aluminium", "quantity": 1 }]
+    }
+  },
+  {
+    "id": "stormInitiate",
+    "nameKey": "campaign.stormInitiate.name",
+    "descriptionKey": "campaign.stormInitiate.description",
+    "order": 2,
+    "recommendedLevel": 3,
+    "element": "electric",
+    "experience": 900,
+    "loadoutVisibility": "full",
+    "prerequisiteOpponentId": "emberTrial",
+    "repeatable": true,
+    "rings": [
+      {
+        "definitionId": "sparkBand",
+        "experience": 900,
+        "quality": 20,
+        "socketCount": 1,
+        "gems": [
+          {
+            "definitionId": "sparkPrism",
+            "experience": 900,
+            "quality": 20,
+            "enchantment": {
+              "type": "monster",
+              "definitionId": "stormHound",
+              "experience": 900,
+              "quality": 20
+            }
+          }
+        ]
+      }
+    ],
+    "firstClearReward": {
+      "credits": 350,
+      "heroExperience": 250,
+      "materials": [
+        { "materialId": "copper", "quantity": 1 },
+        { "materialId": "pearl", "quantity": 1 }
+      ]
+    },
+    "repeatVictoryReward": {
+      "credits": 140,
+      "heroExperience": 100,
+      "materials": [{ "materialId": "pearl", "quantity": 1 }]
+    }
+  },
+  {
+    "id": "frostGate",
+    "nameKey": "campaign.frostGate.name",
+    "descriptionKey": "campaign.frostGate.description",
+    "order": 3,
+    "recommendedLevel": 5,
+    "element": "ice",
+    "experience": 2500,
+    "loadoutVisibility": "full",
+    "prerequisiteOpponentId": "stormInitiate",
+    "repeatable": true,
+    "rings": [
+      {
+        "definitionId": "frostSeal",
+        "experience": 2500,
+        "quality": 40,
+        "socketCount": 1,
+        "gems": [
+          {
+            "definitionId": "frostChip",
+            "experience": 2500,
+            "quality": 40,
+            "enchantment": {
+              "type": "monster",
+              "definitionId": "snowSentinel",
+              "experience": 2500,
+              "quality": 40
+            }
+          }
+        ]
+      }
+    ],
+    "firstClearReward": {
+      "credits": 500,
+      "heroExperience": 400,
+      "materials": [
+        { "materialId": "iron", "quantity": 1 },
+        { "materialId": "wax", "quantity": 1 }
+      ]
+    },
+    "repeatVictoryReward": {
+      "credits": 200,
+      "heroExperience": 160,
+      "materials": [{ "materialId": "wax", "quantity": 1 }]
+    }
+  }
+]

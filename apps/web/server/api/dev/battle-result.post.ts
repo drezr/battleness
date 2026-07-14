@@ -1,6 +1,7 @@
+import { definePlayerHandler } from "../../utils/playerHandler";
 import { createDevelopmentBattleResult } from "../../utils/gameState";
 
-export default defineEventHandler(async (event) => {
+export default definePlayerHandler(async (event) => {
   if (process.env.NODE_ENV === "production") {
     throw createError({
       statusCode: 404,

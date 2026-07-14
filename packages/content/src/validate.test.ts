@@ -2,6 +2,8 @@ import { applyBattleAction, createBattleState, type BattleAction } from "@battle
 import { describe, expect, it } from "vitest";
 import {
   createBattleSetupFromFixture,
+  createCampaignOpponentBattlePlayer,
+  campaignOpponentSchema,
   craftRecipe,
   createMaterialStock,
   definitions,
@@ -15,11 +17,103 @@ import {
   recipeDefinitionSchema,
   ringDefinitionSchema,
   validateContent,
+  validateCampaignReferences,
 } from "./index";
 
 describe("content package", () => {
   it("validates all prototype content and fixtures", () => {
     expect(() => validateContent()).not.toThrow();
+  });
+
+  it("defines a validated linear campaign with fixed rewards", () => {
+    expect(definitions.campaignOpponents.map((opponent) => opponent.id)).toEqual([
+      "emberTrial",
+      "stormInitiate",
+      "frostGate",
+    ]);
+    expect(
+      definitions.campaignOpponents.map((opponent) => opponent.prerequisiteOpponentId),
+    ).toEqual([undefined, "emberTrial", "stormInitiate"]);
+    expect(
+      definitions.campaignOpponents.every(
+        (opponent) =>
+          opponent.repeatable &&
+          opponent.firstClearReward.credits > opponent.repeatVictoryReward.credits,
+      ),
+    ).toBe(true);
+  });
+
+  it("converts a campaign opponent loadout into deterministic engine instances", () => {
+    const baseSetup = createBattleSetupFromFixture("basicDuel");
+    const opponent = definitions.campaignOpponents[0]!;
+    const player = createCampaignOpponentBattlePlayer({
+      opponent,
+      username: (locales.en as Record<string, string>)[opponent.nameKey]!,
+      resolvedDefinitions: structuredClone(baseSetup.definitions),
+    });
+
+    expect(player).toMatchObject({
+      id: "campaign.emberTrial",
+      username: "Ember Trial",
+      level: 1,
+      rings: [
+        {
+          id: "campaign.emberTrial.ring.emberLoop.1",
+          definitionId: "emberLoop",
+          ownerId: "campaign.emberTrial",
+          gems: [
+            {
+              id: "campaign.emberTrial.gem.rubyShard.1.1",
+              definitionId: "rubyShard",
+              enchantment: {
+                type: "monster",
+                monsterId: "emberImp",
+                resolvedDefinitionId: "campaign.emberTrial.monster.emberImp.1.1",
+              },
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("rejects campaign rings with more gems than sockets", () => {
+    expect(() =>
+      campaignOpponentSchema.parse({
+        ...definitions.campaignOpponents[0],
+        rings: [
+          {
+            ...definitions.campaignOpponents[0]?.rings[0],
+            socketCount: 1,
+            gems: [
+              definitions.campaignOpponents[0]?.rings[0]?.gems[0],
+              definitions.campaignOpponents[0]?.rings[0]?.gems[0],
+            ],
+          },
+        ],
+      }),
+    ).toThrow();
+  });
+
+  it("rejects broken campaign progression and item references", () => {
+    const opponents = definitions.campaignOpponents.map((opponent) => structuredClone(opponent));
+    opponents[1] = {
+      ...opponents[1]!,
+      prerequisiteOpponentId: "missingOpponent",
+      rings: [{ ...opponents[1]!.rings[0]!, definitionId: "missingRing" }],
+    };
+
+    expect(() =>
+      validateCampaignReferences({
+        opponents,
+        rings: definitions.rings,
+        gems: definitions.gems,
+        monsters: definitions.monsters,
+        spells: definitions.spells,
+        materials: definitions.materials,
+        locales,
+      }),
+    ).toThrow(/missingOpponent[\s\S]*missingRing/);
   });
 
   it("rejects ring definitions with a cooldown below 1", () => {
@@ -347,4 +441,3 @@ describe("content package", () => {
     }
   });
 });
-

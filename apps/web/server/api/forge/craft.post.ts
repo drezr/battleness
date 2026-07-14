@@ -1,6 +1,7 @@
+import { definePlayerHandler } from "../../utils/playerHandler";
 import { craftPlayerRecipe } from "../../utils/gameState";
 
-export default defineEventHandler(async (event) => {
+export default definePlayerHandler(async (event) => {
   const body = await readBody<{ recipeId?: string }>(event);
 
   if (!body.recipeId) {

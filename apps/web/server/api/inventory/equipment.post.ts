@@ -1,6 +1,7 @@
+import { definePlayerHandler } from "../../utils/playerHandler";
 import { equipPlayerRing, unequipPlayerRing } from "../../utils/gameState";
 
-export default defineEventHandler(async (event) => {
+export default definePlayerHandler(async (event) => {
   const body = await readBody<{ action?: string; ringItemId?: string }>(event);
 
   if (!body.ringItemId) {

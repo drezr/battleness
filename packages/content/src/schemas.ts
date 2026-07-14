@@ -157,6 +157,76 @@ export const recipeDefinitionSchema = z
     }
   });
 
+export const campaignRewardSchema = z
+  .object({
+    credits: z.number().int().nonnegative(),
+    heroExperience: z.number().int().nonnegative(),
+    materials: z.array(
+      z
+        .object({
+          materialId: z.string().min(1),
+          quantity: z.number().int().positive(),
+        })
+        .strict(),
+    ),
+  })
+  .strict();
+
+export const campaignEnchantmentSchema = z
+  .object({
+    type: z.enum(["monster", "spell"]),
+    definitionId: z.string().min(1),
+    experience: z.number().int().nonnegative(),
+    quality: z.number().int().min(0).max(100),
+  })
+  .strict();
+
+export const campaignGemSchema = z
+  .object({
+    definitionId: z.string().min(1),
+    experience: z.number().int().nonnegative(),
+    quality: z.number().int().min(0).max(100),
+    enchantment: campaignEnchantmentSchema.optional(),
+  })
+  .strict();
+
+export const campaignRingSchema = z
+  .object({
+    definitionId: z.string().min(1),
+    experience: z.number().int().nonnegative(),
+    quality: z.number().int().min(0).max(100),
+    socketCount: z.number().int().min(1).max(3),
+    gems: z.array(campaignGemSchema).max(3),
+  })
+  .strict()
+  .superRefine((ring, context) => {
+    if (ring.gems.length > ring.socketCount) {
+      context.addIssue({
+        code: "custom",
+        path: ["gems"],
+        message: "Campaign rings cannot contain more gems than sockets.",
+      });
+    }
+  });
+
+export const campaignOpponentSchema = z
+  .object({
+    id: z.string().min(1),
+    nameKey: z.string().min(1),
+    descriptionKey: z.string().min(1),
+    order: z.number().int().positive(),
+    recommendedLevel: z.number().int().nonnegative(),
+    element: elementSchema,
+    experience: z.number().int().nonnegative(),
+    loadoutVisibility: z.enum(["hidden", "summary", "full"]),
+    prerequisiteOpponentId: z.string().min(1).optional(),
+    repeatable: z.boolean(),
+    rings: z.array(campaignRingSchema).min(1).max(10),
+    firstClearReward: campaignRewardSchema,
+    repeatVictoryReward: campaignRewardSchema,
+  })
+  .strict();
+
 export const playerFixtureSchema = z
   .object({
     id: z.string().min(1),
@@ -294,6 +364,8 @@ export type MaterialDefinition = z.infer<typeof materialDefinitionSchema>;
 export type CraftableItemType = z.infer<typeof craftableItemTypeSchema>;
 export type RecipeIngredient = z.infer<typeof recipeIngredientSchema>;
 export type RecipeDefinition = z.infer<typeof recipeDefinitionSchema>;
+export type CampaignReward = z.infer<typeof campaignRewardSchema>;
+export type CampaignOpponent = z.infer<typeof campaignOpponentSchema>;
 export type PlayerFixture = z.infer<typeof playerFixtureSchema>;
 export type InventoryFixture = z.infer<typeof inventoryFixtureSchema>;
 export type RingInstance = z.infer<typeof ringInstanceSchema>;
@@ -302,4 +374,3 @@ export type MonsterInstance = z.infer<typeof monsterInstanceSchema>;
 export type SpellInstance = z.infer<typeof spellInstanceSchema>;
 export type BattleSetupFixture = z.infer<typeof battleSetupFixtureSchema>;
 export type ScenarioFixture = z.infer<typeof scenarioFixtureSchema>;
-

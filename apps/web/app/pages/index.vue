@@ -2,77 +2,95 @@
   <main class="shell">
     <header class="view-header">
       <div class="view-title">
-        <span class="eyebrow">Home</span>
-        <h1>Dashboard</h1>
-        <p class="muted">Player-facing entry point for BattleNess.</p>
+        <span class="eyebrow">{{ t("home.section") }}</span>
+        <h1>{{ t("home.title") }}</h1>
+        <p class="muted">{{ t("home.description") }}</p>
       </div>
-      <p class="status-note">Some sections are mockups until their backend workflows exist.</p>
+      <p class="status-note">{{ t("home.mockNotice") }}</p>
     </header>
 
-    <p v-if="pending" class="panel">Loading player state...</p>
-    <p v-else-if="error" class="panel">Unable to load player state.</p>
+    <p v-if="pending" class="panel">{{ t("home.loading") }}</p>
+    <p v-else-if="error" class="panel">{{ t("home.loadError") }}</p>
 
     <template v-else-if="state">
       <dl class="metric-grid panel">
         <div class="stat">
-          <dt>Hero Level</dt>
-          <dd>{{ heroLevelFromExperience(state.player.experience) }}</dd>
+          <dt>{{ t("common.heroLevel") }}</dt>
+          <dd>{{ state.player.level }}</dd>
         </div>
         <div class="stat">
-          <dt>Credits</dt>
+          <dt>{{ t("common.credits") }}</dt>
           <dd>{{ state.player.credits }}</dd>
         </div>
         <div class="stat">
-          <dt>Items</dt>
+          <dt>{{ t("common.items") }}</dt>
           <dd>{{ state.inventory.length }}</dd>
         </div>
         <div class="stat">
-          <dt>Materials</dt>
+          <dt>{{ t("common.materials") }}</dt>
           <dd>{{ totalMaterialQuantity(state.materials) }}</dd>
         </div>
       </dl>
 
       <section class="dashboard-grid">
         <article class="panel">
-          <h2>Battle</h2>
-          <p class="muted">Campaign and PvP entry points with active loadout validation.</p>
+          <h2>{{ t("navigation.battle") }}</h2>
+          <p class="muted">{{ t("home.battleDescription") }}</p>
           <div class="control-row">
-            <NuxtLink class="button-link" to="/battle/campaign">Campaign</NuxtLink>
-            <NuxtLink class="button-link" to="/battle/pvp">PvP</NuxtLink>
+            <NuxtLink class="button-link" to="/battle/campaign">{{
+              t("navigation.campaign")
+            }}</NuxtLink>
+            <NuxtLink class="button-link" to="/battle/pvp">{{ t("navigation.pvp") }}</NuxtLink>
           </div>
         </article>
 
         <article class="panel">
-          <h2>Forge</h2>
-          <p class="muted">Crafting is connected to the local SQLite development inventory.</p>
+          <h2>{{ t("navigation.forge") }}</h2>
+          <p class="muted">{{ t("home.forgeDescription") }}</p>
           <div class="control-row">
-            <NuxtLink class="button-link" to="/forge/craft">Craft</NuxtLink>
-            <NuxtLink class="button-link" to="/forge/socket">Socket</NuxtLink>
-            <NuxtLink class="button-link" to="/forge/quality">Quality</NuxtLink>
+            <NuxtLink class="button-link" to="/forge/craft">{{ t("navigation.craft") }}</NuxtLink>
+            <NuxtLink class="button-link" to="/forge/socket">{{ t("navigation.socket") }}</NuxtLink>
+            <NuxtLink class="button-link" to="/forge/quality">{{
+              t("navigation.quality")
+            }}</NuxtLink>
           </div>
         </article>
 
         <article class="panel">
-          <h2>Inventory</h2>
+          <h2>{{ t("navigation.inventory") }}</h2>
           <p class="muted">
-            {{ ringCount }} rings, {{ gemCount }} gems, {{ monsterCount }} monsters,
-            {{ spellCount }} spells.
+            {{
+              t("home.inventoryDescription", {
+                rings: ringCount,
+                gems: gemCount,
+                monsters: monsterCount,
+                spells: spellCount,
+              })
+            }}
           </p>
           <div class="control-row">
-            <NuxtLink class="button-link" to="/inventory/items">Items</NuxtLink>
-            <NuxtLink class="button-link" to="/inventory/materials">Materials</NuxtLink>
-            <NuxtLink class="button-link" to="/inventory/equipment">Equipment</NuxtLink>
+            <NuxtLink class="button-link" to="/inventory/items">{{
+              t("navigation.items")
+            }}</NuxtLink>
+            <NuxtLink class="button-link" to="/inventory/materials">{{
+              t("navigation.materials")
+            }}</NuxtLink>
+            <NuxtLink class="button-link" to="/inventory/equipment">{{
+              t("navigation.equipment")
+            }}</NuxtLink>
           </div>
         </article>
 
         <article class="panel">
-          <h2>Market</h2>
-          <p class="muted">
-            Material buying and selling are available. Player listings remain planned.
-          </p>
+          <h2>{{ t("navigation.market") }}</h2>
+          <p class="muted">{{ t("home.marketDescription") }}</p>
           <div class="control-row">
-            <NuxtLink class="button-link" to="/market/game">Game Market</NuxtLink>
-            <NuxtLink class="button-link" to="/market/players">Player Market</NuxtLink>
+            <NuxtLink class="button-link" to="/market/game">{{
+              t("navigation.gameMarket")
+            }}</NuxtLink>
+            <NuxtLink class="button-link" to="/market/players">{{
+              t("navigation.playerMarket")
+            }}</NuxtLink>
           </div>
         </article>
       </section>
@@ -82,13 +100,10 @@
 
 <script setup lang="ts">
 import type { PlayerState } from "~/utils/playerState";
-import {
-  heroLevelFromExperience,
-  inventoryCountByType,
-  totalMaterialQuantity,
-} from "~/utils/playerState";
+import { inventoryCountByType, totalMaterialQuantity } from "~/utils/playerState";
 
 const { data: state, error, pending } = await useFetch<PlayerState>("/api/player");
+const { t } = useI18n();
 
 const ringCount = computed(() => inventoryCountByType(state.value?.inventory, "ring"));
 const gemCount = computed(() => inventoryCountByType(state.value?.inventory, "gem"));

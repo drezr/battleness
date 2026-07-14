@@ -1,3 +1,4 @@
+import campaignOpponents from "./definitions/campaignOpponents.json";
 import gems from "./definitions/gems.json";
 import materials from "./definitions/materials.json";
 import monsters from "./definitions/monsters.json";
@@ -20,6 +21,7 @@ import en from "./locales/en.json";
 import fr from "./locales/fr.json";
 import {
   battleSetupFixtureSchema,
+  campaignOpponentSchema,
   gemDefinitionSchema,
   inventoryFixtureSchema,
   localeSchema,
@@ -30,6 +32,7 @@ import {
   ringDefinitionSchema,
   scenarioFixtureSchema,
   spellDefinitionSchema,
+  type CampaignOpponent,
   type GemDefinition,
   type MaterialDefinition,
   type MonsterDefinition,
@@ -37,11 +40,13 @@ import {
   type RingDefinition,
   type SpellDefinition,
 } from "./schemas";
+import { validateCampaignReferences } from "./campaign";
 import { validateContentReferences } from "./references";
 
-export const contentVersion = "prototype-5";
+export const contentVersion = "prototype-6";
 
 export const definitions = {
+  campaignOpponents: campaignOpponents as readonly CampaignOpponent[],
   gems: gems as readonly GemDefinition[],
   materials: materials as readonly MaterialDefinition[],
   monsters: monsters as readonly MonsterDefinition[],
@@ -70,6 +75,7 @@ export const locales = {
 } as const;
 
 export function validateContent(): void {
+  const validatedCampaignOpponents = campaignOpponentSchema.array().parse(campaignOpponents);
   const validatedRings = ringDefinitionSchema.array().parse(rings);
   const validatedGems = gemDefinitionSchema.array().parse(gems);
   const validatedMonsters = monsterDefinitionSchema.array().parse(monsters);
@@ -108,6 +114,15 @@ export function validateContent(): void {
     inventory: validatedInventory,
     battleSetups: validatedBattleSetups,
   });
+  validateCampaignReferences({
+    opponents: validatedCampaignOpponents,
+    rings: validatedRings,
+    gems: validatedGems,
+    monsters: validatedMonsters,
+    spells: validatedSpells,
+    materials: validatedMaterials,
+    locales: { en: validatedEn, fr: validatedFr },
+  });
 }
 
 export * from "./battleSetup";
@@ -117,3 +132,4 @@ export * from "./progression";
 export * from "./references";
 export * from "./schemas";
 export * from "./forge";
+export * from "./campaign";

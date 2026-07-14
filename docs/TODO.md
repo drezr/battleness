@@ -4,7 +4,7 @@ This is the centralized working TODO for BattleNess. It focuses on what remains 
 
 ## Current Focus
 
-The current recommended focus is to connect finished authoritative live battles to reward settlement and action-based item experience while preserving `apps/prototype` as the Dev Lab.
+The first persistent private PvP flow now includes session-based reconnection, a server-enforced five-minute active-turn timeout, and authenticated WebSocket invalidation events with HTTP polling fallback. The next recommended focus is explicit timeout handling for the unresolved opening element duel, followed by casual matchmaking; Google Cloud credentials and consent-screen setup remain an environment deployment task.
 
 ## Phase 1 - Game App Data Foundation
 
@@ -13,8 +13,8 @@ The current recommended focus is to connect finished authoritative live battles 
 - [x] Introduce Prisma migrations for SQLite development persistence.
 - [x] Add bootstrap seed data for the development player.
 - [x] Add an intentional development reset flow for the Prisma-backed player state.
-- [ ] Extend Prisma persistence for PostgreSQL production readiness.
-- [ ] Add content import/version tracking so database rows know which content version created or resolved them.
+- [x] Extend Prisma persistence for PostgreSQL production readiness.
+- [x] Add content import/version tracking so database rows know which content version created or resolved them.
 - [x] Add backend validation for inventory ownership, socket rules, enchantment uniqueness, equipment limits, and loadout limits.
 - [x] Add focused API tests for player state, crafting, inventory reads, and invalid ownership/reference cases.
 
@@ -52,31 +52,33 @@ The current recommended focus is to connect finished authoritative live battles 
 - [x] Hide opponent rings in the player-facing battle UI unless a future reveal rule explicitly exposes them.
 - [x] Reuse the pure combat engine on the server side to validate live actions, enforce the server-owned player identity, reject stale clients, and persist the resulting action journal atomically.
 - [x] Add player-facing live controls for element choice, rings, monsters, target selection, turn ending, and concession.
-- [ ] Replace the passive training-opponent turn pass with mode-owned opponent behavior when campaign opponents are implemented.
+- [x] Add deterministic mode-owned campaign opponent behavior. The separate development training opponent remains passive by design.
 - [x] Persist verified development battle action history, deterministic seed, result, and final-state checksum. The future live server lifecycle must reuse this record model.
 - [x] Add a player-facing result/reward screen separate from Dev Lab diagnostics.
+- [x] Create deterministic live battle reward grants atomically with the finishing action and expose claim controls directly in the live view.
+- [x] Derive a verified combat summary from persisted actions and engine events, and reuse it in live and historical result views.
 - [x] Keep Dev Lab replay/debug tools out of the player-facing battle UI.
 
 ## Phase 5 - Campaign
 
-- [ ] Define campaign opponent data format.
-- [ ] Define campaign progression: unlock order, completion state, repeatability, and recommended level.
-- [ ] Define fixed first-clear and repeat rewards for each opponent.
-- [ ] Build campaign content validation.
-- [ ] Implement `/battle/campaign` opponent selection.
-- [ ] Generate battle setups for campaign opponents.
-- [ ] Persist campaign progress and reward claims.
-- [ ] Add campaign tests for opponent references, unlocks, rewards, and battle start.
+- [x] Define campaign opponent data format.
+- [x] Define campaign progression: unlock order, completion state, repeatability, and recommended level. The initial track is linear; persistent completion state remains below.
+- [x] Define fixed first-clear and repeat rewards for each opponent.
+- [x] Build campaign content validation.
+- [x] Implement `/battle/campaign` opponent selection from the server catalogue.
+- [x] Generate battle setups for campaign opponents from validated game-owned content loadouts.
+- [x] Persist campaign progress and issue first-clear or repeat-victory reward claims atomically when a battle ends.
+- [x] Add campaign tests for opponent references, unlocks, setup conversion, rewards, deterministic opponent turns, and battle start.
 
 ## Phase 6 - Rewards And Progression
 
 - [x] Implement account-backed hero XP in the Prisma player state.
 - [x] Implement initial deterministic Game App hero XP reward formulas for development results. Campaign and PvP formulas remain mode-specific future work.
-- [x] Move participation item XP rewards from Dev Lab localStorage behavior into Game App persistence. Action-based item XP remains dependent on the live server action pipeline.
+- [x] Move participation and action-based item XP rewards from Dev Lab localStorage behavior into Game App persistence. Live settlement grants 8 participation XP and 20 XP for each effective ring, gem, spell, summon, or monster use.
 - [x] Persist material and credit rewards.
 - [x] Prevent duplicate reward claims with an atomic claim transition.
 - [x] Add reward history to profile and battle history views.
-- [ ] Add progression UI for hero level, item level, XP to next level, and quality bonuses.
+- [x] Add progression UI for hero level, item level, XP to next level, and quality bonuses.
 
 ## Phase 7 - Game Market
 
@@ -92,30 +94,34 @@ The current recommended focus is to connect finished authoritative live battles 
 ## Phase 8 - Profile And Settings
 
 - [x] Add Nuxt route mockups for profile sections.
-- [ ] Implement localization support in the Nuxt Game App.
-- [ ] Replace hardcoded Nuxt UI text with localization keys.
-- [ ] Add language selection.
-- [ ] Add account/profile persistence fields.
+- [x] Implement localization support in the Nuxt Game App.
+- [x] Replace hardcoded Nuxt UI text with localization keys.
+- [x] Add language selection.
+- [x] Add account/profile persistence fields.
 - [x] Add match history and reward history views.
-- [ ] Add display and audio preference placeholders, even if audio remains deferred.
+- [x] Add persisted display and audio preferences, with functional theme, density, reduced-motion, localization, mute, and volume controls.
 
 ## Phase 9 - Authentication
 
-- [ ] Decide the first auth provider implementation order.
-- [ ] Add OAuth login, starting with Google if provider setup is available.
-- [ ] Add account linking model for future Facebook and email/password.
-- [ ] Protect player-owned API routes.
-- [ ] Ensure local development can still use a seeded dev player without external OAuth.
-- [ ] Add session handling and logout.
+- [x] Decide the first auth provider implementation order. Google OAuth comes first, followed by Facebook and then email/password.
+- [x] Add Google OAuth login with server-side code exchange, browser-bound state, PKCE, stable `sub` identity, and BattleNess session creation.
+- [ ] Configure separate Google OAuth clients, consent screens, secrets, and redirect URIs for local, staging, and production environments.
+- [x] Add account linking model for future Facebook and email/password.
+- [x] Protect player-owned API routes.
+- [x] Ensure local development can still use a seeded dev player without external OAuth.
+- [x] Add opaque hashed session handling, sliding expiration, revocation, development login, and logout.
 
 ## Phase 10 - PvP And Multiplayer
 
-- [ ] Design authoritative server battle lifecycle.
-- [ ] Design private match creation and join-by-code flow.
-- [ ] Persist server-side match state for reconnects.
-- [ ] Add abandonment timeout rules.
-- [ ] Implement `/battle/pvp/private` before casual matchmaking.
-- [ ] Add WebSocket event model for live turn-based PvP.
+- [x] Design and implement the initial authoritative server battle lifecycle for private matches.
+- [x] Design and implement private match creation and join-by-code flow.
+- [x] Persist private lobby and battle state for session-based reconnects.
+- [x] Add a persisted five-minute timeout for active turns, resolved as a server-side concession.
+- [ ] Add a fair timeout policy for the unresolved opening element duel, where no active player exists yet.
+- [x] Implement `/battle/pvp/private` before casual matchmaking.
+- [x] Add HTTP polling as the first private-lobby and live-battle synchronization transport.
+- [x] Add an authenticated WebSocket invalidation event model for live turn-based PvP while keeping HTTP/Prisma authoritative and polling as fallback.
+- [ ] Replace the process-local WebSocket event hub with shared pub/sub before running more than one Game App server instance.
 - [ ] Add casual matchmaking after private matches work.
 - [ ] Define ranked rating, seasons, rewards, and matchmaking before implementing ranked mode.
 
@@ -149,8 +155,8 @@ The current recommended focus is to connect finished authoritative live battles 
 
 ## Open Design Questions
 
-- [ ] What exact campaign opponents should exist first?
-- [ ] What fixed rewards should campaign opponents grant?
+- [x] What exact campaign opponents should exist first? The initial linear track is Ember Trial, Storm Initiate, and Frost Gate.
+- [x] What fixed rewards should campaign opponents grant? Each content record now defines first-clear and repeat-victory values.
 - [x] What initial hero XP rewards should development battles grant? Win grants 100 XP, draw grants 60 XP, and loss grants 25 XP. Campaign and PvP formulas remain open within their respective modes.
 - [x] Should ring socket-count improvement live under `/forge/socket`, `/forge/quality`, or a separate improvement view? Decided and implemented under `/forge/socket`.
 - [ ] Should spell and monster gem enchantment be managed in inventory, forge, or both?

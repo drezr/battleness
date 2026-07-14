@@ -44,6 +44,7 @@ These instructions are persistent project context for future agents working on B
 - Use ESLint and Prettier for linting and formatting.
 - Do not build a backend for the first combat prototype.
 - Use Prisma as the ORM/database migration tool for the Nuxt Game App durable schema. The current development datasource is local SQLite, with PostgreSQL still targeted for production.
+- Keep `apps/web/prisma/schema.prisma` as the canonical SQLite development model. Generate the PostgreSQL mirror with `prisma:postgres:prepare`, maintain its migrations separately under `apps/web/prisma/postgresql/migrations`, and require PostgreSQL migration deployment, drift detection, and transactional smoke coverage in CI.
 - Keep the Nuxt Game App on Prisma 6.x for now. Prisma 7 requires a SQLite driver adapter in application runtime, and the current Windows development environment should not depend on native `better-sqlite3` build tooling until that upgrade is intentionally planned.
 - The first combat prototype should be deployable as a simple static build after it becomes playable.
 - Use GitHub Actions for install, typecheck, lint, and tests.
@@ -51,8 +52,11 @@ These instructions are persistent project context for future agents working on B
 - Use `packages/engine`, `packages/content`, `apps/prototype`, and `apps/web` as the current workspace layout.
 - Keep `apps/prototype` as a permanent Dev Lab. Do not replace or remove its debug-heavy interface when building the player-facing Game App.
 - Use `apps/web` as the Nuxt Game App scaffold for player-facing UI, backend routes, and persistence integration.
-- Use WebSocket as the primary future multiplayer transport.
+- Use authenticated WebSocket invalidation events as the primary multiplayer transport. Keep HTTP APIs and Prisma authoritative, and retain polling as a fallback.
 - Prefer OAuth login first, especially Google and Facebook, then add email and password authentication.
+- Resolve every player-owned Nuxt API through the request-scoped authenticated player context. Store only SHA-256 hashes of opaque session tokens, keep the raw token in an HttpOnly SameSite cookie, and preserve the explicit local development login without enabling it in production.
+- Keep OAuth client secrets outside Git. Google login must use the server-side authorization-code flow, browser-bound hashed state, PKCE S256, a one-time expiring login attempt, and Google `sub` as the stable provider identifier. Never merge accounts automatically from email equality alone.
+- Persist the account-facing display name and public/private profile visibility separately from the technical username. Persist locale, theme, interface density, reduced-motion, mute, and volume preferences in a one-to-one player preference record.
 - Build localization from the beginning: user-facing text should resolve through localization keys and translation JSON files, not hardcoded strings.
 - Set up an organized asset pipeline from the beginning, even if early assets are AI-generated templates.
 - Keep versioned JSON content definitions as the source of truth and import them into the database if runtime querying, admin tooling, or production operations require it. Player-owned instances and progression data belong in the database.
@@ -71,6 +75,8 @@ These instructions are persistent project context for future agents working on B
 - Development inventory cards and loadout builder ring summaries should keep showing derived level, current XP, next-level XP, and visual XP progress.
 - Keep a full starter development loop DOM test before campaign work: craft a ring, gem, and spell; improve quality; socket and enchant; send the inventory-backed ring to Battle Lab; use it in combat; claim rewards; and verify persisted credits, materials, item XP, quality, and combat summary output.
 - Multiplayer should eventually use an authoritative server, matchmaking, and turn-based real-time interaction.
+- Preserve the implemented private PvP authority boundary: invitation membership, owned loadout locking, battle creation, action validation, and persisted outcomes are server-owned. WebSocket messages only invalidate client state; clients reload authoritative HTTP resources, and polling remains a fallback. Replace the process-local event hub with shared pub/sub before horizontal server scaling.
+- Preserve the private PvP timeout rule: an active player has five minutes, the deadline persists and continues through disconnects, every accepted action transfers and resets it for the next active player, and expiration is settled by the server as that player's concession. Do not apply this rule to the unresolved opening element duel until a fair no-active-player policy is explicitly decided.
 
 ## Current Discussion Status
 
@@ -80,4 +86,3 @@ These instructions are persistent project context for future agents working on B
 - The long-term deployment platform has not been selected yet; a classic Node server or VPS is preferred if feasible.
 - The combat UI direction has not been selected yet; a simple UI is enough for the first prototype.
 - Tooling choices such as bundler, tests, linting, and asset pipeline have not been finalized yet.
-

@@ -1,36 +1,36 @@
 <template>
   <main class="shell">
-    <nav class="section-nav" aria-label="Profile navigation">
+    <nav class="section-nav" :aria-label="t('accessibility.profileNavigation')">
       <NuxtLink
         v-for="link in sectionLinks.profile"
         :key="link.to"
         :class="{ active: route.path === link.to }"
         :to="link.to"
       >
-        {{ link.label }}
+        {{ $t(link.labelKey) }}
       </NuxtLink>
     </nav>
 
     <header class="view-header">
       <div class="view-title">
-        <span class="eyebrow">Profile</span>
-        <h1>Match And Reward History</h1>
-        <p class="muted">Review progression earned from completed battles.</p>
+        <span class="eyebrow">{{ t("profile.section") }}</span>
+        <h1>{{ t("profile.history.title") }}</h1>
+        <p class="muted">{{ t("profile.history.description") }}</p>
       </div>
       <dl v-if="state" class="summary-grid compact-summary">
         <div class="stat">
-          <dt>Hero XP</dt>
+          <dt>{{ t("profile.history.heroXp") }}</dt>
           <dd>{{ state.player.experience }}</dd>
         </div>
         <div class="stat">
-          <dt>Level</dt>
+          <dt>{{ t("common.level") }}</dt>
           <dd>{{ state.player.level }}</dd>
         </div>
       </dl>
     </header>
 
-    <p v-if="pending" class="panel">Loading profile history...</p>
-    <p v-else-if="error" class="panel">Unable to load profile history.</p>
+    <p v-if="pending" class="panel">{{ t("profile.history.loading") }}</p>
+    <p v-else-if="error" class="panel">{{ t("profile.history.loadError") }}</p>
 
     <template v-else-if="state">
       <p v-if="feedback" class="feedback">{{ feedback }}</p>
@@ -48,6 +48,7 @@ import type { BattleHistoryState } from "~/utils/playerState";
 import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
+const { t } = useI18n();
 const { data: state, error, pending } = await useFetch<BattleHistoryState>("/api/battle/history");
 const claimingRewardId = ref("");
 const feedback = ref("");
@@ -61,10 +62,11 @@ async function claimReward(rewardGrantId: string): Promise<void> {
       method: "POST",
       body: { rewardGrantId },
     });
-    feedback.value = "Battle rewards claimed.";
+    feedback.value = t("profile.history.claimed");
     await refreshNuxtData();
   } catch (claimError) {
-    feedback.value = claimError instanceof Error ? claimError.message : "Reward claim failed.";
+    feedback.value =
+      claimError instanceof Error ? claimError.message : t("profile.history.claimError");
   } finally {
     claimingRewardId.value = "";
   }

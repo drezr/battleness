@@ -1,6 +1,7 @@
+import { definePlayerHandler } from "../../utils/playerHandler";
 import { improvePlayerItemQuality } from "../../utils/gameState";
 
-export default defineEventHandler(async (event) => {
+export default definePlayerHandler(async (event) => {
   const body = await readBody<{ action?: string; itemId?: string }>(event);
 
   try {

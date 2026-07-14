@@ -1,47 +1,47 @@
 <template>
   <main class="shell">
-    <nav class="section-nav" aria-label="Inventory navigation">
+    <nav class="section-nav" :aria-label="t('accessibility.inventoryNavigation')">
       <NuxtLink
         v-for="link in sectionLinks.inventory"
         :key="link.to"
         :class="{ active: route.path === link.to }"
         :to="link.to"
       >
-        {{ link.label }}
+        {{ $t(link.labelKey) }}
       </NuxtLink>
     </nav>
 
     <header class="view-header">
       <div class="view-title">
-        <span class="eyebrow">Inventory</span>
-        <h1>Materials</h1>
-        <p class="muted">Material stock grouped by crafting family, rarity, and real-world metadata.</p>
+        <span class="eyebrow">{{ t("inventory.section") }}</span>
+        <h1>{{ t("inventory.materials.title") }}</h1>
+        <p class="muted">{{ t("inventory.materials.description") }}</p>
       </div>
     </header>
 
-    <p v-if="pending" class="panel">Loading materials...</p>
-    <p v-else-if="error" class="panel">Unable to load materials.</p>
+    <p v-if="pending" class="panel">{{ t("inventory.materials.loading") }}</p>
+    <p v-else-if="error" class="panel">{{ t("inventory.materials.loadError") }}</p>
 
     <template v-else-if="state">
       <div class="filter-bar">
         <label>
-          <span class="field-label">Crafting Family</span>
+          <span class="field-label">{{ t("inventory.materials.craftingFamily") }}</span>
           <select v-model="familyFilter">
-            <option value="all">All</option>
-            <option value="ring">Ring</option>
-            <option value="gem">Gem</option>
-            <option value="monster">Monster</option>
-            <option value="spell">Spell</option>
+            <option value="all">{{ t("common.all") }}</option>
+            <option value="ring">{{ t("itemType.ring") }}</option>
+            <option value="gem">{{ t("itemType.gem") }}</option>
+            <option value="monster">{{ t("itemType.monster") }}</option>
+            <option value="spell">{{ t("itemType.spell") }}</option>
           </select>
         </label>
         <label>
-          <span class="field-label">Rarity</span>
+          <span class="field-label">{{ t("inventory.materials.rarity") }}</span>
           <select v-model="rarityFilter">
-            <option value="all">All</option>
-            <option value="common">Common</option>
-            <option value="refined">Refined</option>
-            <option value="rare">Rare</option>
-            <option value="epic">Epic</option>
+            <option value="all">{{ t("common.all") }}</option>
+            <option value="common">{{ t("rarity.common") }}</option>
+            <option value="refined">{{ t("rarity.refined") }}</option>
+            <option value="rare">{{ t("rarity.rare") }}</option>
+            <option value="epic">{{ t("rarity.epic") }}</option>
           </select>
         </label>
       </div>
@@ -62,17 +62,19 @@
             <ItemArtwork :definition-id="material.id" kind="material" />
             <div class="item-card-body">
               <div class="card-heading">
-                <h3>{{ material.label }}</h3>
-                <span :class="['pill', `rarity-${material.rarity}`]">{{ material.rarity }}</span>
+                <h3>{{ contentText(`material.${material.id}.name`, material.label) }}</h3>
+                <span :class="['pill', `rarity-${material.rarity}`]">{{
+                  t(`rarity.${material.rarity}`)
+                }}</span>
               </div>
               <p class="muted">
                 {{ material.chemicalSymbol ?? material.realWorldType }} -
-                {{ material.craftingFamily }}
+                {{ t(`itemType.${material.craftingFamily}`) }}
               </p>
               <strong>{{ material.quantity }}</strong>
               <div class="control-row">
                 <button class="secondary-button" @click="selectedMaterialId = material.id">
-                  Inspect
+                  {{ t("common.inspect") }}
                 </button>
               </div>
             </div>
@@ -81,7 +83,7 @@
 
         <ItemDetailPanel
           :item="selectedMaterial"
-          title="Material Detail"
+          :title="t('inventory.materials.detail')"
           @clear="selectedMaterialId = ''"
         />
       </section>
@@ -94,6 +96,8 @@ import type { PlayerState } from "~/utils/playerState";
 import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
+const { t } = useI18n();
+const contentText = useContentText();
 const { data: state, error, pending } = await useFetch<PlayerState>("/api/player");
 const familyFilter = ref("all");
 const rarityFilter = ref("all");
@@ -120,4 +124,3 @@ watchEffect(() => {
   }
 });
 </script>
-

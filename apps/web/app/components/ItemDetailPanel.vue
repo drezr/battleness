@@ -2,28 +2,28 @@
   <aside class="panel item-detail-panel">
     <div class="card-heading">
       <div>
-        <span class="eyebrow">{{ eyebrow }}</span>
-        <h2>{{ title }}</h2>
+        <span class="eyebrow">{{ eyebrow ?? t("common.inspect") }}</span>
+        <h2>{{ title ?? t("itemDetail.title") }}</h2>
       </div>
       <button v-if="item" class="secondary-button" type="button" @click="$emit('clear')">
-        Clear
+        {{ t("itemDetail.clear") }}
       </button>
     </div>
 
-    <p v-if="!item" class="muted">No item selected.</p>
+    <p v-if="!item" class="muted">{{ t("itemDetail.noneSelected") }}</p>
 
     <template v-else>
       <div class="item-detail-hero">
         <ItemArtwork :definition-id="definitionId" :kind="kind" />
         <div>
-          <h3>{{ item.label ?? item.id }}</h3>
+          <h3>{{ localizedItemName }}</h3>
           <div class="control-row">
-            <span v-if="item.type" class="pill muted-pill">{{ item.type }}</span>
+            <span v-if="item.type" class="pill muted-pill">{{ t(`itemType.${item.type}`) }}</span>
             <span v-if="item.rarity" :class="['pill', `rarity-${item.rarity}`]">
-              {{ item.rarity }}
+              {{ t(`rarity.${item.rarity}`) }}
             </span>
             <span v-if="item.element" :class="['pill', `element-${item.element}`]">
-              {{ item.element }}
+              {{ t(`element.${item.element}`) }}
             </span>
           </div>
         </div>
@@ -31,7 +31,7 @@
 
       <dl class="summary-grid item-detail-grid">
         <div v-if="hasNumber(item.level)" class="stat">
-          <dt>Level</dt>
+          <dt>{{ t("common.level") }}</dt>
           <dd>{{ item.level }}</dd>
         </div>
         <div v-if="hasNumber(item.experience)" class="stat">
@@ -39,18 +39,18 @@
           <dd>{{ item.experience }}</dd>
         </div>
         <div v-if="hasNumber(item.quality)" class="stat">
-          <dt>Quality</dt>
+          <dt>{{ t("common.quality") }}</dt>
           <dd>
             {{ item.quality }}
             <template v-if="hasNumber(item.nextQuality)"> -> {{ item.nextQuality }}</template>
           </dd>
         </div>
         <div v-if="hasNumber(item.quantity)" class="stat">
-          <dt>Quantity</dt>
+          <dt>{{ t("itemDetail.quantity") }}</dt>
           <dd>{{ item.quantity }}</dd>
         </div>
         <div v-if="hasNumber(item.socketCount)" class="stat">
-          <dt>Sockets</dt>
+          <dt>{{ t("stats.sockets") }}</dt>
           <dd>
             {{ item.socketCount }}
             <template v-if="hasNumber(item.nextSocketCount)">
@@ -59,25 +59,38 @@
           </dd>
         </div>
         <div v-if="hasNumber(item.cost)" class="stat">
-          <dt>Cost</dt>
+          <dt>{{ t("common.cost") }}</dt>
           <dd>{{ item.cost }}</dd>
         </div>
         <div v-if="hasNumber(item.buyPrice)" class="stat">
-          <dt>Buy Price</dt>
+          <dt>{{ t("itemDetail.buyPrice") }}</dt>
           <dd>{{ item.buyPrice }}</dd>
         </div>
         <div v-if="hasNumber(item.sellPrice)" class="stat">
-          <dt>Sell Price</dt>
+          <dt>{{ t("itemDetail.sellPrice") }}</dt>
           <dd>{{ item.sellPrice }}</dd>
         </div>
         <div v-if="hasNumber(item.socketImprovementCost)" class="stat">
-          <dt>Socket Cost</dt>
+          <dt>{{ t("itemDetail.socketCost") }}</dt>
           <dd>{{ item.socketImprovementCost }}</dd>
         </div>
       </dl>
 
+      <section v-if="item.progression" class="item-detail-section">
+        <h3>{{ t("progression.title") }}</h3>
+        <ExperienceProgress
+          :progress="item.progression"
+          :label="t('progression.itemExperience', { item: localizedItemName })"
+        />
+        <p v-if="hasNumber(item.bonusPercent)" class="muted">
+          {{ t("itemDetail.currentBonus") }}
+          <strong class="positive">+{{ item.bonusPercent }}%</strong>
+          {{ t("itemDetail.bonusSource") }}
+        </p>
+      </section>
+
       <section v-if="primaryStats.length > 0" class="item-detail-section">
-        <h3>Stats</h3>
+        <h3>{{ t("itemDetail.stats") }}</h3>
         <dl class="summary-grid item-detail-grid">
           <div v-for="stat in primaryStats" :key="stat.label" class="stat">
             <dt>{{ stat.label }}</dt>
@@ -87,10 +100,10 @@
       </section>
 
       <section v-if="previewStats.length > 0" class="item-detail-section">
-        <h3>Preview</h3>
+        <h3>{{ t("itemDetail.preview") }}</h3>
         <div class="quality-stat-list">
           <article v-for="stat in previewStats" :key="stat.label" class="quality-stat">
-            <span>{{ stat.label }}</span>
+            <span>{{ localizeStatLabel(stat.label) }}</span>
             <strong>
               {{ stat.current }}
               <template v-if="stat.next > stat.current">
@@ -103,7 +116,7 @@
       </section>
 
       <section v-if="usageEntries.length > 0" class="item-detail-section">
-        <h3>Usage</h3>
+        <h3>{{ t("itemDetail.usage") }}</h3>
         <dl class="summary-grid item-detail-grid">
           <div v-for="entry in usageEntries" :key="entry.label" class="stat">
             <dt>{{ entry.label }}</dt>
@@ -113,30 +126,44 @@
       </section>
 
       <section v-if="materialEntries.length > 0" class="item-detail-section">
-        <h3>Material</h3>
+        <h3>{{ t("itemType.material") }}</h3>
         <dl class="summary-grid item-detail-grid">
           <div v-for="entry in materialEntries" :key="entry.label" class="stat">
             <dt>{{ entry.label }}</dt>
             <dd>{{ entry.value }}</dd>
           </div>
         </dl>
-        <p v-if="item.description" class="muted">{{ item.description }}</p>
+        <p v-if="item.description" class="muted">{{ localizedDescription }}</p>
       </section>
 
       <section v-if="item.gems?.length" class="item-detail-section">
-        <h3>Socketed Gems</h3>
+        <h3>{{ t("itemDetail.socketedGems") }}</h3>
         <ul class="detail-list">
           <li v-for="gem in item.gems" :key="gem.id">
             <ItemArtwork :definition-id="gem.definitionId" kind="gem" />
             <div>
-              <strong>{{ gem.socketIndex + 1 }}. {{ gem.label }}</strong>
+              <strong
+                >{{ gem.socketIndex + 1 }}.
+                {{ itemName("gem", gem.definitionId, gem.label) }}</strong
+              >
               <small>
-                Damage {{ gem.damage }}, Energy +{{ gem.energyPenalty }}, Cooldown +{{
-                  gem.cooldownPenalty
+                {{
+                  t("forge.socket.gemStats", {
+                    damage: gem.damage,
+                    energy: gem.energyPenalty,
+                    cooldown: gem.cooldownPenalty,
+                  })
                 }}
               </small>
               <small v-if="gem.enchantment">
-                {{ gem.enchantment.type }}: {{ gem.enchantment.label }}
+                {{ t(`itemType.${gem.enchantment.type}`) }}:
+                {{
+                  itemName(
+                    gem.enchantment.type,
+                    gem.enchantment.definitionId,
+                    gem.enchantment.label,
+                  )
+                }}
               </small>
             </div>
           </li>
@@ -144,7 +171,7 @@
       </section>
 
       <section v-if="item.enchantment" class="item-detail-section">
-        <h3>Enchantment</h3>
+        <h3>{{ t("itemDetail.enchantment") }}</h3>
         <div class="detail-list">
           <div>
             <ItemArtwork
@@ -152,15 +179,26 @@
               :kind="item.enchantment.type"
             />
             <div>
-              <strong>{{ item.enchantment.label }}</strong>
-              <small>{{ item.enchantment.type }} damage {{ item.enchantment.damage }}</small>
+              <strong>{{
+                itemName(
+                  item.enchantment.type,
+                  item.enchantment.definitionId,
+                  item.enchantment.label,
+                )
+              }}</strong>
+              <small>{{
+                t("itemDetail.enchantmentDamage", {
+                  type: t(`itemType.${item.enchantment.type}`),
+                  damage: item.enchantment.damage,
+                })
+              }}</small>
             </div>
           </div>
         </div>
       </section>
 
       <section class="item-detail-section">
-        <h3>Technical</h3>
+        <h3>{{ t("itemDetail.technical") }}</h3>
         <dl class="summary-grid item-detail-grid">
           <div v-if="item.id" class="stat">
             <dt>ID</dt>
@@ -169,7 +207,7 @@
             </dd>
           </div>
           <div v-if="item.definitionId" class="stat">
-            <dt>Definition</dt>
+            <dt>{{ t("itemDetail.definition") }}</dt>
             <dd>
               <code>{{ item.definitionId }}</code>
             </dd>
@@ -218,6 +256,8 @@ type DetailItem = {
   atomicNumber?: number | null;
   experience?: number;
   level?: number;
+  progression?: import("~/utils/playerState").ExperienceProgressView;
+  bonusPercent?: number;
   quality?: number;
   nextQuality?: number;
   quantity?: number;
@@ -257,24 +297,55 @@ type DetailEntry = {
   value: string | number;
 };
 
-const props = withDefaults(
-  defineProps<{
-    item: DetailItem | null;
-    title?: string;
-    eyebrow?: string;
-  }>(),
-  {
-    title: "Detail",
-    eyebrow: "Inspect",
-  },
-);
+const props = defineProps<{
+  item: DetailItem | null;
+  title?: string;
+  eyebrow?: string;
+}>();
+const { t } = useI18n();
+const contentText = useContentText();
 
 defineEmits<{
   clear: [];
 }>();
 
-const kind = computed(() => props.item?.type ?? "material");
+const kind = computed(() => {
+  const item = props.item;
+  if (!item) {
+    return "material";
+  }
+  if (item.type) {
+    return item.type;
+  }
+  if (item.gems || item.ringDamage !== undefined || item.baseEnergyCost !== undefined) {
+    return "ring";
+  }
+  if (item.socketedRingId !== undefined || item.socketIndex !== undefined) {
+    return "gem";
+  }
+  if (item.health !== undefined) {
+    return "monster";
+  }
+  if (item.energyPenalty !== undefined) {
+    return "spell";
+  }
+  return "material";
+});
 const definitionId = computed(() => props.item?.definitionId ?? props.item?.id ?? "");
+const localizedItemName = computed(() => {
+  const item = props.item;
+  if (!item) {
+    return "";
+  }
+  return itemName(kind.value, definitionId.value, item.label ?? item.id ?? "");
+});
+const localizedDescription = computed(() => {
+  const item = props.item;
+  if (!item?.description) {
+    return "";
+  }
+  return contentText(`${kind.value}.${definitionId.value}.description`, item.description);
+});
 
 const primaryStats = computed(() => {
   const item = props.item;
@@ -283,21 +354,21 @@ const primaryStats = computed(() => {
   }
 
   const entries: { label: string; value: string | number | undefined }[] = [
-    { label: "Damage", value: item.damage },
-    { label: "Ring Damage", value: item.ringDamage },
-    { label: "Gem Damage", value: item.gemDamage },
-    { label: "Spell Damage", value: item.spellDamage },
-    { label: "Monster Damage", value: item.monsterDamage },
-    { label: "Health", value: item.health },
-    { label: "Energy Cost", value: item.energyCost },
-    { label: "Cooldown", value: item.cooldown },
-    { label: "Energy Penalty", value: item.energyPenalty },
-    { label: "Cooldown Penalty", value: item.cooldownPenalty },
-    { label: "Base Damage", value: item.baseDamage },
-    { label: "Base Energy", value: item.baseEnergyCost },
-    { label: "Base Cooldown", value: item.baseCooldown },
-    { label: "Base Speed", value: item.baseSpeed },
-    { label: "Skill", value: item.skill ?? undefined },
+    { label: t("stats.damage"), value: item.damage },
+    { label: t("itemDetail.ringDamage"), value: item.ringDamage },
+    { label: t("itemDetail.gemDamage"), value: item.gemDamage },
+    { label: t("itemDetail.spellDamage"), value: item.spellDamage },
+    { label: t("itemDetail.monsterDamage"), value: item.monsterDamage },
+    { label: t("stats.health"), value: item.health },
+    { label: t("itemDetail.energyCost"), value: item.energyCost },
+    { label: t("stats.cooldown"), value: item.cooldown },
+    { label: t("itemDetail.energyPenalty"), value: item.energyPenalty },
+    { label: t("itemDetail.cooldownPenalty"), value: item.cooldownPenalty },
+    { label: t("itemDetail.baseDamage"), value: item.baseDamage },
+    { label: t("itemDetail.baseEnergy"), value: item.baseEnergyCost },
+    { label: t("itemDetail.baseCooldown"), value: item.baseCooldown },
+    { label: t("itemDetail.baseSpeed"), value: item.baseSpeed },
+    { label: t("itemDetail.skill"), value: item.skill ?? undefined },
   ];
 
   return entries.filter(isDetailEntry);
@@ -313,23 +384,24 @@ const usageEntries = computed(() => {
 
   const entries: { label: string; value: string | number | undefined }[] = [
     {
-      label: "Equipped",
-      value: item.equipped === undefined ? undefined : item.equipped ? "Yes" : "No",
+      label: t("itemDetail.equipped"),
+      value:
+        item.equipped === undefined ? undefined : t(item.equipped ? "common.yes" : "common.no"),
     },
     {
-      label: "Slot",
+      label: t("itemDetail.slot"),
       value:
         item.slotIndex === null || item.slotIndex === undefined ? undefined : item.slotIndex + 1,
     },
-    { label: "Socketed Ring", value: item.socketedRingId ?? undefined },
+    { label: t("itemDetail.socketedRing"), value: item.socketedRingId ?? undefined },
     {
-      label: "Socket Index",
+      label: t("itemDetail.socketIndex"),
       value:
         item.socketIndex === null || item.socketIndex === undefined
           ? undefined
           : item.socketIndex + 1,
     },
-    { label: "Enchanted Gem", value: item.enchantedGemId ?? undefined },
+    { label: t("itemDetail.enchantedGem"), value: item.enchantedGemId ?? undefined },
   ];
 
   return entries.filter(isDetailEntry);
@@ -342,10 +414,10 @@ const materialEntries = computed(() => {
   }
 
   const entries: { label: string; value: string | number | undefined }[] = [
-    { label: "Family", value: item.craftingFamily },
-    { label: "Real Type", value: item.realWorldType },
-    { label: "Symbol", value: item.chemicalSymbol ?? undefined },
-    { label: "Atomic Number", value: item.atomicNumber ?? undefined },
+    { label: t("itemDetail.family"), value: item.craftingFamily },
+    { label: t("itemDetail.realType"), value: item.realWorldType },
+    { label: t("itemDetail.symbol"), value: item.chemicalSymbol ?? undefined },
+    { label: t("itemDetail.atomicNumber"), value: item.atomicNumber ?? undefined },
   ];
 
   return entries.filter(isDetailEntry);
@@ -360,5 +432,14 @@ function isDetailEntry(entry: {
 
 function hasNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
+}
+
+function itemName(type: string, id: string, fallback: string): string {
+  return contentText(`${type}.${id}.name`, fallback);
+}
+
+function localizeStatLabel(label: string): string {
+  const key = label.toLowerCase().replaceAll(" ", "");
+  return t(`itemDetail.stat.${key}`, label);
 }
 </script>

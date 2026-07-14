@@ -7,7 +7,12 @@ import {
 const baseSnapshot = {
   player: { id: "playerOne", activeLoadoutId: null },
   inventoryItems: [
-    item({ id: "playerOne.ring.emberLoop", type: "ring", definitionId: "emberLoop", socketCount: 2 }),
+    item({
+      id: "playerOne.ring.emberLoop",
+      type: "ring",
+      definitionId: "emberLoop",
+      socketCount: 2,
+    }),
     item({ id: "playerOne.gem.rubyShard", type: "gem", definitionId: "rubyShard" }),
     item({ id: "playerOne.monster.emberImp", type: "monster", definitionId: "emberImp" }),
     item({ id: "playerOne.spell.firebolt", type: "spell", definitionId: "firebolt" }),
@@ -91,7 +96,9 @@ describe("validatePlayerGameStateSnapshot", () => {
       rewardGrants: [],
     });
 
-    expect(issues).toContain('Ring socket for ring "playerOne.ring.emberLoop" is owned by "playerTwo".');
+    expect(issues).toContain(
+      'Ring socket for ring "playerOne.ring.emberLoop" is owned by "playerTwo".',
+    );
     expect(issues).toContain('Ring socket index is invalid for ring "playerOne.ring.emberLoop".');
     expect(issues).toContain('Ring socket references non-gem item "playerOne.spell.firebolt".');
   });

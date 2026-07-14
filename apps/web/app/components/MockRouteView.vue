@@ -1,40 +1,44 @@
 <template>
   <main class="shell">
-    <nav v-if="view.links?.length" class="section-nav" aria-label="Section navigation">
+    <nav
+      v-if="view.links?.length"
+      class="section-nav"
+      :aria-label="t('accessibility.sectionNavigation')"
+    >
       <NuxtLink
         v-for="link in view.links"
         :key="link.to"
         :class="{ active: isActive(link.to) }"
         :to="link.to"
       >
-        {{ link.label }}
+        {{ $t(link.labelKey) }}
       </NuxtLink>
     </nav>
 
     <header class="view-header">
       <div class="view-title">
-        <span class="eyebrow">{{ view.eyebrow }}</span>
-        <h1>{{ view.title }}</h1>
-        <p class="muted">{{ view.description }}</p>
+        <span class="eyebrow">{{ t(view.eyebrowKey) }}</span>
+        <h1>{{ t(view.titleKey) }}</h1>
+        <p class="muted">{{ t(view.descriptionKey) }}</p>
       </div>
-      <p v-if="view.status" class="status-note">{{ view.status }}</p>
+      <p v-if="view.statusKey" class="status-note">{{ t(view.statusKey) }}</p>
     </header>
 
     <dl v-if="view.metrics?.length" class="metric-grid panel">
-      <div v-for="metric in view.metrics" :key="metric.label" class="stat">
-        <dt>{{ metric.label }}</dt>
-        <dd>{{ metric.value }}</dd>
+      <div v-for="metric in view.metrics" :key="metric.labelKey" class="stat">
+        <dt>{{ t(metric.labelKey) }}</dt>
+        <dd>{{ t(metric.valueKey) }}</dd>
       </div>
     </dl>
 
     <section class="dashboard-grid">
-      <article v-for="section in view.sections" :key="section.title" class="panel">
-        <h2>{{ section.title }}</h2>
-        <p class="muted">{{ section.body }}</p>
-        <p v-if="section.status" class="status-note">{{ section.status }}</p>
-        <ul v-if="section.items?.length" class="clean-list">
-          <li v-for="item in section.items" :key="item" class="row-list-item">
-            <span>{{ item }}</span>
+      <article v-for="section in view.sections" :key="section.titleKey" class="panel">
+        <h2>{{ t(section.titleKey) }}</h2>
+        <p class="muted">{{ t(section.bodyKey) }}</p>
+        <p v-if="section.statusKey" class="status-note">{{ t(section.statusKey) }}</p>
+        <ul v-if="section.itemKeys?.length" class="clean-list">
+          <li v-for="itemKey in section.itemKeys" :key="itemKey" class="row-list-item">
+            <span>{{ t(itemKey) }}</span>
           </li>
         </ul>
         <div v-if="section.actions?.length" class="control-row">
@@ -44,7 +48,7 @@
             class="button-link"
             :to="action.to"
           >
-            {{ action.label }}
+            {{ t(action.labelKey) }}
           </NuxtLink>
         </div>
       </article>
@@ -60,6 +64,7 @@ defineProps<{
 }>();
 
 const route = useRoute();
+const { t } = useI18n();
 
 function isActive(to: string): boolean {
   return route.path === to || (to !== "/" && route.path.startsWith(`${to}/`));

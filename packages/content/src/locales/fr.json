@@ -1,4 +1,10 @@
 {
+  "campaign.emberTrial.description": "Un specialiste du feu et des degats directs qui introduit les rings, les gems et les monstres invoques.",
+  "campaign.emberTrial.name": "Epreuve des braises",
+  "campaign.frostGate.description": "Un specialiste de la glace resistant, axe sur la sante et Shield.",
+  "campaign.frostGate.name": "Porte du givre",
+  "campaign.stormInitiate.description": "Un specialiste electrique rapide qui utilise de faibles couts en energie et Haste.",
+  "campaign.stormInitiate.name": "Initie de la tempete",
   "gem.absoluteZeroGem.name": "Gemme du zéro absolu",
   "gem.emberCore.name": "Cœur de braise",
   "gem.frostChip.name": "Éclat de givre",

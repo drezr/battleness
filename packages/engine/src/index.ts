@@ -493,6 +493,15 @@ function useRing(
   requireValidTarget(state, player.id, action.targetId);
   assertTauntAllowsTarget(state, player.id, action.targetId);
 
+  for (const gem of ring.gems) {
+    if (gem.enchantment?.type !== "spell") {
+      continue;
+    }
+    const spellTarget = action.enchantmentTargets?.[gem.id] ?? action.targetId;
+    requireValidTarget(state, player.id, spellTarget);
+    assertTauntAllowsTarget(state, player.id, spellTarget);
+  }
+
   player.energy.current -= ring.energyCost;
   ring.currentCooldown = ring.cooldown;
 
@@ -542,8 +551,9 @@ function useRing(
     }
 
     const spellTarget = action.enchantmentTargets?.[gem.id] ?? action.targetId;
-    requireValidTarget(state, player.id, spellTarget);
-    assertTauntAllowsTarget(state, player.id, spellTarget);
+    if (!getTarget(state, spellTarget)) {
+      continue;
+    }
 
     events.push({
       type: "spellCast",

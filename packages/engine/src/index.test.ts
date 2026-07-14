@@ -263,6 +263,26 @@ describe("createBattleState", () => {
     expect(playerTwo.hero.health).toBe(30);
   });
 
+  it("lets a spell expire when earlier ring damage destroys its valid target", () => {
+    const state = createBattleState(setup);
+    state.players[1].monsters = [createMonster("playerTwo", "emberImp", { maxHealth: 3 })];
+
+    const result = applyBattleAction(state, {
+      type: "useRing",
+      playerId: "playerOne",
+      ringInstanceId: "playerOne.ring.sparkBand",
+      targetId: "playerTwo.monster.emberImp.1",
+    });
+
+    expect(result.events.map((event) => event.type)).toEqual([
+      "ringUsed",
+      "energySpent",
+      "damageDealt",
+      "monsterDestroyed",
+    ]);
+    expect(result.state.players[1].monsters).toEqual([]);
+  });
+
   it("prevents using the same ring twice in one turn even when energy remains", () => {
     const state = createBattleState(setup);
     const ringEnergyCost = state.players[0].rings[0].energyCost;
