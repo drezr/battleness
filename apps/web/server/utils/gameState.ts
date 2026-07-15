@@ -51,6 +51,15 @@ import {
 import { assertValidPlayerGameState } from "./gameStateValidation";
 import { publishGameRealtimeEvent } from "./gameRealtime";
 import { currentPlayerId, developmentPlayerId } from "./playerContext";
+import {
+  rankedCompetitiveConfig,
+  rankedGlicko2Config,
+  rankedMatchmakingRange,
+  rankedQueuePenaltyMinutes,
+  resolveRankedStanding,
+} from "./rankedRating";
+import { settleRankedBattleRating } from "./rankedRatingSettlement";
+import { runRankedSeasonMaintenance } from "./rankedSeasonMaintenance";
 
 type CraftableDefinition = {
   id: string;
@@ -67,6 +76,36 @@ type MaterialStockRow = {
 
 type PrismaContext = PrismaClient | Prisma.TransactionClient;
 const privateTurnDurationMs = 5 * 60 * 1_000;
+const privateOpeningDuelDurationMs = 90 * 1_000;
+const casualQueueDurationMs = 5 * 60 * 1_000;
+const rankedQueueDurationMs = rankedCompetitiveConfig.queueDurationMinutes * 60 * 1_000;
+const pvpTransactionOptions = {
+  isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+  maxWait: 5_000,
+  timeout: 30_000,
+} as const;
+const pvpTransactionAttempts = 4;
+
+async function runPvpTransaction<T>(
+  client: PrismaClient,
+  operation: (transaction: Prisma.TransactionClient) => Promise<T>,
+): Promise<T> {
+  for (let attempt = 1; attempt <= pvpTransactionAttempts; attempt += 1) {
+    try {
+      return await client.$transaction(operation, pvpTransactionOptions);
+    } catch (error) {
+      if (
+        attempt === pvpTransactionAttempts ||
+        !(error instanceof Prisma.PrismaClientKnownRequestError) ||
+        error.code !== "P2034"
+      ) {
+        throw error;
+      }
+    }
+  }
+
+  throw new Error("The PvP transaction could not be completed.");
+}
 
 export type LiveBattleActionCommand =
   | { type: "chooseElement"; element: ElementType }
@@ -178,6 +217,15 @@ type RewardGrantViewSource = {
     experience: number;
     inventoryItem: { definitionId: string; type: string };
   }[];
+};
+
+type RankedSeasonRewardViewSource = {
+  seasonId: string;
+  tier: string;
+  peakRating: number;
+  badgeCosmeticId: string;
+  titleCosmeticId: string;
+  rewardGrant: RewardGrantViewSource;
 };
 
 type BattleOutcome = "win" | "draw" | "loss";
@@ -541,7 +589,7 @@ export async function getBattleHistoryState() {
   await seedDevelopmentPlayer(prisma);
   await assertValidPlayerGameState(prisma, currentPlayerId());
 
-  const [player, records] = await Promise.all([
+  const [player, records, seasonRewards] = await Promise.all([
     prisma.player.findUniqueOrThrow({ where: { id: currentPlayerId() } }),
     prisma.battleRecord.findMany({
       where: {
@@ -562,6 +610,19 @@ export async function getBattleHistoryState() {
         },
       },
     }),
+    prisma.rankedSeasonReward.findMany({
+      where: { playerId: currentPlayerId() },
+      orderBy: [{ createdAt: "desc" }, { seasonId: "desc" }],
+      take: 20,
+      include: {
+        rewardGrant: {
+          include: {
+            materials: true,
+            items: { include: { inventoryItem: true } },
+          },
+        },
+      },
+    }),
   ]);
 
   return {
@@ -572,6 +633,7 @@ export async function getBattleHistoryState() {
       experience: player.experience,
       level: levelFromExperience(player.experience),
     },
+    seasonRewards: seasonRewards.map(toRankedSeasonRewardView),
     records: records.map((record) => {
       const reward = record.rewardGrants[0] ?? null;
       const state = rebuildBattleState(record.setupJson, record.actionLogJson);
@@ -580,10 +642,9 @@ export async function getBattleHistoryState() {
         id: record.id,
         mode: record.mode,
         status: record.status,
-        outcome:
-          record.mode === "private_pvp"
-            ? privateBattleOutcome(record, currentPlayerId())
-            : (record.result as BattleOutcome),
+        outcome: isPvpMode(record.mode)
+          ? privateBattleOutcome(record, currentPlayerId())
+          : (record.result as BattleOutcome),
         seed: record.seed,
         rulesVersion: record.rulesVersion,
         contentVersion: record.contentVersion,
@@ -606,6 +667,7 @@ export async function getPrivateMatchState() {
   const activeMatch = await prisma.privateMatch.findFirst({
     where: {
       status: "active",
+      matchType: "private",
       battleRecordId: { not: null },
       participants: { some: { playerId: currentPlayerId() } },
     },
@@ -617,7 +679,10 @@ export async function getPrivateMatchState() {
 
   const [match, loadouts] = await Promise.all([
     prisma.privateMatch.findFirst({
-      where: { participants: { some: { playerId: currentPlayerId() } } },
+      where: {
+        matchType: "private",
+        participants: { some: { playerId: currentPlayerId() } },
+      },
       orderBy: { updatedAt: "desc" },
       include: {
         participants: {
@@ -643,6 +708,7 @@ export async function getPrivateMatchState() {
           battleId: match.battleRecordId,
           turnPlayerId: match.turnPlayerId,
           turnDeadlineAt: match.turnDeadlineAt?.toISOString() ?? null,
+          openingDuelDeadlineAt: match.openingDuelDeadlineAt?.toISOString() ?? null,
           expiresAt: match.expiresAt.toISOString(),
           participants: [...match.participants]
             .sort((left, right) => (left.slot === "host" ? -1 : right.slot === "host" ? 1 : 0))
@@ -672,12 +738,18 @@ export async function createPrivateMatch() {
 
   const existing = await prisma.privateMatch.findFirst({
     where: {
-      status: { in: ["waiting", "starting", "active"] },
+      status: { in: ["waiting", "starting", "active", "timing_out"] },
       participants: { some: { playerId: currentPlayerId() } },
     },
   });
   if (existing) {
-    throw new Error("Leave the current private match before creating another one.");
+    throw new Error("Leave the current PvP session before creating a private match.");
+  }
+  if (await hasActiveCasualQueueEntry(prisma, currentPlayerId())) {
+    throw new Error("Cancel the current casual search before creating a private match.");
+  }
+  if (await hasActiveRankedQueueEntry(prisma, currentPlayerId())) {
+    throw new Error("Resolve the current ranked search before creating a private match.");
   }
 
   for (let attempt = 0; attempt < 8; attempt += 1) {
@@ -686,6 +758,7 @@ export async function createPrivateMatch() {
       const match = await prisma.privateMatch.create({
         data: {
           code,
+          matchType: "private",
           expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1_000),
           participants: {
             create: { playerId: currentPlayerId(), slot: "host" },
@@ -718,19 +791,30 @@ export async function joinPrivateMatch(rawCode: string) {
   const matchId = await prisma.$transaction(async (transaction) => {
     const existing = await transaction.privateMatch.findFirst({
       where: {
-        status: { in: ["waiting", "starting", "active"] },
+        status: { in: ["waiting", "starting", "active", "timing_out"] },
         participants: { some: { playerId: currentPlayerId() } },
       },
     });
     if (existing) {
-      throw new Error("Leave the current private match before joining another one.");
+      throw new Error("Leave the current PvP session before joining a private match.");
+    }
+    if (await hasActiveCasualQueueEntry(transaction, currentPlayerId())) {
+      throw new Error("Cancel the current casual search before joining a private match.");
+    }
+    if (await hasActiveRankedQueueEntry(transaction, currentPlayerId())) {
+      throw new Error("Resolve the current ranked search before joining a private match.");
     }
 
     const match = await transaction.privateMatch.findUnique({
       where: { code },
       include: { participants: true },
     });
-    if (!match || match.status !== "waiting" || match.expiresAt.getTime() <= Date.now()) {
+    if (
+      !match ||
+      match.matchType !== "private" ||
+      match.status !== "waiting" ||
+      match.expiresAt.getTime() <= Date.now()
+    ) {
       throw new Error("This private match code is invalid or expired.");
     }
     if (match.participants.length >= 2) {
@@ -767,7 +851,7 @@ export async function setPrivateMatchReady(loadoutId: string, ready: boolean) {
     const participant = await transaction.privateMatchParticipant.findFirst({
       where: {
         playerId: currentPlayerId(),
-        match: { status: "waiting", expiresAt: { gt: new Date() } },
+        match: { matchType: "private", status: "waiting", expiresAt: { gt: new Date() } },
       },
     });
     if (!participant) {
@@ -844,6 +928,8 @@ export async function setPrivateMatchReady(loadoutId: string, ready: boolean) {
         battleRecordId: battle.id,
         turnPlayerId: initialState.activePlayerId,
         turnDeadlineAt: privateTurnDeadline(initialState.activePlayerId),
+        openingDuelDeadlineAt:
+          initialState.status === "choosingFirstPlayer" ? privateOpeningDuelDeadline() : null,
       },
     });
     return match.id;
@@ -866,7 +952,7 @@ export async function leavePrivateMatch() {
   const participant = await prisma.privateMatchParticipant.findFirst({
     where: {
       playerId: currentPlayerId(),
-      match: { status: "waiting" },
+      match: { matchType: "private", status: "waiting" },
     },
     include: { match: { include: { participants: true } } },
   });
@@ -898,6 +984,806 @@ export async function leavePrivateMatch() {
     { type: "privateMatchChanged", matchId: participant.matchId, reason: "left" },
   );
   return state;
+}
+
+export async function getCasualMatchmakingState() {
+  const prisma = usePrisma();
+  await seedDevelopmentPlayer(prisma);
+  await expireCasualQueueEntries(prisma);
+
+  let entry = await findCurrentCasualQueueEntry(prisma, currentPlayerId());
+  if (entry?.status === "matched" && entry.battleRecordId) {
+    await settleExpiredPrivateBattle(prisma, entry.battleRecordId);
+    entry = await findCurrentCasualQueueEntry(prisma, currentPlayerId());
+  }
+
+  const player = await prisma.player.findUniqueOrThrow({
+    where: { id: currentPlayerId() },
+    include: { activeLoadout: { include: { rings: true } } },
+  });
+  const activeBattle =
+    entry?.status === "matched" && entry.battleRecord?.status !== "finished"
+      ? entry.battleRecord
+      : null;
+  const battleIsActive = Boolean(activeBattle);
+  const opponent = activeBattle
+    ? activeBattle.playerOneId === currentPlayerId()
+      ? activeBattle.playerTwo
+      : activeBattle.playerOne
+    : null;
+
+  return {
+    playerId: currentPlayerId(),
+    status: battleIsActive
+      ? ("matched" as const)
+      : entry?.status === "waiting" || entry?.status === "matching"
+        ? ("searching" as const)
+        : ("idle" as const),
+    activeLoadout: player.activeLoadout
+      ? {
+          id: player.activeLoadout.id,
+          name: player.activeLoadout.name,
+          ringCount: player.activeLoadout.rings.length,
+        }
+      : null,
+    queue:
+      entry?.status === "waiting" || entry?.status === "matching"
+        ? {
+            id: entry.id,
+            joinedAt: entry.createdAt.toISOString(),
+            expiresAt: entry.expiresAt.toISOString(),
+            loadoutName: entry.loadout?.name ?? null,
+            ringCount: casualQueueRingItemIds(entry.ringItemIdsJson).length,
+          }
+        : null,
+    match: battleIsActive
+      ? {
+          battleId: entry!.battleRecordId!,
+          opponent: {
+            id: opponent?.id ?? "unknown",
+            username: opponent?.username ?? "Unknown player",
+          },
+        }
+      : null,
+    recentBattleId:
+      entry?.status === "matched" && entry.battleRecord?.status === "finished"
+        ? entry.battleRecordId
+        : null,
+  };
+}
+
+export async function enterCasualMatchmaking() {
+  const prisma = usePrisma();
+  await seedDevelopmentPlayer(prisma);
+  await expireCasualQueueEntries(prisma);
+
+  const result = await runPvpTransaction(prisma, async (transaction) => {
+    const player = await transaction.player.findUniqueOrThrow({
+      where: { id: currentPlayerId() },
+      include: { activeLoadout: { include: { rings: true } } },
+    });
+    if (!player.activeLoadout || player.activeLoadout.rings.length === 0) {
+      throw new Error("An active loadout containing at least one ring is required.");
+    }
+
+    const activeSession = await transaction.privateMatchParticipant.findFirst({
+      where: {
+        playerId: currentPlayerId(),
+        match: { status: { in: ["waiting", "starting", "active", "timing_out"] } },
+      },
+    });
+    if (activeSession) {
+      throw new Error("Finish or leave the current PvP session before entering matchmaking.");
+    }
+    if (await hasActiveRankedQueueEntry(transaction, currentPlayerId())) {
+      throw new Error("Resolve the current ranked search before entering casual matchmaking.");
+    }
+
+    const existing = await transaction.casualQueueEntry.findFirst({
+      where: {
+        playerId: currentPlayerId(),
+        OR: [
+          { status: { in: ["waiting", "matching"] } },
+          { status: "matched", battleRecord: { status: { not: "finished" } } },
+        ],
+      },
+    });
+    if (existing) {
+      throw new Error("This player is already searching for or playing a casual match.");
+    }
+
+    const ownEntry = await transaction.casualQueueEntry.create({
+      data: {
+        playerId: currentPlayerId(),
+        loadoutId: player.activeLoadout.id,
+        ringItemIdsJson: JSON.stringify(
+          [...player.activeLoadout.rings]
+            .sort((left, right) => left.slotIndex - right.slotIndex)
+            .map((ring) => ring.ringItemId),
+        ),
+        expiresAt: new Date(Date.now() + casualQueueDurationMs),
+      },
+    });
+    const opponentEntry = await transaction.casualQueueEntry.findFirst({
+      where: {
+        id: { not: ownEntry.id },
+        playerId: { not: currentPlayerId() },
+        status: "waiting",
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    });
+    if (!opponentEntry) {
+      return { battleId: null, playerIds: [currentPlayerId()] };
+    }
+
+    const opponentClaim = await transaction.casualQueueEntry.updateMany({
+      where: { id: opponentEntry.id, status: "waiting", expiresAt: { gt: new Date() } },
+      data: { status: "matching" },
+    });
+    if (opponentClaim.count !== 1) {
+      return { battleId: null, playerIds: [currentPlayerId()] };
+    }
+    const ownClaim = await transaction.casualQueueEntry.updateMany({
+      where: { id: ownEntry.id, status: "waiting" },
+      data: { status: "matching" },
+    });
+    if (ownClaim.count !== 1) {
+      throw new Error("The casual matchmaking entry could not be claimed.");
+    }
+
+    const queueEntries = await transaction.casualQueueEntry.findMany({
+      where: { id: { in: [opponentEntry.id, ownEntry.id] } },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      include: {
+        loadout: { include: { rings: { orderBy: { slotIndex: "asc" } } } },
+        player: {
+          include: {
+            inventoryItems: true,
+            ringSockets: { orderBy: [{ ringItemId: "asc" }, { socketIndex: "asc" }] },
+            gemEnchantments: true,
+          },
+        },
+      },
+    });
+    const first = queueEntries[0];
+    const second = queueEntries[1];
+    if (!first || !second) {
+      throw new Error("Casual matchmaking participants are incomplete.");
+    }
+
+    const firstWithSnapshot = {
+      ...first,
+      loadout: {
+        rings: casualQueueRingItemIds(first.ringItemIdsJson).map((ringItemId) => ({ ringItemId })),
+      },
+    };
+    const secondWithSnapshot = {
+      ...second,
+      loadout: {
+        rings: casualQueueRingItemIds(second.ringItemIdsJson).map((ringItemId) => ({ ringItemId })),
+      },
+    };
+
+    const match = await transaction.privateMatch.create({
+      data: {
+        code: `CQ-${randomBytes(12).toString("hex").toUpperCase()}`,
+        matchType: "casual",
+        status: "starting",
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1_000),
+        participants: {
+          create: [
+            { playerId: first.playerId, loadoutId: first.loadoutId, slot: "host", ready: true },
+            { playerId: second.playerId, loadoutId: second.loadoutId, slot: "guest", ready: true },
+          ],
+        },
+      },
+    });
+    const setup = livePvpBattleSetup(match.id, "casual", firstWithSnapshot, secondWithSnapshot);
+    const initialState = createBattleState(setup);
+    const battle = await transaction.battleRecord.create({
+      data: {
+        mode: "casual_pvp",
+        modeReferenceId: match.id,
+        status: initialState.status,
+        result: "pending",
+        playerOneId: first.playerId,
+        playerTwoId: second.playerId,
+        seed: setup.seed,
+        rulesVersion,
+        contentVersion,
+        setupJson: JSON.stringify(setup),
+        actionLogJson: JSON.stringify(initialState.actionHistory),
+        turnCount: Math.max(
+          ...initialState.players.map((battlePlayer) => battlePlayer.energy.turnCount),
+        ),
+      },
+    });
+    await transaction.privateMatch.update({
+      where: { id: match.id },
+      data: {
+        status: "active",
+        battleRecordId: battle.id,
+        turnPlayerId: initialState.activePlayerId,
+        turnDeadlineAt: privateTurnDeadline(initialState.activePlayerId),
+        openingDuelDeadlineAt:
+          initialState.status === "choosingFirstPlayer" ? privateOpeningDuelDeadline() : null,
+      },
+    });
+    await transaction.casualQueueEntry.updateMany({
+      where: { id: { in: [first.id, second.id] }, status: "matching" },
+      data: {
+        status: "matched",
+        privateMatchId: match.id,
+        battleRecordId: battle.id,
+      },
+    });
+
+    return { battleId: battle.id, playerIds: [first.playerId, second.playerId] };
+  });
+
+  publishGameRealtimeEvent(result.playerIds, {
+    type: "casualQueueChanged",
+    reason: result.battleId ? "matched" : "queued",
+    battleId: result.battleId,
+  });
+  return getCasualMatchmakingState();
+}
+
+export async function cancelCasualMatchmaking() {
+  const prisma = usePrisma();
+  const entry = await prisma.casualQueueEntry.findFirst({
+    where: { playerId: currentPlayerId(), status: "waiting" },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+  });
+  if (!entry) {
+    throw new Error("No active casual matchmaking search can be cancelled.");
+  }
+
+  const cancelled = await prisma.casualQueueEntry.updateMany({
+    where: { id: entry.id, status: "waiting" },
+    data: { status: "cancelled" },
+  });
+  if (cancelled.count !== 1) {
+    throw new Error("The casual matchmaking state changed before cancellation.");
+  }
+
+  publishGameRealtimeEvent([currentPlayerId()], {
+    type: "casualQueueChanged",
+    reason: "cancelled",
+    battleId: null,
+  });
+  return getCasualMatchmakingState();
+}
+
+export async function getRankedMatchmakingState() {
+  const prisma = usePrisma();
+  await seedDevelopmentPlayer(prisma);
+  await runRankedSeasonMaintenance(prisma);
+  const season = await ensureActiveRankedSeason(prisma);
+  if (!season) {
+    return rankedUnavailableState(prisma);
+  }
+
+  await expireRankedQueueEntries(prisma);
+  await tryPairRankedQueueEntry(prisma, currentPlayerId());
+
+  let entry = await findCurrentRankedQueueEntry(prisma, currentPlayerId());
+  if (
+    entry?.status === "matched" &&
+    entry.battleRecordId &&
+    entry.battleRecord?.status === "finished"
+  ) {
+    await settleRankedBattleRating(prisma, {
+      seasonId: entry.seasonId,
+      battleRecordId: entry.battleRecordId,
+    });
+    entry = await findCurrentRankedQueueEntry(prisma, currentPlayerId());
+  }
+
+  const [player, rating, discipline, opponent, seasonReset, seasonRewards] = await Promise.all([
+    prisma.player.findUniqueOrThrow({
+      where: { id: currentPlayerId() },
+      include: { activeLoadout: { include: { rings: true } } },
+    }),
+    prisma.rankedSeasonRating.upsert({
+      where: { seasonId_playerId: { seasonId: season.id, playerId: currentPlayerId() } },
+      create: { seasonId: season.id, playerId: currentPlayerId() },
+      update: {},
+    }),
+    normalizedRankedDiscipline(prisma, currentPlayerId()),
+    entry?.opponentPlayerId
+      ? prisma.player.findUnique({ where: { id: entry.opponentPlayerId } })
+      : Promise.resolve(null),
+    prisma.rankedRatingAdjustment.findFirst({
+      where: {
+        seasonId: season.id,
+        playerId: currentPlayerId(),
+        reason: "season_soft_reset",
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    }),
+    prisma.rankedSeasonReward.findMany({
+      where: { playerId: currentPlayerId() },
+      orderBy: [{ createdAt: "desc" }, { seasonId: "desc" }],
+      take: 10,
+      include: {
+        rewardGrant: {
+          include: {
+            materials: true,
+            items: { include: { inventoryItem: true } },
+          },
+        },
+      },
+    }),
+  ]);
+  const now = new Date();
+  const activeBattle =
+    entry?.status === "matched" && entry.battleRecord?.status !== "finished"
+      ? entry.battleRecord
+      : null;
+  const range =
+    entry?.status === "waiting"
+      ? rankedMatchmakingRange(Math.max(0, (now.getTime() - entry.createdAt.getTime()) / 1_000))
+      : null;
+  const standing = resolveRankedStanding(rating.rating, rating.placementMatches);
+
+  return {
+    playerId: currentPlayerId(),
+    status: activeBattle
+      ? ("matched" as const)
+      : entry?.status === "accepting"
+        ? ("accepting" as const)
+        : entry?.status === "waiting"
+          ? ("searching" as const)
+          : ("idle" as const),
+    season: {
+      id: season.id,
+      endsAt: season.endsAt.toISOString(),
+    },
+    rating: {
+      value: Math.round(rating.rating),
+      deviation: Math.round(rating.deviation),
+      placementMatches: rating.placementMatches,
+      placementTarget: 5,
+      standing,
+      peakRating: rating.peakRating ? Math.round(rating.peakRating) : null,
+      peakStanding: rating.peakRating
+        ? resolveRankedStanding(rating.peakRating, rankedGlicko2Config.placementMatchCount)
+        : null,
+    },
+    seasonReset:
+      seasonReset && rating.placementMatches < rankedGlicko2Config.placementMatchCount
+        ? {
+            ratingBefore: Math.round(seasonReset.ratingBefore),
+            ratingAfter: Math.round(seasonReset.ratingAfter),
+            previousPlacementMatches: seasonReset.placementMatchesBefore,
+          }
+        : null,
+    seasonRewards: seasonRewards.map(toRankedSeasonRewardView),
+    activeLoadout: player.activeLoadout
+      ? {
+          id: player.activeLoadout.id,
+          name: player.activeLoadout.name,
+          ringCount: player.activeLoadout.rings.length,
+        }
+      : null,
+    queue:
+      entry?.status === "waiting"
+        ? {
+            id: entry.id,
+            joinedAt: entry.createdAt.toISOString(),
+            expiresAt: entry.expiresAt.toISOString(),
+            loadoutName: entry.loadout?.name ?? null,
+            ringCount: rankedQueueRingItemIds(entry.ringItemIdsJson).length,
+            ratingRange: range!.rating,
+            heroLevelRange: range!.heroLevel,
+          }
+        : null,
+    proposal:
+      entry?.status === "accepting" && entry.acceptanceDeadlineAt
+        ? {
+            pairingKey: entry.pairingKey!,
+            acceptanceDeadlineAt: entry.acceptanceDeadlineAt.toISOString(),
+            accepted: Boolean(entry.acceptedAt),
+            opponent: {
+              id: entry.opponentPlayerId ?? "unknown",
+              username: opponent?.username ?? "Unknown player",
+            },
+          }
+        : null,
+    match: activeBattle
+      ? {
+          battleId: entry!.battleRecordId!,
+          opponent: {
+            id: entry!.opponentPlayerId ?? "unknown",
+            username: opponent?.username ?? "Unknown player",
+          },
+        }
+      : null,
+    recentBattleId:
+      entry?.status === "matched" && entry.battleRecord?.status === "finished"
+        ? entry.battleRecordId
+        : null,
+    discipline: {
+      missedAcceptances: discipline?.missedAcceptances ?? 0,
+      lockedUntil:
+        discipline?.lockedUntil && discipline.lockedUntil > now
+          ? discipline.lockedUntil.toISOString()
+          : null,
+    },
+  };
+}
+
+export async function getRankedLeaderboardState() {
+  const prisma = usePrisma();
+  await seedDevelopmentPlayer(prisma);
+  await runRankedSeasonMaintenance(prisma);
+  const season = await ensureActiveRankedSeason(prisma);
+  if (!season) {
+    return {
+      season: null,
+      top: [],
+      current: null,
+      nearby: [],
+    };
+  }
+
+  const orderBy = [
+    { rating: "desc" as const },
+    { deviation: "asc" as const },
+    { wins: "desc" as const },
+    { playerId: "asc" as const },
+  ];
+  const placedWhere = {
+    seasonId: season.id,
+    placementMatches: { gte: rankedGlicko2Config.placementMatchCount },
+  };
+  const [topRows, currentRating] = await Promise.all([
+    prisma.rankedSeasonRating.findMany({
+      where: placedWhere,
+      orderBy,
+      take: 100,
+      include: { player: true },
+    }),
+    prisma.rankedSeasonRating.findUnique({
+      where: { seasonId_playerId: { seasonId: season.id, playerId: currentPlayerId() } },
+      include: { player: true },
+    }),
+  ]);
+
+  let currentPosition: number | null = null;
+  let nearbyRows: typeof topRows = [];
+  if (currentRating && currentRating.placementMatches >= rankedGlicko2Config.placementMatchCount) {
+    const playersAhead = await prisma.rankedSeasonRating.count({
+      where: {
+        ...placedWhere,
+        OR: [
+          { rating: { gt: currentRating.rating } },
+          { rating: currentRating.rating, deviation: { lt: currentRating.deviation } },
+          {
+            rating: currentRating.rating,
+            deviation: currentRating.deviation,
+            wins: { gt: currentRating.wins },
+          },
+          {
+            rating: currentRating.rating,
+            deviation: currentRating.deviation,
+            wins: currentRating.wins,
+            playerId: { lt: currentRating.playerId },
+          },
+        ],
+      },
+    });
+    currentPosition = playersAhead + 1;
+    nearbyRows = await prisma.rankedSeasonRating.findMany({
+      where: placedWhere,
+      orderBy,
+      skip: Math.max(0, currentPosition - 3),
+      take: 5,
+      include: { player: true },
+    });
+  }
+
+  return {
+    season: { id: season.id, endsAt: season.endsAt.toISOString() },
+    top: topRows.map((row, index) => rankedLeaderboardEntry(row, index + 1)),
+    current:
+      currentRating && currentPosition
+        ? rankedLeaderboardEntry(currentRating, currentPosition)
+        : null,
+    nearby: nearbyRows.map((row, index) =>
+      rankedLeaderboardEntry(row, Math.max(1, currentPosition! - 2) + index),
+    ),
+  };
+}
+
+export async function enterRankedMatchmaking() {
+  const prisma = usePrisma();
+  await seedDevelopmentPlayer(prisma);
+  await runRankedSeasonMaintenance(prisma);
+  const season = await ensureActiveRankedSeason(prisma);
+  if (!season) {
+    throw new Error("No ranked season is currently active.");
+  }
+  await expireRankedQueueEntries(prisma);
+
+  await runPvpTransaction(prisma, async (transaction) => {
+    const player = await transaction.player.findUniqueOrThrow({
+      where: { id: currentPlayerId() },
+      include: { activeLoadout: { include: { rings: true } } },
+    });
+    if (!player.activeLoadout || player.activeLoadout.rings.length === 0) {
+      throw new Error("An active loadout containing at least one ring is required.");
+    }
+
+    const discipline = await normalizedRankedDiscipline(transaction, currentPlayerId());
+    if (discipline?.lockedUntil && discipline.lockedUntil > new Date()) {
+      throw new Error(
+        `Ranked matchmaking is locked until ${discipline.lockedUntil.toISOString()}.`,
+      );
+    }
+    if (await hasActivePvpSession(transaction, currentPlayerId())) {
+      throw new Error("Finish or leave the current PvP session before entering matchmaking.");
+    }
+    if (await hasActiveCasualQueueEntry(transaction, currentPlayerId())) {
+      throw new Error("Cancel the current casual search before entering ranked matchmaking.");
+    }
+    if (await hasActiveRankedQueueEntry(transaction, currentPlayerId())) {
+      throw new Error("This player is already searching for or playing a ranked match.");
+    }
+
+    const rating = await transaction.rankedSeasonRating.upsert({
+      where: { seasonId_playerId: { seasonId: season.id, playerId: currentPlayerId() } },
+      create: { seasonId: season.id, playerId: currentPlayerId() },
+      update: {},
+    });
+    await transaction.rankedQueueEntry.create({
+      data: {
+        playerId: currentPlayerId(),
+        seasonId: season.id,
+        loadoutId: player.activeLoadout.id,
+        ringItemIdsJson: JSON.stringify(
+          [...player.activeLoadout.rings]
+            .sort((left, right) => left.slotIndex - right.slotIndex)
+            .map((ring) => ring.ringItemId),
+        ),
+        ratingSnapshot: rating.rating,
+        heroLevelSnapshot: levelFromExperience(player.experience),
+        expiresAt: new Date(Date.now() + rankedQueueDurationMs),
+      },
+    });
+  });
+
+  await tryPairRankedQueueEntry(prisma, currentPlayerId());
+  publishGameRealtimeEvent([currentPlayerId()], {
+    type: "rankedQueueChanged",
+    reason: "queued",
+    battleId: null,
+  });
+  return getRankedMatchmakingState();
+}
+
+export async function cancelRankedMatchmaking() {
+  const prisma = usePrisma();
+  const entry = await prisma.rankedQueueEntry.findFirst({
+    where: { playerId: currentPlayerId(), status: "waiting" },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+  });
+  if (!entry) {
+    throw new Error("No active ranked search can be cancelled.");
+  }
+  const cancelled = await prisma.rankedQueueEntry.updateMany({
+    where: { id: entry.id, status: "waiting" },
+    data: { status: "cancelled" },
+  });
+  if (cancelled.count !== 1) {
+    throw new Error("The ranked matchmaking state changed before cancellation.");
+  }
+  publishGameRealtimeEvent([currentPlayerId()], {
+    type: "rankedQueueChanged",
+    reason: "cancelled",
+    battleId: null,
+  });
+  return getRankedMatchmakingState();
+}
+
+export async function acceptRankedMatch() {
+  const prisma = usePrisma();
+  await expireRankedQueueEntries(prisma);
+  const accepted = await runPvpTransaction(prisma, async (transaction) => {
+    const now = new Date();
+    const entry = await transaction.rankedQueueEntry.findFirst({
+      where: {
+        playerId: currentPlayerId(),
+        status: "accepting",
+        acceptanceDeadlineAt: { gt: now },
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    });
+    if (!entry?.pairingKey) {
+      throw new Error("No active ranked match proposal can be accepted.");
+    }
+    const update = await transaction.rankedQueueEntry.updateMany({
+      where: {
+        id: entry.id,
+        status: "accepting",
+        acceptedAt: null,
+        acceptanceDeadlineAt: { gt: now },
+      },
+      data: { acceptedAt: now },
+    });
+    if (update.count !== 1 && !entry.acceptedAt) {
+      throw new Error("The ranked match proposal changed before it could be accepted.");
+    }
+    return { pairingKey: entry.pairingKey };
+  });
+
+  const result = await tryCreateRankedBattleForPairing(prisma, accepted.pairingKey);
+  const playerIds = result.playerIds.length > 0 ? result.playerIds : [currentPlayerId()];
+  publishGameRealtimeEvent(playerIds, {
+    type: "rankedQueueChanged",
+    reason: result.battleId ? "matched" : "accepted",
+    battleId: result.battleId,
+  });
+  return getRankedMatchmakingState();
+}
+
+async function tryCreateRankedBattleForPairing(
+  prisma: PrismaClient,
+  pairingKey: string,
+): Promise<{ battleId: string | null; playerIds: string[] }> {
+  return runPvpTransaction(prisma, async (transaction) => {
+    const existing = await transaction.rankedQueueEntry.findFirst({
+      where: { pairingKey, status: "matched", battleRecordId: { not: null } },
+      select: { battleRecordId: true },
+    });
+    if (existing?.battleRecordId) {
+      const matchedEntries = await transaction.rankedQueueEntry.findMany({
+        where: { pairingKey, status: "matched" },
+        select: { playerId: true },
+      });
+      return {
+        battleId: existing.battleRecordId,
+        playerIds: matchedEntries.map((entry) => entry.playerId),
+      };
+    }
+
+    const proposal = await transaction.rankedQueueEntry.findMany({
+      where: { pairingKey, status: "accepting" },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      select: { id: true, playerId: true, acceptedAt: true },
+    });
+    if (proposal.length !== 2 || proposal.some((entry) => !entry.acceptedAt)) {
+      return { battleId: null, playerIds: proposal.map((entry) => entry.playerId) };
+    }
+
+    const claimed = await transaction.rankedQueueEntry.updateMany({
+      where: { pairingKey, status: "accepting", acceptedAt: { not: null } },
+      data: { status: "matching" },
+    });
+    if (claimed.count !== 2) {
+      throw new Error("The ranked match proposal changed while the battle was being created.");
+    }
+
+    const pair = await transaction.rankedQueueEntry.findMany({
+      where: { pairingKey, status: "matching" },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      include: {
+        loadout: { include: { rings: { orderBy: { slotIndex: "asc" } } } },
+        player: {
+          include: {
+            inventoryItems: true,
+            ringSockets: { orderBy: [{ ringItemId: "asc" }, { socketIndex: "asc" }] },
+            gemEnchantments: true,
+          },
+        },
+      },
+    });
+    if (pair.length !== 2) {
+      throw new Error("The ranked match proposal is incomplete.");
+    }
+
+    const first = rankedEntryWithSnapshot(pair[0]!);
+    const second = rankedEntryWithSnapshot(pair[1]!);
+    const match = await transaction.privateMatch.create({
+      data: {
+        code: `RQ-${randomBytes(12).toString("hex").toUpperCase()}`,
+        matchType: "ranked",
+        status: "starting",
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1_000),
+        participants: {
+          create: [
+            { playerId: first.playerId, loadoutId: first.loadoutId, slot: "host", ready: true },
+            { playerId: second.playerId, loadoutId: second.loadoutId, slot: "guest", ready: true },
+          ],
+        },
+      },
+    });
+    const setup = livePvpBattleSetup(match.id, "ranked", first, second);
+    const initialState = createBattleState(setup);
+    const battle = await transaction.battleRecord.create({
+      data: {
+        mode: "ranked_pvp",
+        modeReferenceId: first.seasonId,
+        status: initialState.status,
+        result: "pending",
+        playerOneId: first.playerId,
+        playerTwoId: second.playerId,
+        seed: setup.seed,
+        rulesVersion,
+        contentVersion,
+        setupJson: JSON.stringify(setup),
+        actionLogJson: JSON.stringify(initialState.actionHistory),
+        turnCount: Math.max(
+          ...initialState.players.map((battlePlayer) => battlePlayer.energy.turnCount),
+        ),
+      },
+    });
+    await transaction.privateMatch.update({
+      where: { id: match.id },
+      data: {
+        status: "active",
+        battleRecordId: battle.id,
+        turnPlayerId: initialState.activePlayerId,
+        turnDeadlineAt: privateTurnDeadline(initialState.activePlayerId),
+        openingDuelDeadlineAt:
+          initialState.status === "choosingFirstPlayer" ? privateOpeningDuelDeadline() : null,
+      },
+    });
+    const matched = await transaction.rankedQueueEntry.updateMany({
+      where: { pairingKey, status: "matching" },
+      data: { status: "matched", privateMatchId: match.id, battleRecordId: battle.id },
+    });
+    if (matched.count !== 2) {
+      throw new Error("The ranked match participants changed before battle activation.");
+    }
+    return { battleId: battle.id, playerIds: pair.map((candidate) => candidate.playerId) };
+  });
+}
+
+export async function declineRankedMatch() {
+  const prisma = usePrisma();
+  await expireRankedQueueEntries(prisma);
+  const playerIds = await runPvpTransaction(prisma, async (transaction) => {
+    const entry = await transaction.rankedQueueEntry.findFirst({
+      where: {
+        playerId: currentPlayerId(),
+        status: "accepting",
+        acceptanceDeadlineAt: { gt: new Date() },
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    });
+    if (!entry?.pairingKey) {
+      throw new Error("No active ranked match proposal can be declined.");
+    }
+    const claimed = await transaction.rankedQueueEntry.updateMany({
+      where: { pairingKey: entry.pairingKey, status: "accepting" },
+      data: { status: "declining" },
+    });
+    if (claimed.count !== 2) {
+      throw new Error("The ranked match proposal changed before it could be declined.");
+    }
+    const pair = await transaction.rankedQueueEntry.findMany({
+      where: { pairingKey: entry.pairingKey, status: "declining" },
+    });
+    await applyRankedQueuePenalty(transaction, currentPlayerId(), new Date());
+    await transaction.rankedQueueEntry.updateMany({
+      where: { pairingKey: entry.pairingKey, status: "declining" },
+      data: { status: "cancelled" },
+    });
+    await transaction.rankedQueueEntry.update({
+      where: { id: entry.id },
+      data: { status: "declined" },
+    });
+    return pair.map((candidate) => candidate.playerId);
+  });
+  publishGameRealtimeEvent(playerIds, {
+    type: "rankedQueueChanged",
+    reason: "declined",
+    battleId: null,
+  });
+  return getRankedMatchmakingState();
 }
 
 export async function createLiveTrainingBattle(requestId: string) {
@@ -1031,6 +1917,7 @@ export async function getLiveBattleState(battleId: string) {
 
   await seedDevelopmentPlayer(prisma);
   await settleExpiredPrivateBattle(prisma, battleId);
+  await settleFinishedRankedBattle(prisma, battleId);
 
   const record = await prisma.battleRecord.findFirst({
     where: {
@@ -1073,6 +1960,9 @@ export async function getLiveBattleState(battleId: string) {
     turnCount: Math.max(...state.players.map((player) => player.energy.turnCount)),
     turnPlayerId: record.privateMatch?.turnPlayerId ?? null,
     turnDeadlineAt: record.privateMatch?.turnDeadlineAt?.toISOString() ?? null,
+    openingDuelDeadlineAt: record.privateMatch?.openingDuelDeadlineAt?.toISOString() ?? null,
+    openingDuelChoiceSubmitted: Boolean(state.firstPlayerChoices?.[viewer.id]),
+    openingDuelRound: state.log.filter((event) => event.type === "elementDuelTied").length + 1,
     viewer: toLiveBattlePlayerView(viewer, true),
     opponent: toLiveBattlePlayerView(opponent, false),
     result: state.result,
@@ -1108,15 +1998,22 @@ export async function submitLiveBattleAction(
     if (!record) {
       throw new Error(`Battle "${battleId}" is not available for this player.`);
     }
-    if (record.mode !== "training" && record.mode !== "campaign" && record.mode !== "private_pvp") {
+    if (record.mode !== "training" && record.mode !== "campaign" && !isPvpMode(record.mode)) {
       throw new Error("This battle mode does not accept live actions.");
     }
     if (
-      record.mode === "private_pvp" &&
+      isPvpMode(record.mode) &&
       record.privateMatch?.turnDeadlineAt &&
       record.privateMatch.turnDeadlineAt.getTime() <= Date.now()
     ) {
       throw new Error("The turn deadline has expired. Reload the battle state.");
+    }
+    if (
+      isPvpMode(record.mode) &&
+      record.privateMatch?.openingDuelDeadlineAt &&
+      record.privateMatch.openingDuelDeadlineAt.getTime() <= Date.now()
+    ) {
+      throw new Error("The opening duel deadline has expired. Reload the battle state.");
     }
 
     const state = rebuildBattleState(record.setupJson, record.actionLogJson);
@@ -1148,7 +2045,7 @@ export async function submitLiveBattleAction(
       data: {
         status: nextState.status,
         result:
-          record.mode === "private_pvp" && nextState.status === "finished"
+          isPvpMode(record.mode) && nextState.status === "finished"
             ? nextState.result?.type === "draw"
               ? "draw"
               : "finished"
@@ -1159,7 +2056,7 @@ export async function submitLiveBattleAction(
         winnerPlayerId:
           nextState.result?.type !== "winner"
             ? null
-            : record.mode === "private_pvp"
+            : isPvpMode(record.mode)
               ? nextState.result.winnerId
               : nextState.result.winnerId === currentPlayerId()
                 ? currentPlayerId()
@@ -1174,22 +2071,34 @@ export async function submitLiveBattleAction(
       );
     }
 
-    if (nextState.status === "finished" && record.mode === "private_pvp") {
+    if (nextState.status === "finished" && isPvpMode(record.mode)) {
       await transaction.privateMatch.updateMany({
         where: { battleRecordId: record.id },
-        data: { status: "finished", turnPlayerId: null, turnDeadlineAt: null },
+        data: {
+          status: "finished",
+          turnPlayerId: null,
+          turnDeadlineAt: null,
+          openingDuelDeadlineAt: null,
+        },
       });
-    } else if (record.mode === "private_pvp") {
+    } else if (isPvpMode(record.mode)) {
+      const duelTied = applied.events.some((event) => event.type === "elementDuelTied");
       await transaction.privateMatch.updateMany({
         where: { battleRecordId: record.id, status: "active" },
         data: {
           turnPlayerId: nextState.activePlayerId,
           turnDeadlineAt: privateTurnDeadline(nextState.activePlayerId),
+          openingDuelDeadlineAt:
+            nextState.status === "choosingFirstPlayer"
+              ? duelTied
+                ? privateOpeningDuelDeadline()
+                : record.privateMatch?.openingDuelDeadlineAt
+              : null,
         },
       });
     }
 
-    if (nextState.status === "finished" && record.mode !== "private_pvp") {
+    if (nextState.status === "finished" && !isPvpMode(record.mode)) {
       if (outcome === "pending") {
         throw new Error("Finished battle does not have a settlement outcome.");
       }
@@ -1234,7 +2143,11 @@ export async function submitLiveBattleAction(
     await assertValidPlayerGameState(prisma, currentPlayerId());
   }
 
-  if (submitted.mode === "private_pvp") {
+  if (submitted.mode === "ranked_pvp" && submitted.finished) {
+    await settleFinishedRankedBattle(prisma, battleId);
+  }
+
+  if (isPvpMode(submitted.mode)) {
     publishGameRealtimeEvent(submitted.playerIds, {
       type: "battleChanged",
       battleId,
@@ -1359,7 +2272,7 @@ export async function claimBattleReward(rewardGrantId: string) {
   await prisma.$transaction(async (transaction) => {
     const reward = await transaction.rewardGrant.findUnique({
       where: { id: rewardGrantId },
-      include: { materials: true, items: true },
+      include: { materials: true, items: true, rankedSeasonReward: true },
     });
 
     if (!reward || reward.playerId !== currentPlayerId()) {
@@ -1413,6 +2326,31 @@ export async function claimBattleReward(rewardGrantId: string) {
 
       if (updated.count !== 1) {
         throw new Error(`Reward item "${itemReward.inventoryItemId}" is not available.`);
+      }
+    }
+
+    if (reward.rankedSeasonReward) {
+      const cosmeticUnlocks = [
+        { cosmeticId: reward.rankedSeasonReward.badgeCosmeticId, type: "badge" },
+        { cosmeticId: reward.rankedSeasonReward.titleCosmeticId, type: "title" },
+      ];
+      for (const cosmetic of cosmeticUnlocks) {
+        await transaction.playerCosmeticUnlock.upsert({
+          where: {
+            playerId_cosmeticId: {
+              playerId: currentPlayerId(),
+              cosmeticId: cosmetic.cosmeticId,
+            },
+          },
+          create: {
+            playerId: currentPlayerId(),
+            cosmeticId: cosmetic.cosmeticId,
+            type: cosmetic.type,
+            sourceType: "rankedSeason",
+            sourceId: reward.rankedSeasonReward.seasonId,
+          },
+          update: {},
+        });
       }
     }
   });
@@ -1921,6 +2859,7 @@ export async function socketPlayerGem(ringItemId: string, gemItemId: string) {
     if (!gem || gem.playerId !== currentPlayerId() || gem.type !== "gem") {
       throw new Error(`Gem item "${gemItemId}" is not available for this player.`);
     }
+    await assertItemsNotMarketEscrowed(transaction, [ringItemId, gemItemId]);
     if (ring.socketCount === null) {
       throw new Error(`Ring item "${ringItemId}" cannot contain gems.`);
     }
@@ -1979,6 +2918,7 @@ export async function unsocketPlayerGem(gemItemId: string) {
     if (!socket) {
       throw new Error(`Gem item "${gemItemId}" is not socketed.`);
     }
+    await assertItemsNotMarketEscrowed(transaction, [socket.ringItemId, gemItemId]);
 
     await transaction.ringSocket.deleteMany({
       where: { playerId: currentPlayerId(), gemItemId },
@@ -2008,6 +2948,7 @@ export async function improvePlayerRingSocketCount(ringItemId: string) {
     if (!ring || ring.playerId !== currentPlayerId() || ring.type !== "ring") {
       throw new Error(`Ring item "${ringItemId}" is not available for this player.`);
     }
+    await assertItemsNotMarketEscrowed(transaction, [ringItemId]);
     if (ring.socketCount === null) {
       throw new Error(`Ring item "${ringItemId}" cannot contain sockets.`);
     }
@@ -2060,6 +3001,7 @@ export async function enchantPlayerGem(
         `${capitalize(targetType)} item "${targetItemId}" is not available for this player.`,
       );
     }
+    await assertItemsNotMarketEscrowed(transaction, [gemItemId, targetItemId]);
 
     const existingGemEnchantment = await transaction.gemEnchantment.findUnique({
       where: { gemItemId },
@@ -2106,6 +3048,7 @@ export async function unenchantPlayerGem(gemItemId: string) {
     if (!enchantment) {
       throw new Error(`Gem item "${gemItemId}" is not enchanted.`);
     }
+    await assertItemsNotMarketEscrowed(transaction, [gemItemId, enchantment.targetItemId]);
 
     await transaction.gemEnchantment.delete({
       where: { gemItemId },
@@ -2160,6 +3103,7 @@ export async function improvePlayerItemQuality(itemId: string) {
     if (!item || item.playerId !== currentPlayerId()) {
       throw new Error(`Inventory item "${itemId}" is not available for this player.`);
     }
+    await assertItemsNotMarketEscrowed(transaction, [itemId]);
 
     const definition = getCraftableDefinition(item.type as CraftableItemType, item.definitionId);
     const cost = qualityImprovementCost(definition.rarity as ImprovementRarity, item.quality);
@@ -2197,6 +3141,7 @@ export async function equipPlayerRing(ringItemId: string) {
     if (!ring || ring.playerId !== currentPlayerId() || ring.type !== "ring") {
       throw new Error(`Ring item "${ringItemId}" is not available for this player.`);
     }
+    await assertItemsNotMarketEscrowed(transaction, [ringItemId]);
 
     const existing = await transaction.equippedRing.findUnique({
       where: { ringItemId },
@@ -2273,6 +3218,17 @@ export async function resetDevelopmentPlayerState() {
   const prisma = usePrisma();
 
   await prisma.$transaction(async (transaction) => {
+    await transaction.rankedRatingAdjustment.deleteMany({
+      where: {
+        battleRecord: {
+          OR: [
+            { playerOneId: currentPlayerId() },
+            { playerTwoId: currentPlayerId() },
+            { winnerPlayerId: currentPlayerId() },
+          ],
+        },
+      },
+    });
     await transaction.privateMatch.deleteMany({
       where: { participants: { some: { playerId: currentPlayerId() } } },
     });
@@ -2283,6 +3239,11 @@ export async function resetDevelopmentPlayerState() {
           { playerTwoId: currentPlayerId() },
           { winnerPlayerId: currentPlayerId() },
         ],
+      },
+    });
+    await transaction.playerMarketListing.deleteMany({
+      where: {
+        OR: [{ sellerId: currentPlayerId() }, { buyerId: currentPlayerId() }],
       },
     });
     await transaction.player.deleteMany({ where: { id: currentPlayerId() } });
@@ -3355,23 +4316,32 @@ function livePrivateBattleSetup(
   host: PrivateBattleParticipantSource,
   guest: PrivateBattleParticipantSource,
 ): BattleSetup {
-  if (!host.loadout || !guest.loadout) {
-    throw new Error("Both private match participants require a loadout.");
+  return livePvpBattleSetup(matchId, "private", host, guest);
+}
+
+function livePvpBattleSetup(
+  matchId: string,
+  mode: "private" | "casual" | "ranked",
+  first: PrivateBattleParticipantSource,
+  second: PrivateBattleParticipantSource,
+): BattleSetup {
+  if (!first.loadout || !second.loadout) {
+    throw new Error("Both PvP participants require a loadout.");
   }
-  const hostSetup = liveTrainingBattleSetup({
-    requestId: `${matchId}.host`,
-    player: { ...host.player, activeLoadout: host.loadout },
+  const firstSetup = liveTrainingBattleSetup({
+    requestId: `${matchId}.${mode}.first`,
+    player: { ...first.player, activeLoadout: first.loadout },
   });
-  const guestSetup = liveTrainingBattleSetup({
-    requestId: `${matchId}.guest`,
-    player: { ...guest.player, activeLoadout: guest.loadout },
+  const secondSetup = liveTrainingBattleSetup({
+    requestId: `${matchId}.${mode}.second`,
+    player: { ...second.player, activeLoadout: second.loadout },
   });
 
   return {
-    ...hostSetup,
-    id: `private.${matchId}`,
-    seed: `private.${matchId}`,
-    players: [hostSetup.players[0]!, guestSetup.players[0]!],
+    ...firstSetup,
+    id: `${mode}.${matchId}`,
+    seed: `${mode}.${matchId}`,
+    players: [firstSetup.players[0]!, secondSetup.players[0]!],
   };
 }
 
@@ -3609,15 +4579,438 @@ function privateBattleOutcome(
   return record.winnerPlayerId === playerId ? "win" : "loss";
 }
 
+function isPvpMode(mode: string): mode is "private_pvp" | "casual_pvp" | "ranked_pvp" {
+  return mode === "private_pvp" || mode === "casual_pvp" || mode === "ranked_pvp";
+}
+
 function privateMatchCode(): string {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const bytes = randomBytes(6);
   return `BN-${Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join("")}`;
 }
 
+async function hasActiveCasualQueueEntry(
+  client: PrismaContext,
+  playerId: string,
+): Promise<boolean> {
+  const entry = await client.casualQueueEntry.findFirst({
+    where: {
+      playerId,
+      OR: [
+        { status: { in: ["waiting", "matching"] } },
+        { status: "matched", battleRecord: { status: { not: "finished" } } },
+      ],
+    },
+    select: { id: true },
+  });
+  return Boolean(entry);
+}
+
+async function hasActiveRankedQueueEntry(
+  client: PrismaContext,
+  playerId: string,
+): Promise<boolean> {
+  const entry = await client.rankedQueueEntry.findFirst({
+    where: {
+      playerId,
+      OR: [
+        { status: { in: ["waiting", "accepting"] } },
+        { status: "matched", battleRecord: { status: { not: "finished" } } },
+      ],
+    },
+    select: { id: true },
+  });
+  return Boolean(entry);
+}
+
+async function hasActivePvpSession(client: PrismaContext, playerId: string): Promise<boolean> {
+  const participant = await client.privateMatchParticipant.findFirst({
+    where: {
+      playerId,
+      match: { status: { in: ["waiting", "starting", "active", "timing_out"] } },
+    },
+    select: { matchId: true },
+  });
+  return Boolean(participant);
+}
+
+async function findCurrentCasualQueueEntry(client: PrismaContext, playerId: string) {
+  return client.casualQueueEntry.findFirst({
+    where: {
+      playerId,
+      status: { in: ["waiting", "matching", "matched"] },
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    include: {
+      loadout: { select: { name: true } },
+      battleRecord: { include: { playerOne: true, playerTwo: true } },
+    },
+  });
+}
+
+function casualQueueRingItemIds(value: string): string[] {
+  const parsed: unknown = JSON.parse(value);
+  if (
+    !Array.isArray(parsed) ||
+    parsed.length === 0 ||
+    parsed.some((id) => typeof id !== "string")
+  ) {
+    throw new Error("The casual matchmaking loadout snapshot is invalid.");
+  }
+  return parsed;
+}
+
+async function expireCasualQueueEntries(client: PrismaContext): Promise<void> {
+  const expired = await client.casualQueueEntry.findMany({
+    where: { status: "waiting", expiresAt: { lte: new Date() } },
+    select: { id: true, playerId: true },
+  });
+  if (expired.length === 0) {
+    return;
+  }
+
+  await client.casualQueueEntry.updateMany({
+    where: { id: { in: expired.map((entry) => entry.id) }, status: "waiting" },
+    data: { status: "expired" },
+  });
+  for (const playerId of new Set(expired.map((entry) => entry.playerId))) {
+    publishGameRealtimeEvent([playerId], {
+      type: "casualQueueChanged",
+      reason: "expired",
+      battleId: null,
+    });
+  }
+}
+
+async function ensureActiveRankedSeason(client: PrismaContext) {
+  const now = new Date();
+  const active = await client.rankedSeason.findFirst({
+    where: { status: "active", startsAt: { lte: now }, endsAt: { gt: now } },
+    orderBy: [{ startsAt: "desc" }, { id: "asc" }],
+  });
+  if (active || process.env.NODE_ENV === "production") {
+    return active;
+  }
+
+  return client.rankedSeason.upsert({
+    where: { id: "development-ranked-season" },
+    create: {
+      id: "development-ranked-season",
+      status: "active",
+      startsAt: new Date(now.getTime() - 24 * 60 * 60 * 1_000),
+      endsAt: new Date(
+        now.getTime() + (rankedCompetitiveConfig.seasonDurationDays - 1) * 24 * 60 * 60 * 1_000,
+      ),
+    },
+    update: {
+      status: "active",
+      startsAt: new Date(now.getTime() - 24 * 60 * 60 * 1_000),
+      endsAt: new Date(
+        now.getTime() + (rankedCompetitiveConfig.seasonDurationDays - 1) * 24 * 60 * 60 * 1_000,
+      ),
+    },
+  });
+}
+
+type RankedLeaderboardRow = Prisma.RankedSeasonRatingGetPayload<{
+  include: { player: true };
+}>;
+
+function rankedLeaderboardEntry(row: RankedLeaderboardRow, position: number) {
+  const isCurrentPlayer = row.playerId === currentPlayerId();
+  return {
+    position,
+    playerId: row.playerId,
+    username:
+      isCurrentPlayer || row.player.profileVisibility === "public"
+        ? (row.player.displayName ?? row.player.username)
+        : null,
+    isCurrentPlayer,
+    rating: Math.round(row.rating),
+    deviation: Math.round(row.deviation),
+    standing: resolveRankedStanding(row.rating, row.placementMatches)!,
+    wins: row.wins,
+    losses: row.losses,
+    draws: row.draws,
+  };
+}
+
+async function rankedUnavailableState(client: PrismaContext) {
+  const player = await client.player.findUniqueOrThrow({
+    where: { id: currentPlayerId() },
+    include: { activeLoadout: { include: { rings: true } } },
+  });
+  return {
+    playerId: currentPlayerId(),
+    status: "unavailable" as const,
+    season: null,
+    rating: null,
+    seasonReset: null,
+    seasonRewards: [],
+    activeLoadout: player.activeLoadout
+      ? {
+          id: player.activeLoadout.id,
+          name: player.activeLoadout.name,
+          ringCount: player.activeLoadout.rings.length,
+        }
+      : null,
+    queue: null,
+    proposal: null,
+    match: null,
+    recentBattleId: null,
+    discipline: { missedAcceptances: 0, lockedUntil: null },
+  };
+}
+
+async function normalizedRankedDiscipline(client: PrismaContext, playerId: string) {
+  const discipline = await client.rankedQueueDiscipline.findUnique({ where: { playerId } });
+  if (
+    !discipline?.lastMissedAt ||
+    Date.now() - discipline.lastMissedAt.getTime() <=
+      rankedCompetitiveConfig.queuePenaltyResetHours * 60 * 60 * 1_000
+  ) {
+    return discipline;
+  }
+  return client.rankedQueueDiscipline.update({
+    where: { playerId },
+    data: { missedAcceptances: 0, lastMissedAt: null, lockedUntil: null },
+  });
+}
+
+async function applyRankedQueuePenalty(client: PrismaContext, playerId: string, missedAt: Date) {
+  const current = await normalizedRankedDiscipline(client, playerId);
+  const missedAcceptances = (current?.missedAcceptances ?? 0) + 1;
+  const lockedUntil = new Date(
+    missedAt.getTime() + rankedQueuePenaltyMinutes(missedAcceptances) * 60 * 1_000,
+  );
+  return client.rankedQueueDiscipline.upsert({
+    where: { playerId },
+    create: { playerId, missedAcceptances, lastMissedAt: missedAt, lockedUntil },
+    update: { missedAcceptances, lastMissedAt: missedAt, lockedUntil },
+  });
+}
+
+async function findCurrentRankedQueueEntry(client: PrismaContext, playerId: string) {
+  return client.rankedQueueEntry.findFirst({
+    where: { playerId, status: { in: ["waiting", "accepting", "matched"] } },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    include: {
+      loadout: { select: { name: true } },
+      battleRecord: true,
+    },
+  });
+}
+
+function rankedQueueRingItemIds(value: string): string[] {
+  const parsed: unknown = JSON.parse(value);
+  if (
+    !Array.isArray(parsed) ||
+    parsed.length === 0 ||
+    parsed.some((id) => typeof id !== "string")
+  ) {
+    throw new Error("The ranked matchmaking loadout snapshot is invalid.");
+  }
+  return parsed;
+}
+
+function rankedEntryWithSnapshot(entry: {
+  playerId: string;
+  seasonId: string;
+  loadoutId: string | null;
+  ringItemIdsJson: string;
+  player: PrivateBattleParticipantSource["player"];
+}): PrivateBattleParticipantSource & { seasonId: string; loadoutId: string | null } {
+  return {
+    ...entry,
+    loadout: {
+      rings: rankedQueueRingItemIds(entry.ringItemIdsJson).map((ringItemId) => ({ ringItemId })),
+    },
+  };
+}
+
+async function tryPairRankedQueueEntry(client: PrismaClient, playerId: string): Promise<void> {
+  const paired = await runPvpTransaction(client, async (transaction) => {
+    const now = new Date();
+    const ownEntry = await transaction.rankedQueueEntry.findFirst({
+      where: { playerId, status: "waiting", expiresAt: { gt: now } },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    });
+    if (!ownEntry) {
+      return null;
+    }
+    const candidates = await transaction.rankedQueueEntry.findMany({
+      where: {
+        id: { not: ownEntry.id },
+        playerId: { not: playerId },
+        seasonId: ownEntry.seasonId,
+        status: "waiting",
+        expiresAt: { gt: now },
+      },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      take: 100,
+    });
+    const recentOpponentIds = new Set(
+      (
+        await transaction.rankedRatingAdjustment.findMany({
+          where: {
+            playerId,
+            opponentPlayerId: { not: null },
+            createdAt: {
+              gte: new Date(
+                now.getTime() - rankedCompetitiveConfig.recentOpponentAvoidanceMinutes * 60 * 1_000,
+              ),
+            },
+          },
+          select: { opponentPlayerId: true },
+        })
+      ).flatMap((adjustment) => (adjustment.opponentPlayerId ? [adjustment.opponentPlayerId] : [])),
+    );
+    const ownRange = rankedMatchmakingRange(
+      Math.max(0, (now.getTime() - ownEntry.createdAt.getTime()) / 1_000),
+    );
+    const eligible = candidates.filter((candidate) => {
+      const candidateRange = rankedMatchmakingRange(
+        Math.max(0, (now.getTime() - candidate.createdAt.getTime()) / 1_000),
+      );
+      const ratingDifference = Math.abs(ownEntry.ratingSnapshot - candidate.ratingSnapshot);
+      const levelDifference = Math.abs(ownEntry.heroLevelSnapshot - candidate.heroLevelSnapshot);
+      return (
+        ratingDifference <= ownRange.rating &&
+        ratingDifference <= candidateRange.rating &&
+        levelDifference <= ownRange.heroLevel &&
+        levelDifference <= candidateRange.heroLevel
+      );
+    });
+    eligible.sort((left, right) => {
+      const leftRecent = recentOpponentIds.has(left.playerId) ? 1 : 0;
+      const rightRecent = recentOpponentIds.has(right.playerId) ? 1 : 0;
+      return leftRecent - rightRecent || left.createdAt.getTime() - right.createdAt.getTime();
+    });
+    const opponentEntry = eligible[0];
+    if (!opponentEntry) {
+      return null;
+    }
+
+    const opponentClaim = await transaction.rankedQueueEntry.updateMany({
+      where: { id: opponentEntry.id, status: "waiting", expiresAt: { gt: now } },
+      data: { status: "matching" },
+    });
+    if (opponentClaim.count !== 1) {
+      return null;
+    }
+    const ownClaim = await transaction.rankedQueueEntry.updateMany({
+      where: { id: ownEntry.id, status: "waiting", expiresAt: { gt: now } },
+      data: { status: "matching" },
+    });
+    if (ownClaim.count !== 1) {
+      throw new Error("The ranked matchmaking entry could not be claimed.");
+    }
+
+    const pairingKey = randomBytes(16).toString("hex");
+    const acceptanceDeadlineAt = new Date(
+      now.getTime() + rankedCompetitiveConfig.acceptanceSeconds * 1_000,
+    );
+    await transaction.rankedQueueEntry.update({
+      where: { id: ownEntry.id },
+      data: {
+        status: "accepting",
+        pairingKey,
+        opponentPlayerId: opponentEntry.playerId,
+        acceptanceDeadlineAt,
+      },
+    });
+    await transaction.rankedQueueEntry.update({
+      where: { id: opponentEntry.id },
+      data: {
+        status: "accepting",
+        pairingKey,
+        opponentPlayerId: ownEntry.playerId,
+        acceptanceDeadlineAt,
+      },
+    });
+    return { playerIds: [ownEntry.playerId, opponentEntry.playerId] };
+  });
+
+  if (paired) {
+    publishGameRealtimeEvent(paired.playerIds, {
+      type: "rankedQueueChanged",
+      reason: "proposal",
+      battleId: null,
+    });
+  }
+}
+
+async function expireRankedQueueEntries(client: PrismaClient): Promise<void> {
+  const now = new Date();
+  const expiredWaiting = await client.rankedQueueEntry.findMany({
+    where: { status: "waiting", expiresAt: { lte: now } },
+    select: { id: true, playerId: true },
+  });
+  if (expiredWaiting.length > 0) {
+    await client.rankedQueueEntry.updateMany({
+      where: { id: { in: expiredWaiting.map((entry) => entry.id) }, status: "waiting" },
+      data: { status: "expired" },
+    });
+  }
+
+  const expiredProposals = await client.rankedQueueEntry.findMany({
+    where: {
+      status: "accepting",
+      pairingKey: { not: null },
+      acceptanceDeadlineAt: { lte: now },
+    },
+    select: { pairingKey: true },
+    distinct: ["pairingKey"],
+  });
+  const proposalPlayers: string[] = [];
+  for (const proposal of expiredProposals) {
+    if (!proposal.pairingKey) continue;
+    const settled = await runPvpTransaction(client, async (transaction) => {
+      const claimed = await transaction.rankedQueueEntry.updateMany({
+        where: {
+          pairingKey: proposal.pairingKey!,
+          status: "accepting",
+          acceptanceDeadlineAt: { lte: now },
+        },
+        data: { status: "expiring" },
+      });
+      if (claimed.count === 0) return [];
+      if (claimed.count !== 2) {
+        throw new Error("The expired ranked proposal is incomplete.");
+      }
+      const pair = await transaction.rankedQueueEntry.findMany({
+        where: { pairingKey: proposal.pairingKey!, status: "expiring" },
+      });
+      for (const entry of pair) {
+        if (!entry.acceptedAt) {
+          await applyRankedQueuePenalty(transaction, entry.playerId, now);
+        }
+      }
+      const expired = await transaction.rankedQueueEntry.updateMany({
+        where: { pairingKey: proposal.pairingKey!, status: "expiring" },
+        data: { status: "expired" },
+      });
+      if (expired.count !== 2) {
+        throw new Error("The ranked proposal changed before expiration completed.");
+      }
+      return pair.map((entry) => entry.playerId);
+    });
+    proposalPlayers.push(...settled);
+  }
+
+  const playerIds = [...expiredWaiting.map((entry) => entry.playerId), ...proposalPlayers];
+  if (playerIds.length > 0) {
+    publishGameRealtimeEvent(playerIds, {
+      type: "rankedQueueChanged",
+      reason: "expired",
+      battleId: null,
+    });
+  }
+}
+
 async function expirePrivateMatches(client: PrismaContext): Promise<void> {
   await client.privateMatch.updateMany({
-    where: { status: "waiting", expiresAt: { lte: new Date() } },
+    where: { matchType: "private", status: "waiting", expiresAt: { lte: new Date() } },
     data: { status: "cancelled" },
   });
 }
@@ -3626,8 +5019,114 @@ function privateTurnDeadline(playerId: string | null): Date | null {
   return playerId ? new Date(Date.now() + privateTurnDurationMs) : null;
 }
 
+function privateOpeningDuelDeadline(): Date {
+  return new Date(Date.now() + privateOpeningDuelDurationMs);
+}
+
+async function settleExpiredPrivateOpeningDuel(
+  client: PrismaClient,
+  battleId: string,
+): Promise<void> {
+  const settled = await runPvpTransaction(client, async (transaction) => {
+    const match = await transaction.privateMatch.findFirst({
+      where: {
+        battleRecordId: battleId,
+        status: "active",
+        openingDuelDeadlineAt: { lte: new Date() },
+      },
+      include: { battleRecord: true, participants: true },
+    });
+    if (!match?.battleRecord || !match.openingDuelDeadlineAt) {
+      return null;
+    }
+
+    const claimed = await transaction.privateMatch.updateMany({
+      where: {
+        id: match.id,
+        status: "active",
+        openingDuelDeadlineAt: match.openingDuelDeadlineAt,
+      },
+      data: { status: "timing_out" },
+    });
+    if (claimed.count !== 1) {
+      return null;
+    }
+
+    const state = rebuildBattleState(
+      match.battleRecord.setupJson,
+      match.battleRecord.actionLogJson,
+    );
+    if (state.status !== "choosingFirstPlayer") {
+      await transaction.privateMatch.update({
+        where: { id: match.id },
+        data: {
+          status: state.status === "finished" ? "finished" : "active",
+          openingDuelDeadlineAt: null,
+          turnPlayerId: state.status === "active" ? state.activePlayerId : null,
+          turnDeadlineAt:
+            state.status === "active" ? privateTurnDeadline(state.activePlayerId) : null,
+        },
+      });
+      return null;
+    }
+
+    const playersWithoutChoice = state.players.filter(
+      (player) => !state.firstPlayerChoices?.[player.id],
+    );
+    const timedOutPlayerId = playersWithoutChoice.length === 1 ? playersWithoutChoice[0]!.id : null;
+    const timedOut = applyBattleAction(state, {
+      type: "resolveOpeningDuelTimeout",
+      timedOutPlayerId,
+    }).state;
+    const finishedRecord = createBattleRecord(timedOut, { rulesVersion, contentVersion });
+    const winnerPlayerId = timedOut.result?.type === "winner" ? timedOut.result.winnerId : null;
+
+    await transaction.battleRecord.update({
+      where: { id: match.battleRecord.id },
+      data: {
+        status: "finished",
+        result: timedOut.result?.type === "draw" ? "draw" : "finished",
+        actionLogJson: JSON.stringify(timedOut.actionHistory),
+        resultJson: JSON.stringify(finishedRecord.result),
+        finalStateChecksum: finishedRecord.finalStateChecksum,
+        winnerPlayerId,
+        turnCount: 0,
+      },
+    });
+    await transaction.privateMatch.update({
+      where: { id: match.id },
+      data: {
+        status: "finished",
+        turnPlayerId: null,
+        turnDeadlineAt: null,
+        openingDuelDeadlineAt: null,
+      },
+    });
+
+    return {
+      matchId: match.id,
+      playerIds: match.participants.map((participant) => participant.playerId),
+    };
+  });
+
+  if (settled) {
+    publishGameRealtimeEvent(settled.playerIds, {
+      type: "battleChanged",
+      battleId,
+      reason: "timeout",
+    });
+    publishGameRealtimeEvent(settled.playerIds, {
+      type: "privateMatchChanged",
+      matchId: settled.matchId,
+      reason: "finished",
+    });
+  }
+}
+
 async function settleExpiredPrivateBattle(client: PrismaClient, battleId: string): Promise<void> {
-  const settled = await client.$transaction(async (transaction) => {
+  await ensurePrivateBattleDeadline(client, battleId);
+  await settleExpiredPrivateOpeningDuel(client, battleId);
+  const settled = await runPvpTransaction(client, async (transaction) => {
     const match = await transaction.privateMatch.findFirst({
       where: {
         battleRecordId: battleId,
@@ -3666,6 +5165,7 @@ async function settleExpiredPrivateBattle(client: PrismaClient, battleId: string
           turnPlayerId: state.status === "active" ? state.activePlayerId : null,
           turnDeadlineAt:
             state.status === "active" ? privateTurnDeadline(state.activePlayerId) : null,
+          openingDuelDeadlineAt: null,
         },
       });
       return null;
@@ -3696,6 +5196,7 @@ async function settleExpiredPrivateBattle(client: PrismaClient, battleId: string
         status: "finished",
         turnPlayerId: null,
         turnDeadlineAt: null,
+        openingDuelDeadlineAt: null,
       },
     });
     return {
@@ -3716,6 +5217,50 @@ async function settleExpiredPrivateBattle(client: PrismaClient, battleId: string
       reason: "finished",
     });
   }
+}
+
+async function ensurePrivateBattleDeadline(client: PrismaClient, battleId: string): Promise<void> {
+  const match = await client.privateMatch.findFirst({
+    where: {
+      battleRecordId: battleId,
+      status: "active",
+      openingDuelDeadlineAt: null,
+      turnDeadlineAt: null,
+    },
+    include: { battleRecord: true },
+  });
+  if (!match?.battleRecord) {
+    return;
+  }
+
+  const state = rebuildBattleState(match.battleRecord.setupJson, match.battleRecord.actionLogJson);
+  if (state.status !== "choosingFirstPlayer") {
+    return;
+  }
+
+  await client.privateMatch.updateMany({
+    where: {
+      id: match.id,
+      status: "active",
+      openingDuelDeadlineAt: null,
+      turnDeadlineAt: null,
+    },
+    data: { openingDuelDeadlineAt: privateOpeningDuelDeadline() },
+  });
+}
+
+async function settleFinishedRankedBattle(client: PrismaClient, battleId: string): Promise<void> {
+  const battle = await client.battleRecord.findUnique({
+    where: { id: battleId },
+    select: { mode: true, modeReferenceId: true, status: true },
+  });
+  if (battle?.mode !== "ranked_pvp" || battle.status !== "finished" || !battle.modeReferenceId) {
+    return;
+  }
+  await settleRankedBattleRating(client, {
+    seasonId: battle.modeReferenceId,
+    battleRecordId: battleId,
+  });
 }
 
 async function settleCampaignOutcome(
@@ -3902,6 +5447,17 @@ function toBattleRewardView(reward: RewardGrantViewSource | null) {
   };
 }
 
+function toRankedSeasonRewardView(reward: RankedSeasonRewardViewSource) {
+  return {
+    seasonId: reward.seasonId,
+    tier: reward.tier,
+    peakRating: Math.round(reward.peakRating),
+    badgeCosmeticId: reward.badgeCosmeticId,
+    titleCosmeticId: reward.titleCosmeticId,
+    reward: toBattleRewardView(reward.rewardGrant)!,
+  };
+}
+
 function liveBattleItemExperience(state: BattleState): {
   inventoryItemId: string;
   experience: number;
@@ -4024,6 +5580,9 @@ function battleResultSummary(state: BattleState) {
   }
 
   for (const action of state.actionHistory) {
+    if (!("playerId" in action)) {
+      continue;
+    }
     actionCountByPlayerId.set(
       action.playerId,
       (actionCountByPlayerId.get(action.playerId) ?? 0) + 1,
@@ -4217,6 +5776,19 @@ function assertMarketQuantity(quantity: number): void {
 function assertMarketRequestId(requestId: string): void {
   if (!requestId.trim() || requestId.length > 100) {
     throw new Error("requestId must contain between 1 and 100 characters.");
+  }
+}
+
+async function assertItemsNotMarketEscrowed(
+  transaction: Prisma.TransactionClient,
+  inventoryItemIds: readonly string[],
+): Promise<void> {
+  const escrowedItem = await transaction.playerMarketEscrowItem.findFirst({
+    where: { inventoryItemId: { in: [...new Set(inventoryItemIds)] } },
+    select: { inventoryItemId: true },
+  });
+  if (escrowedItem) {
+    throw new Error(`Inventory item "${escrowedItem.inventoryItemId}" is locked in market escrow.`);
   }
 }
 

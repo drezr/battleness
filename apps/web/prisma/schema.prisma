@@ -8,33 +8,43 @@ datasource db {
 }
 
 model Player {
-  id                  String                    @id
-  username            String
-  displayName         String?
-  profileVisibility   String                    @default("public")
-  experience          Int                       @default(0)
-  credits             Int                       @default(0)
-  nextItemSequence    Int                       @default(1)
-  createdAt           DateTime                  @default(now())
-  lastActiveAt        DateTime                  @default(now())
-  activeLoadoutId     String?
-  activeLoadout       Loadout?                  @relation("ActivePlayerLoadout", fields: [activeLoadoutId], references: [id], onDelete: SetNull)
-  authIdentities      AuthIdentity[]
-  battleRecordsWon    BattleRecord[]            @relation("BattleRecordWinner")
-  battleRecordsAsOne  BattleRecord[]            @relation("BattleRecordPlayerOne")
-  battleRecordsAsTwo  BattleRecord[]            @relation("BattleRecordPlayerTwo")
-  campaignProgress    CampaignProgress[]
-  equippedRings       EquippedRing[]
-  inventoryItems      InventoryItem[]
-  loadouts            Loadout[]                 @relation("PlayerLoadouts")
-  marketTransactions  MarketTransaction[]
-  materialStock       MaterialStock[]
-  preferences         PlayerPreferences?
-  privateMatchEntries PrivateMatchParticipant[]
-  rewardGrants        RewardGrant[]
-  ringSockets         RingSocket[]
-  gemEnchantments     GemEnchantment[]
-  sessions            PlayerSession[]
+  id                          String                    @id
+  username                    String
+  displayName                 String?
+  profileVisibility           String                    @default("public")
+  experience                  Int                       @default(0)
+  credits                     Int                       @default(0)
+  nextItemSequence            Int                       @default(1)
+  createdAt                   DateTime                  @default(now())
+  lastActiveAt                DateTime                  @default(now())
+  activeLoadoutId             String?
+  activeLoadout               Loadout?                  @relation("ActivePlayerLoadout", fields: [activeLoadoutId], references: [id], onDelete: SetNull)
+  authIdentities              AuthIdentity[]
+  battleRecordsWon            BattleRecord[]            @relation("BattleRecordWinner")
+  battleRecordsAsOne          BattleRecord[]            @relation("BattleRecordPlayerOne")
+  battleRecordsAsTwo          BattleRecord[]            @relation("BattleRecordPlayerTwo")
+  campaignProgress            CampaignProgress[]
+  casualQueueEntries          CasualQueueEntry[]
+  equippedRings               EquippedRing[]
+  inventoryItems              InventoryItem[]
+  loadouts                    Loadout[]                 @relation("PlayerLoadouts")
+  marketTransactions          MarketTransaction[]
+  materialStock               MaterialStock[]
+  playerMarketListingsBought  PlayerMarketListing[]     @relation("PlayerMarketListingBuyer")
+  playerMarketListingsSold    PlayerMarketListing[]     @relation("PlayerMarketListingSeller")
+  playerMarketMutations       PlayerMarketMutation[]
+  preferences                 PlayerPreferences?
+  privateMatchEntries         PrivateMatchParticipant[]
+  rewardGrants                RewardGrant[]
+  cosmeticUnlocks             PlayerCosmeticUnlock[]
+  rankedSeasonRewards         RankedSeasonReward[]
+  rankedSeasonRatings         RankedSeasonRating[]
+  rankedAdjustmentsAsOpponent RankedRatingAdjustment[]  @relation("RankedAdjustmentOpponent")
+  rankedQueueEntries          RankedQueueEntry[]
+  rankedQueueDiscipline       RankedQueueDiscipline?
+  ringSockets                 RingSocket[]
+  gemEnchantments             GemEnchantment[]
+  sessions                    PlayerSession[]
 }
 
 model AuthIdentity {
@@ -108,6 +118,123 @@ model CampaignProgress {
   @@index([contentVersion])
 }
 
+model RankedSeason {
+  id               String               @id
+  previousSeasonId String?              @unique
+  status           String               @default("scheduled")
+  startsAt         DateTime
+  endsAt           DateTime
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  previousSeason   RankedSeason?        @relation("RankedSeasonSuccession", fields: [previousSeasonId], references: [id], onDelete: SetNull)
+  nextSeason       RankedSeason?        @relation("RankedSeasonSuccession")
+  ratings          RankedSeasonRating[]
+  rewards          RankedSeasonReward[]
+  queueEntries     RankedQueueEntry[]
+
+  @@index([status, startsAt, endsAt])
+  @@index([endsAt])
+}
+
+model RankedSeasonRating {
+  seasonId         String
+  playerId         String
+  rating           Float                    @default(1500)
+  deviation        Float                    @default(350)
+  volatility       Float                    @default(0.06)
+  placementMatches Int                      @default(0)
+  wins             Int                      @default(0)
+  losses           Int                      @default(0)
+  draws            Int                      @default(0)
+  peakRating       Float?
+  version          Int                      @default(0)
+  lastMatchAt      DateTime?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  season           RankedSeason             @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  player           Player                   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  adjustments      RankedRatingAdjustment[]
+
+  @@id([seasonId, playerId])
+  @@index([seasonId, rating])
+  @@index([playerId])
+  @@index([lastMatchAt])
+}
+
+model RankedRatingAdjustment {
+  id                     String             @id @default(cuid())
+  settlementKey          String             @unique
+  seasonId               String
+  playerId               String
+  opponentPlayerId       String?
+  battleRecordId         String?
+  reason                 String
+  score                  Float?
+  ratingBefore           Float
+  ratingAfter            Float
+  deviationBefore        Float
+  deviationAfter         Float
+  volatilityBefore       Float
+  volatilityAfter        Float
+  placementMatchesBefore Int
+  placementMatchesAfter  Int
+  createdAt              DateTime           @default(now())
+  seasonRating           RankedSeasonRating @relation(fields: [seasonId, playerId], references: [seasonId, playerId], onDelete: Cascade)
+  opponentPlayer         Player?            @relation("RankedAdjustmentOpponent", fields: [opponentPlayerId], references: [id], onDelete: SetNull)
+  battleRecord           BattleRecord?      @relation(fields: [battleRecordId], references: [id], onDelete: Restrict)
+
+  @@unique([battleRecordId, playerId])
+  @@index([seasonId, createdAt])
+  @@index([playerId, createdAt])
+  @@index([opponentPlayerId, createdAt])
+  @@index([battleRecordId])
+  @@index([reason])
+}
+
+model RankedQueueEntry {
+  id                   String        @id @default(cuid())
+  playerId             String
+  seasonId             String
+  loadoutId            String?
+  ringItemIdsJson      String
+  ratingSnapshot       Float
+  heroLevelSnapshot    Int
+  status               String        @default("waiting")
+  pairingKey           String?
+  opponentPlayerId     String?
+  acceptanceDeadlineAt DateTime?
+  acceptedAt           DateTime?
+  privateMatchId       String?
+  battleRecordId       String?
+  expiresAt            DateTime
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  player               Player        @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  season               RankedSeason  @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  loadout              Loadout?      @relation(fields: [loadoutId], references: [id], onDelete: SetNull)
+  privateMatch         PrivateMatch? @relation(fields: [privateMatchId], references: [id], onDelete: SetNull)
+  battleRecord         BattleRecord? @relation(fields: [battleRecordId], references: [id], onDelete: SetNull)
+
+  @@index([playerId, status])
+  @@index([seasonId, status, createdAt])
+  @@index([pairingKey])
+  @@index([expiresAt])
+  @@index([acceptanceDeadlineAt])
+  @@index([privateMatchId])
+  @@index([battleRecordId])
+}
+
+model RankedQueueDiscipline {
+  playerId          String    @id
+  missedAcceptances Int       @default(0)
+  lastMissedAt      DateTime?
+  lockedUntil       DateTime?
+  updatedAt         DateTime  @updatedAt
+  player            Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([lockedUntil])
+}
+
 model ContentRelease {
   version      String   @id
   checksum     String
@@ -135,6 +262,71 @@ model MarketTransaction {
   @@index([contentVersion])
 }
 
+model PlayerMarketListing {
+  id               String                   @id @default(cuid())
+  sellerId         String
+  buyerId          String?
+  status           String                   @default("active")
+  resourceType     String
+  definitionId     String
+  rarity           String
+  element          String?
+  level            Int?
+  quality          Int?
+  quantity         Int                      @default(1)
+  price            Int
+  rootItemId       String?
+  itemSnapshotJson String?
+  contentVersion   String                   @default("legacy-unversioned")
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  soldAt           DateTime?
+  cancelledAt      DateTime?
+  seller           Player                   @relation("PlayerMarketListingSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  buyer            Player?                  @relation("PlayerMarketListingBuyer", fields: [buyerId], references: [id], onDelete: SetNull)
+  rootItem         InventoryItem?           @relation("PlayerMarketListingRootItem", fields: [rootItemId], references: [id], onDelete: SetNull)
+  escrowItems      PlayerMarketEscrowItem[]
+  mutations        PlayerMarketMutation[]
+
+  @@index([sellerId, status])
+  @@index([buyerId, soldAt])
+  @@index([status, createdAt])
+  @@index([status, resourceType, price])
+  @@index([status, definitionId, price])
+  @@index([status, rarity, price])
+  @@index([status, element, price])
+  @@index([status, level, price])
+  @@index([status, quality, price])
+  @@index([rootItemId])
+  @@index([contentVersion])
+}
+
+model PlayerMarketEscrowItem {
+  listingId       String
+  inventoryItemId String              @unique
+  role            String
+  createdAt       DateTime            @default(now())
+  listing         PlayerMarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  inventoryItem   InventoryItem       @relation(fields: [inventoryItemId], references: [id], onDelete: Restrict)
+
+  @@id([listingId, inventoryItemId])
+  @@index([listingId, role])
+}
+
+model PlayerMarketMutation {
+  requestId   String              @id
+  playerId    String
+  listingId   String
+  action      String
+  payloadHash String
+  createdAt   DateTime            @default(now())
+  player      Player              @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  listing     PlayerMarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, createdAt])
+  @@index([listingId, action])
+}
+
 model MaterialStock {
   playerId       String
   materialId     String
@@ -148,7 +340,7 @@ model MaterialStock {
 }
 
 model InventoryItem {
-  id                     String            @id
+  id                     String                  @id
   playerId               String
   type                   String
   definitionId           String
@@ -156,18 +348,20 @@ model InventoryItem {
   experience             Int
   quality                Int
   socketCount            Int?
-  socketedGemInstanceIds String            @default("[]")
+  socketedGemInstanceIds String                  @default("[]")
   enchantment            String?
-  equipped               Boolean           @default(false)
-  createdAt              DateTime          @default(now())
-  player                 Player            @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  enchantedByGem         GemEnchantment?   @relation("GemEnchantmentTarget")
+  equipped               Boolean                 @default(false)
+  createdAt              DateTime                @default(now())
+  player                 Player                  @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  enchantedByGem         GemEnchantment?         @relation("GemEnchantmentTarget")
   equippedRing           EquippedRing?
-  gemEnchantment         GemEnchantment?   @relation("GemEnchantmentGem")
+  gemEnchantment         GemEnchantment?         @relation("GemEnchantmentGem")
   loadoutRings           LoadoutRing[]
+  marketEscrow           PlayerMarketEscrowItem?
+  marketListingRoots     PlayerMarketListing[]   @relation("PlayerMarketListingRootItem")
   rewardGrantItems       RewardGrantItem[]
-  socketedAsGem          RingSocket?       @relation("RingSocketGem")
-  sockets                RingSocket[]      @relation("RingSocketRing")
+  socketedAsGem          RingSocket?             @relation("RingSocketGem")
+  sockets                RingSocket[]            @relation("RingSocketRing")
 
   @@index([playerId])
   @@index([type])
@@ -230,6 +424,8 @@ model Loadout {
   player              Player                    @relation("PlayerLoadouts", fields: [playerId], references: [id], onDelete: Cascade)
   rings               LoadoutRing[]
   privateMatchEntries PrivateMatchParticipant[]
+  casualQueueEntries  CasualQueueEntry[]
+  rankedQueueEntries  RankedQueueEntry[]
 
   @@unique([playerId, name])
   @@index([playerId])
@@ -248,26 +444,59 @@ model LoadoutRing {
 }
 
 model RewardGrant {
-  id             String                @id @default(cuid())
-  playerId       String
-  sourceType     String
-  sourceId       String?
-  battleRecordId String?
-  status         String                @default("unclaimed")
-  credits        Int                   @default(0)
-  heroExperience Int                   @default(0)
-  contentVersion String?
-  claimedAt      DateTime?
-  createdAt      DateTime              @default(now())
-  battleRecord   BattleRecord?         @relation(fields: [battleRecordId], references: [id], onDelete: SetNull)
-  items          RewardGrantItem[]
-  materials      RewardGrantMaterial[]
-  player         Player                @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  id                 String                @id @default(cuid())
+  playerId           String
+  sourceType         String
+  sourceId           String?
+  battleRecordId     String?
+  status             String                @default("unclaimed")
+  credits            Int                   @default(0)
+  heroExperience     Int                   @default(0)
+  contentVersion     String?
+  claimedAt          DateTime?
+  createdAt          DateTime              @default(now())
+  battleRecord       BattleRecord?         @relation(fields: [battleRecordId], references: [id], onDelete: SetNull)
+  items              RewardGrantItem[]
+  materials          RewardGrantMaterial[]
+  player             Player                @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  rankedSeasonReward RankedSeasonReward?
 
   @@index([playerId])
   @@index([sourceType, sourceId])
   @@index([battleRecordId])
   @@index([status])
+}
+
+model RankedSeasonReward {
+  seasonId        String
+  playerId        String
+  rewardGrantId   String       @unique
+  tier            String
+  peakRating      Float
+  badgeCosmeticId String
+  titleCosmeticId String
+  createdAt       DateTime     @default(now())
+  season          RankedSeason @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  player          Player       @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  rewardGrant     RewardGrant  @relation(fields: [rewardGrantId], references: [id], onDelete: Cascade)
+
+  @@id([seasonId, playerId])
+  @@index([playerId, createdAt])
+  @@index([tier])
+}
+
+model PlayerCosmeticUnlock {
+  playerId   String
+  cosmeticId String
+  type       String
+  sourceType String
+  sourceId   String
+  unlockedAt DateTime @default(now())
+  player     Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@id([playerId, cosmeticId])
+  @@index([playerId, type])
+  @@index([sourceType, sourceId])
 }
 
 model RewardGrantMaterial {
@@ -292,28 +521,31 @@ model RewardGrantItem {
 }
 
 model BattleRecord {
-  id                 String        @id @default(cuid())
-  mode               String
-  modeReferenceId    String?
-  status             String        @default("finished")
-  result             String
-  playerOneId        String?
-  playerTwoId        String?
-  winnerPlayerId     String?
-  seed               String
-  rulesVersion       String
-  contentVersion     String
-  setupJson          String
-  actionLogJson      String
-  resultJson         String?
-  finalStateChecksum String?
-  turnCount          Int?
-  createdAt          DateTime      @default(now())
-  playerOne          Player?       @relation("BattleRecordPlayerOne", fields: [playerOneId], references: [id], onDelete: SetNull)
-  playerTwo          Player?       @relation("BattleRecordPlayerTwo", fields: [playerTwoId], references: [id], onDelete: SetNull)
-  rewardGrants       RewardGrant[]
-  winnerPlayer       Player?       @relation("BattleRecordWinner", fields: [winnerPlayerId], references: [id], onDelete: SetNull)
-  privateMatch       PrivateMatch?
+  id                      String                   @id @default(cuid())
+  mode                    String
+  modeReferenceId         String?
+  status                  String                   @default("finished")
+  result                  String
+  playerOneId             String?
+  playerTwoId             String?
+  winnerPlayerId          String?
+  seed                    String
+  rulesVersion            String
+  contentVersion          String
+  setupJson               String
+  actionLogJson           String
+  resultJson              String?
+  finalStateChecksum      String?
+  turnCount               Int?
+  createdAt               DateTime                 @default(now())
+  playerOne               Player?                  @relation("BattleRecordPlayerOne", fields: [playerOneId], references: [id], onDelete: SetNull)
+  playerTwo               Player?                  @relation("BattleRecordPlayerTwo", fields: [playerTwoId], references: [id], onDelete: SetNull)
+  rewardGrants            RewardGrant[]
+  winnerPlayer            Player?                  @relation("BattleRecordWinner", fields: [winnerPlayerId], references: [id], onDelete: SetNull)
+  privateMatch            PrivateMatch?
+  casualQueueEntries      CasualQueueEntry[]
+  rankedRatingAdjustments RankedRatingAdjustment[]
+  rankedQueueEntries      RankedQueueEntry[]
 
   @@index([mode])
   @@index([mode, modeReferenceId])
@@ -325,21 +557,50 @@ model BattleRecord {
 }
 
 model PrivateMatch {
-  id             String                    @id @default(cuid())
-  code           String                    @unique
-  status         String                    @default("waiting")
-  battleRecordId String?                   @unique
-  turnPlayerId   String?
-  turnDeadlineAt DateTime?
-  expiresAt      DateTime
-  createdAt      DateTime                  @default(now())
-  updatedAt      DateTime                  @updatedAt
-  battleRecord   BattleRecord?             @relation(fields: [battleRecordId], references: [id], onDelete: SetNull)
-  participants   PrivateMatchParticipant[]
+  id                    String                    @id @default(cuid())
+  code                  String                    @unique
+  status                String                    @default("waiting")
+  matchType             String                    @default("private")
+  battleRecordId        String?                   @unique
+  turnPlayerId          String?
+  turnDeadlineAt        DateTime?
+  openingDuelDeadlineAt DateTime?
+  expiresAt             DateTime
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  battleRecord          BattleRecord?             @relation(fields: [battleRecordId], references: [id], onDelete: SetNull)
+  participants          PrivateMatchParticipant[]
+  casualQueueEntries    CasualQueueEntry[]
+  rankedQueueEntries    RankedQueueEntry[]
 
   @@index([status])
+  @@index([matchType, status])
   @@index([expiresAt])
   @@index([turnDeadlineAt])
+  @@index([openingDuelDeadlineAt])
+}
+
+model CasualQueueEntry {
+  id              String        @id @default(cuid())
+  playerId        String
+  loadoutId       String?
+  ringItemIdsJson String
+  status          String        @default("waiting")
+  privateMatchId  String?
+  battleRecordId  String?
+  expiresAt       DateTime
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  player          Player        @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  loadout         Loadout?      @relation(fields: [loadoutId], references: [id], onDelete: SetNull)
+  privateMatch    PrivateMatch? @relation(fields: [privateMatchId], references: [id], onDelete: SetNull)
+  battleRecord    BattleRecord? @relation(fields: [battleRecordId], references: [id], onDelete: SetNull)
+
+  @@index([playerId, status])
+  @@index([status, createdAt])
+  @@index([expiresAt])
+  @@index([privateMatchId])
+  @@index([battleRecordId])
 }
 
 model PrivateMatchParticipant {

@@ -7,6 +7,7 @@ import {
   replayBattleRecord,
   rulesVersion,
   serializeBattleRecord,
+  type BattleEvent,
   type BattleSetup,
   type MonsterCombatInstance,
 } from "./index";
@@ -235,6 +236,90 @@ describe("createBattleState", () => {
       type: "firstPlayerChosen",
       playerId: "playerOne",
       reason: "elementDuel",
+    });
+  });
+
+  it("uses a seeded deterministic tiebreaker after three tied element duels", () => {
+    const tiedSetup = structuredClone(setup);
+    tiedSetup.players[0].hero.speed = 4;
+    tiedSetup.players[1].hero.speed = 4;
+    tiedSetup.players[0].level = 1;
+    tiedSetup.players[1].level = 1;
+
+    const resolveThreeTies = () => {
+      let state = createBattleState(tiedSetup);
+      let lastEvents: BattleEvent[] = [];
+      for (let duel = 0; duel < 3; duel += 1) {
+        state = applyBattleAction(state, {
+          type: "chooseElement",
+          playerId: "playerOne",
+          element: "fire",
+        }).state;
+        const result = applyBattleAction(state, {
+          type: "chooseElement",
+          playerId: "playerTwo",
+          element: "fire",
+        });
+        state = result.state;
+        lastEvents = result.events;
+      }
+      return { state, lastEvents };
+    };
+
+    const firstRun = resolveThreeTies();
+    const secondRun = resolveThreeTies();
+    expect(firstRun.state.status).toBe("active");
+    expect(firstRun.state.activePlayerId).toBe(secondRun.state.activePlayerId);
+    expect(firstRun.lastEvents).toContainEqual({
+      type: "elementDuelTiebreaker",
+      playerId: firstRun.state.activePlayerId,
+      tieCount: 3,
+    });
+    expect(firstRun.lastEvents).toContainEqual({
+      type: "firstPlayerChosen",
+      playerId: firstRun.state.activePlayerId,
+      reason: "elementDuelTiebreaker",
+    });
+  });
+
+  it("resolves an opening duel timeout as a draw when neither player chose", () => {
+    const tiedSetup = structuredClone(setup);
+    tiedSetup.players[0].hero.speed = tiedSetup.players[1].hero.speed = 4;
+    tiedSetup.players[0].level = tiedSetup.players[1].level = 1;
+    const state = createBattleState(tiedSetup);
+
+    const result = applyBattleAction(state, {
+      type: "resolveOpeningDuelTimeout",
+      timedOutPlayerId: null,
+    });
+
+    expect(result.state.status).toBe("finished");
+    expect(result.state.result).toEqual({ type: "draw" });
+    expect(result.events).toContainEqual({
+      type: "openingDuelTimedOut",
+      timedOutPlayerId: null,
+    });
+  });
+
+  it("resolves an opening duel timeout as a concession when one player did not choose", () => {
+    const tiedSetup = structuredClone(setup);
+    tiedSetup.players[0].hero.speed = tiedSetup.players[1].hero.speed = 4;
+    tiedSetup.players[0].level = tiedSetup.players[1].level = 1;
+    const chosen = applyBattleAction(createBattleState(tiedSetup), {
+      type: "chooseElement",
+      playerId: "playerOne",
+      element: "electric",
+    }).state;
+
+    const result = applyBattleAction(chosen, {
+      type: "resolveOpeningDuelTimeout",
+      timedOutPlayerId: "playerTwo",
+    });
+
+    expect(result.state.result).toEqual({
+      type: "winner",
+      winnerId: "playerOne",
+      loserId: "playerTwo",
     });
   });
 

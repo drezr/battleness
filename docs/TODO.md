@@ -4,7 +4,7 @@ This is the centralized working TODO for BattleNess. It focuses on what remains 
 
 ## Current Focus
 
-The first persistent private PvP flow now includes session-based reconnection, a server-enforced five-minute active-turn timeout, and authenticated WebSocket invalidation events with HTTP polling fallback. The next recommended focus is explicit timeout handling for the unresolved opening element duel, followed by casual matchmaking; Google Cloud credentials and consent-screen setup remain an environment deployment task.
+Private, casual, and ranked PvP now share the authoritative persistent battle lifecycle, deadlines, reconnection behavior, authenticated WebSocket invalidations with HTTP polling fallback, and concurrency regression coverage. The complete core player-market flow, including permanent private transaction history, is implemented; the next recommended product focus is the combat-presentation decision and mobile battle controls. Google Cloud credentials and consent-screen setup remain an environment deployment task.
 
 ## Phase 1 - Game App Data Foundation
 
@@ -117,22 +117,40 @@ The first persistent private PvP flow now includes session-based reconnection, a
 - [x] Design and implement private match creation and join-by-code flow.
 - [x] Persist private lobby and battle state for session-based reconnects.
 - [x] Add a persisted five-minute timeout for active turns, resolved as a server-side concession.
-- [ ] Add a fair timeout policy for the unresolved opening element duel, where no active player exists yet.
+- [x] Add a persisted 90-second opening element-duel timeout with one-player concession, no-choice draw, per-tie reset, hidden locked choices, and deterministic resolution after three ties.
 - [x] Implement `/battle/pvp/private` before casual matchmaking.
 - [x] Add HTTP polling as the first private-lobby and live-battle synchronization transport.
 - [x] Add an authenticated WebSocket invalidation event model for live turn-based PvP while keeping HTTP/Prisma authoritative and polling as fallback.
 - [ ] Replace the process-local WebSocket event hub with shared pub/sub before running more than one Game App server instance.
-- [ ] Add casual matchmaking after private matches work.
-- [ ] Define ranked rating, seasons, rewards, and matchmaking before implementing ranked mode.
+- [x] Add casual matchmaking with a five-minute FIFO queue, immutable loadout snapshots, atomic opponent claims, cancellation and expiration, persistent unranked battles, reconnect support, and no PvP rewards.
+- [x] Define ranked rating, visible ranks, placements, seasons, rewards, matchmaking, acceptance, abandonment, inactivity, repeat-opponent, and leaderboard behavior.
+- [x] Implement and test a pure Glicko-2 calculation module with persisted player rating, deviation, volatility, placement count, season ownership, match record counters, and last-match time.
+- [x] Define visible division thresholds, season-reset contraction, inactivity-decay amount, queue expansion caps, and penalty reset window. Initial Glicko-2 constants are fixed at rating `1500`, deviation `350`, volatility `0.06`, `tau 0.5`, scale `173.7178`, tolerance `0.000001`, and maximum deviation `350`.
+- [x] Define exact ranked season reward content without ranked-exclusive combat power. Eligible players must finish five placements; rewards use the highest post-placement tier reached, ignore divisions, and grant one deterministic tier bundle with permanent cosmetics, modest credits, and three non-exclusive materials.
+- [x] Persist ranked seasons, versioned player season ratings, immutable rating adjustments, and battle-result provenance in SQLite and PostgreSQL.
+- [x] Persist ranked queue entries, bilateral acceptance state, and queue penalties in SQLite and PostgreSQL.
+- [x] Implement atomic ranked queue matching with rating and hero-level range expansion, recent-opponent preference, 20-second bilateral acceptance, immutable loadout snapshots, and cancellation or timeout handling.
+- [x] Reuse the authoritative PvP battle lifecycle for `ranked_pvp` and settle each finished win, loss, or draw exactly once.
+- [x] Implement the real `/battle/pvp/ranked` queue, placement, rank, division, acceptance, season, penalty, and result UI with WebSocket invalidations and polling fallback.
+- [x] Implement the top-100 leaderboard plus the current player's exact position and nearby entries, with deterministic ties and private-profile anonymization.
+- [x] Implement idempotent eight-week season succession, seasonal soft resets, Diamond/Master inactivity decay, and stale queue expiration. Maintenance runs at Nitro startup, hourly, and before ranked reads or queue entry.
+- [x] Implement idempotent ranked season rewards with persistent peak rating, automatic unclaimed grants during rollover, deterministic material selection, permanent badge/title unlocks on claim, and localized ranked/history presentation.
+- [x] Add concurrency coverage for simultaneous casual queue entry, bilateral ranked acceptance, duplicate decline attempts, concurrent acceptance expiry, duplicate live actions, reconnect reads during turn and opening-duel expiry, and unique timeout settlement. The complete ranked queue-to-settlement path, duplicate rating settlement, leaderboard ordering, season transitions, and inactivity idempotence also have integration coverage.
 
 ## Phase 11 - Player Market
 
-- [ ] Defer until authentication, ownership validation, and transaction logs exist.
-- [ ] Define which items can be listed.
-- [ ] Define listing fees, price bounds, expiration, cancellation, and sold-state behavior.
-- [ ] Implement browse listings.
-- [ ] Implement create listing.
-- [ ] Implement buy listing with atomic ownership and currency transfer.
+- [x] Defer until authentication, ownership validation, and transaction logs exist. These prerequisites are now implemented.
+- [x] Define which items can be listed. Rings, gems, monsters, spells, and materials are eligible; attached objects cannot be listed independently, and a ring listing includes its complete socket and enchantment graph.
+- [x] Define listing fees, price bounds, lifetime, cancellation, and sold-state behavior. V1 uses fixed positive whole-credit prices, no fees or commission, no expiration, free cancellation, 20 active listings per player, anonymous sellers, and permanent private history.
+- [x] Define material quantities, listing escrow, self-purchase, proceeds, and idempotency details. Material lots are indivisible; listed assets remain in escrow; self-purchase is forbidden; sellers are paid atomically; purchase/cancellation races use first-commit semantics; and mutating requests are idempotent.
+- [x] Persist permanent listings, denormalized search fields, item-bundle snapshots, unique item escrow locks, nullable completed-sale ownership, and globally unique mutation request journals in SQLite and PostgreSQL.
+- [x] Add local persistence coverage and PostgreSQL smoke coverage for listing, escrow, and mutation relations.
+- [x] Implement authenticated, anonymous, paginated browsing of active listings with deterministic sorting.
+- [x] Implement idempotent listing creation with material decrement, complete ring-bundle snapshots, unique item escrow locks, eligibility enforcement, and a localized seller form.
+- [x] Implement idempotent buy listing with atomic single-winner ownership, currency settlement, complete item-bundle transfer, and concurrent-buyer coverage.
+- [x] Implement free idempotent cancellation with immediate material return or item-lock release. Listings otherwise remain active indefinitely until sold.
+- [x] Add filters for type, definition, rarity, element, level, quality, and price.
+- [x] Add permanent private buyer and seller transaction history with role filters, deterministic pagination, content-backed presentation, and counterparty privacy.
 - [ ] Add moderation or anti-abuse hooks if needed.
 
 ## Phase 12 - Combat Presentation
@@ -162,7 +180,7 @@ The first persistent private PvP flow now includes session-based reconnection, a
 - [ ] Should spell and monster gem enchantment be managed in inventory, forge, or both?
 - [ ] Should the Game Market sell only materials at first?
 - [ ] What data should be public in player-facing PvP before and during battle?
-- [ ] When should ranked mode become visible as more than a locked mock?
+- [x] When should ranked mode become visible as more than a locked mock? Replace the mock only when the first complete rating, queue, acceptance, battle, and settlement vertical slice is functional.
 
 ## Keep Explicitly
 

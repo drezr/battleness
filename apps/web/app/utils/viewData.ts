@@ -65,6 +65,7 @@ export const sectionLinks = {
     { labelKey: "navigation.hub", to: "/market" },
     { labelKey: "navigation.gameMarket", to: "/market/game" },
     { labelKey: "navigation.playerMarket", to: "/market/players" },
+    { labelKey: "navigation.marketHistory", to: "/market/players/history" },
   ],
   profile: [
     { labelKey: "navigation.overview", to: "/profile" },

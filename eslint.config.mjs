@@ -14,6 +14,7 @@ export default tseslint.config(
         projectService: {
           allowDefaultProject: [
             "apps/web/server/api/*.test.ts",
+            "apps/web/server/plugins/*.ts",
             "apps/web/server/utils/*.test.ts",
           ],
         },

@@ -27,6 +27,11 @@
 
     <template v-else-if="state">
       <p v-if="feedback" class="feedback">{{ feedback }}</p>
+      <RankedSeasonRewardList
+        :rewards="state.seasonRewards"
+        :claiming-reward-id="claimingRewardId"
+        @claim="claimReward"
+      />
       <BattleHistoryList
         :records="state.records"
         :claiming-reward-id="claimingRewardId"
@@ -47,7 +52,9 @@ const claimingRewardId = ref("");
 const feedback = ref("");
 
 const unclaimedCount = computed(
-  () => state.value?.records.filter((record) => record.reward?.status === "unclaimed").length ?? 0,
+  () =>
+    (state.value?.records.filter((record) => record.reward?.status === "unclaimed").length ?? 0) +
+    (state.value?.seasonRewards.filter((entry) => entry.reward.status === "unclaimed").length ?? 0),
 );
 
 async function claimReward(rewardGrantId: string): Promise<void> {

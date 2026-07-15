@@ -12,6 +12,18 @@ export type GameRealtimeEvent =
       battleId: string;
       reason: "action" | "timeout";
       occurredAt: string;
+    }
+  | {
+      type: "casualQueueChanged";
+      reason: "queued" | "matched" | "cancelled" | "expired";
+      battleId: string | null;
+      occurredAt: string;
+    }
+  | {
+      type: "rankedQueueChanged";
+      reason: "queued" | "proposal" | "accepted" | "matched" | "cancelled" | "declined" | "expired";
+      battleId: string | null;
+      occurredAt: string;
     };
 
 type RealtimePeer = {

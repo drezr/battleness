@@ -4642,13 +4642,15 @@ function renderAction(action: BattleAction, index: number, currentIndex = action
   const className = index < currentIndex ? "done" : index === currentIndex ? "current" : "";
   const label = t(`ui.action.${action.type}`);
   const detail =
-    action.type === "useRing"
-      ? `${action.playerId} - ${action.ringInstanceId} -> ${action.targetId}`
-      : action.type === "useMonster"
-        ? `${action.playerId} - ${action.monsterInstanceId} -> ${action.targetId}`
-        : "element" in action
-          ? `${action.playerId} - ${action.element}`
-          : action.playerId;
+    action.type === "resolveOpeningDuelTimeout"
+      ? (action.timedOutPlayerId ?? t("ui.draw"))
+      : action.type === "useRing"
+        ? `${action.playerId} - ${action.ringInstanceId} -> ${action.targetId}`
+        : action.type === "useMonster"
+          ? `${action.playerId} - ${action.monsterInstanceId} -> ${action.targetId}`
+          : "element" in action
+            ? `${action.playerId} - ${action.element}`
+            : action.playerId;
 
   return `
     <li class="${className}">
@@ -4688,6 +4690,17 @@ function eventMessage(event: BattleEvent): string {
       return formatMessage("event.elementDuelTied", {
         element: t(`ui.element.${event.element}`),
       });
+    case "elementDuelTiebreaker":
+      return formatMessage("event.elementDuelTiebreaker", {
+        player: playerLabel(event.playerId),
+        tieCount: String(event.tieCount),
+      });
+    case "openingDuelTimedOut":
+      return event.timedOutPlayerId
+        ? formatMessage("event.openingDuelTimedOut.player", {
+            player: playerLabel(event.timedOutPlayerId),
+          })
+        : t("event.openingDuelTimedOut.draw");
     case "firstPlayerChosen":
       return formatMessage(`event.firstPlayerChosen.${event.reason}`, {
         player: playerLabel(event.playerId),
@@ -5070,4 +5083,3 @@ function escapeHtml(value: string): string {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
-

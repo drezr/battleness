@@ -16,7 +16,7 @@ import type {
   TargetId,
 } from "./types";
 
-export const rulesVersion = "prototype-1";
+export const rulesVersion = "prototype-2";
 
 export function createBattleState(setup: BattleSetup): BattleState {
   assertValidBattleSetup(setup);
@@ -60,6 +60,9 @@ export function applyBattleAction(state: BattleState, action: BattleAction): Bat
       break;
     case "concede":
       events.push(...concede(next, action.playerId));
+      break;
+    case "resolveOpeningDuelTimeout":
+      events.push(...resolveOpeningDuelTimeout(next, action.timedOutPlayerId));
       break;
   }
 
@@ -191,8 +194,18 @@ export function assertValidBattleRecord(record: unknown): asserts record is Batt
 }
 
 function assertValidBattleAction(action: unknown): asserts action is BattleAction {
-  if (!isRecord(action) || !isNonEmptyString(action.type) || !isNonEmptyString(action.playerId)) {
+  if (!isRecord(action) || !isNonEmptyString(action.type)) {
     throw new Error("Battle record contains an invalid action.");
+  }
+
+  if (action.type === "resolveOpeningDuelTimeout") {
+    if (action.timedOutPlayerId !== null && !isNonEmptyString(action.timedOutPlayerId)) {
+      throw new Error("Battle record contains an invalid opening duel timeout action.");
+    }
+    return;
+  }
+  if (!isNonEmptyString(action.playerId)) {
+    throw new Error("Battle record contains an action without a playerId.");
   }
 
   switch (action.type) {
@@ -461,14 +474,65 @@ function chooseElement(
   }
 
   if (firstChoice === secondChoice) {
-    state.firstPlayerChoices = {};
+    const tieCount = state.log.filter((event) => event.type === "elementDuelTied").length + 1;
     events.push({ type: "elementDuelTied", element: firstChoice });
+    if (tieCount >= 3) {
+      const winner = deterministicOpeningDuelWinner(state, tieCount);
+      events.push({
+        type: "elementDuelTiebreaker",
+        playerId: winner.id,
+        tieCount,
+      });
+      events.push(...startBattleForPlayer(state, winner.id, "elementDuelTiebreaker"));
+      return events;
+    }
+    state.firstPlayerChoices = {};
     return events;
   }
 
   const winnerId = hasElementalAdvantage(firstChoice, secondChoice) ? first.id : second.id;
   events.push(...startBattleForPlayer(state, winnerId, "elementDuel"));
 
+  return events;
+}
+
+function deterministicOpeningDuelWinner(state: BattleState, tieCount: number): BattlePlayer {
+  const input = `${state.seed}:${state.id}:opening-duel:${tieCount}`;
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < input.length; index += 1) {
+    hash ^= input.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return state.players[(hash >>> 0) % state.players.length]!;
+}
+
+function resolveOpeningDuelTimeout(
+  state: BattleState,
+  timedOutPlayerId: string | null,
+): BattleEvent[] {
+  if (state.status !== "choosingFirstPlayer") {
+    throw new Error("Opening duel timeout can only resolve an unresolved element duel.");
+  }
+
+  const events: BattleEvent[] = [{ type: "openingDuelTimedOut", timedOutPlayerId }];
+  if (timedOutPlayerId === null) {
+    const result = { type: "draw" as const };
+    state.status = "finished";
+    state.result = result;
+    events.push({ type: "battleEnded", result });
+    return events;
+  }
+
+  const timedOutPlayer = getPlayer(state, timedOutPlayerId);
+  const opponent = getOpponent(state, timedOutPlayer.id);
+  if (state.firstPlayerChoices?.[timedOutPlayer.id]) {
+    throw new Error("The timed-out opening duel player already submitted a choice.");
+  }
+  if (!state.firstPlayerChoices?.[opponent.id]) {
+    throw new Error("A single-player opening duel timeout requires the opponent's choice.");
+  }
+
+  events.push(...concede(state, timedOutPlayer.id));
   return events;
 }
 

@@ -4,7 +4,7 @@ export type Rarity = "common" | "refined" | "rare" | "epic";
 export type TargetId = `${string}.hero` | `${string}.monster.${string}.${number}`;
 
 export type BattleStatus = "choosingFirstPlayer" | "active" | "finished";
-export type FirstPlayerChoiceReason = "speed" | "level" | "elementDuel";
+export type FirstPlayerChoiceReason = "speed" | "level" | "elementDuel" | "elementDuelTiebreaker";
 
 export type SpellEffect = {
   type: "dealDamage";
@@ -155,6 +155,10 @@ export type BattleAction =
   | {
       type: "concede";
       playerId: string;
+    }
+  | {
+      type: "resolveOpeningDuelTimeout";
+      timedOutPlayerId: string | null;
     };
 
 export type BattleResult =
@@ -172,6 +176,8 @@ export type BattleEvent =
   | { type: "firstPlayerChoiceRequested"; playerIds: [string, string]; reason: "speedAndLevelTie" }
   | { type: "elementChosen"; playerId: string; element: ElementType }
   | { type: "elementDuelTied"; element: ElementType }
+  | { type: "elementDuelTiebreaker"; playerId: string; tieCount: number }
+  | { type: "openingDuelTimedOut"; timedOutPlayerId: string | null }
   | { type: "firstPlayerChosen"; playerId: string; reason: FirstPlayerChoiceReason }
   | { type: "turnStarted"; playerId: string; turnCount: number; energy: number }
   | { type: "cooldownChanged"; targetId: string; from: number; to: number }
@@ -238,4 +244,3 @@ export type BattleRecordVersions = {
   rulesVersion: string;
   contentVersion: string;
 };
-

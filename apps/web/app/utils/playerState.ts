@@ -96,6 +96,90 @@ export type GameMarketState = {
   transactions: GameMarketTransactionView[];
 };
 
+export type PlayerMarketListingView = {
+  id: string;
+  resourceType: "ring" | "gem" | "monster" | "spell" | "material";
+  definitionId: string;
+  nameKey: string | null;
+  label: string;
+  rarity: "common" | "refined" | "rare" | "epic";
+  element: "electric" | "fire" | "ice" | null;
+  level: number | null;
+  quality: number | null;
+  quantity: number;
+  price: number;
+  contentVersion: string;
+  createdAt: string;
+  bundleItemCount: number;
+  isOwnListing: boolean;
+};
+
+export type PlayerMarketBrowseState = {
+  createOptions: {
+    activeListingCount: number;
+    maxActiveListings: number;
+    items: {
+      inventoryItemId: string;
+      resourceType: Exclude<PlayerMarketListingView["resourceType"], "material">;
+      definitionId: string;
+      nameKey: string;
+      label: string;
+      rarity: PlayerMarketListingView["rarity"];
+      element: Exclude<PlayerMarketListingView["element"], null>;
+      level: number;
+      quality: number;
+      bundleItemCount: number;
+    }[];
+    materials: {
+      materialId: string;
+      definitionId: string;
+      nameKey: string;
+      label: string;
+      rarity: PlayerMarketListingView["rarity"];
+      quantity: number;
+    }[];
+  };
+  filters: {
+    resourceTypes: PlayerMarketListingView["resourceType"][];
+    rarities: PlayerMarketListingView["rarity"][];
+    elements: Exclude<PlayerMarketListingView["element"], null>[];
+    sorts: ("newest" | "priceAsc" | "priceDesc" | "levelDesc" | "qualityDesc")[];
+    definitions: {
+      resourceType: PlayerMarketListingView["resourceType"];
+      definitionId: string;
+      nameKey: string;
+      label: string;
+    }[];
+  };
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+  listings: PlayerMarketListingView[];
+};
+
+export type PlayerMarketHistoryTransactionView = Omit<
+  PlayerMarketListingView,
+  "createdAt" | "isOwnListing"
+> & {
+  direction: "purchase" | "sale";
+  listedAt: string;
+  soldAt: string;
+};
+
+export type PlayerMarketHistoryState = {
+  filter: { role: "all" | "buyer" | "seller" };
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+  transactions: PlayerMarketHistoryTransactionView[];
+};
+
 export type BattleRewardView = {
   id: string;
   contentVersion: string;
@@ -115,6 +199,15 @@ export type BattleRewardView = {
     label: string;
     experience: number;
   }[];
+};
+
+export type RankedSeasonRewardView = {
+  seasonId: string;
+  tier: "bronze" | "silver" | "gold" | "platinum" | "diamond" | "master";
+  peakRating: number;
+  badgeCosmeticId: string;
+  titleCosmeticId: string;
+  reward: BattleRewardView;
 };
 
 export type BattleResultSummaryActivityView = {
@@ -164,6 +257,7 @@ export type BattleHistoryState = {
     experience: number;
     level: number;
   };
+  seasonRewards: RankedSeasonRewardView[];
   records: BattleHistoryRecordView[];
 };
 
@@ -176,6 +270,7 @@ export type PrivateMatchState = {
     battleId: string | null;
     turnPlayerId: string | null;
     turnDeadlineAt: string | null;
+    openingDuelDeadlineAt: string | null;
     expiresAt: string;
     participants: {
       playerId: string;
@@ -192,6 +287,102 @@ export type PrivateMatchState = {
     name: string;
     ringCount: number;
   }[];
+};
+
+export type CasualMatchmakingState = {
+  playerId: string;
+  status: "idle" | "searching" | "matched";
+  activeLoadout: {
+    id: string;
+    name: string;
+    ringCount: number;
+  } | null;
+  queue: {
+    id: string;
+    joinedAt: string;
+    expiresAt: string;
+    loadoutName: string | null;
+    ringCount: number;
+  } | null;
+  match: {
+    battleId: string;
+    opponent: {
+      id: string;
+      username: string;
+    };
+  } | null;
+  recentBattleId: string | null;
+};
+
+export type RankedMatchmakingState = {
+  playerId: string;
+  status: "unavailable" | "idle" | "searching" | "accepting" | "matched";
+  season: { id: string; endsAt: string } | null;
+  rating: {
+    value: number;
+    deviation: number;
+    placementMatches: number;
+    placementTarget: number;
+    standing: {
+      tier: "bronze" | "silver" | "gold" | "platinum" | "diamond" | "master";
+      division: 1 | 2 | 3 | null;
+      minimumRating: number;
+    } | null;
+    peakRating: number | null;
+    peakStanding: {
+      tier: "bronze" | "silver" | "gold" | "platinum" | "diamond" | "master";
+      division: 1 | 2 | 3 | null;
+      minimumRating: number;
+    } | null;
+  } | null;
+  seasonReset: {
+    ratingBefore: number;
+    ratingAfter: number;
+    previousPlacementMatches: number;
+  } | null;
+  seasonRewards: RankedSeasonRewardView[];
+  activeLoadout: { id: string; name: string; ringCount: number } | null;
+  queue: {
+    id: string;
+    joinedAt: string;
+    expiresAt: string;
+    loadoutName: string | null;
+    ringCount: number;
+    ratingRange: number;
+    heroLevelRange: number;
+  } | null;
+  proposal: {
+    pairingKey: string;
+    acceptanceDeadlineAt: string;
+    accepted: boolean;
+    opponent: { id: string; username: string };
+  } | null;
+  match: {
+    battleId: string;
+    opponent: { id: string; username: string };
+  } | null;
+  recentBattleId: string | null;
+  discipline: { missedAcceptances: number; lockedUntil: string | null };
+};
+
+export type RankedLeaderboardEntry = {
+  position: number;
+  playerId: string;
+  username: string | null;
+  isCurrentPlayer: boolean;
+  rating: number;
+  deviation: number;
+  standing: NonNullable<NonNullable<RankedMatchmakingState["rating"]>["standing"]>;
+  wins: number;
+  losses: number;
+  draws: number;
+};
+
+export type RankedLeaderboardState = {
+  season: { id: string; endsAt: string } | null;
+  top: RankedLeaderboardEntry[];
+  current: RankedLeaderboardEntry | null;
+  nearby: RankedLeaderboardEntry[];
 };
 
 export type CampaignRewardPreview = {
@@ -325,6 +516,9 @@ export type LiveBattleState = {
   turnCount: number;
   turnPlayerId: string | null;
   turnDeadlineAt: string | null;
+  openingDuelDeadlineAt: string | null;
+  openingDuelChoiceSubmitted: boolean;
+  openingDuelRound: number;
   viewer: LiveBattlePlayerView;
   opponent: LiveBattlePlayerView;
   result: null | { type: "draw" } | { type: "winner"; winnerId: string; loserId: string };

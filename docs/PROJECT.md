@@ -198,7 +198,10 @@ This section separates executable game rules from implementation decisions. It i
 - The side with the highest hero speed becomes the starting player.
 - If both heroes have equal speed, the lower-level hero starts.
 - If both heroes have equal speed and equal level, starting player is decided by an element choice duel at battle start using fire, ice, and electric. Electric beats fire, fire beats ice, and ice beats electric.
-- If both players choose the same element in the element choice duel, the duel repeats until there is a winner.
+- Element choices are hidden, lock immediately after submission, and cannot be changed while waiting for the opponent.
+- The opening duel has a persisted 90-second deadline starting when the battle is created. The deadline continues through disconnects and resets to 90 seconds after a tied duel.
+- If exactly one player has submitted when the deadline expires, the missing player concedes. If neither player submitted, the battle ends in a draw without rewards.
+- If both players choose the same element, another duel begins. After three tied duels, a deterministic seed-based tiebreaker selects the starting player and is recorded in the action/event journal.
 - Both heroes begin battle with their computed maximum health.
 - All rings begin battle ready.
 - No monsters are in play at battle start during normal gameplay. Development fixtures may preload monsters for isolated rule testing.
@@ -426,19 +429,41 @@ This section separates executable game rules from implementation decisions. It i
 - Each ring in the active persisted loadout, its socketed gems, and their spell or monster enchantments receive 8 participation XP. Authoritative live settlement also grants 20 XP for each effective ring and socketed-gem use, spell trigger, successful monster summon, and monster attack. Rewards remain unclaimed until the player explicitly claims them.
 - Prototype item XP applies only to crafted development inventory instances referenced by Battle Lab `sourceInstanceId` values, regardless of whether those source-backed items are assigned to Player One or Player Two.
 - Source-backed equipped rings, socketed gems, and gem enchantments gain 8 XP when rewards are claimed. Each ring use adds 20 XP to the ring and each of its socketed gems. Each spell trigger adds 20 XP to the spell. Each monster summon and monster attack adds 20 XP to the matching monster source instance.
-- Hero XP is persisted on the Nuxt `Player` model and is awarded by Game App development battle settlement. Campaign, casual PvP, and ranked formulas remain mode-specific future decisions.
+- Hero XP is persisted on the Nuxt `Player` model and is awarded by Game App development battle settlement. Campaign uses content-owned fixed rewards, casual PvP currently grants no rewards, and ranked formulas remain a future decision.
 - The prototype and Nuxt Game App show deterministic result summaries after finished battles. Nuxt summaries are reconstructed from persisted actions through the engine and cover turns, actions played, damage and action contribution by player, rings used, spells cast, monsters summoned or used, item XP generated, and reward claim status. Imported Dev Lab replays can show the summary but cannot claim rewards.
 - In solo campaign, each opponent defines its fixed victory rewards in content data and victory unlocks the next opponent.
 - The initial campaign track is linear: `emberTrial` at recommended level 1, `stormInitiate` at level 3, and `frostGate` at level 5. Each opponent is repeatable and owns a validated content loadout plus separate first-clear and repeat-victory rewards.
 - Campaign completion is persisted as one `CampaignProgress` row per player and opponent. Victory count distinguishes first-clear from repeat settlement, and the selected opponent ID is stored as the battle mode reference.
 - In solo campaign, defeat grants only a small amount of item experience.
-- In PvP, rewards will vary based on player level and opponent level.
-- In PvP defeat, the player receives a small amount of experience, credits, and 1 to 2 low-rarity materials.
-- The exact PvP and ranked reward formulas will be decided with the matchmaking and ranking design.
+- Private and casual PvP currently grant no rewards. This prevents early unranked farming while matchmaking is validated.
+- The exact ranked reward formula will be decided with the rating, season, and ranked matchmaking design.
+
+### Player Market
+
+- The initial player market uses fixed-price listings paid only in credits; auctions, barter, listing fees, and sale commissions are excluded.
+- Rings, gems, monsters, spells, and materials can be listed. An equipped object or an object currently attached to another inventory object cannot be listed independently.
+- A listed ring is sold as one complete bundle with all socketed gems and their spell or monster enchantments. Ownership of the complete graph must transfer atomically.
+- Listings never expire. They remain active, purchasable, and counted toward the seller's active-listing limit until they are sold or explicitly cancelled. Sellers may cancel at any time without a fee and receive the escrowed content immediately.
+- Sellers choose any positive whole-credit price supported by the monetary storage type. The market does not impose rarity-based or suggested minimum and maximum prices.
+- Each player may have at most 20 active listings.
+- Sellers remain anonymous in player-facing market data regardless of profile visibility.
+- Browsing supports type, definition, rarity, element, level, quality, and price filters.
+- A purchase uses a database-owned single-winner transition. If multiple buyers submit concurrently, only the first committed purchase transfers ownership and credits; all others receive an unavailable-listing result.
+- Material listings contain one seller-selected quantity and are purchased only as an indivisible lot.
+- Listing creation moves or locks the complete item bundle or material quantity in market escrow, preventing inventory use while the listing is active.
+- Players cannot buy their own listings. A completed purchase credits the seller immediately in the same atomic transaction that debits the buyer and transfers ownership.
+- Purchase and cancellation races use first-committed-writer semantics. Creation, purchase, and cancellation require idempotency request IDs.
+- Buyer and seller retain a permanent private transaction history.
+- Persistence implementation: `PlayerMarketListing` retains permanent active, sold, or cancelled listing state, anonymous-search attributes, price, quantity, content provenance, optional root-item relation, immutable bundle snapshot, and buyer/sale timestamps. `PlayerMarketEscrowItem` uniquely locks every item instance in an active bundle, while material quantities are removed from player stock into the listing record by the creation API. `PlayerMarketMutation` provides one globally unique request journal for create, purchase, and cancellation idempotency. Matching migrations exist for SQLite and PostgreSQL, and the production persistence smoke test covers the new relations.
+- Browse implementation: authenticated players can query active listings through `/api/market/players` with validated type, definition, rarity, element, level, quality, and price filters. Results use bounded pagination and deterministic newest, price, level, or quality ordering. Player-facing payloads never expose seller identity; they only identify the current player's own listings. The localized `/market/players` view consumes the versioned content catalogue for definition labels and filter options.
+- Creation implementation: authenticated players can create a listing through `POST /api/market/players` with a globally idempotent request ID and a positive whole-credit price. Material quantities are atomically removed from player stock into one indivisible listing. Item listings lock the owned root instance; ring listings additionally lock every socketed gem and attached enchantment and retain a versioned immutable graph snapshot. Equipped rings, rings referenced by any loadout, attached standalone objects, already escrowed objects, and standalone enchanted gems are ineligible. Escrowed instances cannot be equipped or modified through quality, socket, or enchantment operations. Creation uses a serializable retrying transaction and enforces the 20-active-listing limit before moving assets.
+- Cancellation implementation: only the seller can cancel an active listing through `DELETE /api/market/players/:listingId`, using a globally idempotent request ID. The same serializable transaction claims the active listing, marks it permanently cancelled, returns the complete material lot to stock or removes every item escrow lock, and records the mutation. A later or competing cancellation cannot return assets twice. Cancelled records remain stored for future private history but disappear from active browsing immediately.
+- Purchase implementation: an authenticated non-seller can buy an active listing through `POST /api/market/players/:listingId/purchase`, using a globally idempotent request ID. One serializable transaction claims the listing, conditionally debits the buyer, immediately credits the seller, transfers the exact material lot or every escrowed item, rewrites ring-socket and enchantment ownership, removes item locks, records the buyer and sale timestamp, and journals the mutation. Conditional claims provide first-writer-wins behavior for concurrent buyers, while any failed payment or invalid transfer rolls back the complete settlement. The localized market view requires explicit confirmation before spending credits and refreshes ownership, balance, and listing state after success.
+- History implementation: authenticated players can query only their own completed purchases and sales through `GET /api/market/players/history`, with buyer, seller, or combined filters and deterministic sale-date pagination. The response projects content-backed item details, immutable price and quantity, completion time, and bundle size without exposing either participant identifier or profile data. The responsive localized `/market/players/history` view presents this permanent private record separately from active listings.
 
 ### Rule Questions To Resolve
 
-- What are the exact PvP and ranked reward formulas?
+- What is the exact ranked reward formula, and should casual PvP gain rewards later?
 
 ### Prototype Content Collection
 
@@ -619,6 +644,13 @@ This section separates executable game rules from implementation decisions. It i
 - Reason: The intended combat experience is turn-based but interactive, and live play should validate server authority, reconnect behavior, timers, and match flow.
 - Tradeoffs: Live PvP requires stronger connection handling than asynchronous play.
 
+#### Multiplayer Concurrency
+
+- Status: decided and implemented for the current PvP lifecycle.
+- Decision: Protect queue, acceptance, discipline, battle-action, timeout, and rating transitions with database-owned single-writer claims, optimistic guards, or serializable transactions with bounded retry.
+- Reason: Reconnects, retries, multiple tabs, and simultaneous player requests must observe one authoritative result rather than create duplicate battles, penalties, actions, rewards, or rating settlements.
+- Testing: Integration coverage sends simultaneous casual queue entries, ranked acceptances, duplicate declines and actions, concurrent proposal expirations, and reconnect reads during both timeout types.
+
 #### Reconnection
 
 - Status: decided.
@@ -629,10 +661,41 @@ This section separates executable game rules from implementation decisions. It i
 #### Initial PvP Entry Point
 
 - Status: implemented with persistent HTTP state and authenticated WebSocket invalidation.
-- Decision: The first future PvP mode should support private matches by code before automatic matchmaking.
-- Implementation: Prisma stores private matches and their two participants. The host creates a two-hour code, the guest joins it, each player locks an owned non-empty loadout, and the server atomically snapshots both loadouts into a `private_pvp` battle when both participants are ready. The authenticated session is the reconnect identity. Active turns have a persisted five-minute deadline that continues during disconnection and expires as a server-side concession. The unresolved opening element duel remains untimed because no active player can yet be assigned fairly. Lobby and battle changes are delivered as WebSocket invalidations with HTTP polling fallback; PvP rewards remain separate work.
+- Decision: Implement private matches by code before automatic matchmaking.
+- Implementation: Prisma stores private matches and their two participants. The host creates a two-hour code, the guest joins it, each player locks an owned non-empty loadout, and the server atomically snapshots both loadouts into a `private_pvp` battle when both participants are ready. The authenticated session is the reconnect identity. Opening element duels have a separate persisted 90-second deadline with hidden locked choices, per-tie reset, one-player concession, no-choice draw, and deterministic resolution after three ties. Active turns have a persisted five-minute deadline that continues during disconnection and expires as a server-side concession. Lobby and battle changes are delivered as WebSocket invalidations with HTTP polling fallback.
 - Reason: Private codes are simpler than matchmaking and make early multiplayer testing easier.
-- Tradeoffs: This delays casual/ranked matchmaking. Ranked mode is still desired later, alongside solo/campaign.
+- Tradeoffs: Ranked mode is still desired later and requires its own competitive design.
+
+#### Casual Matchmaking
+
+- Status: implemented.
+- Decision: Use a five-minute FIFO queue for unranked live PvP. Entering the queue requires an active non-empty loadout and snapshots its ordered ring instance IDs. A player cannot search while another PvP session is active, and cannot enter or create a private lobby while searching.
+- Implementation: `CasualQueueEntry` records explicit waiting, matching, matched, cancelled, and expired states. The server atomically claims the oldest available opponent, creates a shared PvP session and `casual_pvp` battle, and links both entries to the result. Casual battles reuse private-PvP authority, reconnection, opening-duel and turn deadlines, hidden opponent rings, history, WebSocket invalidations, and HTTP polling fallback. They currently grant no rewards.
+- Reason: Reusing the proven persistent battle lifecycle keeps matchmaking focused on pairing and queue integrity instead of duplicating combat infrastructure.
+- Tradeoffs: FIFO matching does not account for player skill or latency. Those constraints belong to the future ranked design.
+
+#### Ranked PvP
+
+- Status: ranked matchmaking, battles, rating settlement, leaderboard, scheduled season lifecycle, and season rewards implemented.
+- Rating: Use Glicko-2 with an initial rating of `1500`, initial rating deviation of `350`, initial volatility of `0.06`, volatility constraint `tau = 0.5`, conversion scale `173.7178`, convergence tolerance `0.000001`, and maximum persisted deviation `350`. New players complete five placement matches while their visible rank remains hidden; the internal rating is updated after every placement result.
+- Visible ranks: Use Bronze, Silver, Gold, Platinum, Diamond, and Master. Bronze through Diamond each have three divisions; Master has no divisions. The thresholds are Bronze III below `1000`, Bronze II at `1000`, Bronze I at `1100`, Silver III at `1200`, Silver II at `1300`, Silver I at `1400`, Gold III at `1500`, Gold II at `1600`, Gold I at `1700`, Platinum III at `1800`, Platinum II at `1900`, Platinum I at `2000`, Diamond III at `2100`, Diamond II at `2200`, Diamond I at `2300`, and Master at `2400`.
+- Matchmaking: Match primarily by rating while also constraining hero-level difference. Start at `+/-100` rating and `+/-2` hero levels, then expand every 15 seconds by `100` rating and two hero levels up to `+/-500` rating and `+/-10` hero levels. Equipment power is not a matchmaking input because match results should naturally incorporate its effect into rating.
+- Rating settlement: Use only win, loss, or draw and the opponent's Glicko-2 state. Remaining health, battle duration, and turn count do not modify rating.
+- Queue and acceptance: Snapshot the active non-empty loadout on queue entry. A search lasts five minutes. When an opponent is found, both players receive a 20-second acceptance window before the ranked battle is created.
+- Queue penalties: Declining or timing out before acceptance does not change rating, but repeated occurrences apply matchmaking lockouts of 1, 5, 15, and 30 minutes. The occurrence streak resets after 24 hours without another miss.
+- Abandonment: Leaving, conceding, disconnecting past the authoritative deadline, or otherwise abandoning after both players accept is settled as a normal ranked loss without an additional rating multiplier.
+- Seasons: Seasons last eight weeks. A season transition retains 75% of the distance from the central `1500` rating and raises rating deviation to at least `200` so returning certainty is reduced without erasing prior performance.
+- Inactivity: Rating decay applies to players who reach Diamond or Master after seven days without ranked play. Each additional complete seven-day period moves rating down by `25`, with a `2000` rating floor. Once decay starts, it continues toward the floor even if the rating crosses below Diamond, avoiding a one-step boundary oscillation.
+- Rewards: Eligibility requires five completed placements. The reward uses the highest tier reached after placements, is not reduced by later losses or inactivity, ignores divisions, and grants one bundle rather than cumulative lower-tier bundles. Bronze through Master grant `500`, `750`, `1000`, `1500`, `2000`, and `3000` credits. Each tier grants exactly three deterministic, auditable, non-exclusive materials: Bronze `3 common`; Silver `2 common + 1 refined`; Gold `1 common + 2 refined`; Platinum `2 refined + 1 rare`; Diamond `1 refined + 2 rare`; Master `1 refined + 1 rare + 1 epic`. Every eligible reward also includes a permanent season-and-tier badge and profile title. Grants never expire and require an explicit claim.
+- Repeat opponents: Avoid matching the same players again for 30 minutes when the available queue population permits it; this is a preference, not an absolute prohibition.
+- Leaderboard: Expose the global top 100 plus the current player's position and nearby players. Only players who completed five placements receive a position. Order by rating descending, deviation ascending, wins descending, then player ID ascending for deterministic ties. Private profiles are anonymized for other viewers.
+- Reason: Glicko-2 handles provisional and inactive players more accurately than a fixed Elo delta, while the visible rank structure remains understandable. Acceptance and progressive queue penalties reduce avoidable match abandonment without treating connection failures as completed losses.
+- Tradeoffs: Ranked mode requires more persistence, transactional state transitions, scheduled season work, abuse monitoring, and balance parameters than casual matchmaking.
+- Foundation implementation: The pure server module implements complete Glicko-2 rating-period updates, visible-rank resolution, range expansion, queue penalties, soft resets, and inactivity arithmetic without depending on Prisma, Nuxt, combat state, or wall-clock time. Prisma stores ranked seasons and one versioned rating, deviation, volatility, placement counter, record, and last-match timestamp per player and season in both SQLite and PostgreSQL. Ranked battle settlement updates both pre-match rating snapshots atomically, uses optimistic versions to reject concurrent writes, and records one immutable adjustment per player and battle. A unique settlement key and the `(battleRecordId, playerId)` constraint make retries idempotent and retain result provenance.
+- Matchmaking implementation: Prisma persists ranked queue entries, immutable loadout/rating/hero-level snapshots, pairing keys, acceptance deadlines, accepted timestamps, linked battles, and per-player penalty state in SQLite and PostgreSQL. Matching requires mutually compatible expanded rating and hero-level ranges, prefers opponents not played in the previous 30 minutes, and atomically claims both entries. Bilateral acceptance creates a `ranked_pvp` battle through the existing authoritative PvP lifecycle. Declines and missed acceptances apply the configured lockout only to the responsible player. The localized `/battle/pvp/ranked` view exposes season rating, placements, current ranges, acceptance, penalties, and battle entry through WebSocket invalidations with polling fallback.
+- Leaderboard implementation: The authenticated ranked API returns the active season's top 100, the current placed player's exact position, and a five-player window around that position without loading the complete leaderboard into application memory. The ranked view renders a dense responsive table, highlights the current player, and shows a placement requirement instead of assigning provisional players a public position.
+- Season lifecycle implementation: Ranked seasons have an explicit one-to-one predecessor/successor relation in SQLite and PostgreSQL. An idempotent maintenance service runs at Nitro startup, hourly, and before ranked reads or queue entry. It advances every overdue eight-week season, closes the predecessor, expires unfinished queue entries, creates reset ratings for the successor, and stores immutable `season_soft_reset` journals. High-rank inactivity uses one unique journal key per player, inactivity anchor, and completed weekly period, so repeated or concurrent maintenance cannot intentionally apply the same decay twice. The UI exposes the previous and reset rating until the player finishes the new season's placements.
+- Season reward implementation: Each placed rating persists its post-placement peak. Rollover creates one stable reward grant and one `RankedSeasonReward` per eligible player in the same serializable transition transaction. Material choices are SHA-256-derived from season, player, rarity, and slot, making retries deterministic without introducing globally shared drops. Claiming uses the existing atomic reward pipeline for credits and material stock, then upserts permanent badge and title ownership. Ranked and history views expose both pending and claimed season rewards.
 
 #### Authentication
 

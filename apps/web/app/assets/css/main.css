@@ -614,6 +614,22 @@ h3 {
   background: rgb(255 255 255 / 12%);
 }
 
+.pill.history-purchase {
+  border-color: #69e89b;
+  color: #c9ffdb;
+  background: rgb(105 232 155 / 12%);
+}
+
+.pill.history-sale {
+  border-color: #25d7ff;
+  color: #c6f8ff;
+  background: rgb(37 215 255 / 12%);
+}
+
+.market-history-filters {
+  grid-template-columns: minmax(180px, 320px);
+}
+
 .view-status-stack {
   display: flex;
   align-items: center;
@@ -1890,5 +1906,139 @@ h3 {
   .private-ready-panel .action-row {
     align-items: stretch;
     flex-direction: column;
+  }
+}
+
+.ranked-leaderboard-layout {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.ranked-season-rewards {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.ranked-reward-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: 1rem;
+}
+
+.ranked-reward-panel {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+}
+
+.ranked-leaderboard-panel {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ranked-leaderboard-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ranked-leaderboard-title h2 {
+  margin: 0.2rem 0 0;
+}
+
+.ranked-leaderboard-header,
+.ranked-leaderboard-list > li {
+  display: grid;
+  grid-template-columns: 56px minmax(140px, 1fr) 130px 110px 120px;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.ranked-leaderboard-header {
+  padding: 0 0.75rem;
+  color: #cbd9df;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.ranked-leaderboard-list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ranked-leaderboard-list > li {
+  min-width: 0;
+  padding: 0.7rem 0.75rem;
+  border-left: 3px solid transparent;
+  background: rgb(255 255 255 / 4%);
+}
+
+.ranked-leaderboard-list > li.current {
+  border-left-color: #36d984;
+  background: rgb(73 222 128 / 10%);
+}
+
+.ranked-leaderboard-list > li > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ranked-position {
+  color: #25d7ff;
+}
+
+.ranked-player-name {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-weight: 700;
+}
+
+.ranked-player-name small {
+  color: #9af5c2;
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .ranked-leaderboard-title {
+    align-items: flex-start;
+  }
+
+  .ranked-leaderboard-header {
+    display: none;
+  }
+
+  .ranked-leaderboard-list > li {
+    grid-template-columns: 48px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .ranked-leaderboard-list .ranked-position {
+    grid-row: 1 / span 4;
+  }
+
+  .ranked-leaderboard-list > li > span {
+    grid-column: 2;
+  }
+
+  .ranked-leaderboard-list > li > span[data-label] {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .ranked-leaderboard-list > li > span[data-label]::before {
+    color: #cbd9df;
+    content: attr(data-label);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
   }
 }

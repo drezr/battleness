@@ -142,6 +142,9 @@
           <p v-if="currentMatch.turnDeadlineAt" class="muted">
             {{ t("privateMatch.turnTimerActive") }}
           </p>
+          <p v-else-if="currentMatch.openingDuelDeadlineAt" class="muted">
+            {{ t("privateMatch.openingDuelTimerActive") }}
+          </p>
         </div>
         <NuxtLink class="button-link" :to="`/battle/live/${currentMatch.battleId}`">
           {{ t("privateMatch.enterBattle") }}

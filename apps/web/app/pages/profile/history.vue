@@ -34,6 +34,11 @@
 
     <template v-else-if="state">
       <p v-if="feedback" class="feedback">{{ feedback }}</p>
+      <RankedSeasonRewardList
+        :rewards="state.seasonRewards"
+        :claiming-reward-id="claimingRewardId"
+        @claim="claimReward"
+      />
       <BattleHistoryList
         :records="state.records"
         :claiming-reward-id="claimingRewardId"

@@ -43,9 +43,9 @@
           <span class="eyebrow">{{ t("battle.live.status") }}</span>
           <strong>{{ battle.status }}</strong>
         </div>
-        <div v-if="battle.mode === 'private_pvp' && turnSecondsRemaining !== null">
-          <span class="eyebrow">{{ t("battle.live.turnDeadline") }}</span>
-          <strong>{{ formattedTurnTime }}</strong>
+        <div v-if="isPvpBattle && deadlineSecondsRemaining !== null">
+          <span class="eyebrow">{{ deadlineLabel }}</span>
+          <strong>{{ formattedDeadlineTime }}</strong>
         </div>
       </section>
 
@@ -262,13 +262,19 @@
         <div>
           <span class="eyebrow">{{ t("battle.live.elementDuel") }}</span>
           <h2>{{ t("battle.live.chooseElement") }}</h2>
+          <p class="muted">
+            {{ t("battle.live.openingDuelRound", { round: battle.openingDuelRound }) }}
+            <template v-if="battle.openingDuelChoiceSubmitted">
+              · {{ t("battle.live.openingDuelWaiting") }}
+            </template>
+          </p>
         </div>
         <div class="segmented-control live-element-choice">
           <button
             v-for="element in elements"
             :key="element"
             type="button"
-            :disabled="submitting"
+            :disabled="submitting || battle.openingDuelChoiceSubmitted"
             @click="chooseElement(element)"
           >
             {{ element }}
@@ -386,6 +392,9 @@ const {
   pending,
   refresh,
 } = await useFetch<LiveBattleState>(() => `/api/battle/live/${battleId.value}`);
+const isPvpBattle = computed(() =>
+  ["private_pvp", "casual_pvp"].includes(battle.value?.mode ?? ""),
+);
 const { status: realtimeStatus } = useGameRealtime((event) => {
   if (event.type === "battleChanged" && event.battleId === battleId.value) {
     void refresh();
@@ -402,16 +411,35 @@ const claimingReward = ref(false);
 const actionError = ref("");
 const lastEventTypes = ref<string[]>([]);
 const clockNow = ref(Date.now());
-const turnSecondsRemaining = computed(() => {
-  if (!battle.value?.turnDeadlineAt) return null;
-  return Math.max(0, Math.ceil((Date.parse(battle.value.turnDeadlineAt) - clockNow.value) / 1000));
+const activeDeadlineAt = computed(() =>
+  battle.value?.status === "choosingFirstPlayer"
+    ? battle.value.openingDuelDeadlineAt
+    : battle.value?.turnDeadlineAt,
+);
+const deadlineSecondsRemaining = computed(() => {
+  if (!activeDeadlineAt.value) return null;
+  return Math.max(0, Math.ceil((Date.parse(activeDeadlineAt.value) - clockNow.value) / 1000));
 });
-const formattedTurnTime = computed(() => {
-  const remaining = turnSecondsRemaining.value;
+const formattedDeadlineTime = computed(() => {
+  const remaining = deadlineSecondsRemaining.value;
   if (remaining === null) return "";
   const minutes = Math.floor(remaining / 60);
   const seconds = remaining % 60;
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
+});
+const deadlineLabel = computed(() =>
+  t(
+    battle.value?.status === "choosingFirstPlayer"
+      ? "battle.live.openingDuelDeadline"
+      : "battle.live.turnDeadline",
+  ),
+);
+let refreshedExpiredDeadline = "";
+watch([activeDeadlineAt, deadlineSecondsRemaining], ([deadline, remaining]) => {
+  if (deadline && remaining === 0 && refreshedExpiredDeadline !== deadline && !submitting.value) {
+    refreshedExpiredDeadline = deadline;
+    void refresh();
+  }
 });
 const targets = computed(() => {
   const currentBattle = battle.value;
@@ -482,7 +510,11 @@ const statusLabel = computed(() => {
     return t("battle.live.serverState");
   }
   if (battle.value.status === "choosingFirstPlayer") {
-    return t("battle.live.firstPlayerPending");
+    return t(
+      battle.value.openingDuelChoiceSubmitted
+        ? "battle.live.openingDuelWaiting"
+        : "battle.live.firstPlayerPending",
+    );
   }
   if (battle.value.status === "finished") {
     return t("battle.live.finished");
@@ -619,8 +651,8 @@ onMounted(() => {
     const fallbackDue = realtimeStatus.value !== "connected" || privateBattlePollTick % 5 === 0;
     if (
       fallbackDue &&
-      battle.value?.mode === "private_pvp" &&
-      battle.value.status !== "finished" &&
+      isPvpBattle.value &&
+      battle.value?.status !== "finished" &&
       !submitting.value &&
       !document.hidden
     ) {

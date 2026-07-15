@@ -13,14 +13,14 @@ Read these files before making changes:
 ## Current Project State
 
 - Project name: BattleNess.
-- Current phase: authenticated Game App infrastructure with the first persistent private PvP lifecycle, while the original deterministic prototype remains a permanent Dev Lab.
+- Current phase: authenticated Game App with persistent private, casual, and ranked PvP lifecycles, while the original deterministic prototype remains a permanent Dev Lab.
 - User intent: clean rebuild of an already-started game.
 - A TypeScript monorepo is in place with `packages/engine`, `packages/content`, `apps/prototype`, and `apps/web`.
 - The prototype includes deterministic combat state creation, ring and monster actions, direct-damage spells, summons, all six current monster skills, first-turn protection, battle end checks, combat-start resolution, JSON scenarios, versioned battle-record export/import and replay, a battle setup screen, a first sketch-inspired battle board with prepare-action-then-target interaction for rings and monsters, both players' rings visible for development testing, manual browser controls, localized event-log rendering, Taunt-aware target selection, and DOM interaction tests for critical board flows.
 - `apps/prototype` should stay as a permanent Dev Lab for engine, content, inventory, reward, and combat diagnostics.
-- `apps/web` is the Nuxt Game App. It has Prisma-backed player state, inventory, forge, market, campaign, authenticated live battles, Google OAuth support, and a persistent private PvP lobby using invitation codes. Private lobby and battle changes use authenticated WebSocket invalidations with HTTP polling fallback. Private active turns use a persisted five-minute deadline that continues through disconnects and expires as a server-side concession; the unresolved opening element duel is not timed yet.
+- `apps/web` is the Nuxt Game App. It has Prisma-backed player state, inventory, forge, game market, campaign, authenticated live battles, Google OAuth support, private PvP invitation lobbies, casual matchmaking, and ranked matchmaking with Glicko-2 seasons and rewards. PvP queue, lobby, and battle changes use authenticated WebSocket invalidations with HTTP polling fallback. Critical queue, acceptance, discipline, action, and timeout transitions use optimistic or serializable single-writer guards with concurrent integration coverage. Casual and private PvP currently grant no rewards.
 - The user handles commits and pushes to GitHub themselves.
-- The next infrastructure milestone is to harden the Game App data model and UI shell before moving into campaign work.
+- The player market is implemented end to end on the SQLite and PostgreSQL persistence foundation: authenticated anonymous browsing, transactional listing creation, free seller cancellation, atomic single-winner purchase, and permanent private buyer/seller history. It includes validated filters, deterministic pagination, localized content labels, responsive seller, buyer, and history views, material escrow, complete ring-bundle locks and snapshots, idempotent mutations, exact escrow return or ownership transfer, relation rewrites, inventory mutation guards, rollback guarantees, counterparty privacy, and concurrent purchase coverage. The next recommended product milestone is the combat-presentation decision and mobile battle controls. Shared pub/sub and external OAuth environment configuration remain deployment work.
 
 ## Persistent Documentation Rules
 
@@ -88,7 +88,7 @@ The following are currently marked as decided in `docs/PROJECT.md`:
 - Use authenticated WebSocket invalidations as the primary multiplayer transport while HTTP/Prisma remain authoritative and polling remains a fallback. The current event hub is process-local and requires shared pub/sub before multi-instance deployment.
 - Build live synchronous PvP first when multiplayer work starts, with asynchronous play left as a possible later addition.
 - Live matches should be preserved during disconnects and allow players to reconnect.
-- The first future PvP mode should support private matches by code before automatic matchmaking; ranked mode is desired later alongside solo/campaign.
+- Private matches by code, automatic casual matchmaking, and ranked PvP are implemented. Ranked uses a persistent five-minute queue, immutable loadout/rating/level snapshots, mutually expanded rating-plus-level matching, 30-minute recent-opponent preference, persisted 20-second bilateral acceptance, progressive per-player lockouts, the authoritative reconnectable PvP battle lifecycle, and atomic idempotent Glicko-2 settlement. The localized UI shows placements, visible standing, current search ranges, acceptance state, penalties, the global top 100, and the current player's nearby entries. Eight-week season succession, soft-reset journals, stale queue expiration, weekly high-rank inactivity decay, and peak-tier season rewards are automated and retry-safe. Concurrent queue entry, acceptance, decline, expiry, live action, reconnect, and timeout paths have integration coverage.
 - Prefer OAuth login first, especially Google and Facebook, then add email and password authentication.
 - Build a localization module from the beginning. User-facing text must resolve through localization keys and translation JSON files, not hardcoded strings.
 - Set up an organized asset pipeline from the beginning, even if early assets are AI-generated templates that may be replaced later.
@@ -139,8 +139,8 @@ Suggested next step:
 
 These questions are listed in `docs/PROJECT.md` and can remain deferred while the local combat prototype is developed:
 
-- What are the exact PvP and ranked reward formulas?
-- What fixed reward values should each solo campaign opponent grant?
+- Should casual PvP gain rewards later?
+- What exact cosmetic, credit, and material records should each ranked season tier grant?
 
 ## Progression And Stat Formula Decisions
 
@@ -155,7 +155,7 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - Energy costs, cooldowns, speed, energy penalties, and cooldown penalties do not scale for now.
 - Final ring energy cost and cooldown minimums remain 1.
 - Positive integer stat calculations use floor rounding unless a specific rule overrides it.
-- Campaign victory rewards are configured per opponent in content data. PvP and ranked reward formulas remain deferred until matchmaking and ranking are designed.
+- Campaign victory rewards are configured per opponent in content data. Private and casual PvP currently grant no rewards. Ranked season rewards require five placements and use the highest post-placement tier reached. They grant one non-cumulative bundle containing permanent season badge/title unlocks, tier credits, and three deterministic rarity-scaled materials. Rollover creation and claims are persisted and idempotent, and grants never expire.
 
 ## Progression Implementation
 
@@ -217,7 +217,7 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - First-turn protection prevents all damage to the opposing hero during the starting player's first turn.
 - All rings begin battle ready.
 - Ring use resolves as: pay energy, put the ring on cooldown, apply ring and gem damage, trigger enchantments in socket order, then check win conditions.
-- If the starting-player element duel results in both players choosing the same element, the duel repeats until there is a winner.
+- Opening element choices are hidden and lock immediately. Each duel has 90 seconds; one missing player concedes, no choices produce a draw, ties reset the timer, and the third tie invokes a deterministic seed-based tiebreaker.
 - Elemental advantage grants +10% damage, rounded down.
 - If a summon effect would exceed the 3-monster board limit, the summon fails without cancelling the rest of the action.
 - If the defending side has multiple Taunt monsters, the attacker may choose any Taunt monster as the target.
