@@ -438,6 +438,23 @@ This section separates executable game rules from implementation decisions. It i
 - Private and casual PvP currently grant no rewards. This prevents early unranked farming while matchmaking is validated.
 - The exact ranked reward formula will be decided with the rating, season, and ranked matchmaking design.
 
+### Game Market
+
+- Official material buy prices are fixed by rarity at 10/25/60/150 credits for common, refined,
+  rare, and epic materials.
+- Material buyback pays `max(1, floor(officialBuyPrice * 0.25))` credits per unit.
+- A crafted item is valued from its recipe: sum every ingredient's quantity multiplied by its
+  official material buy price, then pay `max(1, floor(recipeValue * 0.25))` credits.
+- Item XP, level, quality, socket-count improvements, and other investments do not increase the
+  initial buyback value.
+- Development-only items without a crafting recipe cannot be sold to the game.
+- Equipped rings, rings referenced by a loadout, rings containing socketed gems, socketed gems,
+  enchantment gems or targets, and player-market escrow items cannot be sold to the game.
+- Material and item sales are atomic, server-valued, and journaled with globally unique request
+  IDs. Item deletion occurs before the player credit increment in the same database transaction.
+- Market history stores both the sold instance ID and its durable content definition ID so the
+  transaction remains readable after the inventory instance is deleted.
+
 ### Player Market
 
 - The initial player market uses fixed-price listings paid only in credits; auctions, barter, listing fees, and sale commissions are excluded.

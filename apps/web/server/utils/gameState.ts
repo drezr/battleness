@@ -278,6 +278,20 @@ const materialBuyPrices: Record<string, number> = {
   epic: 150,
 };
 
+const gameMarketItemInclude = {
+  marketEscrow: { select: { listingId: true } },
+  equippedRing: { select: { ringItemId: true } },
+  loadoutRings: { select: { loadoutId: true }, take: 1 },
+  sockets: { select: { gemItemId: true }, take: 1 },
+  socketedAsGem: { select: { ringItemId: true } },
+  gemEnchantment: { select: { targetItemId: true } },
+  enchantedByGem: { select: { gemItemId: true } },
+} satisfies Prisma.InventoryItemInclude;
+
+type GameMarketInventoryItem = Prisma.InventoryItemGetPayload<{
+  include: typeof gameMarketItemInclude;
+}>;
+
 export async function getPlayerState() {
   const prisma = usePrisma();
 
@@ -392,6 +406,10 @@ export async function getGameMarketState() {
     where: { id: currentPlayerId() },
     include: {
       materialStock: true,
+      inventoryItems: {
+        include: gameMarketItemInclude,
+        orderBy: { createdAt: "desc" },
+      },
       marketTransactions: {
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         take: 20,
@@ -426,23 +444,8 @@ export async function getGameMarketState() {
       buyPrice: materialBuyPrice(material),
       sellPrice: materialSellPrice(material),
     })),
-    transactions: player.marketTransactions.map((transaction) => {
-      const material = getMaterialDefinition(transaction.resourceId);
-
-      return {
-        id: transaction.id,
-        requestId: transaction.requestId,
-        action: transaction.action,
-        resourceType: transaction.resourceType,
-        resourceId: transaction.resourceId,
-        resourceLabel: label(material.nameKey),
-        quantity: transaction.quantity,
-        unitPrice: transaction.unitPrice,
-        creditsDelta: transaction.creditsDelta,
-        contentVersion: transaction.contentVersion,
-        createdAt: transaction.createdAt.toISOString(),
-      };
-    }),
+    items: player.inventoryItems.map(toGameMarketItemView),
+    transactions: player.marketTransactions.map(toGameMarketTransactionView),
   };
 }
 
@@ -466,7 +469,8 @@ export async function buyGameMarketMaterial(
     if (existing) {
       assertMatchingMarketTransaction(existing, {
         action: "buy",
-        materialId,
+        resourceType: "material",
+        resourceId: materialId,
         quantity,
         unitPrice,
       });
@@ -508,6 +512,7 @@ export async function buyGameMarketMaterial(
         action: "buy",
         resourceType: "material",
         resourceId: materialId,
+        resourceDefinitionId: materialId,
         quantity,
         unitPrice,
         creditsDelta: -totalCost,
@@ -540,7 +545,8 @@ export async function sellGameMarketMaterial(
     if (existing) {
       assertMatchingMarketTransaction(existing, {
         action: "sell",
-        materialId,
+        resourceType: "material",
+        resourceId: materialId,
         quantity,
         unitPrice,
       });
@@ -571,10 +577,72 @@ export async function sellGameMarketMaterial(
         action: "sell",
         resourceType: "material",
         resourceId: materialId,
+        resourceDefinitionId: materialId,
         quantity,
         unitPrice,
         creditsDelta: totalCredits,
         contentVersion,
+      },
+    });
+  });
+
+  await assertValidPlayerGameState(prisma, currentPlayerId());
+  return getGameMarketState();
+}
+
+export async function sellGameMarketItem(itemId: string, requestId: string) {
+  assertMarketRequestId(requestId);
+  if (!itemId.trim()) {
+    throw new Error("itemId is required.");
+  }
+
+  const prisma = usePrisma();
+  await seedDevelopmentPlayer(prisma);
+
+  await prisma.$transaction(async (transaction) => {
+    const existing = await transaction.marketTransaction.findUnique({ where: { requestId } });
+
+    if (existing) {
+      assertMatchingMarketItemTransaction(existing, itemId);
+      return;
+    }
+
+    const item = await transaction.inventoryItem.findFirst({
+      where: { id: itemId, playerId: currentPlayerId() },
+      include: gameMarketItemInclude,
+    });
+    if (!item) {
+      throw new Error(`Inventory item "${itemId}" is not available.`);
+    }
+
+    const sale = toGameMarketItemView(item);
+    if (!sale.canSell || sale.sellPrice === null) {
+      throw new Error(gameMarketItemBlockMessage(sale.blockedReason));
+    }
+
+    const deleted = await transaction.inventoryItem.deleteMany({
+      where: gameMarketItemDeleteWhere(item),
+    });
+    if (deleted.count !== 1) {
+      throw new Error("The item is no longer eligible for sale.");
+    }
+
+    await transaction.player.update({
+      where: { id: currentPlayerId() },
+      data: { credits: { increment: sale.sellPrice } },
+    });
+    await transaction.marketTransaction.create({
+      data: {
+        requestId,
+        playerId: currentPlayerId(),
+        action: "sell",
+        resourceType: item.type,
+        resourceId: item.id,
+        resourceDefinitionId: item.definitionId,
+        quantity: 1,
+        unitPrice: sale.sellPrice,
+        creditsDelta: sale.sellPrice,
+        contentVersion: item.contentVersion ?? contentVersion,
       },
     });
   });
@@ -5764,7 +5832,149 @@ function jsonArrayLength(value: string): number {
 }
 
 function materialSellPrice(material: MaterialDefinition): number {
-  return Math.floor(materialBuyPrice(material) * 0.5);
+  return Math.max(1, Math.floor(materialBuyPrice(material) * 0.25));
+}
+
+function toGameMarketItemView(item: GameMarketInventoryItem) {
+  const inventory = toInventoryView(item);
+  const recipe = definitions.recipes.find(
+    (candidate) =>
+      candidate.outputType === item.type && candidate.outputDefinitionId === item.definitionId,
+  );
+  const ingredients = (recipe?.ingredients ?? []).map((ingredient) => {
+    const material = getMaterialDefinition(ingredient.materialId);
+    return {
+      materialId: material.id,
+      label: label(material.nameKey),
+      quantity: ingredient.quantity,
+      unitPrice: materialBuyPrice(material),
+    };
+  });
+  const recipeValue = recipe
+    ? ingredients.reduce(
+        (total, ingredient) => total + ingredient.unitPrice * ingredient.quantity,
+        0,
+      )
+    : null;
+  const blockedReason = gameMarketItemBlockReason(item, recipe !== undefined);
+
+  return {
+    ...inventory,
+    recipeId: recipe?.id ?? null,
+    recipeValue,
+    sellPrice: recipeValue === null ? null : Math.max(1, Math.floor(recipeValue * 0.25)),
+    canSell: blockedReason === null,
+    blockedReason,
+    ingredients,
+  };
+}
+
+function gameMarketItemBlockReason(
+  item: GameMarketInventoryItem,
+  hasRecipe: boolean,
+):
+  | "noRecipe"
+  | "equipped"
+  | "loadout"
+  | "socketedGems"
+  | "socketed"
+  | "enchantment"
+  | "marketListing"
+  | null {
+  if (item.marketEscrow) return "marketListing";
+  if (item.equipped || item.equippedRing) return "equipped";
+  if (item.loadoutRings.length > 0) return "loadout";
+  if (
+    item.type === "ring" &&
+    (item.sockets.length > 0 || jsonArrayLength(item.socketedGemInstanceIds))
+  ) {
+    return "socketedGems";
+  }
+  if (item.socketedAsGem) return "socketed";
+  if (item.gemEnchantment || item.enchantedByGem) return "enchantment";
+  if (!hasRecipe) return "noRecipe";
+  return null;
+}
+
+function gameMarketItemBlockMessage(reason: ReturnType<typeof gameMarketItemBlockReason>): string {
+  const messages = {
+    noRecipe: "This item has no crafting recipe and cannot be valued.",
+    equipped: "Equipped items cannot be sold.",
+    loadout: "Items used by a loadout cannot be sold.",
+    socketedGems: "Rings containing socketed gems cannot be sold.",
+    socketed: "Socketed gems cannot be sold.",
+    enchantment: "Items used by an enchantment cannot be sold.",
+    marketListing: "Items listed on the player market cannot be sold.",
+  } as const;
+
+  return reason ? messages[reason] : "The item cannot be sold.";
+}
+
+function gameMarketItemDeleteWhere(item: GameMarketInventoryItem): Prisma.InventoryItemWhereInput {
+  const base: Prisma.InventoryItemWhereInput = {
+    id: item.id,
+    playerId: currentPlayerId(),
+    type: item.type,
+    marketEscrow: { is: null },
+  };
+
+  if (item.type === "ring") {
+    return {
+      ...base,
+      equipped: false,
+      equippedRing: { is: null },
+      loadoutRings: { none: {} },
+      sockets: { none: {} },
+      socketedGemInstanceIds: "[]",
+    };
+  }
+  if (item.type === "gem") {
+    return {
+      ...base,
+      socketedAsGem: { is: null },
+      gemEnchantment: { is: null },
+    };
+  }
+
+  return { ...base, enchantedByGem: { is: null } };
+}
+
+function toGameMarketTransactionView(transaction: {
+  id: string;
+  requestId: string;
+  action: string;
+  resourceType: string;
+  resourceId: string;
+  resourceDefinitionId: string | null;
+  quantity: number;
+  unitPrice: number;
+  creditsDelta: number;
+  contentVersion: string;
+  createdAt: Date;
+}) {
+  const definitionId = transaction.resourceDefinitionId ?? transaction.resourceId;
+  const resourceLabel =
+    transaction.resourceType === "material"
+      ? label(getMaterialDefinition(definitionId).nameKey)
+      : label(
+          getCraftableDefinition(transaction.resourceType as CraftableItemType, definitionId)
+            .nameKey,
+        );
+
+  return {
+    id: transaction.id,
+    requestId: transaction.requestId,
+    action: transaction.action,
+    resourceType: transaction.resourceType,
+    resourceId: transaction.resourceId,
+    resourceDefinitionId: definitionId,
+    resourceLabel,
+    quantity: transaction.quantity,
+    unitPrice: transaction.unitPrice,
+    creditsDelta: transaction.creditsDelta,
+    contentVersion: transaction.contentVersion,
+    createdAt: transaction.createdAt.toISOString(),
+  };
 }
 
 function assertMarketQuantity(quantity: number): void {
@@ -5803,7 +6013,8 @@ function assertMatchingMarketTransaction(
   },
   expected: {
     action: "buy" | "sell";
-    materialId: string;
+    resourceType: string;
+    resourceId: string;
     quantity: number;
     unitPrice: number;
   },
@@ -5811,12 +6022,33 @@ function assertMatchingMarketTransaction(
   const matches =
     transaction.playerId === currentPlayerId() &&
     transaction.action === expected.action &&
-    transaction.resourceType === "material" &&
-    transaction.resourceId === expected.materialId &&
+    transaction.resourceType === expected.resourceType &&
+    transaction.resourceId === expected.resourceId &&
     transaction.quantity === expected.quantity &&
     transaction.unitPrice === expected.unitPrice;
 
   if (!matches) {
+    throw new Error("requestId was already used for a different market transaction.");
+  }
+}
+
+function assertMatchingMarketItemTransaction(
+  transaction: {
+    playerId: string;
+    action: string;
+    resourceType: string;
+    resourceId: string;
+    quantity: number;
+  },
+  itemId: string,
+): void {
+  if (
+    transaction.playerId !== currentPlayerId() ||
+    transaction.action !== "sell" ||
+    transaction.resourceType === "material" ||
+    transaction.resourceId !== itemId ||
+    transaction.quantity !== 1
+  ) {
     throw new Error("requestId was already used for a different market transaction.");
   }
 }

@@ -12,6 +12,7 @@
     "inventoryNavigation": "Inventory navigation",
     "marketNavigation": "Market navigation",
     "marketAction": "Market action",
+    "marketResource": "Game market resource type",
     "battleStatus": "Battle status",
     "battleCommands": "Battle commands",
     "emptyMonsterSlot": "Empty monster slot",
@@ -432,7 +433,7 @@
     "section": "Market",
     "game": {
       "title": "Game Market",
-      "description": "Buy and sell crafting materials through the fixed game economy.",
+      "description": "Buy crafting materials and sell materials or crafted items through the fixed game economy.",
       "loading": "Loading game market...",
       "loadError": "Unable to load game market.",
       "owned": "Owned",
@@ -441,6 +442,16 @@
       "transaction": "Transaction",
       "buyMaterial": "Buy Material",
       "sellMaterial": "Sell Material",
+      "materials": "Materials",
+      "items": "Items",
+      "itemType": "Item Type",
+      "itemSale": "Item Sale",
+      "sellItem": "Sell Item",
+      "selectItem": "Select an item to review its recipe-based buyback value.",
+      "noItems": "No inventory items match these filters.",
+      "valuation": "Recipe Valuation",
+      "recipeValue": "Recipe Value",
+      "buybackRate": "Buyback Rate",
       "each": "{price} each",
       "selectMaterial": "Select a material to prepare a transaction.",
       "totalCost": "Total Cost",
@@ -458,6 +469,17 @@
       },
       "purchased": "{quantity} {material} purchased.",
       "sold": "{quantity} {material} sold.",
+      "confirmItemSale": "Sell {item} for {price} credits? Item XP, quality, and improvements will not increase its value.",
+      "itemSold": "{item} sold for {price} credits.",
+      "blocked": {
+        "noRecipe": "This item has no crafting recipe and cannot be valued.",
+        "equipped": "Unequip this item before selling it.",
+        "loadout": "Remove this ring from every loadout before selling it.",
+        "socketedGems": "Remove every socketed gem before selling this ring.",
+        "socketed": "Remove this gem from its ring before selling it.",
+        "enchantment": "Remove this item from its enchantment before selling it.",
+        "marketListing": "Cancel its player-market listing before selling it here."
+      },
       "actionError": "Market transaction failed."
     },
     "players": {
@@ -619,8 +641,8 @@
     "market": {
       "title": "Market Hub",
       "description": "Buy and sell through the game economy or future player listings.",
-      "gameBody": "Fixed economy with persistent material trading and transaction history.",
-      "gameStatus": "Material trading available",
+      "gameBody": "Fixed economy with material purchasing, item buyback, and persistent history.",
+      "gameStatus": "Purchasing and buyback available",
       "openGame": "Open Game Market",
       "players": {
         "title": "Player Market",
@@ -679,7 +701,7 @@
     "battleDescription": "Campaign and PvP entry points with active loadout validation.",
     "forgeDescription": "Crafting is connected to the local development inventory.",
     "inventoryDescription": "{rings} rings, {gems} gems, {monsters} monsters, {spells} spells.",
-    "marketDescription": "Material buying and selling are available. Player listings remain planned."
+    "marketDescription": "Material purchasing, material and item buyback, and player listings are available."
   },
   "profile": {
     "section": "Profile",

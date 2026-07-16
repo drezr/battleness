@@ -12,6 +12,7 @@
     "inventoryNavigation": "Navigation de l’inventaire",
     "marketNavigation": "Navigation du marché",
     "marketAction": "Action du marché",
+    "marketResource": "Type de ressource du marché du jeu",
     "battleStatus": "État du combat",
     "battleCommands": "Commandes du combat",
     "emptyMonsterSlot": "Emplacement de monstre vide",
@@ -432,7 +433,7 @@
     "section": "Marché",
     "game": {
       "title": "Marché du jeu",
-      "description": "Achetez et vendez des matériaux de fabrication dans l’économie fixe du jeu.",
+      "description": "Achetez des matériaux et vendez des matériaux ou objets fabriqués dans l’économie fixe du jeu.",
       "loading": "Chargement du marché du jeu...",
       "loadError": "Impossible de charger le marché du jeu.",
       "owned": "Possédé",
@@ -441,6 +442,16 @@
       "transaction": "Transaction",
       "buyMaterial": "Acheter un matériau",
       "sellMaterial": "Vendre un matériau",
+      "materials": "Matériaux",
+      "items": "Objets",
+      "itemType": "Type d’objet",
+      "itemSale": "Vente d’objet",
+      "sellItem": "Vendre l’objet",
+      "selectItem": "Sélectionnez un objet pour consulter sa valeur de rachat basée sur sa recette.",
+      "noItems": "Aucun objet de l’inventaire ne correspond à ces filtres.",
+      "valuation": "Valeur de la recette",
+      "recipeValue": "Valeur de la recette",
+      "buybackRate": "Taux de rachat",
       "each": "{price} l’unité",
       "selectMaterial": "Sélectionnez un matériau pour préparer une transaction.",
       "totalCost": "Coût total",
@@ -458,6 +469,17 @@
       },
       "purchased": "{quantity} {material} acheté(s).",
       "sold": "{quantity} {material} vendu(s).",
+      "confirmItemSale": "Vendre {item} pour {price} crédits ? L’XP, la qualité et les améliorations n’augmentent pas sa valeur.",
+      "itemSold": "{item} vendu pour {price} crédits.",
+      "blocked": {
+        "noRecipe": "Cet objet n’a pas de recette et ne peut pas être évalué.",
+        "equipped": "Déséquipez cet objet avant de le vendre.",
+        "loadout": "Retirez cette ring de tous les loadouts avant de la vendre.",
+        "socketedGems": "Retirez toutes les gems de cette ring avant de la vendre.",
+        "socketed": "Retirez cette gem de sa ring avant de la vendre.",
+        "enchantment": "Retirez cet objet de son enchantement avant de le vendre.",
+        "marketListing": "Annulez son annonce sur le marché des joueurs avant de le vendre ici."
+      },
       "actionError": "Échec de la transaction."
     },
     "players": {
@@ -619,8 +641,8 @@
     "market": {
       "title": "Centre du marché",
       "description": "Achetez et vendez via l’économie du jeu ou les futures annonces de joueurs.",
-      "gameBody": "Économie fixe avec échange persistant de matériaux et historique des transactions.",
-      "gameStatus": "Échange de matériaux disponible",
+      "gameBody": "Économie fixe avec achat de matériaux, rachat d’objets et historique persistant.",
+      "gameStatus": "Achat et rachat disponibles",
       "openGame": "Ouvrir le marché du jeu",
       "players": {
         "title": "Marché des joueurs",
@@ -679,7 +701,7 @@
     "battleDescription": "Accès à la campagne et au JcJ avec validation de la configuration active.",
     "forgeDescription": "La fabrication utilise l’inventaire de développement local.",
     "inventoryDescription": "{rings} anneaux, {gems} gemmes, {monsters} monstres, {spells} sorts.",
-    "marketDescription": "L’achat et la vente de matériaux sont disponibles. Les annonces des joueurs restent prévues."
+    "marketDescription": "L’achat de matériaux et la vente de matériaux ou d’objets sont disponibles, ainsi que le marché des joueurs."
   },
   "profile": {
     "section": "Profil",

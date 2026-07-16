@@ -1,10 +1,15 @@
 import { definePlayerHandler } from "../../utils/playerHandler";
-import { buyGameMarketMaterial, sellGameMarketMaterial } from "../../utils/gameState";
+import {
+  buyGameMarketMaterial,
+  sellGameMarketItem,
+  sellGameMarketMaterial,
+} from "../../utils/gameState";
 
 export default definePlayerHandler(async (event) => {
   const body = await readBody<{
     action?: string;
     materialId?: string;
+    itemId?: string;
     quantity?: number;
     requestId?: string;
   }>(event);
@@ -31,6 +36,17 @@ export default definePlayerHandler(async (event) => {
 
       return await sellGameMarketMaterial(body.materialId, body.quantity ?? 0, body.requestId);
     }
+
+    if (body.action === "sellItem") {
+      if (!body.itemId) {
+        throw new Error("itemId is required.");
+      }
+      if (!body.requestId) {
+        throw new Error("requestId is required.");
+      }
+
+      return await sellGameMarketItem(body.itemId, body.requestId);
+    }
   } catch (error) {
     throw createError({
       statusCode: 400,
@@ -40,6 +56,6 @@ export default definePlayerHandler(async (event) => {
 
   throw createError({
     statusCode: 400,
-    statusMessage: "action must be buyMaterial or sellMaterial.",
+    statusMessage: "action must be buyMaterial, sellMaterial, or sellItem.",
   });
 });

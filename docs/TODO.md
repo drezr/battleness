@@ -84,10 +84,13 @@ Private, casual, and ranked PvP now share the authoritative persistent battle li
 
 - [x] Add Nuxt route mockups for market sections.
 - [x] Confirm the initial material price formulas. Buy prices are 10/25/60/150 credits for
-      common/refined/rare/epic materials, and sell prices are 50% of buy prices rounded down.
-- [ ] Confirm whether items can be sold to the game and how item prices are computed.
+      common/refined/rare/epic materials, and sell prices are 25% of buy prices rounded down with
+      a minimum of one credit.
+- [x] Confirm item game-market sales. A crafted item's value is the sum of the official buy prices
+      for every material quantity in its recipe; its buyback price is 25% of that value rounded
+      down with a minimum of one credit.
 - [x] Implement `/market/game` for buying materials.
-- [x] Implement `/market/game` for selling materials. Item selling remains undecided.
+- [x] Implement `/market/game` for selling materials and eligible crafted item instances.
 - [x] Add transaction previews and persistent backend market transaction logs.
 - [x] Add tests for insufficient credits, insufficient stock, atomic updates, and idempotent requests.
 
@@ -178,7 +181,8 @@ Private, casual, and ranked PvP now share the authoritative persistent battle li
 - [x] What initial hero XP rewards should development battles grant? Win grants 100 XP, draw grants 60 XP, and loss grants 25 XP. Campaign and PvP formulas remain open within their respective modes.
 - [x] Should ring socket-count improvement live under `/forge/socket`, `/forge/quality`, or a separate improvement view? Decided and implemented under `/forge/socket`.
 - [ ] Should spell and monster gem enchantment be managed in inventory, forge, or both?
-- [ ] Should the Game Market sell only materials at first?
+- [x] Should the Game Market sell only materials at first? It buys materials from players and also
+      buys eligible crafted rings, gems, monsters, and spells using recipe-based values.
 - [ ] What data should be public in player-facing PvP before and during battle?
 - [x] When should ranked mode become visible as more than a locked mock? Replace the mock only when the first complete rating, queue, acceptance, battle, and settlement vertical slice is functional.
 

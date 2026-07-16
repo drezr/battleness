@@ -200,11 +200,30 @@ type GameMarketApiResponse = {
     buyPrice: number;
     sellPrice: number;
   }[];
+  items: {
+    id: string;
+    type: string;
+    definitionId: string;
+    label: string;
+    recipeId: string | null;
+    recipeValue: number | null;
+    sellPrice: number | null;
+    canSell: boolean;
+    blockedReason: string | null;
+    ingredients: {
+      materialId: string;
+      quantity: number;
+      unitPrice: number;
+    }[];
+  }[];
   transactions: {
     id: string;
     requestId: string;
     action: "buy" | "sell";
+    resourceType: "material" | "ring" | "gem" | "monster" | "spell";
     resourceId: string;
+    resourceDefinitionId: string;
+    resourceLabel: string;
     quantity: number;
     unitPrice: number;
     creditsDelta: number;
@@ -4029,10 +4048,11 @@ describe("Nuxt Game App APIs", () => {
       rarity: "common",
       quantity: 2,
       buyPrice: 10,
-      sellPrice: 5,
+      sellPrice: 2,
     });
     expect(response.materials.find((material) => material.rarity === "epic")?.buyPrice).toBe(150);
-    expect(response.materials.find((material) => material.rarity === "epic")?.sellPrice).toBe(75);
+    expect(response.materials.find((material) => material.rarity === "epic")?.sellPrice).toBe(37);
+    expect(response.items).toHaveLength(0);
     expect(response.transactions).toHaveLength(0);
   });
 
@@ -4139,15 +4159,15 @@ describe("Nuxt Game App APIs", () => {
       },
     })) as GameMarketApiResponse;
 
-    expect(response.player.credits).toBe(1_000_010);
+    expect(response.player.credits).toBe(1_000_004);
     expect(response.materials.find((material) => material.id === "aluminium")?.quantity).toBe(0);
     expect(response.transactions[0]).toMatchObject({
       requestId: "sell-aluminium-2",
       action: "sell",
       resourceId: "aluminium",
       quantity: 2,
-      unitPrice: 5,
-      creditsDelta: 10,
+      unitPrice: 2,
+      creditsDelta: 4,
     });
 
     const player = await prisma.player.findUniqueOrThrow({ where: { id: "devPlayer" } });
@@ -4156,7 +4176,7 @@ describe("Nuxt Game App APIs", () => {
         playerId_materialId: { playerId: "devPlayer", materialId: "aluminium" },
       },
     });
-    expect(player.credits).toBe(1_000_010);
+    expect(player.credits).toBe(1_000_004);
     expect(stock.quantity).toBe(0);
     expect(await prisma.marketTransaction.count()).toBe(1);
   });
@@ -4232,6 +4252,245 @@ describe("Nuxt Game App APIs", () => {
     expect(response.player.credits).toBe(999_990);
     expect(response.materials.find((material) => material.id === "aluminium")?.quantity).toBe(3);
     expect(response.transactions).toHaveLength(1);
+  });
+
+  it("values a crafted ring from its recipe and sells it atomically and idempotently", async () => {
+    const crafted = (await craftHandler({
+      body: { recipeId: "craftRingEmberLoop" },
+    })) as CraftApiResponse;
+    const beforeSale = (await marketGameGetHandler({})) as GameMarketApiResponse;
+    const saleOption = beforeSale.items.find((item) => item.id === crafted.crafted.id);
+
+    expect(saleOption).toMatchObject({
+      type: "ring",
+      definitionId: "emberLoop",
+      recipeId: "craftRingEmberLoop",
+      recipeValue: 30,
+      sellPrice: 7,
+      canSell: true,
+      blockedReason: null,
+      ingredients: [
+        { materialId: "aluminium", quantity: 1, unitPrice: 10 },
+        { materialId: "iron", quantity: 1, unitPrice: 10 },
+        { materialId: "sodium", quantity: 1, unitPrice: 10 },
+      ],
+    });
+
+    const body = {
+      action: "sellItem",
+      itemId: crafted.crafted.id,
+      requestId: "sell-crafted-ember-loop",
+    };
+    await marketGamePostHandler({ body });
+    const response = (await marketGamePostHandler({ body })) as GameMarketApiResponse;
+
+    expect(response.player.credits).toBe(1_000_007);
+    expect(response.items.some((item) => item.id === crafted.crafted.id)).toBe(false);
+    expect(response.transactions).toHaveLength(1);
+    expect(response.transactions[0]).toMatchObject({
+      requestId: "sell-crafted-ember-loop",
+      action: "sell",
+      resourceType: "ring",
+      resourceId: crafted.crafted.id,
+      resourceDefinitionId: "emberLoop",
+      resourceLabel: "Ember Loop",
+      quantity: 1,
+      unitPrice: 7,
+      creditsDelta: 7,
+    });
+    expect(await prisma.inventoryItem.findUnique({ where: { id: crafted.crafted.id } })).toBeNull();
+    expect(await prisma.marketTransaction.count()).toBe(1);
+  });
+
+  it("allows only one concurrent game-market sale for the same item", async () => {
+    const crafted = (await craftHandler({
+      body: { recipeId: "craftRingEmberLoop" },
+    })) as CraftApiResponse;
+
+    const results = await Promise.allSettled([
+      marketGamePostHandler({
+        body: {
+          action: "sellItem",
+          itemId: crafted.crafted.id,
+          requestId: "concurrent-item-sale-a",
+        },
+      }),
+      marketGamePostHandler({
+        body: {
+          action: "sellItem",
+          itemId: crafted.crafted.id,
+          requestId: "concurrent-item-sale-b",
+        },
+      }),
+    ]);
+
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    expect(results.filter((result) => result.status === "rejected")).toHaveLength(1);
+    expect((await prisma.player.findUniqueOrThrow({ where: { id: "devPlayer" } })).credits).toBe(
+      1_000_007,
+    );
+    expect(await prisma.inventoryItem.findUnique({ where: { id: crafted.crafted.id } })).toBeNull();
+    expect(await prisma.marketTransaction.count()).toBe(1);
+  });
+
+  it("does not value development items without a crafting recipe", async () => {
+    await prisma.inventoryItem.create({
+      data: {
+        id: "devPlayer.ring.trainingFlameBand.manual",
+        playerId: "devPlayer",
+        type: "ring",
+        definitionId: "trainingFlameBand",
+        contentVersion: "prototype-6",
+        experience: 0,
+        quality: 0,
+        socketCount: 1,
+      },
+    });
+
+    const state = (await marketGameGetHandler({})) as GameMarketApiResponse;
+    expect(state.items[0]).toMatchObject({
+      definitionId: "trainingFlameBand",
+      recipeId: null,
+      recipeValue: null,
+      sellPrice: null,
+      canSell: false,
+      blockedReason: "noRecipe",
+    });
+    await expect(
+      marketGamePostHandler({
+        body: {
+          action: "sellItem",
+          itemId: "devPlayer.ring.trainingFlameBand.manual",
+          requestId: "sell-item-without-recipe",
+        },
+      }),
+    ).rejects.toMatchObject({
+      statusMessage: "This item has no crafting recipe and cannot be valued.",
+    });
+    expect(await prisma.marketTransaction.count()).toBe(0);
+  });
+
+  it("blocks game-market item sales while an item is equipped, socketed, or enchanted", async () => {
+    const ring = (await craftHandler({
+      body: { recipeId: "craftRingEmberLoop" },
+    })) as CraftApiResponse;
+    const gem = (await craftHandler({
+      body: { recipeId: "craftGemRubyShard" },
+    })) as CraftApiResponse;
+
+    await equipmentPostHandler({ body: { action: "equip", ringItemId: ring.crafted.id } });
+    let state = (await marketGameGetHandler({})) as GameMarketApiResponse;
+    expect(state.items.find((item) => item.id === ring.crafted.id)?.blockedReason).toBe("equipped");
+    await expect(
+      marketGamePostHandler({
+        body: { action: "sellItem", itemId: ring.crafted.id, requestId: "sell-equipped" },
+      }),
+    ).rejects.toMatchObject({ statusMessage: "Equipped items cannot be sold." });
+
+    await equipmentPostHandler({ body: { action: "unequip", ringItemId: ring.crafted.id } });
+    await socketPostHandler({
+      body: { action: "socket", ringItemId: ring.crafted.id, gemItemId: gem.crafted.id },
+    });
+    state = (await marketGameGetHandler({})) as GameMarketApiResponse;
+    expect(state.items.find((item) => item.id === ring.crafted.id)?.blockedReason).toBe(
+      "socketedGems",
+    );
+    expect(state.items.find((item) => item.id === gem.crafted.id)?.blockedReason).toBe("socketed");
+
+    await expect(
+      marketGamePostHandler({
+        body: { action: "sellItem", itemId: ring.crafted.id, requestId: "sell-socketed-ring" },
+      }),
+    ).rejects.toMatchObject({
+      statusMessage: "Rings containing socketed gems cannot be sold.",
+    });
+
+    await socketPostHandler({ body: { action: "unsocket", gemItemId: gem.crafted.id } });
+    const spell = (await craftHandler({
+      body: { recipeId: "craftSpellFirebolt" },
+    })) as CraftApiResponse;
+    await socketPostHandler({
+      body: {
+        action: "enchant",
+        gemItemId: gem.crafted.id,
+        targetItemId: spell.crafted.id,
+        targetType: "spell",
+      },
+    });
+    state = (await marketGameGetHandler({})) as GameMarketApiResponse;
+    expect(state.items.find((item) => item.id === gem.crafted.id)?.blockedReason).toBe(
+      "enchantment",
+    );
+    expect(state.items.find((item) => item.id === spell.crafted.id)?.blockedReason).toBe(
+      "enchantment",
+    );
+    await expect(
+      marketGamePostHandler({
+        body: { action: "sellItem", itemId: spell.crafted.id, requestId: "sell-enchantment" },
+      }),
+    ).rejects.toMatchObject({
+      statusMessage: "Items used by an enchantment cannot be sold.",
+    });
+
+    expect((await prisma.player.findUniqueOrThrow({ where: { id: "devPlayer" } })).credits).toBe(
+      1_000_000,
+    );
+    expect(await prisma.marketTransaction.count()).toBe(0);
+  });
+
+  it("blocks rings referenced by loadouts or active player-market listings", async () => {
+    const loadoutRing = (await craftHandler({
+      body: { recipeId: "craftRingEmberLoop" },
+    })) as CraftApiResponse;
+    const listedRing = (await craftHandler({
+      body: { recipeId: "craftRingCinderSignet" },
+    })) as CraftApiResponse;
+    const loadout = await prisma.loadout.create({
+      data: {
+        playerId: "devPlayer",
+        name: "Protected",
+        rings: { create: { ringItemId: loadoutRing.crafted.id, slotIndex: 0 } },
+      },
+    });
+    await marketPlayersPostHandler({
+      body: {
+        inventoryItemId: listedRing.crafted.id,
+        price: 100,
+        requestId: "list-ring-before-game-sale",
+      },
+    });
+
+    const state = (await marketGameGetHandler({})) as GameMarketApiResponse;
+    expect(state.items.find((item) => item.id === loadoutRing.crafted.id)?.blockedReason).toBe(
+      "loadout",
+    );
+    expect(state.items.find((item) => item.id === listedRing.crafted.id)?.blockedReason).toBe(
+      "marketListing",
+    );
+
+    await expect(
+      marketGamePostHandler({
+        body: {
+          action: "sellItem",
+          itemId: loadoutRing.crafted.id,
+          requestId: "sell-loadout-ring",
+        },
+      }),
+    ).rejects.toMatchObject({ statusMessage: "Items used by a loadout cannot be sold." });
+    await expect(
+      marketGamePostHandler({
+        body: {
+          action: "sellItem",
+          itemId: listedRing.crafted.id,
+          requestId: "sell-listed-ring",
+        },
+      }),
+    ).rejects.toMatchObject({
+      statusMessage: "Items listed on the player market cannot be sold.",
+    });
+    expect(await prisma.loadout.findUnique({ where: { id: loadout.id } })).not.toBeNull();
+    expect(await prisma.inventoryItem.count({ where: { playerId: "devPlayer" } })).toBe(2);
+    expect(await prisma.marketTransaction.count()).toBe(0);
   });
 
   it("requires an active loadout before starting a live training battle", async () => {

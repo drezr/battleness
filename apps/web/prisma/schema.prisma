@@ -243,21 +243,23 @@ model ContentRelease {
 }
 
 model MarketTransaction {
-  id             String   @id @default(cuid())
-  requestId      String   @unique
-  playerId       String
-  action         String
-  resourceType   String
-  resourceId     String
-  quantity       Int
-  unitPrice      Int
-  creditsDelta   Int
-  contentVersion String   @default("legacy-unversioned")
-  createdAt      DateTime @default(now())
-  player         Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  id                   String   @id @default(cuid())
+  requestId            String   @unique
+  playerId             String
+  action               String
+  resourceType         String
+  resourceId           String
+  resourceDefinitionId String?
+  quantity             Int
+  unitPrice            Int
+  creditsDelta         Int
+  contentVersion       String   @default("legacy-unversioned")
+  createdAt            DateTime @default(now())
+  player               Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   @@index([playerId, createdAt])
   @@index([resourceType, resourceId])
+  @@index([resourceType, resourceDefinitionId])
   @@index([action])
   @@index([contentVersion])
 }

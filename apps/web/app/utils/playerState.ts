@@ -71,12 +71,36 @@ export type GameMarketMaterialView = MaterialView & {
   sellPrice: number;
 };
 
+export type GameMarketItemBlockReason =
+  | "noRecipe"
+  | "equipped"
+  | "loadout"
+  | "socketedGems"
+  | "socketed"
+  | "enchantment"
+  | "marketListing";
+
+export type GameMarketItemView = InventoryItemView & {
+  recipeId: string | null;
+  recipeValue: number | null;
+  sellPrice: number | null;
+  canSell: boolean;
+  blockedReason: GameMarketItemBlockReason | null;
+  ingredients: {
+    materialId: string;
+    label: string;
+    quantity: number;
+    unitPrice: number;
+  }[];
+};
+
 export type GameMarketTransactionView = {
   id: string;
   requestId: string;
   action: "buy" | "sell";
-  resourceType: "material";
+  resourceType: "material" | "ring" | "gem" | "monster" | "spell";
   resourceId: string;
+  resourceDefinitionId: string;
   resourceLabel: string;
   quantity: number;
   unitPrice: number;
@@ -93,6 +117,7 @@ export type GameMarketState = {
     credits: number;
   };
   materials: GameMarketMaterialView[];
+  items: GameMarketItemView[];
   transactions: GameMarketTransactionView[];
 };
 

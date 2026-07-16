@@ -266,7 +266,7 @@ type DetailItem = {
   socketImprovementCost?: number | null;
   cost?: number | null;
   buyPrice?: number;
-  sellPrice?: number;
+  sellPrice?: number | null;
   equipped?: boolean;
   slotIndex?: number | null;
   socketedRingId?: string | null;

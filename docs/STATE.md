@@ -4,6 +4,15 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- The Nuxt Game Market now buys eligible crafted rings, gems, monsters, and spells. The server
+  derives each item value from the official buy prices of all recipe ingredients and pays 25%
+  rounded down with a one-credit minimum; material buyback now uses the same 25% rule. Atomic,
+  idempotent sales delete the exact inventory instance and credit the player together, retain a
+  durable definition ID in transaction history, and block equipped, loadout, socketed, enchanted,
+  escrowed, or recipe-less items. The localized market view exposes material/item modes, recipe
+  valuation, eligibility reasons, confirmation, and persistent history. SQLite and PostgreSQL
+  migrations plus integration tests cover valuation, rollback guards, idempotency, and concurrent
+  single-sale behavior.
 - Permanent private player-market history is implemented. The authenticated paginated API returns only sold listings in which the current player was buyer or seller, supports purchase and sale filters, reconstructs safe bundle counts from immutable snapshots, and excludes all counterparty identity data. The localized responsive `/market/players/history` view uses existing item artwork and rarity presentation, and integration tests cover actual settlement visibility, privacy, filtering, ordering, pagination, and invalid input.
 - Player-market purchase is implemented end to end. Authenticated non-sellers can explicitly confirm a purchase; an idempotent serializable transaction then claims the active listing, conditionally debits the buyer, credits the seller, and transfers the indivisible material lot or complete escrowed item graph. Ring-socket and enchantment ownership follows transferred bundles, failed settlements roll back fully, and concurrent buyers are covered by a single-winner integration test.
 - Player-market cancellation is implemented end to end. Sellers can freely cancel their own active listings through an idempotent serializable transition that restores the exact material lot or releases every item-bundle escrow lock, retains the cancelled record, and rejects foreign, repeated-with-a-new-request, or no-longer-active operations. Own listing cards expose the localized action and refresh browse, stock, and capacity state immediately.
@@ -37,8 +46,8 @@ This file records modifications made to the project during agent-assisted work.
 - Campaign battles resolve game-owned content loadouts into deterministic engine instances, hide opponent rings in the live player view, execute a deterministic server-side opponent that respects energy, cooldown, and Taunt, and atomically persist victory count plus the correct first-clear or repeat reward. Clearing an opponent unlocks the next content record immediately; defeats preserve only the normal participation and usage item XP.
 - The Nuxt Game App can now start a persistent live training battle from the development player's active Prisma loadout. The server snapshots owned rings, sockets, gems, and enchantments into an engine setup, reconstructs current state from the persisted setup and action log, and exposes a player-facing live view without opponent ring details.
 - The Nuxt Game App now persists verified development battle records and deterministic reward grants. Battle and profile history views expose replay metadata and atomic reward claims that update credits, materials, hero XP, and active-loadout item XP exactly once.
-- The Nuxt Game Market now supports persistent material buying and selling with rarity-based fixed
-  prices, quantity and credit previews, stock validation, atomic Prisma updates, persistent
+- The Nuxt Game Market supports persistent material purchasing plus material and crafted-item
+  buyback, fixed recipe-based previews, eligibility validation, atomic Prisma updates, persistent
   transaction history, and idempotent request IDs that prevent duplicate economic operations.
 - BattleNess is being restarted as a clean rebuild.
 - A TypeScript monorepo skeleton is in place with `packages/engine`, `packages/content`, and `apps/prototype`.
@@ -105,6 +114,7 @@ This file records modifications made to the project during agent-assisted work.
 
 ### 2026-07-15
 
+- Implemented recipe-valued game-market item buyback and reduced material buyback to 25%, with atomic instance deletion and credit settlement, durable definition-backed history, full inventory-reference guards, localized material/item sale workflows, dual-database migrations, and integration coverage including idempotent and concurrent sale attempts.
 - Added permanent private player-market purchase and sale history with authenticated role filtering, stable pagination, safe immutable transaction projections, counterparty privacy, localized responsive cards, navigation, and integration plus desktop/mobile browser coverage.
 - Implemented atomic player-market purchases with self-purchase rejection, conditional balance debit, immediate seller proceeds, exact material or complete item-graph ownership transfer, relation rewrites, escrow release, globally idempotent retries, localized confirmation controls, rollback coverage, and a concurrent single-winner test.
 - Implemented free seller-only player-market cancellation with atomic listing claims, idempotent mutation journals, exact material restoration, item-bundle lock release, localized own-listing controls, and integration plus browser coverage.
