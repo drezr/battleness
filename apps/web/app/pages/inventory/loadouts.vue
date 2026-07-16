@@ -1,5 +1,5 @@
 <template>
-  <main class="shell">
+  <main class="shell loadouts-page">
     <nav class="section-nav" :aria-label="t('accessibility.inventoryNavigation')">
       <NuxtLink
         v-for="link in sectionLinks.inventory"
@@ -11,183 +11,147 @@
       </NuxtLink>
     </nav>
 
-    <header class="view-header">
+    <header class="view-header loadouts-header">
       <div class="view-title">
         <span class="eyebrow">{{ t("inventory.section") }}</span>
         <h1>{{ t("inventory.loadouts.title") }}</h1>
         <p class="muted">{{ t("inventory.loadouts.description") }}</p>
       </div>
+      <NuxtLink class="button-link secondary-button" to="/inventory/equipment">
+        <Shield :size="17" aria-hidden="true" />
+        {{ t("inventory.loadouts.editEquipment") }}
+        <ArrowRight :size="16" aria-hidden="true" />
+      </NuxtLink>
     </header>
 
     <p v-if="pending" class="panel">{{ t("inventory.loadouts.loading") }}</p>
     <p v-else-if="error" class="panel">{{ t("inventory.loadouts.loadError") }}</p>
 
     <template v-else-if="loadouts">
-      <section class="detail-layout">
-        <div class="stack">
-          <section class="panel">
-            <div class="card-heading">
+      <p v-if="feedback" class="feedback">{{ feedback }}</p>
+      <p v-if="actionError" class="status-note">{{ actionError }}</p>
+
+      <section class="detail-layout loadouts-detail-layout">
+        <div class="stack loadouts-workspace">
+          <section class="loadout-builder">
+            <div class="loadout-builder-heading">
+              <span class="loadout-builder-icon"><Wrench :size="23" aria-hidden="true" /></span>
               <div>
+                <span class="eyebrow">{{ t("inventory.loadouts.builder") }}</span>
                 <h2>{{ t("inventory.loadouts.currentEquipment") }}</h2>
-                <p class="muted">{{ t("inventory.loadouts.currentDescription") }}</p>
+                <p>{{ t("inventory.loadouts.currentDescription") }}</p>
               </div>
               <span class="pill muted-pill">
                 {{ loadouts.currentEquipment.rings.length }} / {{ loadouts.maxLoadoutRings }}
               </span>
             </div>
 
-            <section class="metric-grid equipment-metrics">
-              <article class="card">
-                <span class="eyebrow">{{ t("stats.speed") }}</span>
-                <strong>{{ loadouts.currentEquipment.summary.totalSpeed }}</strong>
-              </article>
-              <article class="card">
-                <span class="eyebrow">{{ t("stats.damage") }}</span>
-                <strong>{{ loadouts.currentEquipment.summary.totalDamage }}</strong>
-              </article>
-              <article class="card">
-                <span class="eyebrow">{{ t("battle.hub.averageEnergy") }}</span>
-                <strong>{{ loadouts.currentEquipment.summary.averageEnergyCost }}</strong>
-              </article>
-              <article class="card">
-                <span class="eyebrow">{{ t("battle.hub.averageCooldown") }}</span>
-                <strong>{{ loadouts.currentEquipment.summary.averageCooldown }}</strong>
-              </article>
-            </section>
+            <dl class="loadout-builder-metrics">
+              <div><dt><Sword :size="14" /> {{ t("stats.damage") }}</dt><dd>{{ loadouts.currentEquipment.summary.totalDamage }}</dd></div>
+              <div><dt><Gauge :size="14" /> {{ t("stats.speed") }}</dt><dd>{{ loadouts.currentEquipment.summary.totalSpeed }}</dd></div>
+              <div><dt><Zap :size="14" /> {{ t("stats.energy") }}</dt><dd>{{ loadouts.currentEquipment.summary.averageEnergyCost }}</dd></div>
+              <div><dt><Timer :size="14" /> {{ t("stats.cooldown") }}</dt><dd>{{ loadouts.currentEquipment.summary.averageCooldown }}</dd></div>
+            </dl>
 
-            <div v-if="loadouts.currentEquipment.rings.length > 0" class="loadout-ring-strip">
-              <article
+            <div v-if="loadouts.currentEquipment.rings.length > 0" class="loadout-ring-dock">
+              <button
                 v-for="ring in loadouts.currentEquipment.rings"
                 :key="ring.id"
                 :class="[
-                  'mini-ring-card',
+                  'loadout-dock-ring',
                   `rarity-border-${ring.rarity}`,
                   { selected: selectedDetailRing?.id === ring.id },
                 ]"
+                type="button"
+                @click="selectedDetailRingId = ring.id"
               >
+                <span class="loadout-ring-slot">{{ (ring.slotIndex ?? 0) + 1 }}</span>
                 <ItemArtwork :definition-id="ring.definitionId" kind="ring" />
-                <div>
-                  <strong>{{ (ring.slotIndex ?? 0) + 1 }}. {{ ringName(ring) }}</strong>
-                  <small>
-                    {{
-                      t("inventory.loadouts.ringSummary", {
-                        element: t(`element.${ring.element}`),
-                        damage: ring.damage,
-                        cooldown: ring.cooldown,
-                      })
-                    }}
-                  </small>
-                  <button class="secondary-button" @click="selectedDetailRingId = ring.id">
-                    {{ t("common.inspect") }}
-                  </button>
-                </div>
-              </article>
+                <span>
+                  <strong>{{ ringName(ring) }}</strong>
+                  <small>{{ t("inventory.loadouts.compactRingSummary", { damage: ring.damage, cooldown: ring.cooldown }) }}</small>
+                </span>
+              </button>
+            </div>
+            <div v-else class="loadout-builder-empty">
+              <ShieldAlert :size="25" aria-hidden="true" />
+              <span>{{ t("inventory.loadouts.noCurrentRings") }}</span>
+              <NuxtLink class="text-link" to="/inventory/equipment">{{ t("inventory.loadouts.editEquipment") }}</NuxtLink>
             </div>
 
-            <form class="toolbar" @submit.prevent="saveFromEquipped">
+            <form class="loadout-save-bar" @submit.prevent="saveFromEquipped">
               <label>
                 <span class="field-label">{{ t("inventory.loadouts.name") }}</span>
-                <input
-                  v-model="loadoutName"
-                  :placeholder="t('inventory.loadouts.namePlaceholder')"
-                />
+                <input v-model="loadoutName" :placeholder="t('inventory.loadouts.namePlaceholder')" />
               </label>
               <button :disabled="updating || loadouts.currentEquipment.rings.length === 0">
-                {{ t("inventory.loadouts.saveCurrent") }}
+                <Save :size="17" aria-hidden="true" /> {{ t("inventory.loadouts.saveCurrent") }}
               </button>
             </form>
           </section>
 
-          <p v-if="feedback" class="feedback">{{ feedback }}</p>
-          <p v-if="actionError" class="status-note">{{ actionError }}</p>
+          <section class="loadouts-saved-section">
+            <div class="section-heading-row">
+              <div>
+                <span class="eyebrow">{{ t("inventory.loadouts.collection") }}</span>
+                <h2>{{ t("inventory.loadouts.savedLoadouts") }}</h2>
+              </div>
+              <span class="pill muted-pill">{{ loadouts.loadouts.length }}</span>
+            </div>
 
-          <section class="panel">
-            <h2>{{ t("inventory.loadouts.savedLoadouts") }}</h2>
-            <p v-if="loadouts.loadouts.length === 0" class="muted">
-              {{ t("inventory.loadouts.noneSaved") }}
-            </p>
+            <div v-if="loadouts.loadouts.length === 0" class="loadouts-empty-state">
+              <Layers3 :size="28" aria-hidden="true" />
+              <div><strong>{{ t("inventory.loadouts.noneSaved") }}</strong><p>{{ t("inventory.loadouts.noneSavedHint") }}</p></div>
+            </div>
 
-            <div v-else class="loadout-list">
+            <div v-else class="loadout-card-grid">
               <article
                 v-for="loadout in loadouts.loadouts"
                 :key="loadout.id"
-                :class="['card', 'loadout-card', { active: loadout.active }]"
+                :class="['loadout-config-card', { active: loadout.active }]"
               >
-                <div class="card-heading">
-                  <div>
-                    <h3>{{ loadout.name }}</h3>
-                    <p class="muted">
-                      {{ t("battle.campaign.ringCount", { count: loadout.ringCount }) }}
-                    </p>
-                  </div>
-                  <span :class="['pill', loadout.active ? 'element-electric' : 'muted-pill']">
-                    {{
-                      t(loadout.active ? "inventory.loadouts.active" : "inventory.loadouts.saved")
-                    }}
+                <div class="loadout-config-heading">
+                  <span :class="['loadout-status-icon', { active: loadout.active }]">
+                    <ShieldCheck v-if="loadout.active" :size="22" aria-hidden="true" />
+                    <Shield v-else :size="22" aria-hidden="true" />
                   </span>
+                  <div>
+                    <span class="eyebrow">{{ t(loadout.active ? "inventory.loadouts.active" : "inventory.loadouts.saved") }}</span>
+                    <h3>{{ loadout.name }}</h3>
+                  </div>
+                  <span class="pill muted-pill">{{ t("battle.campaign.ringCount", { count: loadout.ringCount }) }}</span>
                 </div>
 
-                <dl class="summary-grid">
-                  <div class="stat">
-                    <dt>{{ t("stats.speed") }}</dt>
-                    <dd>{{ loadout.summary.totalSpeed }}</dd>
-                  </div>
-                  <div class="stat">
-                    <dt>{{ t("stats.damage") }}</dt>
-                    <dd>{{ loadout.summary.totalDamage }}</dd>
-                  </div>
-                  <div class="stat">
-                    <dt>{{ t("stats.energy") }}</dt>
-                    <dd>{{ loadout.summary.averageEnergyCost }}</dd>
-                  </div>
-                  <div class="stat">
-                    <dt>{{ t("stats.cooldown") }}</dt>
-                    <dd>{{ loadout.summary.averageCooldown }}</dd>
-                  </div>
+                <dl class="loadout-config-stats">
+                  <div><dt>{{ t("stats.damage") }}</dt><dd>{{ loadout.summary.totalDamage }}</dd></div>
+                  <div><dt>{{ t("stats.speed") }}</dt><dd>{{ loadout.summary.totalSpeed }}</dd></div>
+                  <div><dt>{{ t("stats.energy") }}</dt><dd>{{ loadout.summary.averageEnergyCost }}</dd></div>
+                  <div><dt>{{ t("stats.cooldown") }}</dt><dd>{{ loadout.summary.averageCooldown }}</dd></div>
                 </dl>
 
-                <div class="loadout-ring-strip">
-                  <article
+                <div class="loadout-config-rings">
+                  <button
                     v-for="ring in loadout.rings"
                     :key="ring.id"
-                    :class="[
-                      'mini-ring-card',
-                      `rarity-border-${ring.rarity}`,
-                      { selected: selectedDetailRing?.id === ring.id },
-                    ]"
+                    :class="[`rarity-border-${ring.rarity}`, { selected: selectedDetailRing?.id === ring.id }]"
+                    type="button"
+                    :title="ringName(ring)"
+                    @click="selectedDetailRingId = ring.id"
                   >
                     <ItemArtwork :definition-id="ring.definitionId" kind="ring" />
-                    <div>
-                      <strong>{{ (ring.slotIndex ?? 0) + 1 }}. {{ ringName(ring) }}</strong>
-                      <small>
-                        {{
-                          t("inventory.loadouts.ringSummary", {
-                            element: t(`element.${ring.element}`),
-                            damage: ring.damage,
-                            cooldown: ring.cooldown,
-                          })
-                        }}
-                      </small>
-                      <button class="secondary-button" @click="selectedDetailRingId = ring.id">
-                        {{ t("common.inspect") }}
-                      </button>
-                    </div>
-                  </article>
+                    <span>{{ (ring.slotIndex ?? 0) + 1 }}</span>
+                  </button>
                 </div>
 
-                <div class="control-row">
-                  <button v-if="!loadout.active" :disabled="updating" @click="activate(loadout.id)">
-                    {{ t("inventory.loadouts.activate") }}
+                <div class="loadout-config-actions">
+                  <button v-if="!loadout.active" :disabled="updating" type="button" @click="activate(loadout.id)">
+                    <Check :size="16" aria-hidden="true" /> {{ t("inventory.loadouts.activate") }}
                   </button>
-                  <button
-                    class="secondary-button"
-                    :disabled="updating"
-                    @click="deleteLoadout(loadout.id)"
-                  >
-                    {{ t("inventory.loadouts.delete") }}
+                  <span v-else class="loadout-active-label"><Check :size="16" aria-hidden="true" /> {{ t("inventory.loadouts.readyForBattle") }}</span>
+                  <button class="secondary-button danger-action" :disabled="updating" type="button" @click="deleteLoadout(loadout.id)">
+                    <Trash2 :size="16" aria-hidden="true" /> {{ t("inventory.loadouts.delete") }}
                   </button>
                 </div>
-                <code>{{ loadout.id }}</code>
               </article>
             </div>
           </section>
@@ -204,6 +168,21 @@
 </template>
 
 <script setup lang="ts">
+import {
+  ArrowRight,
+  Check,
+  Gauge,
+  Layers3,
+  Save,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  Sword,
+  Timer,
+  Trash2,
+  Wrench,
+  Zap,
+} from "@lucide/vue";
 import type { LoadoutState } from "~/utils/playerState";
 import { sectionLinks } from "~/utils/viewData";
 
@@ -215,20 +194,12 @@ const actionError = ref("");
 const updating = ref(false);
 const loadoutName = ref(t("inventory.loadouts.defaultName"));
 const selectedDetailRingId = ref("");
-const {
-  data: loadouts,
-  error,
-  pending,
-  refresh,
-} = await useFetch<LoadoutState>("/api/inventory/loadouts");
+const { data: loadouts, error, pending, refresh } = await useFetch<LoadoutState>("/api/inventory/loadouts");
 
 const selectedDetailRing = computed(() => {
   const currentRings = loadouts.value?.currentEquipment.rings ?? [];
   const savedRings = (loadouts.value?.loadouts ?? []).flatMap((loadout) => loadout.rings);
-
-  return (
-    [...currentRings, ...savedRings].find((ring) => ring.id === selectedDetailRingId.value) ?? null
-  );
+  return [...currentRings, ...savedRings].find((ring) => ring.id === selectedDetailRingId.value) ?? null;
 });
 
 function ringName(ring: { definitionId: string; label: string }): string {
@@ -236,43 +207,29 @@ function ringName(ring: { definitionId: string; label: string }): string {
 }
 
 async function saveFromEquipped() {
-  await updateLoadouts({
-    action: "saveFromEquipped",
-    name: loadoutName.value,
-  });
-  feedback.value = t("inventory.loadouts.savedSuccess");
+  await updateLoadouts({ action: "saveFromEquipped", name: loadoutName.value });
+  if (!actionError.value) feedback.value = t("inventory.loadouts.savedSuccess");
 }
 
 async function activate(loadoutId: string) {
-  await updateLoadouts({
-    action: "activate",
-    loadoutId,
-  });
-  feedback.value = t("inventory.loadouts.activatedSuccess");
+  await updateLoadouts({ action: "activate", loadoutId });
+  if (!actionError.value) feedback.value = t("inventory.loadouts.activatedSuccess");
 }
 
 async function deleteLoadout(loadoutId: string) {
-  await updateLoadouts({
-    action: "delete",
-    loadoutId,
-  });
-  feedback.value = t("inventory.loadouts.deletedSuccess");
+  await updateLoadouts({ action: "delete", loadoutId });
+  if (!actionError.value) feedback.value = t("inventory.loadouts.deletedSuccess");
 }
 
 async function updateLoadouts(body: { action: string; loadoutId?: string; name?: string }) {
   feedback.value = "";
   actionError.value = "";
   updating.value = true;
-
   try {
-    loadouts.value = await $fetch<LoadoutState>("/api/inventory/loadouts", {
-      method: "POST",
-      body,
-    });
+    loadouts.value = await $fetch<LoadoutState>("/api/inventory/loadouts", { method: "POST", body });
     await refresh();
   } catch (error_) {
-    actionError.value =
-      error_ instanceof Error ? error_.message : t("inventory.loadouts.actionError");
+    actionError.value = error_ instanceof Error ? error_.message : t("inventory.loadouts.actionError");
   } finally {
     updating.value = false;
   }

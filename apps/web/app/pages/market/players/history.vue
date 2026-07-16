@@ -1,135 +1,128 @@
 <template>
-  <main class="shell">
+  <main class="shell market-history-page">
     <nav class="section-nav" :aria-label="t('accessibility.marketNavigation')">
       <NuxtLink
         v-for="link in sectionLinks.market"
         :key="link.to"
         :class="{ active: route.path === link.to }"
         :to="link.to"
+        >{{ t(link.labelKey) }}</NuxtLink
       >
-        {{ t(link.labelKey) }}
-      </NuxtLink>
     </nav>
 
-    <header class="view-header">
+    <header class="view-header market-view-header">
       <div class="view-title">
         <span class="eyebrow">{{ t("market.section") }}</span>
         <h1>{{ t("market.players.history.title") }}</h1>
         <p class="muted">{{ t("market.players.history.description") }}</p>
       </div>
-      <p v-if="state" class="status-note">
-        {{ t("market.players.history.transactionCount", { count: state.pagination.total }) }}
-      </p>
+      <NuxtLink class="button-link secondary-button" to="/market/players"
+        ><Store :size="17" />{{ t("market.players.backToMarket") }}<ArrowRight :size="16"
+      /></NuxtLink>
     </header>
 
-    <section class="panel">
-      <div class="filter-bar market-history-filters">
-        <label>
-          <span class="field-label">{{ t("market.players.history.role.label") }}</span>
-          <select v-model="role">
-            <option v-for="value in roles" :key="value" :value="value">
-              {{ t(`market.players.history.role.${value}`) }}
-            </option>
-          </select>
-        </label>
+    <section class="market-history-toolbar">
+      <div>
+        <span class="market-history-icon"><History :size="21" /></span
+        ><span
+          ><small>{{ t("market.players.history.privateLedger") }}</small
+          ><strong v-if="state">{{
+            t("market.players.history.transactionCount", { count: state.pagination.total })
+          }}</strong></span
+        >
       </div>
+      <label
+        ><span class="field-label">{{ t("market.players.history.role.label") }}</span
+        ><select v-model="role">
+          <option v-for="value in roles" :key="value" :value="value">
+            {{ t(`market.players.history.role.${value}`) }}
+          </option>
+        </select></label
+      >
     </section>
 
     <p v-if="pending" class="panel">{{ t("market.players.history.loading") }}</p>
     <p v-else-if="error" class="panel">{{ t("market.players.history.loadError") }}</p>
 
     <template v-else-if="state">
-      <section v-if="state.transactions.length === 0" class="panel empty-state">
-        <h2>{{ t("market.players.history.emptyTitle") }}</h2>
-        <p class="muted">{{ t("market.players.history.emptyBody") }}</p>
+      <section v-if="state.transactions.length === 0" class="player-market-empty">
+        <ReceiptText :size="30" />
+        <div>
+          <h2>{{ t("market.players.history.emptyTitle") }}</h2>
+          <p>{{ t("market.players.history.emptyBody") }}</p>
+        </div>
       </section>
-
-      <section v-else class="item-grid market-listing-grid">
+      <section v-else class="market-ledger-list">
         <article
           v-for="transaction in state.transactions"
           :key="transaction.id"
-          :class="['card', 'item-card', `rarity-border-${transaction.rarity}`]"
+          :class="`rarity-border-${transaction.rarity}`"
         >
+          <span :class="['ledger-direction-icon', transaction.direction]"
+            ><ShoppingCart v-if="transaction.direction === 'purchase'" :size="18" /><Banknote
+              v-else
+              :size="18"
+          /></span>
           <ItemArtwork :definition-id="transaction.definitionId" :kind="transaction.resourceType" />
-          <div class="item-card-body">
-            <div class="card-heading">
-              <div>
-                <h2>{{ transactionName(transaction) }}</h2>
-                <small>{{ t(`itemType.${transaction.resourceType}`) }}</small>
-              </div>
-              <span :class="['pill', `rarity-${transaction.rarity}`]">
-                {{ t(`rarity.${transaction.rarity}`) }}
-              </span>
+          <div class="ledger-item-copy">
+            <span class="eyebrow">{{
+              t(`market.players.history.direction.${transaction.direction}`)
+            }}</span>
+            <h2>{{ transactionName(transaction) }}</h2>
+            <span
+              ><small>{{ t(`itemType.${transaction.resourceType}`) }}</small
+              ><span
+                v-if="transaction.element"
+                :class="['pill', `element-${transaction.element}`]"
+                >{{ t(`element.${transaction.element}`) }}</span
+              ><span :class="['pill', `rarity-${transaction.rarity}`]">{{
+                t(`rarity.${transaction.rarity}`)
+              }}</span></span
+            >
+          </div>
+          <dl class="ledger-stats">
+            <div>
+              <dt>{{ t("itemDetail.quantity") }}</dt>
+              <dd>{{ transaction.quantity }}</dd>
             </div>
-
-            <div class="control-row market-listing-badges">
-              <span
-                :class="[
-                  'pill',
-                  transaction.direction === 'purchase' ? 'history-purchase' : 'history-sale',
-                ]"
-              >
-                {{ t(`market.players.history.direction.${transaction.direction}`) }}
-              </span>
-              <span v-if="transaction.element" :class="['pill', `element-${transaction.element}`]">
-                {{ t(`element.${transaction.element}`) }}
-              </span>
+            <div v-if="transaction.level !== null">
+              <dt>{{ t("common.level") }}</dt>
+              <dd>{{ transaction.level }}</dd>
             </div>
-
-            <dl class="summary-grid item-detail-grid">
-              <div class="stat">
-                <dt>{{ t("common.credits") }}</dt>
-                <dd>{{ formatNumber(transaction.price) }}</dd>
-              </div>
-              <div class="stat">
-                <dt>{{ t("itemDetail.quantity") }}</dt>
-                <dd>{{ transaction.quantity }}</dd>
-              </div>
-              <div v-if="transaction.level !== null" class="stat">
-                <dt>{{ t("common.level") }}</dt>
-                <dd>{{ transaction.level }}</dd>
-              </div>
-              <div v-if="transaction.quality !== null" class="stat">
-                <dt>{{ t("common.quality") }}</dt>
-                <dd>{{ transaction.quality }}%</dd>
-              </div>
-            </dl>
-
-            <small v-if="transaction.bundleItemCount > 1">
-              {{
-                t("market.players.bundleCount", {
-                  count: transaction.bundleItemCount,
-                })
-              }}
-            </small>
-            <small>
-              {{ t("market.players.history.soldAt", { date: formatDate(transaction.soldAt) }) }}
-            </small>
+            <div v-if="transaction.quality !== null">
+              <dt>{{ t("common.quality") }}</dt>
+              <dd>{{ transaction.quality }}%</dd>
+            </div>
+            <div v-if="transaction.bundleItemCount > 1">
+              <dt>{{ t("market.players.bundle") }}</dt>
+              <dd>{{ transaction.bundleItemCount }}</dd>
+            </div>
+          </dl>
+          <div class="ledger-settlement">
+            <small>{{
+              t("market.players.history.soldAt", { date: formatDate(transaction.soldAt) })
+            }}</small
+            ><strong><Coins :size="17" />{{ formatNumber(transaction.price) }}</strong>
           </div>
         </article>
       </section>
 
-      <nav
-        class="control-row market-pagination"
-        :aria-label="t('market.players.history.pagination')"
-      >
+      <nav class="market-pagination" :aria-label="t('market.players.history.pagination')">
         <button :disabled="state.pagination.page <= 1" class="secondary-button" @click="page--">
-          {{ t("market.players.previous") }}
+          <ChevronLeft :size="16" />{{ t("market.players.previous") }}
         </button>
-        <span>
-          {{
-            t("market.players.page", {
-              page: state.pagination.page,
-              total: state.pagination.totalPages,
-            })
-          }}
-        </span>
+        <span>{{
+          t("market.players.page", {
+            page: state.pagination.page,
+            total: state.pagination.totalPages,
+          })
+        }}</span>
         <button
           :disabled="state.pagination.page >= state.pagination.totalPages"
           class="secondary-button"
           @click="page++"
         >
-          {{ t("market.players.next") }}
+          {{ t("market.players.next") }}<ChevronRight :size="16" />
         </button>
       </nav>
     </template>
@@ -137,6 +130,17 @@
 </template>
 
 <script setup lang="ts">
+import {
+  ArrowRight,
+  Banknote,
+  ChevronLeft,
+  ChevronRight,
+  Coins,
+  History,
+  ReceiptText,
+  ShoppingCart,
+  Store,
+} from "@lucide/vue";
 import type {
   PlayerMarketHistoryState,
   PlayerMarketHistoryTransactionView,
@@ -155,25 +159,20 @@ const {
   error,
   pending,
 } = await useFetch<PlayerMarketHistoryState>("/api/market/players/history", { query });
-
 watch(role, () => {
   page.value = 1;
 });
-
 function transactionName(transaction: PlayerMarketHistoryTransactionView): string {
   return transaction.nameKey
     ? contentText(transaction.nameKey, transaction.label)
     : transaction.label;
 }
-
 function formatNumber(value: number): string {
   return new Intl.NumberFormat(locale.value).format(value);
 }
-
 function formatDate(value: string): string {
-  return new Intl.DateTimeFormat(locale.value, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+  return new Intl.DateTimeFormat(locale.value, { dateStyle: "medium", timeStyle: "short" }).format(
+    new Date(value),
+  );
 }
 </script>

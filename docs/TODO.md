@@ -4,7 +4,7 @@ This is the centralized working TODO for BattleNess. It focuses on what remains 
 
 ## Current Focus
 
-Private, casual, and ranked PvP now share the authoritative persistent battle lifecycle, deadlines, reconnection behavior, authenticated WebSocket invalidations with HTTP polling fallback, and concurrency regression coverage. The complete core player-market flow, including permanent private transaction history, is implemented. The mobile-first Nuxt DOM combat presentation now includes board-level target selection, a prepared-action command tray, localized resolution messages, and reduced-motion-compatible source, impact, damage, and status feedback. Google Cloud credentials and consent-screen setup remain an environment deployment task.
+The player-facing visual redesign now covers the application shell, home, collection inventory, all battle surfaces, equipment, saved loadouts, Forge, Game Market, Player Market, and private market history. The next visual slice is Profile/Settings, followed by the final cross-application audit. Google Cloud credentials and consent-screen setup remain an environment deployment task.
 
 ## Phase 1 - Game App Data Foundation
 
@@ -174,9 +174,9 @@ Private, casual, and ranked PvP now share the authoritative persistent battle li
 - [x] Apply the design system to the Battle hub and Campaign journey, readiness, encounter, reward, and opponent-intelligence views.
 - [x] Apply the design system consistently to the PvP hub and private, casual, and ranked matchmaking views.
 - [x] Apply the design system consistently to Battle history and result views.
-- [ ] Apply the design system consistently to Inventory equipment and loadout workflows.
-- [ ] Apply the design system consistently to Forge workflows.
-- [ ] Apply the design system consistently to Game Market and Player Market workflows.
+- [x] Apply the design system consistently to Inventory equipment and loadout workflows.
+- [x] Apply the design system consistently to Forge workflows.
+- [x] Apply the design system consistently to Game Market and Player Market workflows.
 - [ ] Apply the design system consistently to Profile and Settings workflows.
 - [ ] Perform a final accessibility, responsive layout, reduced-motion, and localization visual audit.
 

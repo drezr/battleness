@@ -1,5 +1,5 @@
 <template>
-  <main class="shell">
+  <main class="shell forge-socket-page">
     <nav class="section-nav" :aria-label="t('accessibility.forgeNavigation')">
       <NuxtLink
         v-for="link in sectionLinks.forge"
@@ -11,402 +11,324 @@
       </NuxtLink>
     </nav>
 
-    <header class="view-header">
+    <header class="view-header forge-view-header">
       <div class="view-title">
         <span class="eyebrow">{{ t("forge.section") }}</span>
         <h1>{{ t("forge.socket.title") }}</h1>
         <p class="muted">{{ t("forge.socket.description") }}</p>
       </div>
+      <span v-if="socketState" class="forge-credit-balance"
+        ><Coins :size="17" aria-hidden="true" />{{
+          t("common.creditCount", { count: socketState.player.credits })
+        }}</span
+      >
     </header>
 
     <p v-if="pending" class="panel">{{ t("forge.socket.loading") }}</p>
     <p v-else-if="error" class="panel">{{ t("forge.socket.loadError") }}</p>
 
     <template v-else-if="socketState">
+      <div class="forge-process-steps" :aria-label="t('forge.socket.workflowLabel')">
+        <span class="active"><strong>1</strong>{{ t("forge.socket.chooseRing") }}</span>
+        <ChevronRight :size="16" aria-hidden="true" />
+        <span><strong>2</strong>{{ t("forge.socket.composeSockets") }}</span>
+        <ChevronRight :size="16" aria-hidden="true" />
+        <span><strong>3</strong>{{ t("forge.socket.bindEnchantment") }}</span>
+      </div>
+
       <p v-if="feedback" class="feedback">{{ feedback }}</p>
       <p v-if="actionError" class="status-note">{{ actionError }}</p>
-      <p class="status-note">
-        {{ t("common.creditCount", { count: socketState.player.credits }) }}
-      </p>
 
-      <section class="detail-layout">
-        <div>
-          <section class="split-layout socket-layout">
-            <div class="stack">
-              <section class="panel">
-                <div class="card-heading">
-                  <div>
-                    <h2>{{ t("itemType.ring") }}</h2>
-                    <p class="muted">{{ t("forge.socket.ringDescription") }}</p>
-                  </div>
-                  <NuxtLink class="button-link" to="/forge/craft">{{
-                    t("forge.craftItems")
-                  }}</NuxtLink>
+      <section class="detail-layout forge-detail-layout">
+        <div class="stack forge-main-workspace">
+          <section class="socket-composer">
+            <div class="socket-ring-station">
+              <div class="section-heading-row">
+                <div>
+                  <span class="eyebrow">{{ t("forge.socket.ringStation") }}</span>
+                  <h2>{{ t("forge.socket.chooseRing") }}</h2>
                 </div>
+                <NuxtLink class="text-link" to="/forge/craft"
+                  >{{ t("forge.craftItems") }} <ArrowRight :size="16"
+                /></NuxtLink>
+              </div>
+              <label class="forge-select-field">
+                <span class="field-label">{{ t("forge.socket.ownedRing") }}</span>
+                <select v-model="selectedRingId">
+                  <option value="">{{ t("forge.socket.selectRing") }}</option>
+                  <option v-for="ring in socketState.rings" :key="ring.id" :value="ring.id">
+                    {{ itemName("ring", ring.definitionId, ring.label) }} ·
+                    {{
+                      t("forge.socket.socketCount", {
+                        used: ring.gems.length,
+                        total: ring.socketCount ?? 0,
+                      })
+                    }}
+                  </option>
+                </select>
+              </label>
 
-                <label>
-                  <span class="field-label">{{ t("forge.socket.ownedRing") }}</span>
-                  <select v-model="selectedRingId">
-                    <option value="">{{ t("forge.socket.selectRing") }}</option>
-                    <option v-for="ring in socketState.rings" :key="ring.id" :value="ring.id">
-                      {{ itemName("ring", ring.definitionId, ring.label) }} -
-                      {{
-                        t("forge.socket.socketCount", {
-                          used: ring.gems.length,
-                          total: ring.socketCount ?? 0,
-                        })
-                      }}
-                    </option>
-                  </select>
-                </label>
-
-                <p v-if="socketState.rings.length === 0" class="status-note">
-                  {{ t("forge.socket.craftRingFirst") }}
-                </p>
-
-                <article
-                  v-if="selectedRing"
-                  :class="['card', 'item-card', `rarity-border-${selectedRing.rarity}`]"
-                >
-                  <ItemArtwork :definition-id="selectedRing.definitionId" kind="ring" />
-                  <div class="item-card-body">
+              <div v-if="!selectedRing" class="forge-empty-state">
+                <CircleDashed :size="26" />
+                <p>{{ t("forge.socket.craftRingFirst") }}</p>
+              </div>
+              <template v-else>
+                <div class="socket-selected-ring">
+                  <div :class="['socket-ring-art', `rarity-border-${selectedRing.rarity}`]">
+                    <ItemArtwork :definition-id="selectedRing.definitionId" kind="ring" />
+                  </div>
+                  <div class="socket-ring-copy">
                     <div class="card-heading">
-                      <h3>{{ itemName("ring", selectedRing.definitionId, selectedRing.label) }}</h3>
-                      <span :class="['pill', `element-${selectedRing.element}`]">
-                        {{ t(`element.${selectedRing.element}`) }}
-                      </span>
+                      <div>
+                        <span class="eyebrow">{{ t("forge.socket.selectedRing") }}</span>
+                        <h3>
+                          {{ itemName("ring", selectedRing.definitionId, selectedRing.label) }}
+                        </h3>
+                      </div>
+                      <span :class="['pill', `element-${selectedRing.element}`]">{{
+                        t(`element.${selectedRing.element}`)
+                      }}</span>
                     </div>
                     <RingStatGrid :ring="selectedRing" />
-                    <div class="control-row">
-                      <button
-                        class="secondary-button"
-                        @click="selectedDetailItemId = selectedRing.id"
-                      >
-                        {{ t("common.inspect") }}
-                      </button>
-                    </div>
-                    <div class="socket-improvement">
-                      <div>
-                        <strong>{{ t("forge.socket.capacity") }}</strong>
-                        <small>
-                          {{ selectedRing.socketCount ?? 0 }} / {{ socketState.maxRingSockets }}
-                        </small>
-                      </div>
-                      <div>
-                        <span v-if="selectedRing.socketImprovementCost !== null">
-                          {{
-                            t("forge.socket.nextCapacity", {
-                              count: selectedRing.nextSocketCount,
-                              cost: selectedRing.socketImprovementCost,
-                            })
-                          }}
-                        </span>
-                        <span v-else>{{ t("forge.socket.maximumCapacity") }}</span>
-                        <button
-                          class="secondary-button"
-                          :disabled="!selectedRing.canImproveSockets || updating"
-                          @click="improveSelectedRingSockets"
-                        >
-                          {{ t("forge.socket.improve") }}
-                        </button>
-                      </div>
-                      <small
-                        v-if="
-                          selectedRing.socketImprovementCost !== null &&
-                          !selectedRing.canImproveSockets
-                        "
-                      >
-                        {{ t("forge.socket.notEnoughCredits") }}
-                      </small>
-                    </div>
+                    <button
+                      class="text-link"
+                      type="button"
+                      @click="selectedDetailItemId = selectedRing.id"
+                    >
+                      <Eye :size="15" />{{ t("common.inspect") }}
+                    </button>
                   </div>
-                </article>
-              </section>
+                </div>
 
-              <section v-if="selectedRing" class="panel">
-                <h2>{{ t("stats.sockets") }}</h2>
-                <div class="socket-slot-list">
+                <div class="socket-capacity-row">
+                  <div>
+                    <span class="eyebrow">{{ t("forge.socket.capacity") }}</span>
+                    <strong
+                      >{{ selectedRing.socketCount ?? 0 }} /
+                      {{ socketState.maxRingSockets }}</strong
+                    >
+                  </div>
+                  <div class="socket-capacity-track" aria-hidden="true">
+                    <span
+                      v-for="slot in socketState.maxRingSockets"
+                      :key="slot"
+                      :class="{ active: slot <= (selectedRing.socketCount ?? 0) }"
+                    />
+                  </div>
+                  <div class="socket-capacity-action">
+                    <small v-if="selectedRing.socketImprovementCost !== null">{{
+                      t("forge.socket.nextCapacity", {
+                        count: selectedRing.nextSocketCount,
+                        cost: selectedRing.socketImprovementCost,
+                      })
+                    }}</small>
+                    <small v-else>{{ t("forge.socket.maximumCapacity") }}</small>
+                    <button
+                      class="secondary-button"
+                      :disabled="!selectedRing.canImproveSockets || updating"
+                      type="button"
+                      @click="improveSelectedRingSockets"
+                    >
+                      <Plus :size="16" />{{ t("forge.socket.improve") }}
+                    </button>
+                  </div>
+                </div>
+
+                <div class="socket-slot-grid">
                   <article
                     v-for="socketIndex in socketIndexes"
                     :key="socketIndex"
                     :class="[
-                      'socket-slot-card',
+                      'socket-composer-slot',
                       socketGem(socketIndex)
                         ? `rarity-border-${socketGem(socketIndex)?.rarity}`
-                        : '',
+                        : 'empty',
                     ]"
                   >
+                    <span class="socket-slot-index">{{ socketIndex + 1 }}</span>
                     <template v-if="socketGem(socketIndex)">
                       <ItemArtwork
                         :definition-id="socketGem(socketIndex)?.definitionId ?? ''"
                         kind="gem"
                       />
                       <div>
-                        <strong
-                          >{{ socketIndex + 1 }}. {{ gemName(socketGem(socketIndex)) }}</strong
-                        >
-                        <small>
-                          {{
-                            t("forge.socket.gemStats", {
-                              damage: socketGem(socketIndex)?.damage,
-                              energy: socketGem(socketIndex)?.energyPenalty,
-                              cooldown: socketGem(socketIndex)?.cooldownPenalty,
-                            })
-                          }}
-                        </small>
-                        <button
-                          class="secondary-button"
-                          :disabled="updating"
-                          @click="unsocket(socketGem(socketIndex)?.id ?? '')"
-                        >
-                          {{ t("forge.socket.unsocket") }}
-                        </button>
+                        <strong>{{ gemName(socketGem(socketIndex)) }}</strong
+                        ><small>{{
+                          t("forge.socket.gemStats", {
+                            damage: socketGem(socketIndex)?.damage,
+                            energy: socketGem(socketIndex)?.energyPenalty,
+                            cooldown: socketGem(socketIndex)?.cooldownPenalty,
+                          })
+                        }}</small>
                       </div>
+                      <button
+                        class="icon-button danger-action"
+                        :disabled="updating"
+                        type="button"
+                        :title="t('forge.socket.unsocket')"
+                        :aria-label="t('forge.socket.unsocket')"
+                        @click="unsocket(socketGem(socketIndex)?.id ?? '')"
+                      >
+                        <X :size="17" />
+                      </button>
                     </template>
                     <template v-else>
-                      <div class="empty-socket">
-                        <strong>{{ socketIndex + 1 }}. {{ t("forge.socket.emptySocket") }}</strong>
-                        <small>{{ t("forge.socket.availableSlot") }}</small>
+                      <CircleDashed :size="24" aria-hidden="true" />
+                      <div>
+                        <strong>{{ t("forge.socket.emptySocket") }}</strong
+                        ><small>{{ t("forge.socket.availableSlot") }}</small>
                       </div>
                     </template>
                   </article>
                 </div>
-              </section>
+              </template>
             </div>
 
-            <section class="panel">
-              <h2>{{ t("forge.socket.availableGems") }}</h2>
+            <aside class="socket-gem-vault">
+              <div class="section-heading-row">
+                <div>
+                  <span class="eyebrow">{{ t("forge.socket.gemVault") }}</span>
+                  <h2>{{ t("forge.socket.availableGems") }}</h2>
+                </div>
+                <span class="pill muted-pill">{{ availableGems.length }}</span>
+              </div>
               <p v-if="socketState.gems.length === 0" class="muted">
                 {{ t("forge.socket.craftGemsFirst") }}
               </p>
-
-              <form v-else class="toolbar" @submit.prevent="socketSelectedGem">
-                <label>
-                  <span class="field-label">{{ t("itemType.gem") }}</span>
-                  <select v-model="selectedGemId">
-                    <option value="">{{ t("forge.socket.selectGem") }}</option>
-                    <option v-for="gem in availableGems" :key="gem.id" :value="gem.id">
-                      {{ itemName("gem", gem.definitionId, gem.label) }} -
-                      {{ t("battle.summary.damageValue", { count: gem.damage }) }}
-                    </option>
-                  </select>
-                </label>
-                <button :disabled="!canSocketSelectedGem || updating" type="submit">
-                  {{ t("forge.socket.action") }}
-                </button>
-              </form>
-
-              <p
-                v-if="socketState.gems.length > 0 && availableGems.length === 0"
-                class="status-note"
-              >
+              <p v-else-if="availableGems.length === 0" class="status-note">
                 {{ t("forge.socket.allSocketed") }}
               </p>
+              <div v-else class="socket-vault-list">
+                <button
+                  v-for="gem in availableGems"
+                  :key="gem.id"
+                  :class="[`rarity-border-${gem.rarity}`, { selected: selectedGemId === gem.id }]"
+                  type="button"
+                  @click="selectedGemId = gem.id"
+                >
+                  <ItemArtwork :definition-id="gem.definitionId" kind="gem" />
+                  <span
+                    ><strong>{{ itemName("gem", gem.definitionId, gem.label) }}</strong
+                    ><small>{{
+                      t("forge.socket.gemStats", {
+                        damage: gem.damage,
+                        energy: gem.energyPenalty,
+                        cooldown: gem.cooldownPenalty,
+                      })
+                    }}</small></span
+                  >
+                  <Check v-if="selectedGemId === gem.id" :size="17" aria-hidden="true" />
+                </button>
+              </div>
               <p v-if="selectedRing && ringIsFull" class="status-note">
                 {{ t("forge.socket.ringFull") }}
               </p>
-
-              <div class="item-grid socket-gem-grid">
-                <article
-                  v-for="gem in socketState.gems"
-                  :key="gem.id"
-                  :class="[
-                    'card',
-                    'item-card',
-                    `rarity-border-${gem.rarity}`,
-                    {
-                      'muted-card': gem.socketedRingId,
-                      selected: socketDetailItem?.id === gem.id,
-                    },
-                  ]"
-                >
-                  <ItemArtwork :definition-id="gem.definitionId" kind="gem" />
-                  <div class="item-card-body">
-                    <div class="card-heading">
-                      <h3>{{ itemName("gem", gem.definitionId, gem.label) }}</h3>
-                      <span
-                        :class="[
-                          'pill',
-                          gem.socketedRingId ? 'muted-pill' : `element-${gem.element}`,
-                        ]"
-                      >
-                        {{
-                          gem.socketedRingId
-                            ? t("forge.socket.socketed")
-                            : t(`element.${gem.element}`)
-                        }}
-                      </span>
-                    </div>
-                    <dl class="summary-grid">
-                      <div class="stat">
-                        <dt>{{ t("stats.damage") }}</dt>
-                        <dd>{{ gem.damage }}</dd>
-                      </div>
-                      <div class="stat">
-                        <dt>{{ t("stats.energy") }}</dt>
-                        <dd>+{{ gem.energyPenalty }}</dd>
-                      </div>
-                      <div class="stat">
-                        <dt>{{ t("stats.cooldown") }}</dt>
-                        <dd>+{{ gem.cooldownPenalty }}</dd>
-                      </div>
-                      <div class="stat">
-                        <dt>{{ t("common.quality") }}</dt>
-                        <dd>{{ gem.quality }}</dd>
-                      </div>
-                    </dl>
-                    <small v-if="gem.enchantment">
-                      {{ t(`itemType.${gem.enchantment.type}`) }}:
-                      {{
-                        itemName(
-                          gem.enchantment.type,
-                          gem.enchantment.definitionId,
-                          gem.enchantment.label,
-                        )
-                      }}
-                    </small>
-                    <div class="control-row">
-                      <button class="secondary-button" @click="selectedDetailItemId = gem.id">
-                        {{ t("common.inspect") }}
-                      </button>
-                    </div>
-                    <code>{{ gem.id }}</code>
-                  </div>
-                </article>
-              </div>
-            </section>
+              <button
+                class="socket-primary-action"
+                :disabled="!canSocketSelectedGem || updating"
+                type="button"
+                @click="socketSelectedGem"
+              >
+                <Gem :size="17" />{{ t("forge.socket.action") }}
+              </button>
+            </aside>
           </section>
 
-          <section class="panel enchantment-panel">
-            <div class="card-heading">
+          <section class="enchantment-lab">
+            <div class="enchantment-lab-heading">
+              <span class="enchantment-icon"><WandSparkles :size="23" aria-hidden="true" /></span>
               <div>
+                <span class="eyebrow">{{ t("forge.socket.enchantmentLab") }}</span>
                 <h2>{{ t("forge.socket.enchantment") }}</h2>
-                <p class="muted">{{ t("forge.socket.enchantmentDescription") }}</p>
+                <p>{{ t("forge.socket.enchantmentDescription") }}</p>
               </div>
-              <NuxtLink class="button-link" to="/forge/craft">{{
-                t("forge.socket.craftEnchantments")
-              }}</NuxtLink>
+              <NuxtLink class="text-link" to="/forge/craft"
+                >{{ t("forge.socket.craftEnchantments") }} <ArrowRight :size="16"
+              /></NuxtLink>
             </div>
 
-            <p v-if="socketState.gems.length === 0" class="status-note">
-              {{ t("forge.socket.craftGemFirst") }}
-            </p>
-            <p v-else-if="socketState.enchantmentTargets.length === 0" class="status-note">
-              {{ t("forge.socket.craftTargetFirst") }}
-            </p>
-
-            <template v-else>
-              <form class="toolbar" @submit.prevent="enchantSelectedGem">
-                <label>
-                  <span class="field-label">{{ t("itemType.gem") }}</span>
-                  <select v-model="selectedEnchantGemId">
-                    <option value="">{{ t("forge.socket.selectGem") }}</option>
-                    <option v-for="gem in socketState.gems" :key="gem.id" :value="gem.id">
-                      {{ itemName("gem", gem.definitionId, gem.label)
-                      }}{{
-                        gem.enchantment
-                          ? ` - ${itemName(gem.enchantment.type, gem.enchantment.definitionId, gem.enchantment.label)}`
-                          : ""
-                      }}
-                    </option>
-                  </select>
-                </label>
-
-                <label>
-                  <span class="field-label">{{ t("forge.socket.spellOrMonster") }}</span>
-                  <select
-                    v-model="selectedTargetId"
-                    :disabled="Boolean(selectedEnchantGem?.enchantment)"
+            <div class="enchantment-controls">
+              <label
+                ><span class="field-label">{{ t("itemType.gem") }}</span
+                ><select v-model="selectedEnchantGemId">
+                  <option value="">{{ t("forge.socket.selectGem") }}</option>
+                  <option v-for="gem in socketState.gems" :key="gem.id" :value="gem.id">
+                    {{ itemName("gem", gem.definitionId, gem.label)
+                    }}{{
+                      gem.enchantment
+                        ? ` · ${itemName(gem.enchantment.type, gem.enchantment.definitionId, gem.enchantment.label)}`
+                        : ""
+                    }}
+                  </option>
+                </select></label
+              >
+              <span class="enchantment-link-icon"><Link :size="19" aria-hidden="true" /></span>
+              <label
+                ><span class="field-label">{{ t("forge.socket.spellOrMonster") }}</span
+                ><select
+                  v-model="selectedTargetId"
+                  :disabled="Boolean(selectedEnchantGem?.enchantment)"
+                >
+                  <option value="">{{ t("forge.socket.selectTarget") }}</option>
+                  <option
+                    v-for="target in availableEnchantmentTargets"
+                    :key="target.id"
+                    :value="target.id"
                   >
-                    <option value="">{{ t("forge.socket.selectTarget") }}</option>
-                    <option
-                      v-for="target in availableEnchantmentTargets"
-                      :key="target.id"
-                      :value="target.id"
-                    >
-                      {{ itemName(target.type, target.definitionId, target.label) }} -
-                      {{ t(`itemType.${target.type}`) }}
-                    </option>
-                  </select>
-                </label>
+                    {{ itemName(target.type, target.definitionId, target.label) }} ·
+                    {{ t(`itemType.${target.type}`) }}
+                  </option>
+                </select></label
+              >
+              <button
+                v-if="selectedEnchantGem?.enchantment"
+                class="secondary-button danger-action"
+                :disabled="updating"
+                type="button"
+                @click="unenchantSelectedGem"
+              >
+                <Unlink :size="16" />{{ t("forge.socket.remove") }}
+              </button>
+              <button
+                v-else
+                :disabled="!canEnchantSelectedGem || updating"
+                type="button"
+                @click="enchantSelectedGem"
+              >
+                <WandSparkles :size="16" />{{ t("forge.socket.enchant") }}
+              </button>
+            </div>
 
-                <button
-                  v-if="selectedEnchantGem?.enchantment"
-                  class="secondary-button"
-                  :disabled="updating"
-                  type="button"
-                  @click="unenchantSelectedGem"
+            <div v-if="socketState.enchantmentTargets.length > 0" class="enchantment-target-strip">
+              <button
+                v-for="target in socketState.enchantmentTargets"
+                :key="target.id"
+                :class="[
+                  `rarity-border-${target.rarity}`,
+                  { unavailable: target.enchantedGemId, selected: selectedTargetId === target.id },
+                ]"
+                type="button"
+                :disabled="Boolean(target.enchantedGemId)"
+                @click="
+                  selectedTargetId = target.id;
+                  selectedDetailItemId = target.id;
+                "
+              >
+                <ItemArtwork :definition-id="target.definitionId" :kind="target.type" />
+                <span
+                  ><strong>{{ itemName(target.type, target.definitionId, target.label) }}</strong
+                  ><small>{{
+                    target.enchantedGemId ? t("forge.socket.used") : t(`itemType.${target.type}`)
+                  }}</small></span
                 >
-                  {{ t("forge.socket.remove") }}
-                </button>
-                <button v-else :disabled="!canEnchantSelectedGem || updating" type="submit">
-                  {{ t("forge.socket.enchant") }}
-                </button>
-              </form>
-
-              <div class="item-grid socket-gem-grid">
-                <article
-                  v-for="target in socketState.enchantmentTargets"
-                  :key="target.id"
-                  :class="[
-                    'card',
-                    'item-card',
-                    `rarity-border-${target.rarity}`,
-                    {
-                      'muted-card': target.enchantedGemId,
-                      selected: socketDetailItem?.id === target.id,
-                    },
-                  ]"
-                >
-                  <ItemArtwork :definition-id="target.definitionId" :kind="target.type" />
-                  <div class="item-card-body">
-                    <div class="card-heading">
-                      <h3>{{ itemName(target.type, target.definitionId, target.label) }}</h3>
-                      <span
-                        :class="[
-                          'pill',
-                          target.enchantedGemId ? 'muted-pill' : `element-${target.element}`,
-                        ]"
-                      >
-                        {{
-                          target.enchantedGemId
-                            ? t("forge.socket.used")
-                            : t(`element.${target.element}`)
-                        }}
-                      </span>
-                    </div>
-                    <dl class="summary-grid">
-                      <div class="stat">
-                        <dt>{{ t("common.type") }}</dt>
-                        <dd>{{ t(`itemType.${target.type}`) }}</dd>
-                      </div>
-                      <div class="stat">
-                        <dt>{{ t("stats.damage") }}</dt>
-                        <dd>{{ target.damage }}</dd>
-                      </div>
-                      <div v-if="target.type === 'monster'" class="stat">
-                        <dt>{{ t("stats.health") }}</dt>
-                        <dd>{{ target.health }}</dd>
-                      </div>
-                      <div v-else class="stat">
-                        <dt>{{ t("stats.energy") }}</dt>
-                        <dd>+{{ target.energyPenalty }}</dd>
-                      </div>
-                    </dl>
-                    <div class="control-row">
-                      <button class="secondary-button" @click="selectedDetailItemId = target.id">
-                        {{ t("common.inspect") }}
-                      </button>
-                    </div>
-                    <code>{{ target.id }}</code>
-                  </div>
-                </article>
-              </div>
-            </template>
+              </button>
+            </div>
+            <p v-else class="status-note">{{ t("forge.socket.craftTargetFirst") }}</p>
           </section>
         </div>
 
         <ItemDetailPanel
+          v-if="selectedDetailItemId"
           :item="socketDetailItem"
           :title="t('forge.socket.detail')"
           @clear="selectedDetailItemId = ''"
@@ -417,6 +339,20 @@
 </template>
 
 <script setup lang="ts">
+import {
+  ArrowRight,
+  Check,
+  ChevronRight,
+  CircleDashed,
+  Coins,
+  Eye,
+  Gem,
+  Link,
+  Plus,
+  Unlink,
+  WandSparkles,
+  X,
+} from "@lucide/vue";
 import type {
   EquipmentGemView,
   SocketEnchantmentTargetView,
@@ -456,25 +392,22 @@ const selectedTarget = computed(
     socketState.value?.enchantmentTargets.find((target) => target.id === selectedTargetId.value) ??
     null,
 );
-const socketDetailItem = computed(() => {
-  const items = [
-    ...(socketState.value?.rings ?? []),
-    ...(socketState.value?.gems ?? []),
-    ...(socketState.value?.enchantmentTargets ?? []),
-  ];
-
-  return items.find((item) => item.id === selectedDetailItemId.value) ?? selectedRing.value;
-});
+const socketDetailItem = computed(
+  () =>
+    [
+      ...(socketState.value?.rings ?? []),
+      ...(socketState.value?.gems ?? []),
+      ...(socketState.value?.enchantmentTargets ?? []),
+    ].find((item) => item.id === selectedDetailItemId.value) ?? selectedRing.value,
+);
 const availableEnchantmentTargets = computed(() =>
   (socketState.value?.enchantmentTargets ?? []).filter((target) => target.enchantedGemId === null),
 );
-const ringIsFull = computed(() => {
-  if (!selectedRing.value) {
-    return false;
-  }
-
-  return selectedRing.value.gems.length >= (selectedRing.value.socketCount ?? 0);
-});
+const ringIsFull = computed(() =>
+  Boolean(
+    selectedRing.value && selectedRing.value.gems.length >= (selectedRing.value.socketCount ?? 0),
+  ),
+);
 const canSocketSelectedGem = computed(
   () => Boolean(selectedRing.value && selectedGemId.value) && !ringIsFull.value,
 );
@@ -488,119 +421,86 @@ const socketIndexes = computed(() =>
 );
 
 watchEffect(() => {
-  if (!selectedRingId.value && socketState.value?.rings[0]) {
+  if (!selectedRingId.value && socketState.value?.rings[0])
     selectedRingId.value = socketState.value.rings[0].id;
-  }
-  if (selectedGemId.value && !availableGems.value.some((gem) => gem.id === selectedGemId.value)) {
+  if (selectedGemId.value && !availableGems.value.some((gem) => gem.id === selectedGemId.value))
     selectedGemId.value = "";
-  }
-  if (!selectedEnchantGemId.value && socketState.value?.gems[0]) {
+  if (!selectedEnchantGemId.value && socketState.value?.gems[0])
     selectedEnchantGemId.value = socketState.value.gems[0].id;
-  }
   if (
     selectedTargetId.value &&
     !availableEnchantmentTargets.value.some((target) => target.id === selectedTargetId.value)
-  ) {
+  )
     selectedTargetId.value = "";
-  }
 });
 
 function socketGem(socketIndex: number): EquipmentGemView | undefined {
   return selectedRing.value?.gems.find((gem) => gem.socketIndex === socketIndex);
 }
-
 function itemName(type: string, definitionId: string, fallback: string): string {
   return contentText(`${type}.${definitionId}.name`, fallback);
 }
-
 function gemName(gem: EquipmentGemView | undefined): string {
   return gem ? itemName("gem", gem.definitionId, gem.label) : "";
 }
 
 async function socketSelectedGem() {
-  if (!selectedRing.value || !selectedGemId.value) {
-    return;
-  }
-
-  await updateSocketState({
+  if (!selectedRing.value || !selectedGemId.value) return;
+  const success = await updateSocketState({
     action: "socket",
     ringItemId: selectedRing.value.id,
     gemItemId: selectedGemId.value,
   });
-  selectedGemId.value = "";
-  feedback.value = t("forge.socket.socketedSuccess");
+  if (success) {
+    selectedGemId.value = "";
+    feedback.value = t("forge.socket.socketedSuccess");
+  }
 }
-
 async function unsocket(gemItemId: string) {
-  if (!gemItemId) {
-    return;
-  }
-
-  await updateSocketState({
-    action: "unsocket",
-    gemItemId,
-  });
-  feedback.value = t("forge.socket.unsocketedSuccess");
+  if (!gemItemId) return;
+  if (await updateSocketState({ action: "unsocket", gemItemId }))
+    feedback.value = t("forge.socket.unsocketedSuccess");
 }
-
 async function improveSelectedRingSockets() {
-  if (!selectedRing.value) {
-    return;
-  }
-
-  await updateSocketState({
-    action: "improveSockets",
-    ringItemId: selectedRing.value.id,
-  });
-  feedback.value = t("forge.socket.improvedSuccess");
+  if (!selectedRing.value) return;
+  if (await updateSocketState({ action: "improveSockets", ringItemId: selectedRing.value.id }))
+    feedback.value = t("forge.socket.improvedSuccess");
 }
-
 async function enchantSelectedGem() {
-  if (!selectedEnchantGem.value || !selectedTarget.value) {
-    return;
-  }
-
-  await updateSocketState({
+  if (!selectedEnchantGem.value || !selectedTarget.value) return;
+  const success = await updateSocketState({
     action: "enchant",
     gemItemId: selectedEnchantGem.value.id,
     targetItemId: selectedTarget.value.id,
     targetType: selectedTarget.value.type,
   });
-  selectedTargetId.value = "";
-  feedback.value = t("forge.socket.enchantedSuccess");
-}
-
-async function unenchantSelectedGem() {
-  if (!selectedEnchantGem.value) {
-    return;
+  if (success) {
+    selectedTargetId.value = "";
+    feedback.value = t("forge.socket.enchantedSuccess");
   }
-
-  await updateSocketState({
-    action: "unenchant",
-    gemItemId: selectedEnchantGem.value.id,
-  });
-  feedback.value = t("forge.socket.unenchantedSuccess");
 }
-
+async function unenchantSelectedGem() {
+  if (!selectedEnchantGem.value) return;
+  if (await updateSocketState({ action: "unenchant", gemItemId: selectedEnchantGem.value.id }))
+    feedback.value = t("forge.socket.unenchantedSuccess");
+}
 async function updateSocketState(body: {
   action: string;
   ringItemId?: string;
   gemItemId?: string;
   targetItemId?: string;
   targetType?: SocketEnchantmentTargetView["type"];
-}) {
+}): Promise<boolean> {
   feedback.value = "";
   actionError.value = "";
   updating.value = true;
-
   try {
-    socketState.value = await $fetch<SocketState>("/api/forge/socket", {
-      method: "POST",
-      body,
-    });
+    socketState.value = await $fetch<SocketState>("/api/forge/socket", { method: "POST", body });
     await refresh();
+    return true;
   } catch (error_) {
     actionError.value = error_ instanceof Error ? error_.message : t("forge.socket.actionError");
+    return false;
   } finally {
     updating.value = false;
   }
