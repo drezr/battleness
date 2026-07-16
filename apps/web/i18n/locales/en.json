@@ -205,7 +205,23 @@
       "description": "Completed matches, deterministic records, and reward claims.",
       "loading": "Loading battle history...",
       "loadError": "Unable to load battle history.",
-      "status": "{records} records - {rewards} rewards pending"
+      "status": "{records} records - {rewards} rewards pending",
+      "newBattle": "Start a battle",
+      "overview": "Battle history overview",
+      "totalBattles": "Completed",
+      "victories": "Victories",
+      "winRate": "Win rate",
+      "pendingRewards": "Rewards pending",
+      "archiveLabel": "Combat archive",
+      "archiveTitle": "Completed battles",
+      "filterLabel": "Filter battle history",
+      "noReward": "No rewards for this battle",
+      "filter": {
+        "all": "All",
+        "win": "Victories",
+        "draw": "Draws",
+        "loss": "Defeats"
+      }
     },
     "result": {
       "section": "Battle Result",
@@ -213,6 +229,9 @@
       "description": "Verified battle record and persistent rewards.",
       "loading": "Loading battle result...",
       "notFound": "Battle result not found.",
+      "backToHistory": "Back to history",
+      "rewardSummary": "+{credits} credits and +{experience} hero XP",
+      "rewardSecured": "Rewards secured",
       "verification": "Record Verification",
       "recordId": "Record ID",
       "seed": "Seed",
@@ -341,6 +360,9 @@
       "verifiedLog": "Verified Combat Log",
       "title": "Combat Summary",
       "playerContribution": "Player Contribution",
+      "playerIndex": "P{index}",
+      "activityTitle": "Combat Activity",
+      "earnedRewards": "Earned Rewards",
       "none": "None",
       "rewardStatus": "Rewards {status}",
       "damageValue": "{count} damage",
@@ -362,7 +384,10 @@
     "mode": {
       "training": "Training",
       "campaign": "Campaign",
-      "pvp": "PvP"
+      "pvp": "PvP",
+      "private_pvp": "Private PvP",
+      "casual_pvp": "Casual PvP",
+      "ranked_pvp": "Ranked PvP"
     },
     "verified": "Verified",
     "unavailable": "Unavailable",

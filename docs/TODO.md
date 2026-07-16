@@ -173,7 +173,7 @@ Private, casual, and ranked PvP now share the authoritative persistent battle li
 - [x] Apply the first shared item-card and inventory presentation pass, including mobile detail behavior and hidden player-facing technical IDs.
 - [x] Apply the design system to the Battle hub and Campaign journey, readiness, encounter, reward, and opponent-intelligence views.
 - [x] Apply the design system consistently to the PvP hub and private, casual, and ranked matchmaking views.
-- [ ] Apply the design system consistently to Battle history and result views.
+- [x] Apply the design system consistently to Battle history and result views.
 - [ ] Apply the design system consistently to Inventory equipment and loadout workflows.
 - [ ] Apply the design system consistently to Forge workflows.
 - [ ] Apply the design system consistently to Game Market and Player Market workflows.

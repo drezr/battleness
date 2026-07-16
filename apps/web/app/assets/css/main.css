@@ -5246,3 +5246,867 @@ body {
     width: 100%;
   }
 }
+
+/* Battle history and result */
+.battle-history-page,
+.battle-result-page {
+  display: grid;
+  gap: 22px;
+}
+
+.battle-history-page > .section-nav,
+.battle-result-page > .section-nav,
+.battle-history-page > .view-header {
+  margin-bottom: 0;
+}
+
+.battle-history-header {
+  align-items: center;
+}
+
+.battle-history-new-match,
+.battle-result-back {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid var(--app-border-strong);
+  border-radius: 7px;
+  padding: 9px 12px;
+  color: var(--app-text);
+  background: var(--app-surface);
+  font-size: 0.76rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.battle-history-overview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+}
+
+.battle-history-overview > div,
+.battle-summary-kpis > div,
+.battle-earned-grid > div {
+  display: flex;
+  min-width: 0;
+  gap: 11px;
+  align-items: center;
+}
+
+.battle-history-overview > div {
+  min-height: 78px;
+  border-right: 1px solid var(--app-border);
+  padding: 14px 16px;
+}
+
+.battle-history-overview > div:last-child {
+  border-right: 0;
+}
+
+.battle-history-overview svg {
+  flex: 0 0 auto;
+  color: var(--app-cyan);
+}
+
+.battle-history-overview .wins svg {
+  color: var(--app-green);
+}
+
+.battle-history-overview .pending svg {
+  color: var(--app-gold);
+}
+
+.battle-history-overview span,
+.battle-summary-kpis span,
+.battle-earned-grid span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.battle-history-overview small,
+.battle-summary-kpis small,
+.battle-earned-grid small {
+  color: var(--app-muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.battle-history-overview strong {
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.battle-history-browser {
+  display: grid;
+  gap: 12px;
+}
+
+.battle-history-toolbar {
+  display: flex;
+  gap: 16px;
+  align-items: end;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--app-border);
+  padding-bottom: 12px;
+}
+
+.battle-history-toolbar h2 {
+  margin: 3px 0 0;
+  font-size: 1.05rem;
+}
+
+.battle-history-filters {
+  display: flex;
+  gap: 4px;
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  padding: 3px;
+  background: var(--app-surface);
+}
+
+.battle-history-filters button {
+  min-height: 31px;
+  gap: 7px;
+  border-color: transparent;
+  padding: 0 10px;
+  color: var(--app-muted);
+  background: transparent;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.battle-history-filters button.active {
+  color: var(--app-text);
+  background: var(--app-raised);
+}
+
+.battle-history-filters button span {
+  display: grid;
+  min-width: 20px;
+  min-height: 20px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 7%);
+  font-size: 0.62rem;
+}
+
+.battle-history-list {
+  gap: 8px;
+}
+
+.battle-history-card {
+  --outcome-color: var(--app-muted);
+  display: grid;
+  grid-template-columns: 44px minmax(150px, 0.8fr) minmax(230px, 1fr) minmax(210px, 0.9fr) auto;
+  min-height: 104px;
+  gap: 13px;
+  align-items: center;
+  border: 1px solid var(--app-border);
+  border-left: 3px solid var(--outcome-color);
+  border-radius: 7px;
+  padding: 13px 14px;
+  background: var(--app-surface);
+}
+
+.battle-history-card.outcome-win,
+.battle-result-hero.outcome-win {
+  --outcome-color: var(--app-green);
+}
+
+.battle-history-card.outcome-draw,
+.battle-result-hero.outcome-draw {
+  --outcome-color: var(--app-gold);
+}
+
+.battle-history-card.outcome-loss,
+.battle-result-hero.outcome-loss {
+  --outcome-color: #ff7184;
+}
+
+.battle-history-outcome {
+  display: grid;
+  width: 44px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 7px;
+  color: var(--outcome-color);
+  background: color-mix(in srgb, var(--outcome-color) 10%, transparent);
+}
+
+.battle-history-identity {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.battle-history-card .battle-history-identity h2 {
+  color: var(--outcome-color);
+  font-size: 1rem;
+  text-transform: none;
+}
+
+.battle-history-date {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  color: var(--app-muted);
+  font-size: 0.67rem;
+}
+
+.battle-history-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  border-right: 1px solid var(--app-border);
+  border-left: 1px solid var(--app-border);
+}
+
+.battle-history-metrics > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+  padding: 6px 11px;
+}
+
+.battle-history-metrics dt,
+.battle-record-grid dt,
+.battle-contribution-grid dt {
+  color: var(--app-muted);
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.battle-history-metrics dd,
+.battle-record-grid dd,
+.battle-contribution-grid dd {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.battle-history-metrics dd.verified {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  color: var(--app-green);
+}
+
+.battle-history-reward {
+  display: grid;
+  gap: 8px;
+}
+
+.battle-history-reward.empty {
+  color: var(--app-muted);
+  font-size: 0.7rem;
+}
+
+.battle-reward-state {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 24px;
+  gap: 5px;
+  align-items: center;
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  padding: 0 8px;
+  color: var(--app-muted);
+  font-size: 0.62rem;
+  font-weight: 850;
+}
+
+.battle-reward-state.unclaimed {
+  border-color: rgb(255 209 102 / 30%);
+  color: var(--app-gold);
+}
+
+.battle-reward-state.claimed {
+  border-color: rgb(72 220 133 / 30%);
+  color: var(--app-green);
+}
+
+.battle-reward-totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+}
+
+.battle-reward-totals span {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  color: var(--app-muted);
+  font-size: 0.66rem;
+  font-weight: 750;
+}
+
+.battle-reward-totals svg {
+  color: var(--app-cyan);
+}
+
+.battle-history-actions {
+  display: grid;
+  min-width: 138px;
+  gap: 6px;
+}
+
+.battle-history-actions > * {
+  width: 100%;
+  gap: 7px;
+}
+
+.battle-history-empty {
+  display: grid;
+  min-height: 150px;
+  gap: 9px;
+  place-items: center;
+  border: 1px dashed var(--app-border-strong);
+  border-radius: 8px;
+  color: var(--app-muted);
+  background: var(--app-surface);
+}
+
+.battle-result-hero {
+  --outcome-color: var(--app-muted);
+  display: grid;
+  grid-template-columns: 72px minmax(180px, 0.8fr) minmax(320px, 1.2fr) auto;
+  gap: 18px;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--outcome-color) 32%, transparent);
+  border-left: 4px solid var(--outcome-color);
+  border-radius: 8px;
+  padding: 20px;
+  background: var(--app-surface);
+}
+
+.battle-result-emblem {
+  display: grid;
+  width: 72px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--outcome-color);
+  background: color-mix(in srgb, var(--outcome-color) 11%, transparent);
+}
+
+.battle-result-title {
+  display: grid;
+  gap: 4px;
+}
+
+.battle-result-title h1 {
+  margin: 0;
+  color: var(--outcome-color);
+  font-size: 1.8rem;
+}
+
+.battle-result-title p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 0.72rem;
+}
+
+.battle-result-hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.battle-result-hero-metrics > div {
+  display: grid;
+  gap: 4px;
+  border-left: 1px solid var(--app-border);
+  padding: 7px 16px;
+}
+
+.battle-result-hero-metrics dt {
+  color: var(--app-muted);
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.battle-result-hero-metrics dd {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.battle-result-hero-metrics svg {
+  color: var(--app-green);
+}
+
+.battle-result-reward-banner {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 13px;
+  align-items: center;
+  border: 1px solid rgb(255 209 102 / 26%);
+  border-radius: 8px;
+  padding: 14px 16px;
+  background: rgb(255 209 102 / 6%);
+}
+
+.battle-result-reward-icon {
+  display: grid;
+  width: 48px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 7px;
+  color: var(--app-gold);
+  background: rgb(255 209 102 / 10%);
+}
+
+.battle-result-reward-banner h2,
+.battle-result-reward-banner p {
+  margin: 0;
+}
+
+.battle-result-reward-banner h2 {
+  margin-top: 2px;
+  font-size: 1rem;
+}
+
+.battle-result-reward-banner p {
+  margin-top: 3px;
+  color: var(--app-muted);
+  font-size: 0.72rem;
+}
+
+.battle-result-reward-banner button,
+.battle-result-reward-claimed {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.battle-result-reward-claimed {
+  color: var(--app-green);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.battle-result-summary {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.battle-summary-header,
+.battle-summary-section-title {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.battle-summary-header {
+  justify-content: space-between;
+  border-bottom: 1px solid var(--app-border);
+  padding-bottom: 11px;
+}
+
+.battle-summary-header h2 {
+  margin-top: 3px;
+  font-size: 1.1rem;
+}
+
+.battle-summary-kpis,
+.battle-earned-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+}
+
+.battle-summary-kpis > div,
+.battle-earned-grid > div {
+  min-height: 70px;
+  border-right: 1px solid var(--app-border);
+  padding: 12px 14px;
+}
+
+.battle-summary-kpis > div:last-child,
+.battle-earned-grid > div:last-child {
+  border-right: 0;
+}
+
+.battle-summary-kpis svg,
+.battle-earned-grid svg,
+.battle-summary-section-title svg {
+  flex: 0 0 auto;
+  color: var(--app-cyan);
+}
+
+.battle-summary-kpis strong,
+.battle-earned-grid strong {
+  font-size: 1.05rem;
+}
+
+.battle-contribution-section,
+.battle-activity-section,
+.battle-earned-section {
+  display: grid;
+  gap: 11px;
+  border-top: 1px solid var(--app-border);
+  padding-top: 16px;
+}
+
+.battle-summary-section-title h3 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.battle-contribution-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.battle-contribution-grid article {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  padding: 11px;
+  background: var(--app-surface);
+}
+
+.battle-player-index {
+  display: grid;
+  width: 38px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 6px;
+  color: var(--app-cyan);
+  background: var(--app-cyan-soft);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.battle-contribution-grid dl {
+  display: flex;
+  gap: 14px;
+  margin: 0;
+}
+
+.battle-contribution-grid dl > div {
+  display: grid;
+  gap: 2px;
+}
+
+.battle-summary-activity-grid {
+  gap: 8px;
+}
+
+.battle-activity-group {
+  display: grid;
+  gap: 7px;
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  padding: 12px;
+  background: var(--app-surface);
+}
+
+.battle-activity-group h4,
+.battle-activity-group p {
+  margin: 0;
+}
+
+.battle-activity-group h4 {
+  color: var(--app-muted);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+}
+
+.battle-activity-group p {
+  color: var(--app-muted);
+  font-size: 0.72rem;
+}
+
+.battle-activity-group ul,
+.battle-earned-details ul {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.battle-activity-group li,
+.battle-earned-details li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 9px;
+  align-items: center;
+  border-top: 1px solid var(--app-border);
+  padding: 7px 0;
+  font-size: 0.72rem;
+}
+
+.battle-activity-group li:first-child,
+.battle-earned-details li:first-child {
+  border-top: 0;
+}
+
+.battle-activity-group li > span {
+  display: grid;
+  gap: 2px;
+}
+
+.battle-activity-group li small {
+  color: var(--app-muted);
+}
+
+.battle-earned-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.battle-record-technical {
+  margin: 0;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+}
+
+.battle-record-technical summary {
+  display: flex;
+  cursor: pointer;
+  list-style: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 15px;
+  color: var(--app-muted);
+  font-size: 0.75rem;
+  font-weight: 850;
+}
+
+.battle-record-technical summary::-webkit-details-marker {
+  display: none;
+}
+
+.battle-record-technical summary > span {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.battle-record-technical[open] summary > svg {
+  transform: rotate(180deg);
+}
+
+.battle-record-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  border-top: 1px solid var(--app-border);
+  background: var(--app-border);
+}
+
+.battle-record-grid > div {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  padding: 11px 13px;
+  background: var(--app-raised);
+}
+
+.battle-record-grid .checksum {
+  grid-column: 1 / -1;
+}
+
+.battle-record-grid code {
+  overflow-wrap: anywhere;
+  color: #bfd1d8;
+  font-size: 0.68rem;
+}
+
+@media (max-width: 1050px) {
+  .battle-history-card {
+    grid-template-columns: 44px minmax(150px, 0.8fr) minmax(230px, 1fr) auto;
+  }
+
+  .battle-history-reward {
+    grid-column: 2 / 4;
+    border-top: 1px solid var(--app-border);
+    padding-top: 9px;
+  }
+
+  .battle-history-actions {
+    grid-column: 4;
+    grid-row: 1 / span 2;
+  }
+
+  .battle-result-hero {
+    grid-template-columns: 72px minmax(180px, 0.7fr) minmax(280px, 1.3fr);
+  }
+
+  .battle-result-back {
+    grid-column: 2 / 4;
+    width: fit-content;
+  }
+}
+
+@media (max-width: 760px) {
+  .battle-history-page,
+  .battle-result-page {
+    gap: 16px;
+  }
+
+  .battle-history-header {
+    align-items: stretch;
+  }
+
+  .battle-history-new-match {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .battle-history-overview,
+  .battle-summary-kpis,
+  .battle-earned-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .battle-history-overview > div:nth-child(2),
+  .battle-summary-kpis > div:nth-child(2),
+  .battle-earned-grid > div:nth-child(2) {
+    border-right: 0;
+  }
+
+  .battle-history-overview > div:nth-child(-n + 2),
+  .battle-summary-kpis > div:nth-child(-n + 2),
+  .battle-earned-grid > div:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--app-border);
+  }
+
+  .battle-history-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .battle-history-filters {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .battle-history-filters button {
+    min-width: 0;
+    padding: 0 5px;
+  }
+
+  .battle-history-card {
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 11px;
+    padding: 12px;
+  }
+
+  .battle-history-metrics,
+  .battle-history-reward,
+  .battle-history-actions {
+    grid-column: 1 / -1;
+  }
+
+  .battle-history-metrics {
+    border-top: 1px solid var(--app-border);
+    border-right: 0;
+    border-left: 0;
+    padding-top: 8px;
+  }
+
+  .battle-history-reward {
+    border-top: 1px solid var(--app-border);
+    padding-top: 9px;
+  }
+
+  .battle-history-actions {
+    grid-row: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .battle-history-actions > :only-child {
+    grid-column: 1 / -1;
+  }
+
+  .battle-result-hero {
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 12px;
+    padding: 15px;
+  }
+
+  .battle-result-emblem {
+    width: 58px;
+  }
+
+  .battle-result-title h1 {
+    font-size: 1.45rem;
+  }
+
+  .battle-result-hero-metrics,
+  .battle-result-back {
+    grid-column: 1 / -1;
+  }
+
+  .battle-result-hero-metrics > div:first-child {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .battle-result-back {
+    width: 100%;
+  }
+
+  .battle-result-reward-banner {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .battle-result-reward-icon {
+    width: 42px;
+  }
+
+  .battle-result-reward-banner > button,
+  .battle-result-reward-claimed {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .battle-result-reward-claimed {
+    justify-content: center;
+  }
+
+  .battle-contribution-grid,
+  .battle-summary-activity-grid,
+  .battle-earned-details {
+    grid-template-columns: 1fr;
+  }
+
+  .battle-contribution-grid article {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .battle-contribution-grid dl {
+    grid-column: 2;
+  }
+
+  .battle-record-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

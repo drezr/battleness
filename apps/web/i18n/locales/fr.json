@@ -205,7 +205,23 @@
       "description": "Combats terminés, enregistrements déterministes et récompenses.",
       "loading": "Chargement de l’historique des combats...",
       "loadError": "Impossible de charger l’historique des combats.",
-      "status": "{records} combats - {rewards} récompenses en attente"
+      "status": "{records} combats - {rewards} récompenses en attente",
+      "newBattle": "Commencer un combat",
+      "overview": "Aperçu de l'historique des combats",
+      "totalBattles": "Terminés",
+      "victories": "Victoires",
+      "winRate": "Taux de victoire",
+      "pendingRewards": "Récompenses en attente",
+      "archiveLabel": "Archives de combat",
+      "archiveTitle": "Combats terminés",
+      "filterLabel": "Filtrer l'historique des combats",
+      "noReward": "Aucune récompense pour ce combat",
+      "filter": {
+        "all": "Tous",
+        "win": "Victoires",
+        "draw": "Égalités",
+        "loss": "Défaites"
+      }
     },
     "result": {
       "section": "Résultat du combat",
@@ -213,6 +229,9 @@
       "description": "Enregistrement vérifié et récompenses persistantes.",
       "loading": "Chargement du résultat...",
       "notFound": "Résultat du combat introuvable.",
+      "backToHistory": "Retour à l'historique",
+      "rewardSummary": "+{credits} crédits et +{experience} XP de héros",
+      "rewardSecured": "Récompenses récupérées",
       "verification": "Vérification de l’enregistrement",
       "recordId": "ID de l’enregistrement",
       "seed": "Graine",
@@ -341,6 +360,9 @@
       "verifiedLog": "Journal de combat vérifié",
       "title": "Résumé du combat",
       "playerContribution": "Contribution des joueurs",
+      "playerIndex": "J{index}",
+      "activityTitle": "Activité du combat",
+      "earnedRewards": "Récompenses obtenues",
       "none": "Aucune",
       "rewardStatus": "Récompenses : {status}",
       "damageValue": "{count} dégâts",
@@ -362,7 +384,10 @@
     "mode": {
       "training": "Entraînement",
       "campaign": "Campagne",
-      "pvp": "JcJ"
+      "pvp": "JcJ",
+      "private_pvp": "JcJ privé",
+      "casual_pvp": "JcJ libre",
+      "ranked_pvp": "JcJ classé"
     },
     "verified": "Vérifié",
     "unavailable": "Indisponible",

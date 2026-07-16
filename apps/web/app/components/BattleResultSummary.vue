@@ -1,67 +1,153 @@
 <template>
-  <section class="panel battle-result-summary">
-    <div class="card-heading">
+  <section class="battle-result-summary">
+    <header class="battle-summary-header">
       <div>
         <span class="eyebrow">{{ t("battle.summary.verifiedLog") }}</span>
         <h2>{{ t("battle.summary.title") }}</h2>
       </div>
-      <span
-        v-if="reward"
-        :class="['pill', reward.status === 'claimed' ? 'ready-note' : 'muted-pill']"
-      >
-        {{ t("battle.summary.rewardStatus", { status: rewardStatus(reward.status) }) }}
+      <span v-if="reward" :class="['battle-reward-state', reward.status]">
+        <Gift :size="14" /> {{ rewardStatus(reward.status) }}
       </span>
-    </div>
+    </header>
 
-    <dl class="summary-grid">
-      <div class="stat">
-        <dt>{{ t("stats.turns") }}</dt>
-        <dd>{{ summary.turnCount }}</dd>
+    <section class="battle-summary-kpis">
+      <div>
+        <Clock3 :size="19" /><span
+          ><small>{{ t("stats.turns") }}</small
+          ><strong>{{ summary.turnCount }}</strong></span
+        >
       </div>
-      <div class="stat">
-        <dt>{{ t("stats.actions") }}</dt>
-        <dd>{{ summary.actionCount }}</dd>
+      <div>
+        <MousePointerClick :size="19" /><span
+          ><small>{{ t("stats.actions") }}</small
+          ><strong>{{ summary.actionCount }}</strong></span
+        >
       </div>
-      <div class="stat">
-        <dt>{{ t("stats.totalDamage") }}</dt>
-        <dd>{{ totalDamage }}</dd>
+      <div>
+        <Flame :size="19" /><span
+          ><small>{{ t("stats.totalDamage") }}</small
+          ><strong>{{ totalDamage }}</strong></span
+        >
       </div>
-      <div class="stat">
-        <dt>{{ t("stats.itemXp") }}</dt>
-        <dd>{{ totalItemExperience }}</dd>
-      </div>
-    </dl>
-
-    <section class="battle-summary-section">
-      <h3>{{ t("battle.summary.playerContribution") }}</h3>
-      <div class="battle-summary-table">
-        <div v-for="player in summary.players" :key="player.playerId">
-          <strong>{{ player.username }}</strong>
-          <span>{{ t("battle.summary.damageValue", { count: player.damage }) }}</span>
-          <span>{{ t("battle.summary.actionCount", { count: player.actionCount }) }}</span>
-        </div>
+      <div>
+        <Sparkles :size="19" /><span
+          ><small>{{ t("stats.itemXp") }}</small
+          ><strong>{{ totalItemExperience }}</strong></span
+        >
       </div>
     </section>
 
-    <div class="battle-summary-activity-grid">
-      <section v-for="group in activityGroups" :key="group.label" class="battle-summary-section">
-        <h3>{{ group.label }}</h3>
-        <p v-if="group.entries.length === 0" class="muted">{{ t("battle.summary.none") }}</p>
-        <ul v-else class="clean-list battle-summary-activity-list">
-          <li v-for="entry in group.entries" :key="`${entry.playerId}:${entry.id}`">
-            <span>
-              <strong>{{ entry.label }}</strong>
-              <small>{{ playerName(entry.playerId) }}</small>
-            </span>
-            <strong>{{ t("common.multiplier", { count: entry.count }) }}</strong>
+    <section class="battle-contribution-section">
+      <div class="battle-summary-section-title">
+        <Users :size="18" />
+        <h3>{{ t("battle.summary.playerContribution") }}</h3>
+      </div>
+      <div class="battle-contribution-grid">
+        <article v-for="(player, index) in summary.players" :key="player.playerId">
+          <div class="battle-player-index">
+            {{ t("battle.summary.playerIndex", { index: index + 1 }) }}
+          </div>
+          <strong>{{ player.username }}</strong>
+          <dl>
+            <div>
+              <dt>{{ t("stats.totalDamage") }}</dt>
+              <dd>{{ player.damage }}</dd>
+            </div>
+            <div>
+              <dt>{{ t("stats.actions") }}</dt>
+              <dd>{{ player.actionCount }}</dd>
+            </div>
+          </dl>
+        </article>
+      </div>
+    </section>
+
+    <section class="battle-activity-section">
+      <div class="battle-summary-section-title">
+        <Activity :size="18" />
+        <h3>{{ t("battle.summary.activityTitle") }}</h3>
+      </div>
+      <div class="battle-summary-activity-grid">
+        <section v-for="group in activityGroups" :key="group.label" class="battle-activity-group">
+          <h4>{{ group.label }}</h4>
+          <p v-if="group.entries.length === 0">{{ t("battle.summary.none") }}</p>
+          <ul v-else>
+            <li v-for="entry in group.entries" :key="`${entry.playerId}:${entry.id}`">
+              <span
+                ><strong>{{ entry.label }}</strong
+                ><small>{{ playerName(entry.playerId) }}</small></span
+              >
+              <strong>{{ t("common.multiplier", { count: entry.count }) }}</strong>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </section>
+
+    <section v-if="reward" class="battle-earned-section">
+      <div class="battle-summary-section-title">
+        <Gift :size="18" />
+        <h3>{{ t("battle.summary.earnedRewards") }}</h3>
+      </div>
+      <div class="battle-earned-grid">
+        <div>
+          <Coins :size="18" /><span
+            ><small>{{ t("common.credits") }}</small
+            ><strong>+{{ reward.credits }}</strong></span
+          >
+        </div>
+        <div>
+          <Zap :size="18" /><span
+            ><small>{{ t("stats.heroXp") }}</small
+            ><strong>+{{ reward.heroExperience }}</strong></span
+          >
+        </div>
+        <div>
+          <Package :size="18" /><span
+            ><small>{{ t("common.materials") }}</small
+            ><strong>+{{ totalMaterials }}</strong></span
+          >
+        </div>
+        <div>
+          <Sparkles :size="18" /><span
+            ><small>{{ t("stats.itemXp") }}</small
+            ><strong>+{{ totalItemExperience }}</strong></span
+          >
+        </div>
+      </div>
+      <div v-if="reward.materials.length || reward.items.length" class="battle-earned-details">
+        <ul v-if="reward.materials.length">
+          <li v-for="material in reward.materials" :key="material.materialId">
+            <span>{{ contentText(`material.${material.materialId}.name`, material.label) }}</span>
+            <strong>+{{ material.quantity }}</strong>
           </li>
         </ul>
-      </section>
-    </div>
+        <ul v-if="reward.items.length">
+          <li v-for="item in reward.items" :key="item.inventoryItemId">
+            <span>{{ contentText(`${item.type}.${item.definitionId}.name`, item.label) }}</span>
+            <strong>{{
+              t("battle.live.experienceReward", { experience: item.experience })
+            }}</strong>
+          </li>
+        </ul>
+      </div>
+    </section>
   </section>
 </template>
 
 <script setup lang="ts">
+import {
+  Activity,
+  Clock3,
+  Coins,
+  Flame,
+  Gift,
+  MousePointerClick,
+  Package,
+  Sparkles,
+  Users,
+  Zap,
+} from "@lucide/vue";
 import type {
   BattleResultSummaryActivityView,
   BattleResultSummaryView,
@@ -73,12 +159,16 @@ const props = defineProps<{
   reward?: BattleRewardView | null;
 }>();
 const { t } = useI18n();
+const contentText = useContentText();
 
 const totalDamage = computed(() =>
   props.summary.players.reduce((total, player) => total + player.damage, 0),
 );
 const totalItemExperience = computed(
   () => props.reward?.items.reduce((total, item) => total + item.experience, 0) ?? 0,
+);
+const totalMaterials = computed(
+  () => props.reward?.materials.reduce((total, item) => total + item.quantity, 0) ?? 0,
 );
 const activityGroups = computed<{ label: string; entries: BattleResultSummaryActivityView[] }[]>(
   () => [
