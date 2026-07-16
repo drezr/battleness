@@ -149,7 +149,7 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 
 ### Battle Layout Direction
 
-- The battle screen should eventually follow the user's sketch direction: heroes anchored on the left, the monster battlefield occupying the center, rings arranged as a bottom hand or equipment row, and energy bars visible at the top and bottom.
+- The player-facing live battle screen follows the user's sketch direction through a responsive Nuxt DOM arena: heroes anchor each side, three monster slots form the field, the viewer's rings form a bottom dock, and energy rails frame the arena. The action flow prepares a ring or monster, selects a server-compatible legal target on the board, and confirms through a sticky command tray. Complete engine events are converted into localized resolution messages and short source, impact, aggregated-damage, and status feedback that respects the persisted reduced-motion preference. Opponent rings remain hidden. Phaser remains an optional later layer for animation-heavy scene needs rather than a current dependency.
 - Monster cards should expose skill, damage, and health zones clearly.
 - Ring cards should expose damage and energy/cost information, with socketed gems visible along the bottom of each ring.
 - Ring, gem, and monster frames identify rarity consistently: common uses light gray, refined uses blue, rare uses orange, and epic uses purple.
@@ -527,6 +527,15 @@ This section separates executable game rules from implementation decisions. It i
 - Reason: Mobile support is a primary target, not a later adaptation.
 - Tradeoffs: Mobile-first design forces tighter controls, readable combat state, and careful interaction design. Desktop layouts can expand from the mobile model, but dense desktop-only UI patterns should not drive the core experience.
 
+#### Player App Visual Direction
+
+- Status: decided.
+- Decision: Use a dark-first tactical competitive interface. Desktop uses a persistent left sidebar and compact resource top bar; mobile uses a fixed bottom navigation bar. The home view acts as a command center rather than a marketing page.
+- Decision: Use medium-density item cards, a distinct display treatment for headings with a neutral sans-serif UI face, restrained rarity borders and glows, element badges with targeted color accents, and fast functional motion with reduced-motion support.
+- Decision: Use familiar Lucide icons for navigation and tools, text or icon-plus-text controls for explicit commands, the full BattleNess logo on the home view, and the compact BattleNess icon in the application shell.
+- Reason: The Game App needs a recognizable player-facing hierarchy while preserving efficient access to battle, forge, inventory, market, and profile workflows on both mobile and desktop.
+- Tradeoffs: The shared shell and design tokens must be applied incrementally to established feature pages. The permanent Dev Lab keeps technical diagnostics that should not leak into the player-facing presentation.
+
 #### Clean Rebuild
 
 - Status: decided.
@@ -788,7 +797,6 @@ This section separates executable game rules from implementation decisions. It i
 ### Not Decided Yet
 
 - Long-term deployment platform. A classic Node server or VPS is currently preferred if feasible, but this should be confirmed when backend and multiplayer requirements are clearer.
-- Combat UI direction beyond a simple prototype interface.
 - Exact Phaser integration approach for the combat presentation.
 
 ## Open Technical Topics

@@ -26,6 +26,7 @@
   "dependencies": {
     "@battleness/content": "workspace:*",
     "@battleness/engine": "workspace:*",
+    "@lucide/vue": "^1.24.0",
     "@nuxtjs/i18n": "^10.4.1",
     "@prisma/client": "^6.19.0",
     "h3": "^1.15.4",

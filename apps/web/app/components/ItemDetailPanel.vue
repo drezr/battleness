@@ -1,5 +1,5 @@
 <template>
-  <aside class="panel item-detail-panel">
+  <aside :class="['panel', 'item-detail-panel', { 'item-detail-empty': !item }]">
     <div class="card-heading">
       <div>
         <span class="eyebrow">{{ eyebrow ?? t("common.inspect") }}</span>
@@ -197,23 +197,6 @@
         </div>
       </section>
 
-      <section class="item-detail-section">
-        <h3>{{ t("itemDetail.technical") }}</h3>
-        <dl class="summary-grid item-detail-grid">
-          <div v-if="item.id" class="stat">
-            <dt>ID</dt>
-            <dd>
-              <code>{{ item.id }}</code>
-            </dd>
-          </div>
-          <div v-if="item.definitionId" class="stat">
-            <dt>{{ t("itemDetail.definition") }}</dt>
-            <dd>
-              <code>{{ item.definitionId }}</code>
-            </dd>
-          </div>
-        </dl>
-      </section>
     </template>
   </aside>
 </template>

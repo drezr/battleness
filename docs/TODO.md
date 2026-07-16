@@ -4,7 +4,7 @@ This is the centralized working TODO for BattleNess. It focuses on what remains 
 
 ## Current Focus
 
-Private, casual, and ranked PvP now share the authoritative persistent battle lifecycle, deadlines, reconnection behavior, authenticated WebSocket invalidations with HTTP polling fallback, and concurrency regression coverage. The complete core player-market flow, including permanent private transaction history, is implemented; the next recommended product focus is the combat-presentation decision and mobile battle controls. Google Cloud credentials and consent-screen setup remain an environment deployment task.
+Private, casual, and ranked PvP now share the authoritative persistent battle lifecycle, deadlines, reconnection behavior, authenticated WebSocket invalidations with HTTP polling fallback, and concurrency regression coverage. The complete core player-market flow, including permanent private transaction history, is implemented. The mobile-first Nuxt DOM combat presentation now includes board-level target selection, a prepared-action command tray, localized resolution messages, and reduced-motion-compatible source, impact, damage, and status feedback. Google Cloud credentials and consent-screen setup remain an environment deployment task.
 
 ## Phase 1 - Game App Data Foundation
 
@@ -158,14 +158,29 @@ Private, casual, and ranked PvP now share the authoritative persistent battle li
 
 ## Phase 12 - Combat Presentation
 
-- [ ] Decide whether Nuxt DOM is enough for battle presentation or whether Phaser is needed.
+- [x] Decide whether Nuxt DOM is enough for battle presentation or whether Phaser is needed. Nuxt DOM is the initial implementation; Phaser remains optional for future animation-heavy scene requirements.
 - [ ] If Phaser is chosen, isolate it to the battle view and keep the combat engine framework-independent.
-- [ ] Build mobile-first battle controls.
-- [ ] Improve target selection ergonomics.
-- [ ] Add animations only after the action/state model is stable.
-- [ ] Preserve accessibility and readable combat state.
+- [x] Build mobile-first battle controls with horizontally scrollable unit and ring rows plus a sticky command tray.
+- [x] Improve target selection ergonomics with a prepare-source, select-legal-target, confirm-action flow and client-visible Taunt restrictions.
+- [x] Add restrained CSS feedback after the action/state model is stable: source and target pulses, aggregated damage numbers, status labels, and reduced-motion support.
+- [x] Preserve accessibility and readable combat state with semantic controls, meters, localized labels, and collapsible technical diagnostics.
 
-## Phase 13 - Production And Operations
+## Phase 13 - Player App Visual Redesign
+
+- [x] Decide the visual direction: dark-first tactical competitive presentation, medium content density, restrained rarity and element accents, and fast functional motion.
+- [x] Replace the prototype-style horizontal header with a desktop sidebar, compact resource top bar, and mobile bottom navigation.
+- [x] Rebuild the home view as a player command center with battle entry, resource summary, quick destinations, and collection artwork.
+- [x] Apply the first shared item-card and inventory presentation pass, including mobile detail behavior and hidden player-facing technical IDs.
+- [x] Apply the design system to the Battle hub and Campaign journey, readiness, encounter, reward, and opponent-intelligence views.
+- [x] Apply the design system consistently to the PvP hub and private, casual, and ranked matchmaking views.
+- [ ] Apply the design system consistently to Battle history and result views.
+- [ ] Apply the design system consistently to Inventory equipment and loadout workflows.
+- [ ] Apply the design system consistently to Forge workflows.
+- [ ] Apply the design system consistently to Game Market and Player Market workflows.
+- [ ] Apply the design system consistently to Profile and Settings workflows.
+- [ ] Perform a final accessibility, responsive layout, reduced-motion, and localization visual audit.
+
+## Phase 14 - Production And Operations
 
 - [ ] Decide deployment platform.
 - [ ] Decide PostgreSQL hosting.

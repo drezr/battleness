@@ -1,5 +1,5 @@
 <template>
-  <main class="shell">
+  <main class="shell pvp-flow-page ranked-match-page">
     <nav class="section-nav" :aria-label="t('accessibility.pvpNavigation')">
       <NuxtLink
         v-for="link in sectionLinks.pvp"
@@ -11,27 +11,32 @@
       </NuxtLink>
     </nav>
 
-    <header class="view-header">
+    <header class="view-header pvp-view-header">
       <div class="view-title">
         <span class="eyebrow">{{ t("navigation.pvp") }}</span>
         <h1>{{ t("rankedMatch.title") }}</h1>
         <p class="muted">{{ t("rankedMatch.description") }}</p>
       </div>
       <div class="view-status-stack">
-        <span :class="['pill', `realtime-${realtimeStatus}`]">
-          {{ t(`realtime.${realtimeStatus}`) }}
+        <span :class="['pvp-live-status', `realtime-${realtimeStatus}`]">
+          <Wifi :size="14" /> {{ t(`realtime.${realtimeStatus}`) }}
         </span>
-        <span v-if="state" class="pill">{{ t(`rankedMatch.status.${state.status}`) }}</span>
+        <span v-if="state" class="pvp-state-pill">{{
+          t(`rankedMatch.status.${state.status}`)
+        }}</span>
       </div>
     </header>
 
     <p v-if="errorMessage" class="settings-error">{{ errorMessage }}</p>
     <p v-if="pending && !state" class="panel">{{ t("rankedMatch.loading") }}</p>
 
-    <section v-else-if="state" class="private-match-entry">
-      <article class="panel">
-        <span class="eyebrow">{{ t("rankedMatch.ratingLabel") }}</span>
-        <h2>{{ rankLabel }}</h2>
+    <section v-else-if="state" class="ranked-command-layout">
+      <article class="ranked-standing-card">
+        <div class="ranked-emblem"><Trophy :size="31" /></div>
+        <div class="ranked-standing-copy">
+          <span class="eyebrow">{{ t("rankedMatch.ratingLabel") }}</span>
+          <h2>{{ rankLabel }}</h2>
+        </div>
         <dl v-if="state.rating" class="summary-grid">
           <div>
             <dt>{{ t("rankedMatch.rating") }}</dt>
@@ -52,7 +57,7 @@
         </dl>
       </article>
 
-      <article v-if="state.seasonReset" class="panel">
+      <article v-if="state.seasonReset" class="ranked-notice-card">
         <span class="eyebrow">{{ t("rankedMatch.newSeasonLabel") }}</span>
         <h2>{{ t("rankedMatch.newSeasonTitle") }}</h2>
         <p class="muted">
@@ -72,30 +77,36 @@
         </p>
       </article>
 
-      <article v-if="state.status === 'unavailable'" class="panel">
+      <article
+        v-if="state.status === 'unavailable'"
+        class="pvp-queue-console ranked-console unavailable"
+      >
         <span class="eyebrow">{{ t("rankedMatch.seasonLabel") }}</span>
         <h2>{{ t("rankedMatch.noSeason") }}</h2>
         <p class="muted">{{ t("rankedMatch.noSeasonDescription") }}</p>
       </article>
 
-      <article v-else-if="state.status === 'idle'" class="panel">
-        <span class="eyebrow">{{ t("rankedMatch.loadoutLabel") }}</span>
-        <h2>{{ state.activeLoadout?.name || t("rankedMatch.noActiveLoadout") }}</h2>
-        <p v-if="state.activeLoadout" class="muted">
-          {{
-            t(
-              state.activeLoadout.ringCount === 1
-                ? "rankedMatch.ringCountOne"
-                : "rankedMatch.ringCount",
-              { count: state.activeLoadout.ringCount },
-            )
-          }}
-        </p>
-        <p v-else class="muted">{{ t("rankedMatch.loadoutRequired") }}</p>
+      <article v-else-if="state.status === 'idle'" class="pvp-queue-console ranked-console">
+        <div class="pvp-console-icon"><Target :size="31" /></div>
+        <div class="pvp-console-copy">
+          <span class="eyebrow">{{ t("rankedMatch.loadoutLabel") }}</span>
+          <h2>{{ state.activeLoadout?.name || t("rankedMatch.noActiveLoadout") }}</h2>
+          <p v-if="state.activeLoadout" class="muted">
+            {{
+              t(
+                state.activeLoadout.ringCount === 1
+                  ? "rankedMatch.ringCountOne"
+                  : "rankedMatch.ringCount",
+                { count: state.activeLoadout.ringCount },
+              )
+            }}
+          </p>
+          <p v-else>{{ t("rankedMatch.loadoutRequired") }}</p>
+        </div>
         <p v-if="state.discipline.lockedUntil" class="settings-error">
           {{ t("rankedMatch.lockedUntil", { time: formatDateTime(state.discipline.lockedUntil) }) }}
         </p>
-        <div class="action-row">
+        <div class="pvp-command-actions">
           <button
             type="button"
             :disabled="
@@ -106,10 +117,10 @@
             "
             @click="submit('enter')"
           >
-            {{ t("rankedMatch.enterQueue") }}
+            <Swords :size="18" /> {{ t("rankedMatch.enterQueue") }}
           </button>
           <NuxtLink class="button-link secondary-button" to="/inventory/loadouts">
-            {{ t("rankedMatch.manageLoadouts") }}
+            {{ t("rankedMatch.manageLoadouts") }} <ArrowRight :size="16" />
           </NuxtLink>
         </div>
         <p v-if="state.discipline.missedAcceptances > 0" class="muted">
@@ -121,7 +132,13 @@
         </p>
       </article>
 
-      <article v-else-if="state.status === 'searching'" class="panel private-ready-panel">
+      <article
+        v-else-if="state.status === 'searching'"
+        class="pvp-search-state ranked-search-state"
+      >
+        <div class="pvp-search-radar" aria-hidden="true">
+          <span></span><span></span><Search :size="29" />
+        </div>
         <div>
           <span class="eyebrow">{{ t("rankedMatch.searchingLabel") }}</span>
           <h2>{{ t("rankedMatch.searchingTitle") }}</h2>
@@ -148,17 +165,22 @@
           </p>
           <p class="muted">{{ t("rankedMatch.searchTime", { time: queueTimeRemaining }) }}</p>
         </div>
+        <div class="pvp-countdown">
+          <small>{{ t("rankedMatch.expiresLabel") }}</small>
+          <strong>{{ queueTimeRemaining }}</strong>
+        </div>
         <button
           type="button"
           class="secondary-button"
           :disabled="mutating"
           @click="submit('cancel')"
         >
-          {{ t("rankedMatch.cancelQueue") }}
+          <X :size="17" /> {{ t("rankedMatch.cancelQueue") }}
         </button>
       </article>
 
-      <article v-else-if="state.status === 'accepting'" class="panel private-ready-panel">
+      <article v-else-if="state.status === 'accepting'" class="pvp-accept-state">
+        <div class="pvp-match-ready-icon"><UserCheck :size="29" /></div>
         <div>
           <span class="eyebrow">{{ t("rankedMatch.proposalLabel") }}</span>
           <h2>
@@ -171,13 +193,13 @@
             {{ t("rankedMatch.waitingForOpponent") }}
           </p>
         </div>
-        <div class="action-row">
+        <div class="pvp-command-actions">
           <button
             type="button"
             :disabled="mutating || state.proposal?.accepted"
             @click="submit('accept')"
           >
-            {{ t("rankedMatch.accept") }}
+            <Check :size="17" /> {{ t("rankedMatch.accept") }}
           </button>
           <button
             type="button"
@@ -185,33 +207,31 @@
             :disabled="mutating"
             @click="submit('decline')"
           >
-            {{ t("rankedMatch.decline") }}
+            <X :size="17" /> {{ t("rankedMatch.decline") }}
           </button>
         </div>
       </article>
 
-      <article
-        v-else-if="state.status === 'matched' && state.match"
-        class="panel private-battle-ready"
-      >
+      <article v-else-if="state.status === 'matched' && state.match" class="pvp-match-found">
+        <div class="pvp-match-ready-icon"><Swords :size="29" /></div>
         <div>
           <span class="eyebrow">{{ t("rankedMatch.matchedLabel") }}</span>
           <h2>{{ t("rankedMatch.matchedTitle", { opponent: state.match.opponent.username }) }}</h2>
           <p class="muted">{{ t("rankedMatch.redirecting") }}</p>
         </div>
         <NuxtLink class="button-link" :to="`/battle/live/${state.match.battleId}`">
-          {{ t("rankedMatch.enterBattle") }}
+          {{ t("rankedMatch.enterBattle") }} <ArrowRight :size="17" />
         </NuxtLink>
       </article>
 
-      <article v-if="state.recentBattleId" class="panel">
+      <article v-if="state.recentBattleId" class="pvp-recent-card ranked-recent-card">
         <span class="eyebrow">{{ t("rankedMatch.previousBattle") }}</span>
         <h2>{{ t("rankedMatch.previousBattleTitle") }}</h2>
         <NuxtLink
           class="button-link secondary-button"
           :to="`/battle/result/${state.recentBattleId}`"
         >
-          {{ t("rankedMatch.viewResult") }}
+          {{ t("rankedMatch.viewResult") }} <ArrowRight :size="15" />
         </NuxtLink>
       </article>
     </section>
@@ -311,6 +331,7 @@
 </template>
 
 <script setup lang="ts">
+import { ArrowRight, Check, Search, Swords, Target, Trophy, UserCheck, Wifi, X } from "@lucide/vue";
 import type {
   RankedLeaderboardEntry,
   RankedLeaderboardState,

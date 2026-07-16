@@ -1,3 +1,5 @@
+import type { BattleEvent } from "@battleness/engine";
+
 export type PlayerState = {
   content: ContentReleaseView;
   player: {
@@ -560,7 +562,7 @@ export type LiveBattleActionCommand =
 
 export type LiveBattleActionResponse = {
   battle: LiveBattleState;
-  events: { type: string }[];
+  events: BattleEvent[];
 };
 
 export type InventoryItemView = {
