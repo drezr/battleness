@@ -100,12 +100,17 @@
             <h2>{{ t("progression.itemProgress") }}</h2>
             <p class="muted">{{ t("progression.itemProgressDescription") }}</p>
           </div>
-          <div class="progression-type-filters" :aria-label="t('progression.filterLabel')">
+          <div
+            class="progression-type-filters"
+            role="group"
+            :aria-label="t('progression.filterLabel')"
+          >
             <button
               v-for="filter in typeFilters"
               :key="filter.value"
               type="button"
               :class="{ active: typeFilter === filter.value }"
+              :aria-pressed="typeFilter === filter.value"
               @click="typeFilter = filter.value"
             >
               {{ t(filter.labelKey) }} <span>{{ filter.count }}</span>

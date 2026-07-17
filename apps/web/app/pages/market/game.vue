@@ -33,6 +33,7 @@
           <button
             :class="{ active: resourceView === 'materials' }"
             type="button"
+            :aria-pressed="resourceView === 'materials'"
             @click="resourceView = 'materials'"
           >
             <PackageOpen :size="17" aria-hidden="true" />{{ t("market.game.materials") }}
@@ -40,6 +41,7 @@
           <button
             :class="{ active: resourceView === 'items' }"
             type="button"
+            :aria-pressed="resourceView === 'items'"
             @click="resourceView = 'items'"
           >
             <Gem :size="17" aria-hidden="true" />{{ t("market.game.items") }}
@@ -94,6 +96,7 @@
                   { selected: selectedMaterial?.id === material.id },
                 ]"
                 type="button"
+                :aria-pressed="selectedMaterial?.id === material.id"
                 @click="selectMaterial(material.id)"
               >
                 <ItemArtwork :definition-id="material.id" kind="material" />
@@ -149,6 +152,7 @@
               <button
                 :class="{ active: marketAction === 'buy' }"
                 type="button"
+                :aria-pressed="marketAction === 'buy'"
                 @click="selectMarketAction('buy')"
               >
                 <ShoppingCart :size="16" />{{ t("market.game.buy") }}
@@ -156,6 +160,7 @@
               <button
                 :class="{ active: marketAction === 'sell' }"
                 type="button"
+                :aria-pressed="marketAction === 'sell'"
                 @click="selectMarketAction('sell')"
               >
                 <Banknote :size="16" />{{ t("market.game.sell") }}
@@ -285,6 +290,7 @@
                   { selected: selectedItem?.id === item.id, blocked: !item.canSell },
                 ]"
                 type="button"
+                :aria-pressed="selectedItem?.id === item.id"
                 @click="selectItem(item.id)"
               >
                 <ItemArtwork :definition-id="item.definitionId" :kind="item.type" />

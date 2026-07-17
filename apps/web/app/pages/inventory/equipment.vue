@@ -39,7 +39,9 @@
         <dl class="equipment-kpis">
           <div>
             <dt>{{ t("common.rings") }}</dt>
-            <dd>{{ equipment.summary.ringCount }}<small>/{{ equipment.maxEquippedRings }}</small></dd>
+            <dd>
+              {{ equipment.summary.ringCount }}<small>/{{ equipment.maxEquippedRings }}</small>
+            </dd>
           </div>
           <div>
             <dt><Sword :size="14" aria-hidden="true" /> {{ t("stats.damage") }}</dt>
@@ -51,7 +53,10 @@
           </div>
           <div>
             <dt><Zap :size="14" aria-hidden="true" /> {{ t("inventory.equipment.efficiency") }}</dt>
-            <dd>{{ equipment.summary.averageEnergyCost }}<small> / {{ equipment.summary.averageCooldown }}</small></dd>
+            <dd>
+              {{ equipment.summary.averageEnergyCost
+              }}<small> / {{ equipment.summary.averageCooldown }}</small>
+            </dd>
           </div>
         </dl>
       </section>
@@ -91,15 +96,29 @@
                       t(`element.${ring.element}`)
                     }}</span>
                     <small>
-                      {{ t("inventory.equipment.compactStats", { damage: ring.damage, energy: ring.energyCost, cooldown: ring.cooldown }) }}
+                      {{
+                        t("inventory.equipment.compactStats", {
+                          damage: ring.damage,
+                          energy: ring.energyCost,
+                          cooldown: ring.cooldown,
+                        })
+                      }}
                     </small>
                   </div>
                   <div class="equipment-slot-actions">
                     <button
                       class="icon-button"
                       type="button"
-                      :title="t('common.inspect')"
-                      :aria-label="t('common.inspect')"
+                      :title="
+                        t('common.inspectItem', {
+                          item: itemName('ring', ring.definitionId, ring.label),
+                        })
+                      "
+                      :aria-label="
+                        t('common.inspectItem', {
+                          item: itemName('ring', ring.definitionId, ring.label),
+                        })
+                      "
                       @click="selectedDetailRingId = ring.id"
                     >
                       <Eye :size="17" aria-hidden="true" />
@@ -108,8 +127,16 @@
                       class="icon-button danger-action"
                       type="button"
                       :disabled="updating"
-                      :title="t('inventory.equipment.unequip')"
-                      :aria-label="t('inventory.equipment.unequip')"
+                      :title="
+                        t('inventory.equipment.unequipRing', {
+                          ring: itemName('ring', ring.definitionId, ring.label),
+                        })
+                      "
+                      :aria-label="
+                        t('inventory.equipment.unequipRing', {
+                          ring: itemName('ring', ring.definitionId, ring.label),
+                        })
+                      "
                       @click="updateEquipment('unequip', ring.id)"
                     >
                       <X :size="17" aria-hidden="true" />
@@ -117,7 +144,9 @@
                   </div>
                 </template>
                 <template v-else>
-                  <span class="empty-slot-icon"><CircleDashed :size="22" aria-hidden="true" /></span>
+                  <span class="empty-slot-icon"
+                    ><CircleDashed :size="22" aria-hidden="true"
+                  /></span>
                   <span>{{ t("inventory.equipment.emptySlot") }}</span>
                 </template>
               </article>
@@ -126,16 +155,37 @@
 
           <details class="equipment-resolved-details">
             <summary>
-              <span><SlidersHorizontal :size="17" aria-hidden="true" /> {{ t("inventory.equipment.resolvedMetrics") }}</span>
+              <span
+                ><SlidersHorizontal :size="17" aria-hidden="true" />
+                {{ t("inventory.equipment.resolvedMetrics") }}</span
+              >
               <ChevronDown :size="17" aria-hidden="true" />
             </summary>
             <dl class="summary-grid">
-              <div class="stat"><dt>{{ t("itemDetail.ringDamage") }}</dt><dd>{{ equipment.summary.totalRingDamage }}</dd></div>
-              <div class="stat"><dt>{{ t("itemDetail.gemDamage") }}</dt><dd>{{ equipment.summary.totalGemDamage }}</dd></div>
-              <div class="stat"><dt>{{ t("itemDetail.spellDamage") }}</dt><dd>{{ equipment.summary.totalSpellDamage }}</dd></div>
-              <div class="stat"><dt>{{ t("itemDetail.monsterDamage") }}</dt><dd>{{ equipment.summary.totalMonsterDamage }}</dd></div>
-              <div class="stat"><dt>{{ t("itemDetail.energyPenalty") }}</dt><dd>{{ equipment.summary.totalEnergyPenalty }}</dd></div>
-              <div class="stat"><dt>{{ t("itemDetail.cooldownPenalty") }}</dt><dd>{{ equipment.summary.totalCooldownPenalty }}</dd></div>
+              <div class="stat">
+                <dt>{{ t("itemDetail.ringDamage") }}</dt>
+                <dd>{{ equipment.summary.totalRingDamage }}</dd>
+              </div>
+              <div class="stat">
+                <dt>{{ t("itemDetail.gemDamage") }}</dt>
+                <dd>{{ equipment.summary.totalGemDamage }}</dd>
+              </div>
+              <div class="stat">
+                <dt>{{ t("itemDetail.spellDamage") }}</dt>
+                <dd>{{ equipment.summary.totalSpellDamage }}</dd>
+              </div>
+              <div class="stat">
+                <dt>{{ t("itemDetail.monsterDamage") }}</dt>
+                <dd>{{ equipment.summary.totalMonsterDamage }}</dd>
+              </div>
+              <div class="stat">
+                <dt>{{ t("itemDetail.energyPenalty") }}</dt>
+                <dd>{{ equipment.summary.totalEnergyPenalty }}</dd>
+              </div>
+              <div class="stat">
+                <dt>{{ t("itemDetail.cooldownPenalty") }}</dt>
+                <dd>{{ equipment.summary.totalCooldownPenalty }}</dd>
+              </div>
             </dl>
           </details>
 
@@ -167,29 +217,74 @@
                   <div class="card-heading">
                     <div>
                       <strong>{{ itemName("ring", ring.definitionId, ring.label) }}</strong>
-                      <small>{{ t("inventory.equipment.levelQuality", { level: ring.level, quality: ring.quality }) }}</small>
+                      <small>{{
+                        t("inventory.equipment.levelQuality", {
+                          level: ring.level,
+                          quality: ring.quality,
+                        })
+                      }}</small>
                     </div>
-                    <span :class="['pill', `element-${ring.element}`]">{{ t(`element.${ring.element}`) }}</span>
+                    <span :class="['pill', `element-${ring.element}`]">{{
+                      t(`element.${ring.element}`)
+                    }}</span>
                   </div>
                   <dl class="equipment-ring-stats">
-                    <div><dt>{{ t("stats.damage") }}</dt><dd>{{ ring.damage }}</dd></div>
-                    <div><dt>{{ t("stats.energy") }}</dt><dd>{{ ring.energyCost }}</dd></div>
-                    <div><dt>{{ t("stats.cooldown") }}</dt><dd>{{ ring.cooldown }}</dd></div>
-                    <div><dt>{{ t("inventory.equipment.sockets") }}</dt><dd>{{ ring.gems.length }}/{{ ring.socketCount }}</dd></div>
+                    <div>
+                      <dt>{{ t("stats.damage") }}</dt>
+                      <dd>{{ ring.damage }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ t("stats.energy") }}</dt>
+                      <dd>{{ ring.energyCost }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ t("stats.cooldown") }}</dt>
+                      <dd>{{ ring.cooldown }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ t("inventory.equipment.sockets") }}</dt>
+                      <dd>{{ ring.gems.length }}/{{ ring.socketCount }}</dd>
+                    </div>
                   </dl>
                   <div class="equipment-card-actions">
                     <button
                       v-if="!ring.equipped"
                       type="button"
-                      :disabled="updating || equipment.summary.ringCount >= equipment.maxEquippedRings"
+                      :disabled="
+                        updating || equipment.summary.ringCount >= equipment.maxEquippedRings
+                      "
+                      :aria-label="
+                        t('inventory.equipment.equipRing', {
+                          ring: itemName('ring', ring.definitionId, ring.label),
+                        })
+                      "
                       @click="updateEquipment('equip', ring.id)"
                     >
                       <Plus :size="16" aria-hidden="true" /> {{ t("inventory.equipment.equip") }}
                     </button>
-                    <button v-else type="button" :disabled="updating" @click="updateEquipment('unequip', ring.id)">
+                    <button
+                      v-else
+                      type="button"
+                      :disabled="updating"
+                      :aria-label="
+                        t('inventory.equipment.unequipRing', {
+                          ring: itemName('ring', ring.definitionId, ring.label),
+                        })
+                      "
+                      @click="updateEquipment('unequip', ring.id)"
+                    >
                       <X :size="16" aria-hidden="true" /> {{ t("inventory.equipment.unequip") }}
                     </button>
-                    <button class="secondary-button" type="button" @click="selectedDetailRingId = ring.id">
+                    <button
+                      class="secondary-button"
+                      type="button"
+                      :aria-label="
+                        t('common.inspectItem', {
+                          item: itemName('ring', ring.definitionId, ring.label),
+                        })
+                      "
+                      @click="selectedDetailRingId = ring.id"
+                    >
                       <Eye :size="16" aria-hidden="true" /> {{ t("common.inspect") }}
                     </button>
                   </div>
@@ -235,7 +330,12 @@ const feedback = ref("");
 const actionError = ref("");
 const updating = ref(false);
 const selectedDetailRingId = ref("");
-const { data: equipment, error, pending, refresh } = await useFetch<EquipmentState>("/api/inventory/equipment");
+const {
+  data: equipment,
+  error,
+  pending,
+  refresh,
+} = await useFetch<EquipmentState>("/api/inventory/equipment");
 
 const equipmentSlots = computed<(EquipmentRingView | null)[]>(() => {
   if (!equipment.value) return [];
@@ -248,7 +348,8 @@ const equipmentSlots = computed<(EquipmentRingView | null)[]>(() => {
 });
 
 const selectedDetailRing = computed(
-  () => equipment.value?.availableRings.find((ring) => ring.id === selectedDetailRingId.value) ?? null,
+  () =>
+    equipment.value?.availableRings.find((ring) => ring.id === selectedDetailRingId.value) ?? null,
 );
 
 function itemName(type: string, definitionId: string, fallback: string): string {
@@ -264,10 +365,15 @@ async function updateEquipment(action: "equip" | "unequip", ringItemId: string) 
       method: "POST",
       body: { action, ringItemId },
     });
-    feedback.value = t(action === "equip" ? "inventory.equipment.equippedSuccess" : "inventory.equipment.unequippedSuccess");
+    feedback.value = t(
+      action === "equip"
+        ? "inventory.equipment.equippedSuccess"
+        : "inventory.equipment.unequippedSuccess",
+    );
     await refresh();
   } catch (error_) {
-    actionError.value = error_ instanceof Error ? error_.message : t("inventory.equipment.actionError");
+    actionError.value =
+      error_ instanceof Error ? error_.message : t("inventory.equipment.actionError");
   } finally {
     updating.value = false;
   }

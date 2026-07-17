@@ -68,12 +68,17 @@
             <span class="eyebrow">{{ t("battle.history.archiveLabel") }}</span>
             <h2>{{ t("battle.history.archiveTitle") }}</h2>
           </div>
-          <div class="battle-history-filters" :aria-label="t('battle.history.filterLabel')">
+          <div
+            class="battle-history-filters"
+            role="group"
+            :aria-label="t('battle.history.filterLabel')"
+          >
             <button
               v-for="filter in filters"
               :key="filter.value"
               type="button"
               :class="{ active: activeFilter === filter.value }"
+              :aria-pressed="activeFilter === filter.value"
               @click="activeFilter = filter.value"
             >
               {{ t(filter.labelKey) }} <span>{{ filter.count }}</span>

@@ -4,7 +4,7 @@ This is the centralized working TODO for BattleNess. It focuses on what remains 
 
 ## Current Focus
 
-The player-facing visual redesign now covers the application shell, home, collection inventory, all battle surfaces, equipment, saved loadouts, Forge, Game Market, Player Market, private market history, Profile, Progression, and Settings. The next visual task is the final cross-application accessibility, responsive-layout, reduced-motion, and localization audit. Google Cloud credentials and consent-screen setup remain an environment deployment task.
+The player-facing visual redesign and cross-application audit now cover the application shell, authentication, home, collection inventory, all battle surfaces, equipment, saved loadouts, Forge, Game Market, Player Market, private market history, Profile, Progression, and Settings. The next planning work should select among the remaining production and operations tasks, deferred external OAuth configuration, shared realtime pub/sub, and explicit open design questions.
 
 ## Phase 1 - Game App Data Foundation
 
@@ -180,7 +180,12 @@ The player-facing visual redesign now covers the application shell, home, collec
 - [x] Apply the design system consistently to Forge workflows.
 - [x] Apply the design system consistently to Game Market and Player Market workflows.
 - [x] Apply the design system consistently to Profile and Settings workflows.
-- [ ] Perform a final accessibility, responsive layout, reduced-motion, and localization visual audit.
+- [x] Audit Battle Hub, Campaign, PvP, and Live Battle across desktop and mobile layouts, including touch targets, keyboard focus, reduced motion, overflow, and runtime localization warnings.
+- [x] Audit Forge Hub, Craft, Socket, and Quality across desktop and mobile layouts, including touch targets, form controls, overflow, runtime warnings, and shared item-modal focus confinement.
+- [x] Audit Inventory Hub, Items, Materials, Equipment, and Loadouts across desktop and mobile layouts, including touch targets, overflow, item-modal behavior, contextual accessible names, and guarded destructive actions.
+- [x] Audit Market Hub, Game Market, Player Market, and private Market History across desktop and mobile layouts, including touch targets, expandable panels, filters, pagination, selection state, contextual listing actions, overflow, and runtime localization warnings.
+- [x] Audit Home, Profile Overview, Profile History, Progression, Settings, authentication, and the global application shell across desktop and mobile layouts, including touch targets, navigation state, preference controls, reduced motion, sign-out/sign-in restoration, overflow, and runtime localization warnings.
+- [x] Perform a final accessibility, responsive layout, reduced-motion, and localization visual audit.
 
 ## Phase 14 - Production And Operations
 
@@ -188,7 +193,7 @@ The player-facing visual redesign now covers the application shell, home, collec
 - [ ] Decide PostgreSQL hosting.
 - [ ] Add production environment configuration.
 - [ ] Add database backup strategy.
-- [ ] Extend CI to cover the Nuxt Game App and future migration checks.
+- [x] Extend CI to enforce formatting, build the Nuxt Game App for production, and run PostgreSQL migration, drift, and smoke checks.
 - [ ] Add basic observability for server errors and match failures.
 
 ## Open Design Questions

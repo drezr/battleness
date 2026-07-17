@@ -63,7 +63,13 @@
             <div class="settings-field-grid">
               <label>
                 <span class="field-label">{{ t("settings.profile.displayName") }}</span>
-                <input v-model="form.displayName" autocomplete="nickname" maxlength="32" />
+                <input
+                  v-model="form.displayName"
+                  autocomplete="nickname"
+                  minlength="2"
+                  maxlength="32"
+                  required
+                />
               </label>
               <label>
                 <span class="field-label">{{ t("settings.profile.visibility") }}</span>
@@ -189,8 +195,8 @@
       </div>
 
       <div class="settings-save-bar">
-        <p v-if="saveMessage" class="positive">{{ saveMessage }}</p>
-        <p v-else-if="saveError" class="settings-error">{{ saveError }}</p>
+        <p v-if="saveMessage" class="positive" role="status">{{ saveMessage }}</p>
+        <p v-else-if="saveError" class="settings-error" role="alert">{{ saveError }}</p>
         <span v-else />
         <button type="submit" :disabled="saving">
           <Save :size="17" aria-hidden="true" />

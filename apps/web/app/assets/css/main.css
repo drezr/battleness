@@ -539,6 +539,7 @@
 
 .pvp-text-link {
   display: flex;
+  min-height: 44px;
   gap: 6px;
   align-items: center;
   width: fit-content;
@@ -926,6 +927,11 @@ button,
   text-decoration: none;
 }
 
+:where(a, button, input, select, summary, [role="button"]):focus-visible {
+  outline: 2px solid #8eeafa;
+  outline-offset: 2px;
+}
+
 button:disabled,
 .button-link.disabled {
   cursor: not-allowed;
@@ -981,6 +987,17 @@ input {
   transition-duration: 0.01ms !important;
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell *,
+  .app-shell *::before,
+  .app-shell *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
 
 .app-shell.density-compact .shell {
@@ -3477,6 +3494,10 @@ h3 {
 }
 
 @media (max-width: 640px) {
+  .live-command-tray {
+    bottom: calc(70px + env(safe-area-inset-bottom));
+  }
+
   .live-match-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -3526,11 +3547,15 @@ h3 {
 
   .live-command-buttons {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .live-command-buttons button {
     min-width: 0;
+    min-height: 44px;
+    padding-inline: 7px;
+    line-height: 1.2;
+    white-space: normal;
   }
 
   .live-resolution-feed {
@@ -4251,6 +4276,7 @@ body {
 
   .topbar-resource {
     grid-template-columns: auto auto;
+    min-height: 44px;
     padding-inline: 7px;
   }
 
@@ -7793,6 +7819,23 @@ body {
   margin-left: auto;
 }
 
+.loadout-delete-confirmation {
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 1px solid rgb(255 255 255 / 10%);
+}
+
+.loadout-delete-confirmation > span {
+  margin-right: auto;
+  color: var(--app-muted);
+  font-size: 0.78rem;
+}
+
 @media (max-width: 980px) {
   .equipment-overview {
     grid-template-columns: 1fr;
@@ -9761,6 +9804,73 @@ body {
 
   .settings-preference-section {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .battle-hub-page :is(button, .button-link),
+  .campaign-page :is(button, .button-link),
+  .pvp-hub-page :is(button, .button-link),
+  .pvp-flow-page :is(button, .button-link),
+  .live-battle-page :is(button, .button-link) {
+    min-height: 44px;
+  }
+
+  .app-hub-page.forge-hub-page :is(button, .button-link, input, select),
+  .forge-page :is(button, .button-link, input, select),
+  .forge-craft-page :is(button, .button-link, input, select),
+  .forge-socket-page :is(button, .button-link, input, select),
+  .forge-quality-page :is(button, .button-link, input, select) {
+    min-height: 44px;
+  }
+
+  .app-hub-page.inventory-hub-page :is(button, .button-link, input, select),
+  .inventory-items-page :is(button, .button-link, input, select),
+  .inventory-materials-page :is(button, .button-link, input, select),
+  .equipment-page :is(button, .button-link, input, select),
+  .loadouts-page :is(button, .button-link, input, select) {
+    min-height: 44px;
+  }
+
+  .equipment-page .icon-button {
+    min-width: 44px;
+  }
+
+  .app-hub-page.market-hub-page :is(button, .button-link, input, select, summary),
+  .game-market-page :is(button, .button-link, input, select, summary),
+  .player-market-page :is(button, .button-link, input, select, summary),
+  .market-history-page :is(button, .button-link, input, select, summary) {
+    min-height: 44px;
+  }
+
+  .section-nav a,
+  .home-shell :is(button, .button-link, .text-link, input, select, summary),
+  .profile-page :is(button, .button-link, .text-link, input, select, summary),
+  .profile-history-page :is(button, .button-link, .text-link, input, select, summary),
+  .progression-page :is(button, .button-link, .text-link, input, select, summary),
+  .profile-settings-page
+    :is(button, .button-link, .text-link, input:not([type="checkbox"]), select, summary) {
+    min-height: 44px;
+  }
+
+  .section-nav a,
+  .home-shell .text-link,
+  .profile-page .text-link,
+  .profile-history-page .text-link,
+  .progression-page .text-link,
+  .profile-settings-page .text-link {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .profile-history-page .battle-history-new-match,
+  .profile-settings-page .settings-toggle-row,
+  .profile-settings-page input[type="range"] {
+    min-height: 44px;
+  }
+
+  .auth-page :is(button, .button-link, input, select) {
+    min-height: 44px;
   }
 }
 

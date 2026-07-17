@@ -75,20 +75,20 @@ Rarity may increase power, but higher-rarity objects should still have a cost, c
 
 The main collection contains 12 rings: one ring for each element and rarity combination.
 
-| ID               | Name            | Element  | Rarity    | Damage | Energy | Cooldown | Speed | Status                               | Intended role                         |
-| ---------------- | --------------- | -------- | --------- | -----: | -----: | -------: | ----: | ------------------------------------ | ------------------------------------- |
-| `emberLoop`      | Ember Loop      | Fire     | Common    |      4 |      2 |        2 |     1 | Existing, adjust energy and cooldown | Entry fire damage                     |
-| `cinderSignet`   | Cinder Signet   | Fire     | Refined   |      5 |      2 |        2 |     1 | New                                  | Efficient fire pressure               |
-| `furnaceHalo`    | Furnace Halo    | Fire     | Rare      |      7 |      3 |        3 |     1 | New                                  | Heavy periodic attack                 |
-| `solarCrown`     | Solar Crown     | Fire     | Epic |      9 |      4 |        3 |     2 | New                                  | Maximum direct ring damage            |
-| `sparkBand`      | Spark Band      | Electric | Common    |      2 |      1 |        1 |     3 | Existing                             | Fast, inexpensive action              |
-| `ironCircle`     | Iron Circle     | Electric | Refined   |      3 |      1 |        1 |     2 | Existing                             | Efficient general-purpose ring        |
-| `stormCoil`      | Storm Coil      | Electric | Rare      |      4 |      2 |        1 |     4 | Existing, adjust damage              | High-speed sustained pressure         |
-| `tempestCircuit` | Tempest Circuit | Electric | Epic |      5 |      2 |        1 |     5 | New                                  | Premium speed and cadence             |
-| `frostSeal`      | Frost Seal      | Ice      | Common    |      3 |      2 |        1 |     0 | Existing                             | Entry ice ring                        |
-| `rimeClasp`      | Rime Clasp      | Ice      | Refined   |      4 |      2 |        1 |     0 | New                                  | Reliable ice damage                   |
-| `glacierRing`    | Glacier Ring    | Ice      | Rare      |      5 |      3 |        1 |     0 | Existing                             | High-cost repeated pressure           |
-| `winterCrown`    | Winter Crown    | Ice      | Epic |      7 |      4 |        1 |     1 | New                                  | Strong damage with high energy demand |
+| ID               | Name            | Element  | Rarity  | Damage | Energy | Cooldown | Speed | Status                               | Intended role                         |
+| ---------------- | --------------- | -------- | ------- | -----: | -----: | -------: | ----: | ------------------------------------ | ------------------------------------- |
+| `emberLoop`      | Ember Loop      | Fire     | Common  |      4 |      2 |        2 |     1 | Existing, adjust energy and cooldown | Entry fire damage                     |
+| `cinderSignet`   | Cinder Signet   | Fire     | Refined |      5 |      2 |        2 |     1 | New                                  | Efficient fire pressure               |
+| `furnaceHalo`    | Furnace Halo    | Fire     | Rare    |      7 |      3 |        3 |     1 | New                                  | Heavy periodic attack                 |
+| `solarCrown`     | Solar Crown     | Fire     | Epic    |      9 |      4 |        3 |     2 | New                                  | Maximum direct ring damage            |
+| `sparkBand`      | Spark Band      | Electric | Common  |      2 |      1 |        1 |     3 | Existing                             | Fast, inexpensive action              |
+| `ironCircle`     | Iron Circle     | Electric | Refined |      3 |      1 |        1 |     2 | Existing                             | Efficient general-purpose ring        |
+| `stormCoil`      | Storm Coil      | Electric | Rare    |      4 |      2 |        1 |     4 | Existing, adjust damage              | High-speed sustained pressure         |
+| `tempestCircuit` | Tempest Circuit | Electric | Epic    |      5 |      2 |        1 |     5 | New                                  | Premium speed and cadence             |
+| `frostSeal`      | Frost Seal      | Ice      | Common  |      3 |      2 |        1 |     0 | Existing                             | Entry ice ring                        |
+| `rimeClasp`      | Rime Clasp      | Ice      | Refined |      4 |      2 |        1 |     0 | New                                  | Reliable ice damage                   |
+| `glacierRing`    | Glacier Ring    | Ice      | Rare    |      5 |      3 |        1 |     0 | Existing                             | High-cost repeated pressure           |
+| `winterCrown`    | Winter Crown    | Ice      | Epic    |      7 |      4 |        1 |     1 | New                                  | Strong damage with high energy demand |
 
 ### Development-Only Ring
 
@@ -98,20 +98,20 @@ The main collection contains 12 rings: one ring for each element and rarity comb
 
 The main collection contains 12 gems: one gem for each element and rarity combination.
 
-| ID                | Name              | Element  | Rarity    | Damage | Energy penalty | Cooldown penalty | Status                            | Intended role                                 |
-| ----------------- | ----------------- | -------- | --------- | -----: | -------------: | ---------------: | --------------------------------- | --------------------------------------------- |
-| `rubyShard`       | Ruby Shard        | Fire     | Common    |      2 |              0 |                1 | Existing, adjust cooldown penalty | Entry fire damage boost                       |
-| `emberCore`       | Ember Core        | Fire     | Refined   |      3 |              1 |                1 | Existing                          | Balanced fire power                           |
-| `infernoOpal`     | Inferno Opal      | Fire     | Rare      |      5 |              1 |                2 | New                               | Large damage with delayed reuse               |
-| `sunforgeHeart`   | Sunforge Heart    | Fire     | Epic |      7 |              2 |                2 | New                               | Maximum gem damage                            |
-| `sparkPrism`      | Spark Prism       | Electric | Common    |      1 |              0 |                0 | Existing                          | Free low damage                               |
-| `staticPearl`     | Static Pearl      | Electric | Refined   |      1 |              0 |                0 | Existing                          | Flexible enchantment carrier                  |
-| `voltDiamond`     | Volt Diamond      | Electric | Rare      |      2 |              0 |                0 | New                               | Efficient damage without penalties            |
-| `tempestEye`      | Tempest Eye       | Electric | Epic |      3 |              0 |                1 | New                               | Strong electric gem with a small cadence cost |
-| `frostChip`       | Frost Chip        | Ice      | Common    |      1 |              1 |                0 | Existing, adjust energy penalty   | Entry ice enchantment carrier                 |
-| `rimeQuartz`      | Rime Quartz       | Ice      | Refined   |      2 |              1 |                0 | New                               | Moderate damage and energy demand             |
-| `glacierPearl`    | Glacier Pearl     | Ice      | Rare      |      3 |              2 |                0 | New                               | High-cost damage without cooldown cost        |
-| `absoluteZeroGem` | Absolute Zero Gem | Ice      | Epic |      5 |              3 |                0 | New                               | Maximum ice gem damage                        |
+| ID                | Name              | Element  | Rarity  | Damage | Energy penalty | Cooldown penalty | Status                            | Intended role                                 |
+| ----------------- | ----------------- | -------- | ------- | -----: | -------------: | ---------------: | --------------------------------- | --------------------------------------------- |
+| `rubyShard`       | Ruby Shard        | Fire     | Common  |      2 |              0 |                1 | Existing, adjust cooldown penalty | Entry fire damage boost                       |
+| `emberCore`       | Ember Core        | Fire     | Refined |      3 |              1 |                1 | Existing                          | Balanced fire power                           |
+| `infernoOpal`     | Inferno Opal      | Fire     | Rare    |      5 |              1 |                2 | New                               | Large damage with delayed reuse               |
+| `sunforgeHeart`   | Sunforge Heart    | Fire     | Epic    |      7 |              2 |                2 | New                               | Maximum gem damage                            |
+| `sparkPrism`      | Spark Prism       | Electric | Common  |      1 |              0 |                0 | Existing                          | Free low damage                               |
+| `staticPearl`     | Static Pearl      | Electric | Refined |      1 |              0 |                0 | Existing                          | Flexible enchantment carrier                  |
+| `voltDiamond`     | Volt Diamond      | Electric | Rare    |      2 |              0 |                0 | New                               | Efficient damage without penalties            |
+| `tempestEye`      | Tempest Eye       | Electric | Epic    |      3 |              0 |                1 | New                               | Strong electric gem with a small cadence cost |
+| `frostChip`       | Frost Chip        | Ice      | Common  |      1 |              1 |                0 | Existing, adjust energy penalty   | Entry ice enchantment carrier                 |
+| `rimeQuartz`      | Rime Quartz       | Ice      | Refined |      2 |              1 |                0 | New                               | Moderate damage and energy demand             |
+| `glacierPearl`    | Glacier Pearl     | Ice      | Rare    |      3 |              2 |                0 | New                               | High-cost damage without cooldown cost        |
+| `absoluteZeroGem` | Absolute Zero Gem | Ice      | Epic    |      5 |              3 |                0 | New                               | Maximum ice gem damage                        |
 
 ### Development-Only Gem
 
@@ -123,36 +123,36 @@ The main collection contains 18 monsters: six per element. Every monster has at 
 
 ### Fire Monsters
 
-| ID              | Name           | Rarity    | Health | Damage | Cooldown | Speed | Skill  | Status   | Intended role                  |
-| --------------- | -------------- | --------- | -----: | -----: | -------: | ----: | ------ | -------- | ------------------------------ |
-| `emberImp`      | Ember Imp      | Common    |      3 |      4 |        2 |     1 | Rage   | Existing | Fragile escalating attacker    |
-| `emberLancer`   | Ember Lancer   | Common    |      5 |      4 |        2 |     1 | Pierce | Existing | Entry overflow attacker        |
-| `rageSprite`    | Rage Sprite    | Refined   |      4 |      5 |        2 |     1 | Rage   | Existing | Aggressive Rage threat         |
-| `cinderRam`     | Cinder Ram     | Refined   |      6 |      5 |        2 |     1 | Pierce | New      | Durable Pierce attacker        |
-| `magmaColossus` | Magma Colossus | Rare      |      7 |      7 |        3 |     0 | Rage   | New      | Slow heavy attacker            |
-| `solarDrake`    | Solar Drake    | Epic |      9 |      9 |        3 |     2 | Pierce | New      | Maximum single-target pressure |
+| ID              | Name           | Rarity  | Health | Damage | Cooldown | Speed | Skill  | Status   | Intended role                  |
+| --------------- | -------------- | ------- | -----: | -----: | -------: | ----: | ------ | -------- | ------------------------------ |
+| `emberImp`      | Ember Imp      | Common  |      3 |      4 |        2 |     1 | Rage   | Existing | Fragile escalating attacker    |
+| `emberLancer`   | Ember Lancer   | Common  |      5 |      4 |        2 |     1 | Pierce | Existing | Entry overflow attacker        |
+| `rageSprite`    | Rage Sprite    | Refined |      4 |      5 |        2 |     1 | Rage   | Existing | Aggressive Rage threat         |
+| `cinderRam`     | Cinder Ram     | Refined |      6 |      5 |        2 |     1 | Pierce | New      | Durable Pierce attacker        |
+| `magmaColossus` | Magma Colossus | Rare    |      7 |      7 |        3 |     0 | Rage   | New      | Slow heavy attacker            |
+| `solarDrake`    | Solar Drake    | Epic    |      9 |      9 |        3 |     2 | Pierce | New      | Maximum single-target pressure |
 
 ### Electric Monsters
 
-| ID              | Name           | Rarity    | Health | Damage | Cooldown | Speed | Skill    | Status   | Intended role              |
-| --------------- | -------------- | --------- | -----: | -----: | -------: | ----: | -------- | -------- | -------------------------- |
-| `stormHound`    | Storm Hound    | Common    |      4 |      2 |        1 |     3 | Haste    | Existing | Immediate low damage       |
-| `voltMite`      | Volt Mite      | Common    |      3 |      1 |        1 |     4 | MultiHit | New      | Early board-wide pressure  |
-| `arcStriker`    | Arc Striker    | Refined   |      5 |      2 |        1 |     3 | MultiHit | Existing | Stable MultiHit attacker   |
-| `coilLynx`      | Coil Lynx      | Refined   |      5 |      3 |        1 |     4 | Haste    | New      | Immediate tempo attacker   |
-| `thunderRaptor` | Thunder Raptor | Rare      |      6 |      3 |        1 |     5 | MultiHit | New      | Fast board control         |
-| `tempestTitan`  | Tempest Titan  | Epic |      8 |      4 |        1 |     5 | Haste    | New      | Premium immediate pressure |
+| ID              | Name           | Rarity  | Health | Damage | Cooldown | Speed | Skill    | Status   | Intended role              |
+| --------------- | -------------- | ------- | -----: | -----: | -------: | ----: | -------- | -------- | -------------------------- |
+| `stormHound`    | Storm Hound    | Common  |      4 |      2 |        1 |     3 | Haste    | Existing | Immediate low damage       |
+| `voltMite`      | Volt Mite      | Common  |      3 |      1 |        1 |     4 | MultiHit | New      | Early board-wide pressure  |
+| `arcStriker`    | Arc Striker    | Refined |      5 |      2 |        1 |     3 | MultiHit | Existing | Stable MultiHit attacker   |
+| `coilLynx`      | Coil Lynx      | Refined |      5 |      3 |        1 |     4 | Haste    | New      | Immediate tempo attacker   |
+| `thunderRaptor` | Thunder Raptor | Rare    |      6 |      3 |        1 |     5 | MultiHit | New      | Fast board control         |
+| `tempestTitan`  | Tempest Titan  | Epic    |      8 |      4 |        1 |     5 | Haste    | New      | Premium immediate pressure |
 
 ### Ice Monsters
 
-| ID              | Name           | Rarity    | Health | Damage | Cooldown | Speed | Skill  | Status   | Intended role             |
-| --------------- | -------------- | --------- | -----: | -----: | -------: | ----: | ------ | -------- | ------------------------- |
-| `iceGuardian`   | Ice Guardian   | Common    |      7 |      2 |        1 |     0 | Taunt  | Existing | Entry protector           |
-| `snowSentinel`  | Snow Sentinel  | Common    |      6 |      2 |        1 |     0 | Shield | New      | Entry damage absorber     |
-| `frostBeetle`   | Frost Beetle   | Refined   |      8 |      1 |        1 |     0 | Shield | Existing | Defensive shield wall     |
-| `rimeGolem`     | Rime Golem     | Refined   |     10 |      2 |        1 |     0 | Taunt  | New      | Durable protector         |
-| `shieldWisp`    | Shield Wisp    | Rare      |      9 |      1 |        1 |     0 | Shield | Existing | Persistent protected body |
-| `eternalWarden` | Eternal Warden | Epic |     14 |      3 |        1 |     0 | Taunt  | New      | Maximum defensive anchor  |
+| ID              | Name           | Rarity  | Health | Damage | Cooldown | Speed | Skill  | Status   | Intended role             |
+| --------------- | -------------- | ------- | -----: | -----: | -------: | ----: | ------ | -------- | ------------------------- |
+| `iceGuardian`   | Ice Guardian   | Common  |      7 |      2 |        1 |     0 | Taunt  | Existing | Entry protector           |
+| `snowSentinel`  | Snow Sentinel  | Common  |      6 |      2 |        1 |     0 | Shield | New      | Entry damage absorber     |
+| `frostBeetle`   | Frost Beetle   | Refined |      8 |      1 |        1 |     0 | Shield | Existing | Defensive shield wall     |
+| `rimeGolem`     | Rime Golem     | Refined |     10 |      2 |        1 |     0 | Taunt  | New      | Durable protector         |
+| `shieldWisp`    | Shield Wisp    | Rare    |      9 |      1 |        1 |     0 | Shield | Existing | Persistent protected body |
+| `eternalWarden` | Eternal Warden | Epic    |     14 |      3 |        1 |     0 | Taunt  | New      | Maximum defensive anchor  |
 
 ## Spells
 
@@ -233,4 +233,3 @@ The development inventory and loadout builder now expose item XP progression dir
 2. Add focused scenario fixtures for representative elemental and rarity matchups.
 3. Adjust statistical outliers before introducing additional spell effects.
 4. Decide the next forge step: persistent inventory integration, quality improvement, or ring socket improvement.
-

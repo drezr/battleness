@@ -251,6 +251,7 @@
               :data-target-id="monster.id"
               :role="canInteractWithViewerMonster(monster) ? 'button' : undefined"
               :tabindex="canInteractWithViewerMonster(monster) ? 0 : -1"
+              :aria-pressed="selectedSource?.id === monster.id || undefined"
               :aria-label="viewerMonsterInteractionLabel(monster)"
               @click="handleViewerMonsterInteraction(monster)"
               @keydown.enter.prevent="handleViewerMonsterInteraction(monster)"
@@ -343,6 +344,7 @@
             :data-source-id="ring.id"
             :role="canPrepareSource(ringSource(ring)) ? 'button' : undefined"
             :tabindex="canPrepareSource(ringSource(ring)) ? 0 : -1"
+            :aria-pressed="selectedSource?.id === ring.id || undefined"
             :aria-label="sourceInteractionLabel(ringSource(ring))"
             @click="prepareSource(ringSource(ring))"
             @keydown.enter.prevent="prepareSource(ringSource(ring))"
@@ -426,7 +428,7 @@
       </section>
 
       <section class="live-command-tray" :aria-label="t('accessibility.battleCommands')">
-        <div class="live-command-selection">
+        <div class="live-command-selection" aria-live="polite">
           <span class="eyebrow">{{ t("battle.live.preparedAction") }}</span>
           <strong>{{ selectedSourceLabel }}</strong>
           <small class="muted">{{ selectedTargetLabel }}</small>
@@ -493,11 +495,11 @@
             <dd>{{ battle.status }}</dd>
           </div>
           <div class="stat">
-            <dt>{{ t("battle.replay.rules") }}</dt>
+            <dt>{{ t("battle.result.rules") }}</dt>
             <dd>{{ battle.rulesVersion }}</dd>
           </div>
           <div class="stat">
-            <dt>{{ t("battle.replay.content") }}</dt>
+            <dt>{{ t("battle.result.content") }}</dt>
             <dd>{{ battle.contentVersion }}</dd>
           </div>
         </dl>

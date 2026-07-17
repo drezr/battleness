@@ -1,5 +1,5 @@
 <template>
-  <main class="shell">
+  <main class="shell inventory-materials-page">
     <nav class="section-nav" :aria-label="t('accessibility.inventoryNavigation')">
       <NuxtLink
         v-for="link in sectionLinks.inventory"
@@ -73,7 +73,15 @@
               </p>
               <strong>{{ material.quantity }}</strong>
               <div class="control-row">
-                <button class="secondary-button" @click="selectedMaterialId = material.id">
+                <button
+                  class="secondary-button"
+                  :aria-label="
+                    t('common.inspectItem', {
+                      item: contentText(`material.${material.id}.name`, material.label),
+                    })
+                  "
+                  @click="selectedMaterialId = material.id"
+                >
                   {{ t("common.inspect") }}
                 </button>
               </div>

@@ -308,6 +308,8 @@ const { t } = useI18n();
 const contentText = useContentText();
 const dialogElement = ref<HTMLElement | null>(null);
 let triggerElement: HTMLElement | null = null;
+let backgroundElement: HTMLElement | null = null;
+let backgroundWasInert = false;
 let previousBodyOverflow = "";
 let pageLocked = false;
 
@@ -473,6 +475,11 @@ async function openModal(): Promise<void> {
     }
     previousBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    backgroundElement = document.querySelector<HTMLElement>(".app-shell");
+    backgroundWasInert = backgroundElement?.inert ?? false;
+    if (backgroundElement) {
+      backgroundElement.inert = true;
+    }
     pageLocked = true;
   }
   await nextTick();
@@ -484,6 +491,10 @@ function restorePageState(): void {
     return;
   }
   document.body.style.overflow = previousBodyOverflow;
+  if (backgroundElement) {
+    backgroundElement.inert = backgroundWasInert;
+  }
+  backgroundElement = null;
   pageLocked = false;
   const element = triggerElement;
   triggerElement = null;
@@ -491,8 +502,40 @@ function restorePageState(): void {
 }
 
 function handleKeydown(event: KeyboardEvent): void {
-  if (event.key === "Escape" && props.item) {
+  if (!props.item) {
+    return;
+  }
+  if (event.key === "Escape") {
     closeModal();
+    return;
+  }
+  if (event.key !== "Tab" || !dialogElement.value) {
+    return;
+  }
+  const focusable = Array.from(
+    dialogElement.value.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ),
+  ).filter((element) => !element.hidden && element.getClientRects().length > 0);
+  if (focusable.length === 0) {
+    event.preventDefault();
+    dialogElement.value.focus();
+    return;
+  }
+  const first = focusable[0];
+  const last = focusable.at(-1);
+  if (!event.shiftKey && document.activeElement === dialogElement.value) {
+    event.preventDefault();
+    first?.focus();
+  } else if (
+    event.shiftKey &&
+    (document.activeElement === first || document.activeElement === dialogElement.value)
+  ) {
+    event.preventDefault();
+    last?.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first?.focus();
   }
 }
 

@@ -277,6 +277,11 @@
               :disabled="cancellingListingId === listing.id"
               class="secondary-button danger-action"
               type="button"
+              :aria-label="
+                t('market.players.cancel.actionLabel', {
+                  item: listingName(listing),
+                })
+              "
               @click="cancelListing(listing.id)"
             >
               <X :size="16" />{{
@@ -289,6 +294,12 @@
               v-else
               :disabled="purchasingListingId === listing.id"
               type="button"
+              :aria-label="
+                t('market.players.purchase.actionLabel', {
+                  item: listingName(listing),
+                  price: formatNumber(listing.price),
+                })
+              "
               @click="purchaseListing(listing)"
             >
               <ShoppingCart :size="16" />{{
@@ -524,7 +535,12 @@ async function cancelListing(listingId: string): Promise<void> {
 async function purchaseListing(listing: PlayerMarketListingView): Promise<void> {
   if (
     purchasingListingId.value ||
-    !window.confirm(t("market.players.purchase.confirm", { price: formatNumber(listing.price) }))
+    !window.confirm(
+      t("market.players.purchase.confirm", {
+        item: listingName(listing),
+        price: formatNumber(listing.price),
+      }),
+    )
   )
     return;
   purchasingListingId.value = listing.id;

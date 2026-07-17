@@ -1,5 +1,5 @@
 <template>
-  <main class="shell">
+  <main class="shell inventory-items-page">
     <nav class="section-nav" :aria-label="t('accessibility.inventoryNavigation')">
       <NuxtLink
         v-for="link in sectionLinks.inventory"
@@ -103,7 +103,15 @@
                   })
                 }}</small>
                 <div class="control-row">
-                  <button class="secondary-button" @click="selectedDetailItemId = item.id">
+                  <button
+                    class="secondary-button"
+                    :aria-label="
+                      t('common.inspectItem', {
+                        item: itemName(item.type, item.definitionId, item.label),
+                      })
+                    "
+                    @click="selectedDetailItemId = item.id"
+                  >
                     {{ t("common.inspect") }}
                   </button>
                 </div>

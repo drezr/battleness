@@ -209,4 +209,3 @@ function assertEnoughCredits(credits: number, cost: number): void {
     throw new Error("Not enough credits.");
   }
 }
-

@@ -15,6 +15,7 @@
           :key="item.to"
           :class="{ active: isActive(item.to) }"
           :to="item.to"
+          :aria-current="isActive(item.to) ? 'page' : undefined"
         >
           <component :is="item.icon" :size="19" stroke-width="1.9" aria-hidden="true" />
           <span>{{ t(item.labelKey) }}</span>
@@ -78,6 +79,7 @@
         :key="item.to"
         :class="{ active: isActive(item.to) }"
         :to="item.to"
+        :aria-current="isActive(item.to) ? 'page' : undefined"
       >
         <component :is="item.icon" :size="19" stroke-width="2" aria-hidden="true" />
         <span>{{ t(item.labelKey) }}</span>
