@@ -111,8 +111,8 @@
       <div class="pvp-match-ready-icon"><Swords :size="29" /></div>
       <div>
         <span class="eyebrow">{{ t("casualMatch.matchedLabel") }}</span>
-        <h2>{{ t("casualMatch.matchedTitle", { opponent: state.match.opponent.username }) }}</h2>
-        <p>{{ t("casualMatch.redirecting") }}</p>
+        <h2>{{ t("casualMatch.matchedTitle", { opponent: state.match.opponent.displayName }) }}</h2>
+        <p>{{ opponentSummary(state.match.opponent) }}</p>
       </div>
       <NuxtLink class="button-link" :to="`/battle/live/${state.match.battleId}`">
         {{ t("casualMatch.enterBattle") }} <ArrowRight :size="17" />
@@ -134,7 +134,7 @@ import {
   Wifi,
   X,
 } from "@lucide/vue";
-import type { CasualMatchmakingState } from "~/utils/playerState";
+import type { CasualMatchmakingState, PvpOpponentIdentity } from "~/utils/playerState";
 import { sectionLinks } from "~/utils/viewData";
 
 const { t } = useI18n();
@@ -142,6 +142,16 @@ const route = useRoute();
 const mutating = ref(false);
 const errorMessage = ref("");
 const clock = ref(Date.now());
+
+function opponentSummary(opponent: PvpOpponentIdentity): string {
+  const tier = opponent.rank ? t(`rankedMatch.tiers.${opponent.rank.tier}`) : null;
+  const rank = opponent.rank
+    ? opponent.rank.division
+      ? t("rankedMatch.rankName", { tier, division: opponent.rank.division })
+      : tier!
+    : t("rankedMatch.unranked");
+  return t("casualMatch.opponentSummary", { level: opponent.level, rank });
+}
 const {
   data: state,
   pending,

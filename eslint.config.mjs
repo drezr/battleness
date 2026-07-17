@@ -12,6 +12,7 @@ export default tseslint.config(
     languageOptions: {
       parserOptions: {
         projectService: {
+          maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 16,
           allowDefaultProject: [
             "apps/web/server/api/*.test.ts",
             "apps/web/server/plugins/*.ts",

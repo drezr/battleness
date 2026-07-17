@@ -265,10 +265,7 @@
               <span class="enchantment-link-icon"><Link :size="19" aria-hidden="true" /></span>
               <label
                 ><span class="field-label">{{ t("forge.socket.spellOrMonster") }}</span
-                ><select
-                  v-model="selectedTargetId"
-                  :disabled="Boolean(selectedEnchantGem?.enchantment)"
-                >
+                ><select v-model="selectedTargetId">
                   <option value="">{{ t("forge.socket.selectTarget") }}</option>
                   <option
                     v-for="target in availableEnchantmentTargets"
@@ -290,13 +287,31 @@
                 <Unlink :size="16" />{{ t("forge.socket.remove") }}
               </button>
               <button
-                v-else
                 :disabled="!canEnchantSelectedGem || updating"
                 type="button"
-                @click="enchantSelectedGem"
+                @click="requestEnchantSelectedGem"
               >
-                <WandSparkles :size="16" />{{ t("forge.socket.enchant") }}
+                <WandSparkles :size="16" />{{
+                  replacingEnchantment ? t("forge.socket.replace") : t("forge.socket.enchant")
+                }}
               </button>
+            </div>
+
+            <div v-if="replacementConfirmation" class="status-note">
+              <p>{{ replacementConfirmation }}</p>
+              <div class="control-row">
+                <button type="button" :disabled="updating" @click="enchantSelectedGem">
+                  {{ t("common.confirm") }}
+                </button>
+                <button
+                  class="secondary-button"
+                  type="button"
+                  :disabled="updating"
+                  @click="replacementConfirmation = ''"
+                >
+                  {{ t("common.cancel") }}
+                </button>
+              </div>
             </div>
 
             <div v-if="socketState.enchantmentTargets.length > 0" class="enchantment-target-strip">
@@ -305,10 +320,13 @@
                 :key="target.id"
                 :class="[
                   `rarity-border-${target.rarity}`,
-                  { unavailable: target.enchantedGemId, selected: selectedTargetId === target.id },
+                  {
+                    unavailable: targetUnavailable(target),
+                    selected: selectedTargetId === target.id,
+                  },
                 ]"
                 type="button"
-                :disabled="Boolean(target.enchantedGemId)"
+                :disabled="targetUnavailable(target)"
                 @click="
                   selectedTargetId = target.id;
                   selectedDetailItemId = target.id;
@@ -318,7 +336,9 @@
                 <span
                   ><strong>{{ itemName(target.type, target.definitionId, target.label) }}</strong
                   ><small>{{
-                    target.enchantedGemId ? t("forge.socket.used") : t(`itemType.${target.type}`)
+                    targetUnavailable(target)
+                      ? t("forge.socket.used")
+                      : t(`itemType.${target.type}`)
                   }}</small></span
                 >
               </button>
@@ -371,6 +391,8 @@ const selectedGemId = ref("");
 const selectedEnchantGemId = ref("");
 const selectedTargetId = ref("");
 const selectedDetailItemId = ref("");
+const replacementConfirmation = ref("");
+const querySelectionApplied = ref(false);
 const {
   data: socketState,
   error,
@@ -401,7 +423,7 @@ const socketDetailItem = computed(
     ].find((item) => item.id === selectedDetailItemId.value) ?? selectedRing.value,
 );
 const availableEnchantmentTargets = computed(() =>
-  (socketState.value?.enchantmentTargets ?? []).filter((target) => target.enchantedGemId === null),
+  (socketState.value?.enchantmentTargets ?? []).filter((target) => !targetUnavailable(target)),
 );
 const ringIsFull = computed(() =>
   Boolean(
@@ -414,13 +436,36 @@ const canSocketSelectedGem = computed(
 const canEnchantSelectedGem = computed(
   () =>
     Boolean(selectedEnchantGem.value && selectedTarget.value) &&
-    !selectedEnchantGem.value?.enchantment,
+    !targetUnavailable(selectedTarget.value) &&
+    selectedEnchantGem.value?.enchantment?.id !== selectedTarget.value?.id,
+);
+const replacingEnchantment = computed(
+  () =>
+    Boolean(selectedEnchantGem.value?.enchantment && selectedTarget.value) &&
+    selectedEnchantGem.value?.enchantment?.id !== selectedTarget.value?.id,
 );
 const socketIndexes = computed(() =>
   Array.from({ length: selectedRing.value?.socketCount ?? 0 }, (_, index) => index),
 );
 
 watchEffect(() => {
+  if (socketState.value && !querySelectionApplied.value) {
+    const ringId = route.query.ringId;
+    const gemId = route.query.gemId;
+    const targetId = route.query.targetId;
+    if (typeof ringId === "string" && socketState.value.rings.some((ring) => ring.id === ringId))
+      selectedRingId.value = ringId;
+    if (typeof gemId === "string" && socketState.value.gems.some((gem) => gem.id === gemId))
+      selectedEnchantGemId.value = gemId;
+    if (typeof targetId === "string") {
+      const target = socketState.value.enchantmentTargets.find((item) => item.id === targetId);
+      if (target) {
+        if (target.enchantedGemId) selectedEnchantGemId.value = target.enchantedGemId;
+        selectedTargetId.value = target.id;
+      }
+    }
+    querySelectionApplied.value = true;
+  }
   if (!selectedRingId.value && socketState.value?.rings[0])
     selectedRingId.value = socketState.value.rings[0].id;
   if (selectedGemId.value && !availableGems.value.some((gem) => gem.id === selectedGemId.value))
@@ -434,6 +479,10 @@ watchEffect(() => {
     selectedTargetId.value = "";
 });
 
+watch([selectedEnchantGemId, selectedTargetId], () => {
+  replacementConfirmation.value = "";
+});
+
 function socketGem(socketIndex: number): EquipmentGemView | undefined {
   return selectedRing.value?.gems.find((gem) => gem.socketIndex === socketIndex);
 }
@@ -442,6 +491,9 @@ function itemName(type: string, definitionId: string, fallback: string): string 
 }
 function gemName(gem: EquipmentGemView | undefined): string {
   return gem ? itemName("gem", gem.definitionId, gem.label) : "";
+}
+function targetUnavailable(target: SocketEnchantmentTargetView | null): boolean {
+  return Boolean(target?.enchantedGemId && target.enchantedGemId !== selectedEnchantGem.value?.id);
 }
 
 async function socketSelectedGem() {
@@ -468,6 +520,7 @@ async function improveSelectedRingSockets() {
 }
 async function enchantSelectedGem() {
   if (!selectedEnchantGem.value || !selectedTarget.value) return;
+  const wasReplacement = replacingEnchantment.value;
   const success = await updateSocketState({
     action: "enchant",
     gemItemId: selectedEnchantGem.value.id,
@@ -476,8 +529,30 @@ async function enchantSelectedGem() {
   });
   if (success) {
     selectedTargetId.value = "";
-    feedback.value = t("forge.socket.enchantedSuccess");
+    replacementConfirmation.value = "";
+    feedback.value = t(
+      wasReplacement ? "forge.socket.replacedSuccess" : "forge.socket.enchantedSuccess",
+    );
   }
+}
+function requestEnchantSelectedGem() {
+  if (!selectedEnchantGem.value || !selectedTarget.value) return;
+  if (!replacingEnchantment.value) {
+    void enchantSelectedGem();
+    return;
+  }
+  replacementConfirmation.value = t("forge.socket.replaceConfirmation", {
+    current: itemName(
+      selectedEnchantGem.value.enchantment?.type ?? "spell",
+      selectedEnchantGem.value.enchantment?.definitionId ?? "",
+      selectedEnchantGem.value.enchantment?.label ?? "",
+    ),
+    next: itemName(
+      selectedTarget.value.type,
+      selectedTarget.value.definitionId,
+      selectedTarget.value.label,
+    ),
+  });
 }
 async function unenchantSelectedGem() {
   if (!selectedEnchantGem.value) return;

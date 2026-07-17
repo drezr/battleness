@@ -52,6 +52,9 @@ type PlayerApiResponse = {
     level: number;
     bonusPercent: number;
     progression: { nextLevelExperience: number | null; progressPercent: number };
+    enchantment?: null | { id: string; type: "spell" | "monster" };
+    enchantedGemId?: string | null;
+    enchantedGemLabel?: string | null;
   }[];
   recipes: { id: string; canCraft: boolean }[];
 };
@@ -289,6 +292,12 @@ type BattleResultSummaryApiResponse = {
   spellsCast: { id: string; label: string; playerId: string; count: number }[];
   monstersSummoned: { id: string; label: string; playerId: string; count: number }[];
   monstersUsed: { id: string; label: string; playerId: string; count: number }[];
+  loadouts: {
+    playerId: string;
+    username: string;
+    level: number;
+    rings: LiveBattleRingApiResponse[];
+  }[];
 };
 
 type DevelopmentBattleResultApiResponse = {
@@ -308,22 +317,13 @@ type LiveBattleApiResponse = {
   viewer: {
     id: string;
     username: string;
-    ringCount: number;
     energy: { current: number; maxForTurn: number; turnCount: number };
-    rings?: {
-      id: string;
-      definitionId: string;
-      damage: number;
-      energyCost: number;
-      cooldown: number;
-      currentCooldown: number;
-    }[];
+    rings?: LiveBattleRingApiResponse[];
   };
   opponent: {
     id: string;
     username: string;
-    ringCount: number;
-    rings?: unknown[];
+    rings?: LiveBattleRingApiResponse[];
   };
   result: null | { type: "draw" } | { type: "winner"; winnerId: string; loserId: string };
   reward: null | {
@@ -335,6 +335,26 @@ type LiveBattleApiResponse = {
     items: { inventoryItemId: string; experience: number }[];
   };
   summary: BattleResultSummaryApiResponse | null;
+};
+
+type LiveBattleRingApiResponse = {
+  id: string;
+  definitionId: string;
+  damage: number;
+  energyCost: number;
+  cooldown: number;
+  currentCooldown: number;
+  gems: {
+    id: string;
+    definitionId: string;
+    damage: number;
+    energyPenalty: number;
+    cooldownPenalty: number;
+    enchantment?: {
+      type: "monster" | "spell";
+      definitionId: string;
+    } | null;
+  }[];
 };
 
 type LiveBattleActionApiResponse = {
@@ -369,10 +389,19 @@ type PrivateMatchApiResponse = {
     code: string;
     status: string;
     battleId: string | null;
-    turnPlayerId: string | null;
     turnDeadlineAt: string | null;
     openingDuelDeadlineAt: string | null;
-    participants: { playerId: string; slot: string; ready: boolean; loadoutId: string | null }[];
+    participants: {
+      isCurrentPlayer: boolean;
+      displayName: string;
+      level: number;
+      rank: { tier: string; division: number | null } | null;
+      slot: string;
+      ready: boolean;
+      loadoutId?: string | null;
+      loadoutName?: string | null;
+      ringCount?: number;
+    }[];
   };
   loadouts: { id: string; name: string; ringCount: number }[];
 };
@@ -382,7 +411,7 @@ type CasualMatchmakingApiResponse = {
   status: "idle" | "searching" | "matched";
   activeLoadout: { id: string; name: string; ringCount: number } | null;
   queue: { id: string; joinedAt: string; expiresAt: string } | null;
-  match: { battleId: string; opponent: { id: string; username: string } } | null;
+  match: { battleId: string; opponent: PvpOpponentApiResponse } | null;
   recentBattleId: string | null;
 };
 
@@ -395,11 +424,18 @@ type RankedMatchmakingApiResponse = {
   proposal: {
     pairingKey: string;
     accepted: boolean;
-    opponent: { id: string; username: string };
+    opponent: PvpOpponentApiResponse;
   } | null;
-  match: { battleId: string; opponent: { id: string; username: string } } | null;
+  match: { battleId: string; opponent: PvpOpponentApiResponse } | null;
   recentBattleId: string | null;
   discipline: { missedAcceptances: number; lockedUntil: string | null };
+};
+
+type PvpOpponentApiResponse = {
+  displayName: string;
+  level: number;
+  rank: { tier: string; division: number | null } | null;
+  ready: boolean;
 };
 
 type RankedLeaderboardApiResponse = {
@@ -2285,10 +2321,35 @@ describe("Nuxt Game App APIs", () => {
       code: created.match?.code.toLowerCase(),
     });
     const joined = (await privateMatchPostHandler(joinedEvent.event)) as PrivateMatchApiResponse;
-    expect(joined.match?.participants.map((participant) => participant.playerId)).toEqual([
-      "devPlayer",
-      guestId,
+    expect(joined.match?.participants).toMatchObject([
+      {
+        isCurrentPlayer: false,
+        displayName: "Dev Player",
+        level: 0,
+        rank: null,
+        slot: "host",
+        ready: false,
+      },
+      {
+        isCurrentPlayer: true,
+        displayName: "Private Guest",
+        level: 0,
+        rank: null,
+        slot: "guest",
+        ready: false,
+      },
     ]);
+    const privateOpponent = joined.match?.participants.find(
+      (participant) => !participant.isCurrentPlayer,
+    );
+    expect(privateOpponent).toEqual({
+      isCurrentPlayer: false,
+      displayName: "Dev Player",
+      level: 0,
+      rank: null,
+      slot: "host",
+      ready: false,
+    });
 
     const guestReadyEvent = createH3TestEvent(guestCookie, {
       action: "ready",
@@ -2614,15 +2675,27 @@ describe("Nuxt Game App APIs", () => {
     )) as CasualMatchmakingApiResponse;
     expect(matchedGuest).toMatchObject({
       status: "matched",
-      match: { battleId: expect.any(String), opponent: { id: "devPlayer" } },
+      match: {
+        battleId: expect.any(String),
+        opponent: { displayName: "Dev Player", level: 0, rank: null, ready: true },
+      },
     });
     const matchedHost = (await casualMatchGetHandler(
       createH3TestEvent(hostCookie).event,
     )) as CasualMatchmakingApiResponse;
     expect(matchedHost).toMatchObject({
       status: "matched",
-      match: { battleId: matchedGuest.match!.battleId, opponent: { id: guestId } },
+      match: {
+        battleId: matchedGuest.match!.battleId,
+        opponent: { displayName: "Casual Guest", level: 0, rank: null, ready: true },
+      },
     });
+    expect(Object.keys(matchedHost.match!.opponent).sort()).toEqual([
+      "displayName",
+      "level",
+      "rank",
+      "ready",
+    ]);
 
     const hostBattleEvent = createH3TestEvent(hostCookie);
     hostBattleEvent.event.context.params = { battleId: matchedGuest.match!.battleId };
@@ -2691,11 +2764,11 @@ describe("Nuxt Game App APIs", () => {
     )) as CasualMatchmakingApiResponse;
     expect(concurrentHost).toMatchObject({
       status: "matched",
-      match: { battleId: expect.any(String), opponent: { id: guestId } },
+      match: { battleId: expect.any(String), opponent: { displayName: "Casual Guest" } },
     });
     expect(concurrentGuest).toMatchObject({
       status: "matched",
-      match: { battleId: concurrentHost.match!.battleId, opponent: { id: "devPlayer" } },
+      match: { battleId: concurrentHost.match!.battleId, opponent: { displayName: "Dev Player" } },
     });
     const concurrentPair = await prisma.casualQueueEntry.findMany({
       where: {
@@ -2802,7 +2875,10 @@ describe("Nuxt Game App APIs", () => {
     )) as RankedMatchmakingApiResponse;
     expect(proposedGuest).toMatchObject({
       status: "accepting",
-      proposal: { accepted: false, opponent: { id: "devPlayer" } },
+      proposal: {
+        accepted: false,
+        opponent: { displayName: "Dev Player", level: 0, rank: null, ready: false },
+      },
     });
     const proposedHost = (await rankedMatchGetHandler(
       createH3TestEvent(hostCookie).event,
@@ -2812,7 +2888,7 @@ describe("Nuxt Game App APIs", () => {
       proposal: {
         pairingKey: proposedGuest.proposal!.pairingKey,
         accepted: false,
-        opponent: { id: guestId },
+        opponent: { displayName: "Ranked Queue Guest", level: 0, rank: null, ready: false },
       },
     });
 
@@ -2825,8 +2901,17 @@ describe("Nuxt Game App APIs", () => {
     )) as RankedMatchmakingApiResponse;
     expect(matchedGuest).toMatchObject({
       status: "matched",
-      match: { battleId: expect.any(String), opponent: { id: "devPlayer" } },
+      match: {
+        battleId: expect.any(String),
+        opponent: { displayName: "Dev Player", level: 0, rank: null, ready: true },
+      },
     });
+    expect(Object.keys(matchedGuest.match!.opponent).sort()).toEqual([
+      "displayName",
+      "level",
+      "rank",
+      "ready",
+    ]);
     expect(acceptanceResults.some((state) => state.status === "matched")).toBe(true);
     const matchedProposalEntries = await prisma.rankedQueueEntry.findMany({
       where: { pairingKey: proposedGuest.proposal!.pairingKey },
@@ -3325,7 +3410,6 @@ describe("Nuxt Game App APIs", () => {
       opponent: {
         id: "campaign.emberTrial",
         username: "Ember Trial",
-        ringCount: 1,
       },
     });
     expect(battle.opponent.rings).toBeUndefined();
@@ -3428,6 +3512,48 @@ describe("Nuxt Game App APIs", () => {
         },
       }),
     ).toMatchObject({ victoryCount: 2 });
+  });
+
+  it("reveals only opponent items that have produced a live combat effect", async () => {
+    await createAndActivateCampaignTestLoadout();
+    let battle = (await campaignStartHandler({
+      body: { opponentId: "emberTrial", requestId: "campaign-staged-reveal" },
+    })) as LiveBattleApiResponse;
+
+    expect(battle.opponent.rings).toBeUndefined();
+
+    for (let turn = 1; turn <= 2; turn += 1) {
+      const response = (await battleActionHandler({
+        context: { params: { battleId: battle.id } },
+        body: {
+          expectedActionCount: battle.actionCount,
+          action: { type: "endTurn" },
+        },
+      })) as LiveBattleActionApiResponse;
+      battle = response.battle;
+
+      if (turn === 1) {
+        expect(battle.opponent.rings).toBeUndefined();
+      }
+    }
+
+    expect(battle.opponent.rings).toEqual([
+      expect.objectContaining({
+        id: "campaign.emberTrial.ring.emberLoop.1",
+        definitionId: "emberLoop",
+        gems: [
+          expect.objectContaining({
+            id: "campaign.emberTrial.gem.rubyShard.1.1",
+            definitionId: "rubyShard",
+            enchantment: expect.objectContaining({
+              type: "monster",
+              definitionId: "emberImp",
+            }),
+          }),
+        ],
+      }),
+    ]);
+    expect(JSON.stringify(battle.opponent)).not.toContain("frostSeal");
   });
 
   it("crafts a recipe and persists the crafted item plus consumed materials", async () => {
@@ -3922,6 +4048,58 @@ describe("Nuxt Game App APIs", () => {
       unenchant.enchantmentTargets.find((candidate) => candidate.id === spell.crafted.id)
         ?.enchantedGemId,
     ).toBeNull();
+  });
+
+  it("atomically replaces a gem enchantment and returns the previous target to inventory", async () => {
+    const gem = (await craftHandler({
+      body: { recipeId: "craftGemRubyShard" },
+    })) as CraftApiResponse;
+    const spell = (await craftHandler({
+      body: { recipeId: "craftSpellFirebolt" },
+    })) as CraftApiResponse;
+    const monster = (await craftHandler({
+      body: { recipeId: "craftMonsterEmberImp" },
+    })) as CraftApiResponse;
+
+    await socketPostHandler({
+      body: {
+        action: "enchant",
+        gemItemId: gem.crafted.id,
+        targetItemId: spell.crafted.id,
+        targetType: "spell",
+      },
+    });
+    const replaced = (await socketPostHandler({
+      body: {
+        action: "enchant",
+        gemItemId: gem.crafted.id,
+        targetItemId: monster.crafted.id,
+        targetType: "monster",
+      },
+    })) as SocketApiResponse;
+
+    expect(
+      replaced.gems.find((candidate) => candidate.id === gem.crafted.id)?.enchantment,
+    ).toMatchObject({ id: monster.crafted.id, type: "monster" });
+    expect(
+      replaced.enchantmentTargets.find((candidate) => candidate.id === spell.crafted.id)
+        ?.enchantedGemId,
+    ).toBeNull();
+    expect(
+      replaced.enchantmentTargets.find((candidate) => candidate.id === monster.crafted.id)
+        ?.enchantedGemId,
+    ).toBe(gem.crafted.id);
+
+    const inventory = (await playerHandler({})) as PlayerApiResponse;
+    expect(
+      inventory.inventory.find((item) => item.id === gem.crafted.id)?.enchantment,
+    ).toMatchObject({ id: monster.crafted.id, type: "monster" });
+    expect(
+      inventory.inventory.find((item) => item.id === spell.crafted.id)?.enchantedGemId,
+    ).toBeNull();
+    expect(
+      inventory.inventory.find((item) => item.id === monster.crafted.id)?.enchantedGemLabel,
+    ).toBe("Ruby Shard");
   });
 
   it("rejects reusing an enchantment target on multiple gems", async () => {
@@ -4519,11 +4697,9 @@ describe("Nuxt Game App APIs", () => {
       actionCount: 1,
       viewer: {
         id: "devPlayer",
-        ringCount: 1,
       },
       opponent: {
         id: "playerTwo",
-        ringCount: 2,
       },
     });
     expect(started.viewer.rings?.[0]).toMatchObject({
@@ -4532,6 +4708,7 @@ describe("Nuxt Game App APIs", () => {
       damage: 4,
     });
     expect(started.opponent.rings).toBeUndefined();
+    expect(started.opponent).not.toHaveProperty("ringCount");
     expect(JSON.stringify(started)).not.toContain("frostSeal");
     expect(JSON.stringify(started)).not.toContain("ironCircle");
 
@@ -4718,6 +4895,24 @@ describe("Nuxt Game App APIs", () => {
         spellsCast: [],
         monstersSummoned: [],
         monstersUsed: [],
+        loadouts: expect.arrayContaining([
+          expect.objectContaining({
+            playerId: "devPlayer",
+            rings: [
+              expect.objectContaining({
+                id: ringItemId,
+                definitionId: "emberLoop",
+                damage: 4,
+              }),
+            ],
+          }),
+          expect.objectContaining({
+            playerId: "playerTwo",
+            rings: expect.arrayContaining([
+              expect.objectContaining({ definitionId: "ironCircle" }),
+            ]),
+          }),
+        ]),
       },
     });
     const persisted = await prisma.battleRecord.findUniqueOrThrow({ where: { id: started.id } });
@@ -4739,6 +4934,20 @@ describe("Nuxt Game App APIs", () => {
         credits: 30,
         heroExperience: 25,
         items: [{ inventoryItemId: ringItemId, experience: 8 }],
+      },
+      summary: {
+        loadouts: expect.arrayContaining([
+          expect.objectContaining({
+            playerId: "devPlayer",
+            rings: [expect.objectContaining({ id: ringItemId, definitionId: "emberLoop" })],
+          }),
+          expect.objectContaining({
+            playerId: "playerTwo",
+            rings: expect.arrayContaining([
+              expect.objectContaining({ definitionId: "ironCircle" }),
+            ]),
+          }),
+        ]),
       },
     });
   });

@@ -36,7 +36,7 @@ The player-facing visual redesign and cross-application audit now cover the appl
 - [x] Render craft output and material artwork.
 - [x] Implement `/forge/socket` using the Dev Lab socketing rules.
 - [x] Prevent one gem from being socketed into more than one ring.
-- [x] Implement gem enchantment management for spell or monster instances.
+- [x] Implement Forge-only gem enchantment management with independent selection, confirmed atomic replacement, free non-destructive removal, equipped-ring support, and read-only Inventory handoff.
 - [x] Prevent one spell or monster instance from being reused as multiple gem enchantments.
 - [x] Implement `/forge/quality` with credit costs and quality improvement.
 - [x] Implement ring socket-count improvement under `/forge/socket`.
@@ -139,6 +139,11 @@ The player-facing visual redesign and cross-application audit now cover the appl
 - [x] Implement idempotent eight-week season succession, seasonal soft resets, Diamond/Master inactivity decay, and stale queue expiration. Maintenance runs at Nitro startup, hourly, and before ranked reads or queue entry.
 - [x] Implement idempotent ranked season rewards with persistent peak rating, automatic unclaimed grants during rollover, deterministic material selection, permanent badge/title unlocks on claim, and localized ranked/history presentation.
 - [x] Add concurrency coverage for simultaneous casual queue entry, bilateral ranked acceptance, duplicate decline attempts, concurrent acceptance expiry, duplicate live actions, reconnect reads during turn and opening-duel expiry, and unique timeout settlement. The complete ranked queue-to-settlement path, duplicate rating settlement, leaderboard ordering, season transitions, and inactivity idempotence also have integration coverage.
+- [x] Enforce the decided pre-combat PvP DTO across private, casual, and ranked modes: anonymous search, limited identity after matching, and no opponent loadout or ring count.
+- [x] Persist and expose per-participant staged reveals for used rings and effect-producing gems or enchantments, while keeping unrevealed content out of opponent responses. Reveal state is deterministically reconstructed from the persisted battle snapshot and action journal.
+- [x] Reveal full monster combat data on summon and both complete loadout snapshots in participant results and replays. Result loadouts are rebuilt from the immutable initial battle setup and include resolved rings, gems, and enchantments for both participants.
+- [ ] Add public PvP profile statistics for visible rank, rating, peak rank, wins, losses, and match count without inventory or loadout data.
+- [ ] Add API and presentation regression coverage for every PvP visibility phase and mode.
 
 ## Phase 11 - Player Market
 
@@ -202,10 +207,10 @@ The player-facing visual redesign and cross-application audit now cover the appl
 - [x] What fixed rewards should campaign opponents grant? Each content record now defines first-clear and repeat-victory values.
 - [x] What initial hero XP rewards should development battles grant? Win grants 100 XP, draw grants 60 XP, and loss grants 25 XP. Campaign and PvP formulas remain open within their respective modes.
 - [x] Should ring socket-count improvement live under `/forge/socket`, `/forge/quality`, or a separate improvement view? Decided and implemented under `/forge/socket`.
-- [ ] Should spell and monster gem enchantment be managed in inventory, forge, or both?
+- [x] Should spell and monster gem enchantment be managed in inventory, forge, or both? Mutations live only under Forge > Socket; Inventory shows read-only composition and links the selected item into Forge.
 - [x] Should the Game Market sell only materials at first? It buys materials from players and also
       buys eligible crafted rings, gems, monsters, and spells using recipe-based values.
-- [ ] What data should be public in player-facing PvP before and during battle?
+- [x] What data should be public in player-facing PvP before, during, and after battle? Search is anonymous; pre-combat identity is limited; loadouts and ring counts stay hidden; rings, gems, and enchantments reveal through use; monsters reveal on summon; participant results and replays show full loadouts; public profiles show competitive records only.
 - [x] When should ranked mode become visible as more than a locked mock? Replace the mock only when the first complete rating, queue, acceptance, battle, and settlement vertical slice is functional.
 
 ## Keep Explicitly

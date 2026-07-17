@@ -65,7 +65,11 @@
             <strong>{{ battle.opponent.username }}</strong>
           </div>
           <span class="pill">{{
-            t("battle.live.hiddenRings", { count: battle.opponent.ringCount })
+            t(
+              battle.opponent.rings?.length
+                ? "battle.live.revealedLoadout"
+                : "battle.live.hiddenLoadout",
+            )
           }}</span>
         </div>
 
@@ -189,6 +193,62 @@
               class="live-monster empty-slot"
               :aria-label="t('accessibility.emptyMonsterSlot')"
             />
+          </div>
+        </div>
+
+        <div v-if="battle.opponent.rings?.length" class="live-opponent-reveals">
+          <div class="live-loadout-heading">
+            <div>
+              <span class="eyebrow">{{ t("battle.live.revealedLoadout") }}</span>
+              <strong>{{ t("battle.live.revealedByUse") }}</strong>
+            </div>
+          </div>
+          <div class="live-ring-dock opponent-ring-dock">
+            <article
+              v-for="ring in battle.opponent.rings"
+              :key="ring.id"
+              :class="['live-ring', `rarity-border-${ring.rarity}`]"
+            >
+              <div class="live-artwork-wrap">
+                <ItemArtwork :definition-id="ring.definitionId" kind="ring" />
+                <span :class="['pill', `element-${ring.element}`]">{{
+                  t(`element.${ring.element}`)
+                }}</span>
+              </div>
+              <strong>{{ ringName(ring) }}</strong>
+              <dl class="live-inline-stats">
+                <div>
+                  <dt>{{ t("stats.damage") }}</dt>
+                  <dd>{{ ring.damage }}</dd>
+                </div>
+                <div>
+                  <dt>{{ t("stats.energy") }}</dt>
+                  <dd>{{ ring.energyCost }}</dd>
+                </div>
+                <div>
+                  <dt>{{ t("stats.cooldown") }}</dt>
+                  <dd>{{ ring.currentCooldown }}/{{ ring.cooldown }}</dd>
+                </div>
+              </dl>
+              <div class="live-gem-row">
+                <div v-for="gem in ring.gems" :key="gem.id" class="live-revealed-gem">
+                  <ItemArtwork
+                    :definition-id="gem.definitionId"
+                    kind="gem"
+                    :title="contentText(`gem.${gem.definitionId}.name`, gem.label)"
+                  />
+                  <ItemArtwork
+                    v-if="gem.enchantment"
+                    :definition-id="gem.enchantment.definitionId"
+                    :kind="gem.enchantment.type"
+                    :title="gem.enchantment.label"
+                  />
+                </div>
+                <span v-if="ring.gems.length === 0" class="muted">{{
+                  t("battle.live.noRevealedGems")
+                }}</span>
+              </div>
+            </article>
           </div>
         </div>
 
@@ -324,7 +384,9 @@
         <div class="live-loadout-heading">
           <div>
             <span class="eyebrow">{{ t("battle.live.activeLoadout") }}</span>
-            <strong>{{ t("battle.live.ringCount", { count: battle.viewer.ringCount }) }}</strong>
+            <strong>{{
+              t("battle.live.ringCount", { count: battle.viewer.rings?.length ?? 0 })
+            }}</strong>
           </div>
         </div>
 

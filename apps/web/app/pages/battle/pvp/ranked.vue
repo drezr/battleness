@@ -184,11 +184,12 @@
         <div>
           <span class="eyebrow">{{ t("rankedMatch.proposalLabel") }}</span>
           <h2>
-            {{ t("rankedMatch.proposalTitle", { opponent: state.proposal?.opponent.username }) }}
+            {{ t("rankedMatch.proposalTitle", { opponent: state.proposal?.opponent.displayName }) }}
           </h2>
           <p class="muted">
             {{ t("rankedMatch.acceptanceTime", { time: acceptanceTimeRemaining }) }}
           </p>
+          <p v-if="state.proposal" class="muted">{{ opponentSummary(state.proposal.opponent) }}</p>
           <p v-if="state.proposal?.accepted" class="muted">
             {{ t("rankedMatch.waitingForOpponent") }}
           </p>
@@ -216,7 +217,10 @@
         <div class="pvp-match-ready-icon"><Swords :size="29" /></div>
         <div>
           <span class="eyebrow">{{ t("rankedMatch.matchedLabel") }}</span>
-          <h2>{{ t("rankedMatch.matchedTitle", { opponent: state.match.opponent.username }) }}</h2>
+          <h2>
+            {{ t("rankedMatch.matchedTitle", { opponent: state.match.opponent.displayName }) }}
+          </h2>
+          <p class="muted">{{ opponentSummary(state.match.opponent) }}</p>
           <p class="muted">{{ t("rankedMatch.redirecting") }}</p>
         </div>
         <NuxtLink class="button-link" :to="`/battle/live/${state.match.battleId}`">
@@ -336,6 +340,7 @@ import type {
   RankedLeaderboardEntry,
   RankedLeaderboardState,
   RankedMatchmakingState,
+  PvpOpponentIdentity,
 } from "~/utils/playerState";
 import { sectionLinks } from "~/utils/viewData";
 
@@ -385,6 +390,20 @@ const queueTimeRemaining = computed(() => countdown(state.value?.queue?.expiresA
 const acceptanceTimeRemaining = computed(() =>
   countdown(state.value?.proposal?.acceptanceDeadlineAt),
 );
+
+function opponentSummary(opponent: PvpOpponentIdentity): string {
+  const tier = opponent.rank ? t(`rankedMatch.tiers.${opponent.rank.tier}`) : null;
+  const rank = opponent.rank
+    ? opponent.rank.division
+      ? t("rankedMatch.rankName", { tier, division: opponent.rank.division })
+      : tier!
+    : t("rankedMatch.unranked");
+  return t("rankedMatch.opponentSummary", {
+    level: opponent.level,
+    rank,
+    ready: t(opponent.ready ? "privateMatch.ready" : "privateMatch.notReady"),
+  });
+}
 
 watch(
   () => state.value?.match?.battleId,

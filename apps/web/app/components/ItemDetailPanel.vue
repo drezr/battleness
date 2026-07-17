@@ -213,6 +213,12 @@
             </div>
           </div>
         </section>
+
+        <div v-if="manageTo" class="control-row item-detail-actions">
+          <NuxtLink class="button-link" :to="manageTo" @click="closeModal">
+            {{ t("itemDetail.manageInForge") }}
+          </NuxtLink>
+        </div>
       </aside>
     </div>
   </Teleport>
@@ -272,8 +278,10 @@ type DetailItem = {
   equipped?: boolean;
   slotIndex?: number | null;
   socketedRingId?: string | null;
+  socketedRingLabel?: string | null;
   socketIndex?: number | null;
   enchantedGemId?: string | null;
+  enchantedGemLabel?: string | null;
   damage?: number;
   ringDamage?: number;
   gemDamage?: number;
@@ -303,6 +311,7 @@ const props = defineProps<{
   item: DetailItem | null;
   title?: string;
   eyebrow?: string;
+  manageTo?: string;
 }>();
 const { t } = useI18n();
 const contentText = useContentText();
@@ -423,7 +432,7 @@ const usageEntries = computed(() => {
       value:
         item.slotIndex === null || item.slotIndex === undefined ? undefined : item.slotIndex + 1,
     },
-    { label: t("itemDetail.socketedRing"), value: item.socketedRingId ?? undefined },
+    { label: t("itemDetail.socketedRing"), value: item.socketedRingLabel ?? undefined },
     {
       label: t("itemDetail.socketIndex"),
       value:
@@ -431,7 +440,7 @@ const usageEntries = computed(() => {
           ? undefined
           : item.socketIndex + 1,
     },
-    { label: t("itemDetail.enchantedGem"), value: item.enchantedGemId ?? undefined },
+    { label: t("itemDetail.enchantedGem"), value: item.enchantedGemLabel ?? undefined },
   ];
 
   return entries.filter(isDetailEntry);

@@ -297,6 +297,7 @@
         <ItemDetailPanel
           :item="selectedDetailRing"
           :title="t('inventory.equipment.ringDetail')"
+          :manage-to="selectedDetailManageTo"
           @clear="selectedDetailRingId = ''"
         />
       </section>
@@ -350,6 +351,11 @@ const equipmentSlots = computed<(EquipmentRingView | null)[]>(() => {
 const selectedDetailRing = computed(
   () =>
     equipment.value?.availableRings.find((ring) => ring.id === selectedDetailRingId.value) ?? null,
+);
+const selectedDetailManageTo = computed(() =>
+  selectedDetailRing.value
+    ? `/forge/socket?ringId=${encodeURIComponent(selectedDetailRing.value.id)}`
+    : undefined,
 );
 
 function itemName(type: string, definitionId: string, fallback: string): string {

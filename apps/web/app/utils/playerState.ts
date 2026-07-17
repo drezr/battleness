@@ -257,6 +257,12 @@ export type BattleResultSummaryView = {
   spellsCast: BattleResultSummaryActivityView[];
   monstersSummoned: BattleResultSummaryActivityView[];
   monstersUsed: BattleResultSummaryActivityView[];
+  loadouts: {
+    playerId: string;
+    username: string;
+    level: number;
+    rings: LiveBattleRingView[];
+  }[];
 };
 
 export type BattleHistoryRecordView = {
@@ -295,18 +301,19 @@ export type PrivateMatchState = {
     code: string;
     status: "waiting" | "starting" | "active" | "finished" | "cancelled";
     battleId: string | null;
-    turnPlayerId: string | null;
     turnDeadlineAt: string | null;
     openingDuelDeadlineAt: string | null;
     expiresAt: string;
     participants: {
-      playerId: string;
-      username: string;
+      isCurrentPlayer: boolean;
+      displayName: string;
+      level: number;
+      rank: PvpVisibleRank;
       slot: "host" | "guest";
       ready: boolean;
-      loadoutId: string | null;
-      loadoutName: string | null;
-      ringCount: number;
+      loadoutId?: string | null;
+      loadoutName?: string | null;
+      ringCount?: number;
     }[];
   };
   loadouts: {
@@ -334,8 +341,10 @@ export type CasualMatchmakingState = {
   match: {
     battleId: string;
     opponent: {
-      id: string;
-      username: string;
+      displayName: string;
+      level: number;
+      rank: PvpVisibleRank;
+      ready: boolean;
     };
   } | null;
   recentBattleId: string | null;
@@ -382,14 +391,26 @@ export type RankedMatchmakingState = {
     pairingKey: string;
     acceptanceDeadlineAt: string;
     accepted: boolean;
-    opponent: { id: string; username: string };
+    opponent: PvpOpponentIdentity;
   } | null;
   match: {
     battleId: string;
-    opponent: { id: string; username: string };
+    opponent: PvpOpponentIdentity;
   } | null;
   recentBattleId: string | null;
   discipline: { missedAcceptances: number; lockedUntil: string | null };
+};
+
+export type PvpVisibleRank = {
+  tier: "bronze" | "silver" | "gold" | "platinum" | "diamond" | "master";
+  division: 1 | 2 | 3 | null;
+} | null;
+
+export type PvpOpponentIdentity = {
+  displayName: string;
+  level: number;
+  rank: PvpVisibleRank;
+  ready: boolean;
 };
 
 export type RankedLeaderboardEntry = {
@@ -507,9 +528,35 @@ export type LiveBattleRingView = {
     element: string;
     rarity: string;
     damage: number;
-    enchantmentType: "monster" | "spell" | null;
+    energyPenalty: number;
+    cooldownPenalty: number;
+    enchantment?: LiveBattleEnchantmentView | null;
   }[];
 };
+
+export type LiveBattleEnchantmentView =
+  | {
+      type: "spell";
+      definitionId: string;
+      label: string;
+      element: string;
+      rarity: string;
+      damage: number;
+      energyPenalty: number;
+      cooldownPenalty: number;
+    }
+  | {
+      type: "monster";
+      definitionId: string;
+      label: string;
+      element: string;
+      rarity: string;
+      health: number;
+      damage: number;
+      cooldown: number;
+      speed: number;
+      skill: string | null;
+    };
 
 export type LiveBattlePlayerView = {
   id: string;
@@ -526,7 +573,6 @@ export type LiveBattlePlayerView = {
     turnCount: number;
   };
   heroTargetId: string;
-  ringCount: number;
   monsters: LiveBattleMonsterView[];
   rings?: LiveBattleRingView[];
 };
@@ -580,6 +626,19 @@ export type InventoryItemView = {
   bonusPercent: number;
   socketCount: number | null;
   equipped: boolean;
+  damage?: number;
+  health?: number;
+  energyPenalty?: number;
+  cooldownPenalty?: number;
+  cooldown?: number;
+  skill?: string | null;
+  socketedRingId?: string | null;
+  socketedRingLabel?: string | null;
+  socketIndex?: number | null;
+  enchantedGemId?: string | null;
+  enchantedGemLabel?: string | null;
+  gems?: EquipmentGemView[];
+  enchantment?: EquipmentEnchantmentView | null;
 };
 
 export type RecipeView = {

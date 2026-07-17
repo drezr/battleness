@@ -86,14 +86,22 @@
       <section class="private-lobby-grid">
         <article
           v-for="participant in currentMatch.participants"
-          :key="participant.playerId"
+          :key="participant.slot"
           :class="['private-player-slot', { ready: participant.ready }]"
         >
           <div class="private-player-avatar"><UserRound :size="28" /></div>
           <div class="private-player-copy">
             <span class="eyebrow">{{ t(`privateMatch.slot.${participant.slot}`) }}</span>
-            <h2>{{ participant.username }}</h2>
-            <p>
+            <h2>{{ participant.displayName }}</h2>
+            <p class="muted">
+              {{
+                t("privateMatch.opponentSummary", {
+                  level: participant.level,
+                  rank: visibleRankLabel(participant.rank),
+                })
+              }}
+            </p>
+            <p v-if="participant.isCurrentPlayer">
               {{ participant.loadoutName || t("privateMatch.noLoadout") }}
               <template v-if="participant.loadoutName">
                 - {{ t("privateMatch.ringCount", { count: participant.ringCount }) }}
@@ -194,7 +202,7 @@ import {
   UserRound,
   Wifi,
 } from "@lucide/vue";
-import type { PrivateMatchState } from "~/utils/playerState";
+import type { PrivateMatchState, PvpVisibleRank } from "~/utils/playerState";
 import { sectionLinks } from "~/utils/viewData";
 
 const { t } = useI18n();
@@ -223,8 +231,14 @@ const currentMatch = computed(() =>
     : null,
 );
 const ownParticipant = computed(() =>
-  currentMatch.value?.participants.find((entry) => entry.playerId === state.value?.playerId),
+  currentMatch.value?.participants.find((entry) => entry.isCurrentPlayer),
 );
+
+function visibleRankLabel(rank: PvpVisibleRank): string {
+  if (!rank) return t("rankedMatch.unranked");
+  const tier = t(`rankedMatch.tiers.${rank.tier}`);
+  return rank.division ? t("rankedMatch.rankName", { tier, division: rank.division }) : tier;
+}
 
 watchEffect(() => {
   if (ownParticipant.value?.loadoutId && !selectedLoadoutId.value) {

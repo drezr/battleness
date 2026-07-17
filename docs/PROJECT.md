@@ -22,6 +22,9 @@ The game is a one-versus-one, turn-based combat game. Each player controls a her
 - A ring has an energy cost, cooldown, damage, and 1 to 3 sockets.
 - Gems are placed into ring sockets and add damage.
 - Gems can be enchanted by a monster or a spell.
+- Gem enchantments are modified only under Forge > Socket. Inventory exposes their resolved composition as read-only information and links the selected item to the Forge workflow.
+- A gem and an available spell or monster may be selected independently; ownership, type, uniqueness, and market-escrow compatibility are validated automatically.
+- A gem holds at most one spell or monster enchantment. Replacing or removing it is free, never destroys the attached item, and is allowed while its ring is equipped as long as no battle or market lock prevents the mutation.
 - When a ring is used, the gems inside it can summon their monsters or cast their spells.
 - Monsters fight alongside the hero and have damage, health, cooldown, and at most one optional skill.
 - Spells have unique effects.
@@ -420,7 +423,7 @@ This section separates executable game rules from implementation decisions. It i
 - Equipped items gain experience after combat.
 - The current prototype implements claimable deterministic rewards for credits, materials, and source-backed item XP. Replays do not grant rewards.
 - The Nuxt Game App implements the same initial deterministic settlement values through persisted `BattleRecord` and `RewardGrant` rows. Development result generation remains available for focused testing, while authoritative live battles now create their reward grant in the same transaction as the finishing action, final result, and replay checksum.
-- Live battles snapshot the development player's active Prisma loadout into an engine `BattleSetup`, including normalized ring sockets and gem enchantments, and persist the setup plus action log in a `BattleRecord`. Training retains its fixture-backed passive opponent, while campaign mode resolves its selected game-owned content loadout into deterministic engine instances. The live API reconstructs state through the pure engine and intentionally returns only the opponent ring count, never opponent ring identities or stats.
+- Live battles snapshot the development player's active Prisma loadout into an engine `BattleSetup`, including normalized ring sockets and gem enchantments, and persist the setup plus action log in a `BattleRecord`. Training retains its fixture-backed passive opponent, while campaign mode resolves its selected game-owned content loadout into deterministic engine instances. The live API hides opponent ring identities, statistics, and count until use reveals them. PvP matchmaking responses enforce the limited public identity projection described below.
 - Live clients submit commands without a player ID. The server assigns the development-player identity, verifies the client's expected action count, applies the command through the pure engine, and conditionally replaces the persisted journal so concurrent or duplicate submissions cannot overwrite a newer state. Finished battles receive their deterministic result JSON and replay checksum. Campaign opponents choose deterministic legal actions server-side; the development training adapter remains passive.
 - Prototype winner rewards grant 150 credits plus one common material from each crafting family: `aluminium`, `hydrogen`, `pearl`, and `sand`.
 - Prototype draw rewards grant 90 credits plus `aluminium` and `pearl`.
@@ -430,7 +433,7 @@ This section separates executable game rules from implementation decisions. It i
 - Prototype item XP applies only to crafted development inventory instances referenced by Battle Lab `sourceInstanceId` values, regardless of whether those source-backed items are assigned to Player One or Player Two.
 - Source-backed equipped rings, socketed gems, and gem enchantments gain 8 XP when rewards are claimed. Each ring use adds 20 XP to the ring and each of its socketed gems. Each spell trigger adds 20 XP to the spell. Each monster summon and monster attack adds 20 XP to the matching monster source instance.
 - Hero XP is persisted on the Nuxt `Player` model and is awarded by Game App development battle settlement. Campaign uses content-owned fixed rewards, casual PvP currently grants no rewards, and ranked formulas remain a future decision.
-- The prototype and Nuxt Game App show deterministic result summaries after finished battles. Nuxt summaries are reconstructed from persisted actions through the engine and cover turns, actions played, damage and action contribution by player, rings used, spells cast, monsters summoned or used, item XP generated, and reward claim status. Imported Dev Lab replays can show the summary but cannot claim rewards.
+- The prototype and Nuxt Game App show deterministic result summaries after finished battles. Nuxt summaries are reconstructed from persisted actions through the engine and cover turns, actions played, damage and action contribution by player, rings used, spells cast, monsters summoned or used, item XP generated, reward claim status, and both complete resolved loadout snapshots. Result equipment comes from the immutable initial setup rather than current inventory state. Imported Dev Lab replays can show the summary but cannot claim rewards.
 - In solo campaign, each opponent defines its fixed victory rewards in content data and victory unlocks the next opponent.
 - The initial campaign track is linear: `emberTrial` at recommended level 1, `stormInitiate` at level 3, and `frostGate` at level 5. Each opponent is repeatable and owns a validated content loadout plus separate first-clear and repeat-victory rewards.
 - Campaign completion is persisted as one `CampaignProgress` row per player and opponent. Victory count distinguishes first-clear from repeat settlement, and the selected opponent ID is stored as the battle mode reference.
@@ -669,6 +672,20 @@ This section separates executable game rules from implementation decisions. It i
 - Decision: Build live synchronous PvP first when multiplayer work starts, with asynchronous play left as a possible later addition.
 - Reason: The intended combat experience is turn-based but interactive, and live play should validate server authority, reconnect behavior, timers, and match flow.
 - Tradeoffs: Live PvP requires stronger connection handling than asynchronous play.
+
+#### PvP Information Visibility
+
+- Status: decided; pre-combat API sanitization, in-battle staged reveal, and complete participant result loadouts are implemented, while public profile implementation remains pending.
+- Apply the same visibility rules to private, casual, and ranked PvP.
+- Matchmaking search reveals no opponent information. After a match is created and before combat starts, participants see only the opponent's display name, hero level, visible rank, and readiness state.
+- Before use, the opponent's complete loadout, ring count, item identities, rarities, elements, gems, enchantments, and detailed statistics remain server-hidden.
+- The implemented pre-combat API projection contains only display name, hero level, visible rank, and readiness. Private lobbies include loadout identifiers, names, and ring counts only on the current player's own participant record. Casual and ranked search responses contain no opponent object, and live battle opponent responses no longer contain a ring count.
+- A ring becomes visible when first used and remains visible for the rest of the match. Its socketed gems become visible with that use because their resolved damage, energy, or cooldown values contributed to the action. A spell or monster enchantment remains hidden until it actually casts or summons, then remains visible afterward.
+- Reveal state is reconstructed deterministically from the immutable setup and persisted action journal rather than stored as mutable parallel state. Opponent DTOs contain only revealed rings, contributing gems, and triggered enchantments; unrevealed item counts and placeholder records are omitted. The live interface presents revealed items in a separate read-only dock.
+- Finished participant results reveal both complete loadouts from the immutable initial setup. The localized result view presents every resolved ring, gem, and enchantment without consulting mutable post-battle inventory state.
+- A summoned monster immediately reveals all current combat statistics and its skill.
+- Finished battle results and participant-accessible replays reveal both complete loadout snapshots, including items that were never used.
+- Public PvP profiles show visible rank, rating, peak rank, wins, losses, and match count. They never expose inventory, equipment, or saved loadouts.
 
 #### Multiplayer Concurrency
 

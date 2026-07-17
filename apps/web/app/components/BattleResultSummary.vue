@@ -62,6 +62,92 @@
       </div>
     </section>
 
+    <section class="battle-loadout-section">
+      <div class="battle-summary-section-title">
+        <Layers3 :size="18" />
+        <h3>{{ t("battle.summary.loadoutsTitle") }}</h3>
+      </div>
+      <p class="battle-loadout-note">{{ t("battle.summary.loadoutsDescription") }}</p>
+      <div class="battle-result-loadouts">
+        <section
+          v-for="(loadout, playerIndex) in summary.loadouts"
+          :key="loadout.playerId"
+          class="battle-result-loadout"
+        >
+          <header>
+            <span class="battle-player-index">
+              {{ t("battle.summary.playerIndex", { index: playerIndex + 1 }) }}
+            </span>
+            <span>
+              <strong>{{ loadout.username }}</strong>
+              <small>{{ t("battle.summary.level", { level: loadout.level }) }}</small>
+            </span>
+            <strong>{{ t("battle.live.ringCount", { count: loadout.rings.length }) }}</strong>
+          </header>
+          <div class="battle-result-ring-grid">
+            <article
+              v-for="ring in loadout.rings"
+              :key="ring.id"
+              :class="['battle-result-ring', `rarity-border-${ring.rarity}`]"
+            >
+              <div class="battle-result-ring-heading">
+                <ItemArtwork :definition-id="ring.definitionId" kind="ring" />
+                <span>
+                  <strong>{{ contentText(`ring.${ring.definitionId}.name`, ring.label) }}</strong>
+                  <small>{{ t(`rarity.${ring.rarity}`) }}</small>
+                </span>
+                <span :class="['pill', `element-${ring.element}`]">
+                  {{ t(`element.${ring.element}`) }}
+                </span>
+              </div>
+              <dl class="battle-result-ring-stats">
+                <div>
+                  <dt>{{ t("stats.damage") }}</dt>
+                  <dd>{{ ring.damage }}</dd>
+                </div>
+                <div>
+                  <dt>{{ t("stats.energy") }}</dt>
+                  <dd>{{ ring.energyCost }}</dd>
+                </div>
+                <div>
+                  <dt>{{ t("stats.cooldown") }}</dt>
+                  <dd>{{ ring.cooldown }}</dd>
+                </div>
+                <div>
+                  <dt>{{ t("stats.speed") }}</dt>
+                  <dd>{{ ring.speed }}</dd>
+                </div>
+              </dl>
+              <ul v-if="ring.gems.length" class="battle-result-gems">
+                <li v-for="gem in ring.gems" :key="gem.id">
+                  <ItemArtwork
+                    :definition-id="gem.definitionId"
+                    kind="gem"
+                    :title="contentText(`gem.${gem.definitionId}.name`, gem.label)"
+                  />
+                  <span>
+                    <strong>{{ contentText(`gem.${gem.definitionId}.name`, gem.label) }}</strong>
+                    <small>
+                      {{ t("battle.summary.gemStats", { damage: gem.damage }) }}
+                    </small>
+                  </span>
+                  <span v-if="gem.enchantment" class="battle-result-enchantment">
+                    <ItemArtwork
+                      :definition-id="gem.enchantment.definitionId"
+                      :kind="gem.enchantment.type"
+                      :title="gem.enchantment.label"
+                    />
+                    <small>{{ gem.enchantment.label }}</small>
+                  </span>
+                </li>
+              </ul>
+              <p v-else class="battle-result-no-gems">{{ t("battle.live.noGems") }}</p>
+            </article>
+          </div>
+        </section>
+      </div>
+    </section>
+
     <section class="battle-activity-section">
       <div class="battle-summary-section-title">
         <Activity :size="18" />
@@ -142,6 +228,7 @@ import {
   Coins,
   Flame,
   Gift,
+  Layers3,
   MousePointerClick,
   Package,
   Sparkles,

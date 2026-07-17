@@ -124,6 +124,7 @@
         <ItemDetailPanel
           :item="selectedDetailItem"
           :title="t('inventory.items.detail')"
+          :manage-to="selectedDetailManageTo"
           @clear="selectedDetailItemId = ''"
         />
       </section>
@@ -153,6 +154,16 @@ const filteredItems = computed(() =>
 const selectedDetailItem = computed(
   () => state.value?.inventory.find((item) => item.id === selectedDetailItemId.value) ?? null,
 );
+const selectedDetailManageTo = computed(() => {
+  const item = selectedDetailItem.value;
+  if (!item) return undefined;
+  if (item.type === "ring") return `/forge/socket?ringId=${encodeURIComponent(item.id)}`;
+  if (item.type === "gem") return `/forge/socket?gemId=${encodeURIComponent(item.id)}`;
+  if (item.type === "spell" || item.type === "monster") {
+    return `/forge/socket?targetId=${encodeURIComponent(item.id)}`;
+  }
+  return undefined;
+});
 
 function itemName(type: string, definitionId: string, fallback: string): string {
   return contentText(`${type}.${definitionId}.name`, fallback);

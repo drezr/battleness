@@ -3287,6 +3287,27 @@ h3 {
   margin-top: auto;
 }
 
+.live-opponent-reveals {
+  border-top: 1px solid var(--arena-border);
+  background: #132b35;
+}
+
+.opponent-ring-dock {
+  border-top: 1px solid rgb(255 255 255 / 8%);
+  background: #142f39;
+}
+
+.live-revealed-gem {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.live-revealed-gem .item-artwork + .item-artwork {
+  width: 22px;
+  opacity: 0.9;
+}
+
 .live-command-tray {
   position: sticky;
   z-index: 8;
@@ -5833,6 +5854,7 @@ body {
 }
 
 .battle-contribution-section,
+.battle-loadout-section,
 .battle-activity-section,
 .battle-earned-section {
   display: grid;
@@ -5844,6 +5866,157 @@ body {
 .battle-summary-section-title h3 {
   margin: 0;
   font-size: 0.9rem;
+}
+
+.battle-loadout-note {
+  margin: -4px 0 0;
+  color: var(--app-muted);
+  font-size: 0.72rem;
+}
+
+.battle-result-loadouts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.battle-result-loadout {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 10px;
+}
+
+.battle-result-loadout > header {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  border-bottom: 1px solid var(--app-border);
+  padding-bottom: 9px;
+}
+
+.battle-result-loadout > header > span:nth-child(2) {
+  display: grid;
+  gap: 2px;
+}
+
+.battle-result-loadout > header small,
+.battle-result-loadout > header > strong {
+  color: var(--app-muted);
+  font-size: 0.68rem;
+}
+
+.battle-result-ring-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.battle-result-ring {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 7px;
+  padding: 11px;
+  background: var(--app-surface);
+}
+
+.battle-result-ring-heading {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.battle-result-ring-heading .item-artwork {
+  width: 48px;
+}
+
+.battle-result-ring-heading > span:nth-child(2) {
+  display: grid;
+  gap: 2px;
+}
+
+.battle-result-ring-heading small {
+  color: var(--app-muted);
+  font-size: 0.65rem;
+}
+
+.battle-result-ring-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid var(--app-border);
+  border-bottom: 1px solid var(--app-border);
+}
+
+.battle-result-ring-stats > div {
+  display: grid;
+  gap: 2px;
+  padding: 7px 5px;
+}
+
+.battle-result-ring-stats dt,
+.battle-result-ring-stats dd {
+  margin: 0;
+}
+
+.battle-result-ring-stats dt {
+  color: var(--app-muted);
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.battle-result-ring-stats dd {
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.battle-result-gems {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.battle-result-gems li {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.battle-result-gems .item-artwork {
+  width: 38px;
+}
+
+.battle-result-gems li > span:not(.battle-result-enchantment) {
+  display: grid;
+  gap: 2px;
+}
+
+.battle-result-gems small,
+.battle-result-no-gems {
+  color: var(--app-muted);
+  font-size: 0.65rem;
+}
+
+.battle-result-enchantment {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.battle-result-enchantment .item-artwork {
+  width: 32px;
+}
+
+.battle-result-no-gems {
+  margin: 0;
 }
 
 .battle-contribution-grid {
@@ -6169,6 +6342,7 @@ body {
   }
 
   .battle-contribution-grid,
+  .battle-result-loadouts,
   .battle-summary-activity-grid,
   .battle-earned-details {
     grid-template-columns: 1fr;

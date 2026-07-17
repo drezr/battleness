@@ -258,6 +258,7 @@
         <ItemDetailPanel
           :item="selectedDetailRing"
           :title="t('inventory.loadouts.ringDetail')"
+          :manage-to="selectedDetailManageTo"
           @clear="selectedDetailRingId = ''"
         />
       </section>
@@ -307,6 +308,11 @@ const selectedDetailRing = computed(() => {
     [...currentRings, ...savedRings].find((ring) => ring.id === selectedDetailRingId.value) ?? null
   );
 });
+const selectedDetailManageTo = computed(() =>
+  selectedDetailRing.value
+    ? `/forge/socket?ringId=${encodeURIComponent(selectedDetailRing.value.id)}`
+    : undefined,
+);
 
 function ringName(ring: { definitionId: string; label: string }): string {
   return contentText(`ring.${ring.definitionId}.name`, ring.label);

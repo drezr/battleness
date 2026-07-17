@@ -50,6 +50,7 @@ import {
 } from "@battleness/engine";
 import { assertValidPlayerGameState } from "./gameStateValidation";
 import { publishGameRealtimeEvent } from "./gameRealtime";
+import { liveBattleRevealState, type LiveBattleRevealState } from "./liveBattleVisibility";
 import { currentPlayerId, developmentPlayerId } from "./playerContext";
 import {
   rankedCompetitiveConfig,
@@ -303,9 +304,20 @@ export async function getPlayerState() {
     include: {
       inventoryItems: { orderBy: { createdAt: "desc" } },
       materialStock: true,
+      ringSockets: { orderBy: { socketIndex: "asc" } },
+      gemEnchantments: true,
     },
   });
   const stock = materialStockFromRows(player.materialStock);
+  const inventoryById = new Map(player.inventoryItems.map((item) => [item.id, item]));
+  const socketsByRingId = groupSocketsByRingId(player.ringSockets);
+  const socketByGemId = new Map(player.ringSockets.map((socket) => [socket.gemItemId, socket]));
+  const enchantmentByGemId = new Map(
+    player.gemEnchantments.map((enchantment) => [enchantment.gemItemId, enchantment]),
+  );
+  const enchantmentByTargetId = new Map(
+    player.gemEnchantments.map((enchantment) => [enchantment.targetItemId, enchantment]),
+  );
 
   return {
     content: {
@@ -336,7 +348,16 @@ export async function getPlayerState() {
         player.materialStock.find((row) => row.materialId === material.id)?.contentVersion ??
         legacyContentVersion,
     })),
-    inventory: player.inventoryItems.map(toInventoryView),
+    inventory: player.inventoryItems.map((item) =>
+      toInventoryDetailView({
+        item,
+        inventoryById,
+        sockets: socketsByRingId.get(item.id) ?? [],
+        socket: socketByGemId.get(item.id) ?? null,
+        enchantmentByGemId,
+        enchantmentByTargetId,
+      }),
+    ),
     recipes: definitions.recipes.map((recipe) => toRecipeView(recipe, stock)),
   };
 }
@@ -745,7 +766,7 @@ export async function getPrivateMatchState() {
     await settleExpiredPrivateBattle(prisma, activeMatch.battleRecordId);
   }
 
-  const [match, loadouts] = await Promise.all([
+  const [match, loadouts, activeRankedSeason] = await Promise.all([
     prisma.privateMatch.findFirst({
       where: {
         matchType: "private",
@@ -764,7 +785,23 @@ export async function getPrivateMatchState() {
       orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
       include: { rings: true },
     }),
+    prisma.rankedSeason.findFirst({
+      where: { status: "active", startsAt: { lte: new Date() }, endsAt: { gt: new Date() } },
+      orderBy: [{ startsAt: "desc" }, { id: "asc" }],
+    }),
   ]);
+  const participantRatings =
+    match && activeRankedSeason
+      ? await prisma.rankedSeasonRating.findMany({
+          where: {
+            seasonId: activeRankedSeason.id,
+            playerId: { in: match.participants.map((participant) => participant.playerId) },
+          },
+        })
+      : [];
+  const ratingByPlayerId = new Map(
+    participantRatings.map((rating) => [rating.playerId, publicPvpRank(rating)]),
+  );
 
   return {
     playerId: currentPlayerId(),
@@ -774,21 +811,29 @@ export async function getPrivateMatchState() {
           code: match.code,
           status: match.status,
           battleId: match.battleRecordId,
-          turnPlayerId: match.turnPlayerId,
           turnDeadlineAt: match.turnDeadlineAt?.toISOString() ?? null,
           openingDuelDeadlineAt: match.openingDuelDeadlineAt?.toISOString() ?? null,
           expiresAt: match.expiresAt.toISOString(),
           participants: [...match.participants]
             .sort((left, right) => (left.slot === "host" ? -1 : right.slot === "host" ? 1 : 0))
-            .map((participant) => ({
-              playerId: participant.playerId,
-              username: participant.player.username,
-              slot: participant.slot as "host" | "guest",
-              ready: participant.ready,
-              loadoutId: participant.loadoutId,
-              loadoutName: participant.loadout?.name ?? null,
-              ringCount: participant.loadout?.rings.length ?? 0,
-            })),
+            .map((participant) => {
+              const isCurrentPlayer = participant.playerId === currentPlayerId();
+              return {
+                isCurrentPlayer,
+                displayName: participant.player.displayName ?? participant.player.username,
+                level: levelFromExperience(participant.player.experience),
+                rank: ratingByPlayerId.get(participant.playerId) ?? null,
+                slot: participant.slot as "host" | "guest",
+                ready: participant.ready,
+                ...(isCurrentPlayer
+                  ? {
+                      loadoutId: participant.loadoutId,
+                      loadoutName: participant.loadout?.name ?? null,
+                      ringCount: participant.loadout?.rings.length ?? 0,
+                    }
+                  : {}),
+              };
+            }),
         }
       : null,
     loadouts: loadouts.map((loadout) => ({
@@ -895,8 +940,12 @@ export async function joinPrivateMatch(rawCode: string) {
   });
 
   const state = await getPrivateMatchState();
+  const audience = await prisma.privateMatchParticipant.findMany({
+    where: { matchId },
+    select: { playerId: true },
+  });
   publishGameRealtimeEvent(
-    state.match?.participants.map((participant) => participant.playerId) ?? [currentPlayerId()],
+    audience.map((participant) => participant.playerId),
     { type: "privateMatchChanged", matchId, reason: "joined" },
   );
   return state;
@@ -1004,8 +1053,12 @@ export async function setPrivateMatchReady(loadoutId: string, ready: boolean) {
   });
 
   const state = await getPrivateMatchState();
+  const audience = await prisma.privateMatchParticipant.findMany({
+    where: { matchId },
+    select: { playerId: true },
+  });
   publishGameRealtimeEvent(
-    state.match?.participants.map((participant) => participant.playerId) ?? [currentPlayerId()],
+    audience.map((participant) => participant.playerId),
     {
       type: "privateMatchChanged",
       matchId,
@@ -1079,6 +1132,7 @@ export async function getCasualMatchmakingState() {
       ? activeBattle.playerTwo
       : activeBattle.playerOne
     : null;
+  const opponentIdentity = opponent ? await publicPvpIdentity(prisma, opponent, true) : null;
 
   return {
     playerId: currentPlayerId(),
@@ -1107,10 +1161,7 @@ export async function getCasualMatchmakingState() {
     match: battleIsActive
       ? {
           battleId: entry!.battleRecordId!,
-          opponent: {
-            id: opponent?.id ?? "unknown",
-            username: opponent?.username ?? "Unknown player",
-          },
+          opponent: opponentIdentity!,
         }
       : null,
     recentBattleId:
@@ -1349,7 +1400,16 @@ export async function getRankedMatchmakingState() {
     entry = await findCurrentRankedQueueEntry(prisma, currentPlayerId());
   }
 
-  const [player, rating, discipline, opponent, seasonReset, seasonRewards] = await Promise.all([
+  const [
+    player,
+    rating,
+    discipline,
+    opponent,
+    opponentRating,
+    opponentQueueEntry,
+    seasonReset,
+    seasonRewards,
+  ] = await Promise.all([
     prisma.player.findUniqueOrThrow({
       where: { id: currentPlayerId() },
       include: { activeLoadout: { include: { rings: true } } },
@@ -1362,6 +1422,19 @@ export async function getRankedMatchmakingState() {
     normalizedRankedDiscipline(prisma, currentPlayerId()),
     entry?.opponentPlayerId
       ? prisma.player.findUnique({ where: { id: entry.opponentPlayerId } })
+      : Promise.resolve(null),
+    entry?.opponentPlayerId
+      ? prisma.rankedSeasonRating.findUnique({
+          where: {
+            seasonId_playerId: { seasonId: season.id, playerId: entry.opponentPlayerId },
+          },
+        })
+      : Promise.resolve(null),
+    entry?.pairingKey && entry.opponentPlayerId
+      ? prisma.rankedQueueEntry.findFirst({
+          where: { pairingKey: entry.pairingKey, playerId: entry.opponentPlayerId },
+          select: { acceptedAt: true },
+        })
       : Promise.resolve(null),
     prisma.rankedRatingAdjustment.findFirst({
       where: {
@@ -1454,19 +1527,17 @@ export async function getRankedMatchmakingState() {
             pairingKey: entry.pairingKey!,
             acceptanceDeadlineAt: entry.acceptanceDeadlineAt.toISOString(),
             accepted: Boolean(entry.acceptedAt),
-            opponent: {
-              id: entry.opponentPlayerId ?? "unknown",
-              username: opponent?.username ?? "Unknown player",
-            },
+            opponent: publicPvpIdentityFromData(
+              opponent,
+              opponentRating,
+              Boolean(opponentQueueEntry?.acceptedAt),
+            ),
           }
         : null,
     match: activeBattle
       ? {
           battleId: entry!.battleRecordId!,
-          opponent: {
-            id: entry!.opponentPlayerId ?? "unknown",
-            username: opponent?.username ?? "Unknown player",
-          },
+          opponent: publicPvpIdentityFromData(opponent, opponentRating, true),
         }
       : null,
     recentBattleId:
@@ -2031,8 +2102,8 @@ export async function getLiveBattleState(battleId: string) {
     openingDuelDeadlineAt: record.privateMatch?.openingDuelDeadlineAt?.toISOString() ?? null,
     openingDuelChoiceSubmitted: Boolean(state.firstPlayerChoices?.[viewer.id]),
     openingDuelRound: state.log.filter((event) => event.type === "elementDuelTied").length + 1,
-    viewer: toLiveBattlePlayerView(viewer, true),
-    opponent: toLiveBattlePlayerView(opponent, false),
+    viewer: toLiveBattlePlayerView(state, viewer, "full"),
+    opponent: toLiveBattlePlayerView(state, opponent, liveBattleRevealState(state, opponent.id)),
     result: state.result,
     reward: toBattleRewardView(record.rewardGrants[0] ?? null),
     summary: battleResultSummary(state),
@@ -3069,34 +3140,40 @@ export async function enchantPlayerGem(
         `${capitalize(targetType)} item "${targetItemId}" is not available for this player.`,
       );
     }
-    await assertItemsNotMarketEscrowed(transaction, [gemItemId, targetItemId]);
-
     const existingGemEnchantment = await transaction.gemEnchantment.findUnique({
       where: { gemItemId },
     });
-
-    if (existingGemEnchantment) {
-      throw new Error(`Gem item "${gemItemId}" is already enchanted.`);
-    }
+    await assertItemsNotMarketEscrowed(transaction, [
+      gemItemId,
+      targetItemId,
+      ...(existingGemEnchantment ? [existingGemEnchantment.targetItemId] : []),
+    ]);
 
     const existingTargetEnchantment = await transaction.gemEnchantment.findUnique({
       where: { targetItemId },
     });
 
-    if (existingTargetEnchantment) {
+    if (existingTargetEnchantment && existingTargetEnchantment.gemItemId !== gemItemId) {
       throw new Error(
         `${capitalize(targetType)} item "${targetItemId}" is already used as an enchantment.`,
       );
     }
 
-    await transaction.gemEnchantment.create({
-      data: {
-        playerId: currentPlayerId(),
-        gemItemId,
-        targetItemId,
-        targetType,
-      },
-    });
+    if (existingGemEnchantment) {
+      await transaction.gemEnchantment.update({
+        where: { gemItemId },
+        data: { targetItemId, targetType },
+      });
+    } else {
+      await transaction.gemEnchantment.create({
+        data: {
+          playerId: currentPlayerId(),
+          gemItemId,
+          targetItemId,
+          targetType,
+        },
+      });
+    }
   });
 
   await assertValidPlayerGameState(prisma, currentPlayerId());
@@ -3577,6 +3654,68 @@ function toInventoryView(row: InventoryItem) {
     socketCount: row.socketCount,
     equipped: row.equipped,
   };
+}
+
+function toInventoryDetailView(input: {
+  item: InventoryItem;
+  inventoryById: ReadonlyMap<string, InventoryItem>;
+  sockets: readonly RingSocketRow[];
+  socket: RingSocketRow | null;
+  enchantmentByGemId: ReadonlyMap<string, GemEnchantmentRow>;
+  enchantmentByTargetId: ReadonlyMap<string, GemEnchantmentRow>;
+}) {
+  const inventory = toInventoryView(input.item);
+
+  if (input.item.type === "ring") {
+    const ring = toEquipmentRingView({
+      ring: input.item,
+      slotIndex: null,
+      equipped: input.item.equipped,
+      inventoryById: input.inventoryById,
+      sockets: input.sockets,
+      enchantmentByGemId: input.enchantmentByGemId,
+    });
+    return { ...inventory, gems: ring.gems };
+  }
+
+  if (input.item.type === "gem") {
+    const gem = toSocketGemView({
+      gem: input.item,
+      socket: input.socket,
+      enchantmentByGemId: input.enchantmentByGemId,
+      inventoryById: input.inventoryById,
+    });
+    return {
+      ...inventory,
+      damage: gem.damage,
+      energyPenalty: gem.energyPenalty,
+      cooldownPenalty: gem.cooldownPenalty,
+      socketedRingId: gem.socketedRingId,
+      socketedRingLabel: input.socket
+        ? inventoryItemLabel(input.inventoryById.get(input.socket.ringItemId))
+        : null,
+      socketIndex: gem.socketIndex,
+      enchantment: gem.enchantment,
+    };
+  }
+
+  const target = toSocketEnchantmentTargetView({
+    target: input.item,
+    enchantment: input.enchantmentByTargetId.get(input.item.id) ?? null,
+  });
+  const enchantedGemId = input.enchantmentByTargetId.get(input.item.id)?.gemItemId ?? null;
+  return {
+    ...inventory,
+    ...target,
+    enchantedGemLabel: enchantedGemId
+      ? inventoryItemLabel(input.inventoryById.get(enchantedGemId))
+      : null,
+  };
+}
+
+function inventoryItemLabel(item: InventoryItem | undefined): string | null {
+  if (!item) return null;
+  return label(getCraftableDefinition(item.type as CraftableItemType, item.definitionId).nameKey);
 }
 
 function toExperienceProgression(experience: number) {
@@ -4784,6 +4923,52 @@ type RankedLeaderboardRow = Prisma.RankedSeasonRatingGetPayload<{
   include: { player: true };
 }>;
 
+type PublicPvpPlayer = {
+  id: string;
+  username: string;
+  displayName: string | null;
+  experience: number;
+};
+
+type PublicPvpRating = {
+  rating: number;
+  placementMatches: number;
+};
+
+function publicPvpRank(rating: PublicPvpRating | null) {
+  const standing = rating ? resolveRankedStanding(rating.rating, rating.placementMatches) : null;
+  return standing ? { tier: standing.tier, division: standing.division } : null;
+}
+
+function publicPvpIdentityFromData(
+  player: PublicPvpPlayer | null,
+  rating: PublicPvpRating | null,
+  ready: boolean,
+) {
+  return {
+    displayName: player?.displayName ?? player?.username ?? "Unknown player",
+    level: player ? levelFromExperience(player.experience) : 0,
+    rank: publicPvpRank(rating),
+    ready,
+  };
+}
+
+async function publicPvpIdentity(client: PrismaContext, player: PublicPvpPlayer, ready: boolean) {
+  const season = await client.rankedSeason.findFirst({
+    where: { status: "active", startsAt: { lte: new Date() }, endsAt: { gt: new Date() } },
+    orderBy: [{ startsAt: "desc" }, { id: "asc" }],
+    select: { id: true },
+  });
+  const rating = season
+    ? await client.rankedSeasonRating.findUnique({
+        where: {
+          seasonId_playerId: { seasonId: season.id, playerId: player.id },
+        },
+      })
+    : null;
+  return publicPvpIdentityFromData(player, rating, ready);
+}
+
 function rankedLeaderboardEntry(row: RankedLeaderboardRow, position: number) {
   const isCurrentPlayer = row.playerId === currentPlayerId();
   return {
@@ -5423,7 +5608,11 @@ function assertNonEmptyId(value: string, field: string): void {
   }
 }
 
-function toLiveBattlePlayerView(player: BattleState["players"][number], revealRings: boolean) {
+function toLiveBattlePlayerView(
+  state: BattleState,
+  player: BattleState["players"][number],
+  visibility: "full" | LiveBattleRevealState,
+) {
   const common = {
     id: player.id,
     username: player.username,
@@ -5431,7 +5620,6 @@ function toLiveBattlePlayerView(player: BattleState["players"][number], revealRi
     hero: player.hero,
     energy: player.energy,
     heroTargetId: `${player.id}.hero`,
-    ringCount: player.rings.length,
     monsters: player.monsters.map((monster) => ({
       id: monster.id,
       definitionId: monster.definitionId,
@@ -5449,13 +5637,18 @@ function toLiveBattlePlayerView(player: BattleState["players"][number], revealRi
     })),
   };
 
-  if (!revealRings) {
+  const visibleRings =
+    visibility === "full"
+      ? player.rings
+      : player.rings.filter((ring) => visibility.ringIds.has(ring.id));
+
+  if (visibility !== "full" && visibleRings.length === 0) {
     return common;
   }
 
   return {
     ...common,
-    rings: player.rings.map((ring) => ({
+    rings: visibleRings.map((ring) => ({
       id: ring.id,
       definitionId: ring.definitionId,
       label: label(ring.nameKey),
@@ -5466,16 +5659,70 @@ function toLiveBattlePlayerView(player: BattleState["players"][number], revealRi
       cooldown: ring.cooldown,
       currentCooldown: ring.currentCooldown,
       speed: ring.speed,
-      gems: ring.gems.map((gem) => ({
-        id: gem.id,
-        definitionId: gem.definitionId,
-        label: label(gem.nameKey),
-        element: gem.element,
-        rarity: gem.rarity,
-        damage: gem.damage,
-        enchantmentType: gem.enchantment?.type ?? null,
-      })),
+      gems: ring.gems
+        .filter((gem) => visibility === "full" || visibility.gemIds.has(gem.id))
+        .map((gem) => ({
+          id: gem.id,
+          definitionId: gem.definitionId,
+          label: label(gem.nameKey),
+          element: gem.element,
+          rarity: gem.rarity,
+          damage: gem.damage,
+          energyPenalty: gem.energyPenalty,
+          cooldownPenalty: gem.cooldownPenalty,
+          ...(visibility === "full" || visibility.enchantmentGemIds.has(gem.id)
+            ? { enchantment: toLiveBattleEnchantmentView(state, gem) }
+            : {}),
+        })),
     })),
+  };
+}
+
+function toLiveBattleEnchantmentView(
+  state: BattleState,
+  gem: BattleState["players"][number]["rings"][number]["gems"][number],
+) {
+  if (!gem.enchantment) {
+    return null;
+  }
+
+  if (gem.enchantment.type === "spell") {
+    const definitionId = gem.enchantment.resolvedDefinitionId ?? gem.enchantment.spellId;
+    const definition = state.definitions.spells[definitionId];
+    if (!definition) {
+      throw new Error(`Spell definition "${definitionId}" is unavailable in the battle snapshot.`);
+    }
+    return {
+      type: "spell" as const,
+      definitionId: gem.enchantment.spellId,
+      label: label(definition.nameKey),
+      element: definition.element,
+      rarity: definition.rarity,
+      damage: definition.effects.reduce(
+        (total, effect) => total + (effect.type === "dealDamage" ? effect.amount : 0),
+        0,
+      ),
+      energyPenalty: definition.baseEnergyPenalty,
+      cooldownPenalty: definition.baseCooldownPenalty,
+    };
+  }
+
+  const definitionId = gem.enchantment.resolvedDefinitionId ?? gem.enchantment.monsterId;
+  const definition = state.definitions.monsters[definitionId];
+  if (!definition) {
+    throw new Error(`Monster definition "${definitionId}" is unavailable in the battle snapshot.`);
+  }
+  return {
+    type: "monster" as const,
+    definitionId: gem.enchantment.monsterId,
+    label: label(definition.nameKey),
+    element: definition.element,
+    rarity: definition.rarity,
+    health: definition.baseHealth,
+    damage: definition.baseDamage,
+    cooldown: definition.baseCooldown,
+    speed: definition.baseSpeed,
+    skill: definition.skill ?? null,
   };
 }
 
@@ -5732,6 +5979,15 @@ function battleResultSummary(state: BattleState) {
     spellsCast: [...spellsCast.values()],
     monstersSummoned: [...monstersSummoned.values()],
     monstersUsed: [...monstersUsed.values()],
+    loadouts: state.initialSetup.players.map((player) => {
+      const playerView = toLiveBattlePlayerView(state, player, "full");
+      return {
+        playerId: player.id,
+        username: player.username,
+        level: player.level,
+        rings: "rings" in playerView ? playerView.rings : [],
+      };
+    }),
   };
 }
 
