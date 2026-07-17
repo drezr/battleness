@@ -47,7 +47,8 @@ These instructions are persistent project context for future agents working on B
 - Keep `apps/web/prisma/schema.prisma` as the canonical SQLite development model. Generate the PostgreSQL mirror with `prisma:postgres:prepare`, maintain its migrations separately under `apps/web/prisma/postgresql/migrations`, and require PostgreSQL migration deployment, drift detection, and transactional smoke coverage in CI.
 - Keep the Nuxt Game App on Prisma 6.x for now. Prisma 7 requires a SQLite driver adapter in application runtime, and the current Windows development environment should not depend on native `better-sqlite3` build tooling until that upgrade is intentionally planned.
 - The first combat prototype should be deployable as a simple static build after it becomes playable.
-- Use GitHub Actions for install, typecheck, lint, and tests.
+- Use GitHub Actions for install, formatting checks, typecheck, lint, tests, the Nuxt production build, and PostgreSQL migration validation.
+- Preserve request correlation and structured operational error logging in the Nuxt server. Never log request bodies, query parameters, cookies, session identifiers, authorization headers, or other secrets.
 - Use the active Node.js LTS version at setup time and manage pnpm through Corepack.
 - Use `packages/engine`, `packages/content`, `apps/prototype`, and `apps/web` as the current workspace layout.
 - Keep `apps/prototype` as a permanent Dev Lab. Do not replace or remove its debug-heavy interface when building the player-facing Game App.

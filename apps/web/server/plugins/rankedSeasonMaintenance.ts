@@ -1,4 +1,5 @@
 import { usePrisma } from "../utils/gameState";
+import { captureOperationalFailure } from "../utils/observability";
 import { runRankedSeasonMaintenance } from "../utils/rankedSeasonMaintenance";
 
 const maintenanceIntervalMs = 60 * 60 * 1_000;
@@ -8,7 +9,11 @@ export default defineNitroPlugin(() => {
     try {
       await runRankedSeasonMaintenance(usePrisma());
     } catch (error) {
-      console.error("Ranked season maintenance failed.", error);
+      captureOperationalFailure({
+        category: "matchmaking",
+        error,
+        metadata: { operation: "rankedSeasonMaintenance" },
+      });
     }
   };
 

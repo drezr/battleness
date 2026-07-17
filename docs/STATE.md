@@ -4,6 +4,7 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- The Nuxt server now provides basic operational observability: safe request correlation through `x-request-id`, structured JSON request and ranked-maintenance failure records, battle and authenticated-player context without request secrets, a bounded process-local development buffer, and authenticated development-only inspection and clearing endpoints. The operating policy and production limitations are documented in `docs/OBSERVABILITY.md`.
 - GitHub Actions CI now enforces the Prettier baseline and builds the Nuxt Game App for production in addition to type checking, linting, tests, and the existing PostgreSQL migration, drift, and smoke checks.
 - Game Market, Player Market, and private market history now use the tactical player-facing design system without changing their transactional APIs. The fixed market presents material and crafted-item catalogues beside a contextual buy, sell, or recipe-valued buyback desk plus a compact activity log. The player market presents permanent-listing status, a collapsed escrow listing form, primary and advanced search filters, price-forward listing cards, and clear purchase or free-cancellation actions. History is a private ledger with direction, item metadata, settlement value, date, and role filtering. Idempotency, escrow, anonymous counterparties, permanent listings, and transaction privacy remain unchanged.
 

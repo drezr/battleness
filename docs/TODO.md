@@ -194,7 +194,7 @@ The player-facing visual redesign and cross-application audit now cover the appl
 - [ ] Add production environment configuration.
 - [ ] Add database backup strategy.
 - [x] Extend CI to enforce formatting, build the Nuxt Game App for production, and run PostgreSQL migration, drift, and smoke checks.
-- [ ] Add basic observability for server errors and match failures.
+- [x] Add basic request correlation, structured server and match-failure logging, and protected development diagnostics without recording request secrets.
 
 ## Open Design Questions
 

@@ -12,6 +12,7 @@ Read these files before making changes:
 
 ## Current Project State
 
+- The Nuxt server assigns or preserves a safe `x-request-id`, emits structured JSON for request and ranked-maintenance failures, and keeps a bounded 100-record in-memory development buffer. Authenticated development diagnostics are available through `GET` and `DELETE /api/dev/diagnostics`; they are disabled by the handler in production. See `docs/OBSERVABILITY.md` for the data policy and production follow-up.
 - CI installs dependencies, checks the Prettier baseline, type checks, lints, runs the full test suite, builds the Nuxt Game App for production, and validates PostgreSQL migrations, drift, and relational smoke behavior.
 - Project name: BattleNess.
 - Current phase: the authenticated Game App player-facing visual redesign and cross-application audit are complete, while the original deterministic prototype remains a permanent Dev Lab.
