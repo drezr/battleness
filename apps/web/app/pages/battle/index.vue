@@ -39,6 +39,47 @@
     <p v-else-if="error" class="panel">{{ t("battle.hub.loadError") }}</p>
 
     <template v-else-if="loadouts">
+      <section
+        class="hub-stat-strip battle-hub-stats"
+        :aria-label="t('battle.hub.accountOverview')"
+      >
+        <NuxtLink to="/battle/campaign">
+          <span class="hub-stat-icon campaign"><Map :size="19" /></span>
+          <span>
+            <small>{{ t("navigation.campaign") }}</small>
+            <strong
+              >{{ campaign?.progress.completedCount ?? 0 }} /
+              {{ campaign?.progress.totalCount ?? 0 }}</strong
+            >
+            <em>{{ t("battle.hub.opponentsDefeated") }}</em>
+          </span>
+        </NuxtLink>
+        <NuxtLink to="/battle/history">
+          <span class="hub-stat-icon history"><History :size="19" /></span>
+          <span>
+            <small>{{ t("battle.history.totalBattles") }}</small>
+            <strong>{{ history?.records.length ?? 0 }}</strong>
+            <em>{{ t("battle.hub.verifiedRecords") }}</em>
+          </span>
+        </NuxtLink>
+        <NuxtLink to="/battle/history">
+          <span class="hub-stat-icon victories"><Trophy :size="19" /></span>
+          <span>
+            <small>{{ t("battle.history.winRate") }}</small>
+            <strong>{{ winRate }}%</strong>
+            <em>{{ t("battle.hub.combatPerformance") }}</em>
+          </span>
+        </NuxtLink>
+        <NuxtLink :class="{ attention: unclaimedRewardCount > 0 }" to="/profile/history">
+          <span class="hub-stat-icon rewards"><Gift :size="19" /></span>
+          <span>
+            <small>{{ t("battle.history.pendingRewards") }}</small>
+            <strong>{{ unclaimedRewardCount }}</strong>
+            <em>{{ t("battle.hub.rewardClaims") }}</em>
+          </span>
+        </NuxtLink>
+      </section>
+
       <section class="battle-mode-grid">
         <article class="battle-mode-card campaign-mode">
           <div class="battle-mode-icon"><Map :size="28" aria-hidden="true" /></div>
@@ -241,20 +282,36 @@ import {
   Check,
   ChevronRight,
   Dumbbell,
+  Gift,
   History,
   Map,
   Radio,
   Shield,
   ShieldAlert,
   Swords,
+  Trophy,
   Users,
 } from "@lucide/vue";
-import type { LoadoutState } from "~/utils/playerState";
+import type { BattleHistoryState, CampaignState, LoadoutState } from "~/utils/playerState";
 import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
 const { t } = useI18n();
-const { data: loadouts, error, pending } = await useFetch<LoadoutState>("/api/inventory/loadouts");
+const [loadoutRequest, campaignRequest, historyRequest] = await Promise.all([
+  useFetch<LoadoutState>("/api/inventory/loadouts"),
+  useFetch<CampaignState>("/api/campaign", { key: "battle-hub-campaign" }),
+  useFetch<BattleHistoryState>("/api/battle/history", { key: "battle-hub-history" }),
+]);
+const loadouts = loadoutRequest.data;
+const campaign = campaignRequest.data;
+const history = historyRequest.data;
+const pending = computed(
+  () =>
+    loadoutRequest.pending.value || campaignRequest.pending.value || historyRequest.pending.value,
+);
+const error = computed(
+  () => loadoutRequest.error.value || campaignRequest.error.value || historyRequest.error.value,
+);
 const selectedDetailRingId = ref("");
 const creatingBattle = ref(false);
 const creatingResult = ref(false);
@@ -267,6 +324,20 @@ const activeLoadout = computed(
 );
 const selectedDetailRing = computed(
   () => activeLoadout.value?.rings.find((ring) => ring.id === selectedDetailRingId.value) ?? null,
+);
+const winCount = computed(
+  () => history.value?.records.filter((record) => record.outcome === "win").length ?? 0,
+);
+const winRate = computed(() =>
+  history.value?.records.length
+    ? Math.round((winCount.value / history.value.records.length) * 100)
+    : 0,
+);
+const unclaimedRewardCount = computed(
+  () =>
+    (history.value?.records.filter((record) => record.reward?.status === "unclaimed").length ?? 0) +
+    (history.value?.seasonRewards.filter((entry) => entry.reward.status === "unclaimed").length ??
+      0),
 );
 
 async function startTrainingBattle(): Promise<void> {

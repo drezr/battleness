@@ -73,6 +73,12 @@
           <article
             :class="targetCardClasses(battle.opponent.heroTargetId, 'live-hero')"
             :data-target-id="battle.opponent.heroTargetId"
+            :role="canSelectTarget(battle.opponent.heroTargetId) ? 'button' : undefined"
+            :tabindex="canSelectTarget(battle.opponent.heroTargetId) ? 0 : -1"
+            :aria-label="targetInteractionLabel(battle.opponent.heroTargetId)"
+            @click="executeTarget(battle.opponent.heroTargetId)"
+            @keydown.enter.prevent="executeTarget(battle.opponent.heroTargetId)"
+            @keydown.space.prevent="executeTarget(battle.opponent.heroTargetId)"
           >
             <span
               v-if="resolutionEffect(battle.opponent.heroTargetId)?.damage"
@@ -110,14 +116,6 @@
             >
               {{ t("battle.live.firstTurnProtected") }}
             </small>
-            <button
-              type="button"
-              class="live-target-button"
-              :disabled="!canSelectTarget(battle.opponent.heroTargetId)"
-              @click="selectTarget(battle.opponent.heroTargetId)"
-            >
-              {{ targetButtonLabel(battle.opponent.heroTargetId) }}
-            </button>
           </article>
 
           <div class="live-monster-grid">
@@ -126,6 +124,12 @@
               :key="monster.id"
               :class="targetCardClasses(monster.id, 'live-monster', monster.rarity)"
               :data-target-id="monster.id"
+              :role="canSelectTarget(monster.id) ? 'button' : undefined"
+              :tabindex="canSelectTarget(monster.id) ? 0 : -1"
+              :aria-label="targetInteractionLabel(monster.id)"
+              @click="executeTarget(monster.id)"
+              @keydown.enter.prevent="executeTarget(monster.id)"
+              @keydown.space.prevent="executeTarget(monster.id)"
             >
               <span
                 v-if="resolutionEffect(monster.id)?.damage"
@@ -178,14 +182,6 @@
                   t("battle.live.rageActive")
                 }}</span>
               </div>
-              <button
-                type="button"
-                class="live-target-button"
-                :disabled="!canSelectTarget(monster.id)"
-                @click="selectTarget(monster.id)"
-              >
-                {{ targetButtonLabel(monster.id) }}
-              </button>
             </article>
             <div
               v-for="slot in Math.max(0, 3 - battle.opponent.monsters.length)"
@@ -204,6 +200,12 @@
           <article
             :class="targetCardClasses(battle.viewer.heroTargetId, 'live-hero')"
             :data-target-id="battle.viewer.heroTargetId"
+            :role="canSelectTarget(battle.viewer.heroTargetId) ? 'button' : undefined"
+            :tabindex="canSelectTarget(battle.viewer.heroTargetId) ? 0 : -1"
+            :aria-label="targetInteractionLabel(battle.viewer.heroTargetId)"
+            @click="executeTarget(battle.viewer.heroTargetId)"
+            @keydown.enter.prevent="executeTarget(battle.viewer.heroTargetId)"
+            @keydown.space.prevent="executeTarget(battle.viewer.heroTargetId)"
           >
             <span
               v-if="resolutionEffect(battle.viewer.heroTargetId)?.damage"
@@ -233,14 +235,6 @@
                 <dd>{{ battle.viewer.hero.speed }}</dd>
               </div>
             </dl>
-            <button
-              type="button"
-              class="live-target-button"
-              :disabled="!canSelectTarget(battle.viewer.heroTargetId)"
-              @click="selectTarget(battle.viewer.heroTargetId)"
-            >
-              {{ targetButtonLabel(battle.viewer.heroTargetId) }}
-            </button>
           </article>
 
           <div class="live-monster-grid">
@@ -249,9 +243,18 @@
               :key="monster.id"
               :class="[
                 ...targetCardClasses(monster.id, 'live-monster', monster.rarity),
-                { 'source-selected': selectedSource?.id === monster.id },
+                {
+                  'source-selected': selectedSource?.id === monster.id,
+                  'source-available': canPrepareSource(monsterSource(monster)),
+                },
               ]"
               :data-target-id="monster.id"
+              :role="canInteractWithViewerMonster(monster) ? 'button' : undefined"
+              :tabindex="canInteractWithViewerMonster(monster) ? 0 : -1"
+              :aria-label="viewerMonsterInteractionLabel(monster)"
+              @click="handleViewerMonsterInteraction(monster)"
+              @keydown.enter.prevent="handleViewerMonsterInteraction(monster)"
+              @keydown.space.prevent="handleViewerMonsterInteraction(monster)"
             >
               <span
                 v-if="resolutionEffect(monster.id)?.damage"
@@ -303,29 +306,6 @@
                 <span v-if="monster.rageActive" class="pill element-fire">{{
                   t("battle.live.rageActive")
                 }}</span>
-              </div>
-              <div class="live-card-actions">
-                <button
-                  type="button"
-                  :disabled="!sourceAvailability(monsterSource(monster)).available || submitting"
-                  @click="prepareSource(monsterSource(monster))"
-                >
-                  {{
-                    t(
-                      selectedSource?.id === monster.id
-                        ? "battle.live.prepared"
-                        : "battle.live.attack",
-                    )
-                  }}
-                </button>
-                <button
-                  type="button"
-                  class="secondary-button live-target-button"
-                  :disabled="!canSelectTarget(monster.id)"
-                  @click="selectTarget(monster.id)"
-                >
-                  {{ targetButtonLabel(monster.id) }}
-                </button>
               </div>
               <small v-if="!sourceAvailability(monsterSource(monster)).available" class="muted">
                 {{ availabilityLabel(monsterSource(monster)) }}
@@ -356,10 +336,17 @@
               `rarity-border-${ring.rarity}`,
               {
                 'source-selected': selectedSource?.id === ring.id,
+                'source-available': canPrepareSource(ringSource(ring)),
                 'resolution-source': resolutionSourceIds.has(ring.id),
               },
             ]"
             :data-source-id="ring.id"
+            :role="canPrepareSource(ringSource(ring)) ? 'button' : undefined"
+            :tabindex="canPrepareSource(ringSource(ring)) ? 0 : -1"
+            :aria-label="sourceInteractionLabel(ringSource(ring))"
+            @click="prepareSource(ringSource(ring))"
+            @keydown.enter.prevent="prepareSource(ringSource(ring))"
+            @keydown.space.prevent="prepareSource(ringSource(ring))"
           >
             <div class="live-artwork-wrap">
               <ItemArtwork :definition-id="ring.definitionId" kind="ring" />
@@ -392,19 +379,6 @@
               />
               <span v-if="ring.gems.length === 0" class="muted">{{ t("battle.live.noGems") }}</span>
             </div>
-            <button
-              type="button"
-              :disabled="!sourceAvailability(ringSource(ring)).available || submitting"
-              @click="prepareSource(ringSource(ring))"
-            >
-              {{
-                t(
-                  selectedSource?.id === ring.id
-                    ? "battle.live.prepared"
-                    : "battle.live.prepareRing",
-                )
-              }}
-            </button>
             <small v-if="!sourceAvailability(ringSource(ring)).available" class="muted">
               {{ availabilityLabel(ringSource(ring)) }}
             </small>
@@ -458,14 +432,6 @@
           <small class="muted">{{ selectedTargetLabel }}</small>
         </div>
         <div class="live-command-buttons">
-          <button
-            type="button"
-            :disabled="!canConfirmAction"
-            data-testid="confirm-battle-action"
-            @click="confirmPreparedAction"
-          >
-            {{ t(submitting ? "battle.live.submitting" : "battle.live.confirmAction") }}
-          </button>
           <button
             type="button"
             class="secondary-button"
@@ -662,19 +628,6 @@ const targetStates = computed(
   () =>
     new Map((battle.value ? battleTargets(battle.value) : []).map((target) => [target.id, target])),
 );
-const selectedTarget = computed(() =>
-  selectedTargetId.value ? (targetStates.value.get(selectedTargetId.value) ?? null) : null,
-);
-const canConfirmAction = computed(() =>
-  Boolean(
-    battle.value &&
-    selectedSource.value &&
-    selectedTarget.value &&
-    !selectedTarget.value.blockedByTaunt &&
-    sourceAvailability(selectedSource.value).available &&
-    !submitting.value,
-  ),
-);
 const selectedSourceLabel = computed(() => {
   if (!selectedSource.value) return t("battle.live.selectSource");
   return selectedSource.value.kind === "ring"
@@ -683,8 +636,7 @@ const selectedSourceLabel = computed(() => {
 });
 const selectedTargetLabel = computed(() => {
   if (!selectedSource.value) return t("battle.live.selectSourceHint");
-  if (!selectedTarget.value) return t("battle.live.selectTarget");
-  return t("battle.live.targetSelected", { target: targetLabel(selectedTarget.value.id) });
+  return t("battle.live.directTargetHint");
 });
 const presentedEvents = computed(() =>
   lastEvents.value.map((event) => presentBattleEvent(event, eventLabel)),
@@ -797,13 +749,20 @@ function targetLabel(targetId: string): string {
 }
 function canSelectTarget(targetId: string): boolean {
   const target = targetState(targetId);
-  return Boolean(selectedSource.value && target && !target.blockedByTaunt && !submitting.value);
+  return Boolean(
+    selectedSource.value &&
+    sourceAvailability(selectedSource.value).available &&
+    target &&
+    !target.blockedByTaunt &&
+    !submitting.value,
+  );
 }
-function targetButtonLabel(targetId: string): string {
+function targetInteractionLabel(targetId: string): string {
   const target = targetState(targetId);
   if (target?.blockedByTaunt) return t("battle.live.blockedByTaunt");
-  if (selectedTargetId.value === targetId) return t("battle.live.targetLocked");
-  return t("battle.live.selectAsTarget");
+  return canSelectTarget(targetId)
+    ? t("battle.live.attackTarget", { target: targetLabel(targetId) })
+    : targetLabel(targetId);
 }
 function targetCardClasses(targetId: string, base: string, rarity?: string) {
   const target = targetState(targetId);
@@ -813,7 +772,7 @@ function targetCardClasses(targetId: string, base: string, rarity?: string) {
     {
       "target-selected": selectedTargetId.value === targetId,
       "target-blocked": Boolean(selectedSource.value && target?.blockedByTaunt),
-      "target-available": Boolean(selectedSource.value && target && !target.blockedByTaunt),
+      "target-available": canSelectTarget(targetId),
       "resolution-source": resolutionSourceIds.value.has(targetId),
       "resolution-impact": Boolean(resolutionEffect(targetId)),
     },
@@ -880,13 +839,36 @@ function showResolution(
   }, 1400);
 }
 function prepareSource(source: LiveBattleActionSource): void {
-  if (!sourceAvailability(source).available) return;
+  if (!canPrepareSource(source)) return;
   selectedSource.value = source;
   selectedTargetId.value = null;
   actionError.value = "";
 }
-function selectTarget(targetId: string): void {
-  if (canSelectTarget(targetId)) selectedTargetId.value = targetId;
+function canPrepareSource(source: LiveBattleActionSource): boolean {
+  return sourceAvailability(source).available && !submitting.value;
+}
+function sourceInteractionLabel(source: LiveBattleActionSource): string {
+  const label = source.kind === "ring" ? ringName(source.item) : monsterName(source.item);
+  return selectedSource.value?.id === source.id
+    ? t("battle.live.sourceSelected", { source: label })
+    : t("battle.live.selectAttacker", { source: label });
+}
+function canInteractWithViewerMonster(monster: LiveBattleMonsterView): boolean {
+  return selectedSource.value
+    ? canSelectTarget(monster.id)
+    : canPrepareSource(monsterSource(monster));
+}
+function viewerMonsterInteractionLabel(monster: LiveBattleMonsterView): string {
+  return selectedSource.value
+    ? targetInteractionLabel(monster.id)
+    : sourceInteractionLabel(monsterSource(monster));
+}
+function handleViewerMonsterInteraction(monster: LiveBattleMonsterView): void {
+  if (selectedSource.value) {
+    void executeTarget(monster.id);
+    return;
+  }
+  prepareSource(monsterSource(monster));
 }
 function clearPreparedAction(): void {
   selectedSource.value = null;
@@ -917,19 +899,16 @@ async function submitAction(action: LiveBattleActionCommand): Promise<void> {
     submitting.value = false;
   }
 }
-function confirmPreparedAction(): Promise<void> | undefined {
-  if (!canConfirmAction.value || !selectedSource.value || !selectedTargetId.value) return;
-  return selectedSource.value.kind === "ring"
-    ? submitAction({
-        type: "useRing",
-        ringInstanceId: selectedSource.value.id,
-        targetId: selectedTargetId.value,
-      })
-    : submitAction({
-        type: "useMonster",
-        monsterInstanceId: selectedSource.value.id,
-        targetId: selectedTargetId.value,
-      });
+async function executeTarget(targetId: string): Promise<void> {
+  if (!canSelectTarget(targetId) || !selectedSource.value) return;
+  const source = selectedSource.value;
+  selectedTargetId.value = targetId;
+  const action: LiveBattleActionCommand =
+    source.kind === "ring"
+      ? { type: "useRing", ringInstanceId: source.id, targetId }
+      : { type: "useMonster", monsterInstanceId: source.id, targetId };
+  await submitAction(action);
+  if (selectedSource.value?.id === source.id) selectedTargetId.value = null;
 }
 function chooseElement(element: (typeof elements)[number]): Promise<void> {
   return submitAction({ type: "chooseElement", element });

@@ -1,207 +1,226 @@
 <template>
-  <aside :class="['panel', 'item-detail-panel', { 'item-detail-empty': !item }]">
-    <div class="card-heading">
-      <div>
-        <span class="eyebrow">{{ eyebrow ?? t("common.inspect") }}</span>
-        <h2>{{ title ?? t("itemDetail.title") }}</h2>
-      </div>
-      <button v-if="item" class="secondary-button" type="button" @click="$emit('clear')">
-        {{ t("itemDetail.clear") }}
-      </button>
-    </div>
-
-    <p v-if="!item" class="muted">{{ t("itemDetail.noneSelected") }}</p>
-
-    <template v-else>
-      <div class="item-detail-hero">
-        <ItemArtwork :definition-id="definitionId" :kind="kind" />
-        <div>
-          <h3>{{ localizedItemName }}</h3>
-          <div class="control-row">
-            <span v-if="item.type" class="pill muted-pill">{{ t(`itemType.${item.type}`) }}</span>
-            <span v-if="item.rarity" :class="['pill', `rarity-${item.rarity}`]">
-              {{ t(`rarity.${item.rarity}`) }}
-            </span>
-            <span v-if="item.element" :class="['pill', `element-${item.element}`]">
-              {{ t(`element.${item.element}`) }}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <dl class="summary-grid item-detail-grid">
-        <div v-if="hasNumber(item.level)" class="stat">
-          <dt>{{ t("common.level") }}</dt>
-          <dd>{{ item.level }}</dd>
-        </div>
-        <div v-if="hasNumber(item.experience)" class="stat">
-          <dt>XP</dt>
-          <dd>{{ item.experience }}</dd>
-        </div>
-        <div v-if="hasNumber(item.quality)" class="stat">
-          <dt>{{ t("common.quality") }}</dt>
-          <dd>
-            {{ item.quality }}
-            <template v-if="hasNumber(item.nextQuality)"> -> {{ item.nextQuality }}</template>
-          </dd>
-        </div>
-        <div v-if="hasNumber(item.quantity)" class="stat">
-          <dt>{{ t("itemDetail.quantity") }}</dt>
-          <dd>{{ item.quantity }}</dd>
-        </div>
-        <div v-if="hasNumber(item.socketCount)" class="stat">
-          <dt>{{ t("stats.sockets") }}</dt>
-          <dd>
-            {{ item.socketCount }}
-            <template v-if="hasNumber(item.nextSocketCount)">
-              -> {{ item.nextSocketCount }}
-            </template>
-          </dd>
-        </div>
-        <div v-if="hasNumber(item.cost)" class="stat">
-          <dt>{{ t("common.cost") }}</dt>
-          <dd>{{ item.cost }}</dd>
-        </div>
-        <div v-if="hasNumber(item.buyPrice)" class="stat">
-          <dt>{{ t("itemDetail.buyPrice") }}</dt>
-          <dd>{{ item.buyPrice }}</dd>
-        </div>
-        <div v-if="hasNumber(item.sellPrice)" class="stat">
-          <dt>{{ t("itemDetail.sellPrice") }}</dt>
-          <dd>{{ item.sellPrice }}</dd>
-        </div>
-        <div v-if="hasNumber(item.socketImprovementCost)" class="stat">
-          <dt>{{ t("itemDetail.socketCost") }}</dt>
-          <dd>{{ item.socketImprovementCost }}</dd>
-        </div>
-      </dl>
-
-      <section v-if="item.progression" class="item-detail-section">
-        <h3>{{ t("progression.title") }}</h3>
-        <ExperienceProgress
-          :progress="item.progression"
-          :label="t('progression.itemExperience', { item: localizedItemName })"
-        />
-        <p v-if="hasNumber(item.bonusPercent)" class="muted">
-          {{ t("itemDetail.currentBonus") }}
-          <strong class="positive">+{{ item.bonusPercent }}%</strong>
-          {{ t("itemDetail.bonusSource") }}
-        </p>
-      </section>
-
-      <section v-if="primaryStats.length > 0" class="item-detail-section">
-        <h3>{{ t("itemDetail.stats") }}</h3>
-        <dl class="summary-grid item-detail-grid">
-          <div v-for="stat in primaryStats" :key="stat.label" class="stat">
-            <dt>{{ stat.label }}</dt>
-            <dd>{{ stat.value }}</dd>
-          </div>
-        </dl>
-      </section>
-
-      <section v-if="previewStats.length > 0" class="item-detail-section">
-        <h3>{{ t("itemDetail.preview") }}</h3>
-        <div class="quality-stat-list">
-          <article v-for="stat in previewStats" :key="stat.label" class="quality-stat">
-            <span>{{ localizeStatLabel(stat.label) }}</span>
-            <strong>
-              {{ stat.current }}
-              <template v-if="stat.next > stat.current">
-                -> <span class="positive">{{ stat.next }}</span>
-              </template>
-              <template v-else>-> {{ stat.next }}</template>
-            </strong>
-          </article>
-        </div>
-      </section>
-
-      <section v-if="usageEntries.length > 0" class="item-detail-section">
-        <h3>{{ t("itemDetail.usage") }}</h3>
-        <dl class="summary-grid item-detail-grid">
-          <div v-for="entry in usageEntries" :key="entry.label" class="stat">
-            <dt>{{ entry.label }}</dt>
-            <dd>{{ entry.value }}</dd>
-          </div>
-        </dl>
-      </section>
-
-      <section v-if="materialEntries.length > 0" class="item-detail-section">
-        <h3>{{ t("itemType.material") }}</h3>
-        <dl class="summary-grid item-detail-grid">
-          <div v-for="entry in materialEntries" :key="entry.label" class="stat">
-            <dt>{{ entry.label }}</dt>
-            <dd>{{ entry.value }}</dd>
-          </div>
-        </dl>
-        <p v-if="item.description" class="muted">{{ localizedDescription }}</p>
-      </section>
-
-      <section v-if="item.gems?.length" class="item-detail-section">
-        <h3>{{ t("itemDetail.socketedGems") }}</h3>
-        <ul class="detail-list">
-          <li v-for="gem in item.gems" :key="gem.id">
-            <ItemArtwork :definition-id="gem.definitionId" kind="gem" />
-            <div>
-              <strong
-                >{{ gem.socketIndex + 1 }}.
-                {{ itemName("gem", gem.definitionId, gem.label) }}</strong
-              >
-              <small>
-                {{
-                  t("forge.socket.gemStats", {
-                    damage: gem.damage,
-                    energy: gem.energyPenalty,
-                    cooldown: gem.cooldownPenalty,
-                  })
-                }}
-              </small>
-              <small v-if="gem.enchantment">
-                {{ t(`itemType.${gem.enchantment.type}`) }}:
-                {{
-                  itemName(
-                    gem.enchantment.type,
-                    gem.enchantment.definitionId,
-                    gem.enchantment.label,
-                  )
-                }}
-              </small>
-            </div>
-          </li>
-        </ul>
-      </section>
-
-      <section v-if="item.enchantment" class="item-detail-section">
-        <h3>{{ t("itemDetail.enchantment") }}</h3>
-        <div class="detail-list">
+  <Teleport to="body">
+    <div
+      v-if="item"
+      class="item-detail-modal-backdrop"
+      role="presentation"
+      @click.self="closeModal"
+    >
+      <aside
+        ref="dialogElement"
+        class="panel item-detail-panel item-detail-modal"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="localizedItemName"
+        tabindex="-1"
+      >
+        <div class="card-heading item-detail-modal-heading">
           <div>
-            <ItemArtwork
-              :definition-id="item.enchantment.definitionId"
-              :kind="item.enchantment.type"
-            />
-            <div>
-              <strong>{{
-                itemName(
-                  item.enchantment.type,
-                  item.enchantment.definitionId,
-                  item.enchantment.label,
-                )
-              }}</strong>
-              <small>{{
-                t("itemDetail.enchantmentDamage", {
-                  type: t(`itemType.${item.enchantment.type}`),
-                  damage: item.enchantment.damage,
-                })
-              }}</small>
+            <span class="eyebrow">{{ eyebrow ?? t("common.inspect") }}</span>
+            <h2>{{ title ?? t("itemDetail.title") }}</h2>
+          </div>
+          <button
+            class="icon-button item-detail-modal-close"
+            type="button"
+            :aria-label="t('itemDetail.close')"
+            :title="t('itemDetail.close')"
+            @click="closeModal"
+          >
+            <X :size="19" aria-hidden="true" />
+          </button>
+        </div>
+
+        <div class="item-detail-hero">
+          <ItemArtwork :definition-id="definitionId" :kind="kind" />
+          <div>
+            <h3>{{ localizedItemName }}</h3>
+            <div class="control-row">
+              <span v-if="item.type" class="pill muted-pill">{{ t(`itemType.${item.type}`) }}</span>
+              <span v-if="item.rarity" :class="['pill', `rarity-${item.rarity}`]">
+                {{ t(`rarity.${item.rarity}`) }}
+              </span>
+              <span v-if="item.element" :class="['pill', `element-${item.element}`]">
+                {{ t(`element.${item.element}`) }}
+              </span>
             </div>
           </div>
         </div>
-      </section>
 
-    </template>
-  </aside>
+        <dl class="summary-grid item-detail-grid">
+          <div v-if="hasNumber(item.level)" class="stat">
+            <dt>{{ t("common.level") }}</dt>
+            <dd>{{ item.level }}</dd>
+          </div>
+          <div v-if="hasNumber(item.experience)" class="stat">
+            <dt>XP</dt>
+            <dd>{{ item.experience }}</dd>
+          </div>
+          <div v-if="hasNumber(item.quality)" class="stat">
+            <dt>{{ t("common.quality") }}</dt>
+            <dd>
+              {{ item.quality }}
+              <template v-if="hasNumber(item.nextQuality)"> -> {{ item.nextQuality }}</template>
+            </dd>
+          </div>
+          <div v-if="hasNumber(item.quantity)" class="stat">
+            <dt>{{ t("itemDetail.quantity") }}</dt>
+            <dd>{{ item.quantity }}</dd>
+          </div>
+          <div v-if="hasNumber(item.socketCount)" class="stat">
+            <dt>{{ t("stats.sockets") }}</dt>
+            <dd>
+              {{ item.socketCount }}
+              <template v-if="hasNumber(item.nextSocketCount)">
+                -> {{ item.nextSocketCount }}
+              </template>
+            </dd>
+          </div>
+          <div v-if="hasNumber(item.cost)" class="stat">
+            <dt>{{ t("common.cost") }}</dt>
+            <dd>{{ item.cost }}</dd>
+          </div>
+          <div v-if="hasNumber(item.buyPrice)" class="stat">
+            <dt>{{ t("itemDetail.buyPrice") }}</dt>
+            <dd>{{ item.buyPrice }}</dd>
+          </div>
+          <div v-if="hasNumber(item.sellPrice)" class="stat">
+            <dt>{{ t("itemDetail.sellPrice") }}</dt>
+            <dd>{{ item.sellPrice }}</dd>
+          </div>
+          <div v-if="hasNumber(item.socketImprovementCost)" class="stat">
+            <dt>{{ t("itemDetail.socketCost") }}</dt>
+            <dd>{{ item.socketImprovementCost }}</dd>
+          </div>
+        </dl>
+
+        <section v-if="item.progression" class="item-detail-section">
+          <h3>{{ t("progression.title") }}</h3>
+          <ExperienceProgress
+            :progress="item.progression"
+            :label="t('progression.itemExperience', { item: localizedItemName })"
+          />
+          <p v-if="hasNumber(item.bonusPercent)" class="muted">
+            {{ t("itemDetail.currentBonus") }}
+            <strong class="positive">+{{ item.bonusPercent }}%</strong>
+            {{ t("itemDetail.bonusSource") }}
+          </p>
+        </section>
+
+        <section v-if="primaryStats.length > 0" class="item-detail-section">
+          <h3>{{ t("itemDetail.stats") }}</h3>
+          <dl class="summary-grid item-detail-grid">
+            <div v-for="stat in primaryStats" :key="stat.label" class="stat">
+              <dt>{{ stat.label }}</dt>
+              <dd>{{ stat.value }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section v-if="previewStats.length > 0" class="item-detail-section">
+          <h3>{{ t("itemDetail.preview") }}</h3>
+          <div class="quality-stat-list">
+            <article v-for="stat in previewStats" :key="stat.label" class="quality-stat">
+              <span>{{ localizeStatLabel(stat.label) }}</span>
+              <strong>
+                {{ stat.current }}
+                <template v-if="stat.next > stat.current">
+                  -> <span class="positive">{{ stat.next }}</span>
+                </template>
+                <template v-else>-> {{ stat.next }}</template>
+              </strong>
+            </article>
+          </div>
+        </section>
+
+        <section v-if="usageEntries.length > 0" class="item-detail-section">
+          <h3>{{ t("itemDetail.usage") }}</h3>
+          <dl class="summary-grid item-detail-grid">
+            <div v-for="entry in usageEntries" :key="entry.label" class="stat">
+              <dt>{{ entry.label }}</dt>
+              <dd>{{ entry.value }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section v-if="materialEntries.length > 0" class="item-detail-section">
+          <h3>{{ t("itemType.material") }}</h3>
+          <dl class="summary-grid item-detail-grid">
+            <div v-for="entry in materialEntries" :key="entry.label" class="stat">
+              <dt>{{ entry.label }}</dt>
+              <dd>{{ entry.value }}</dd>
+            </div>
+          </dl>
+          <p v-if="item.description" class="muted">{{ localizedDescription }}</p>
+        </section>
+
+        <section v-if="item.gems?.length" class="item-detail-section">
+          <h3>{{ t("itemDetail.socketedGems") }}</h3>
+          <ul class="detail-list">
+            <li v-for="gem in item.gems" :key="gem.id">
+              <ItemArtwork :definition-id="gem.definitionId" kind="gem" />
+              <div>
+                <strong
+                  >{{ gem.socketIndex + 1 }}.
+                  {{ itemName("gem", gem.definitionId, gem.label) }}</strong
+                >
+                <small>
+                  {{
+                    t("forge.socket.gemStats", {
+                      damage: gem.damage,
+                      energy: gem.energyPenalty,
+                      cooldown: gem.cooldownPenalty,
+                    })
+                  }}
+                </small>
+                <small v-if="gem.enchantment">
+                  {{ t(`itemType.${gem.enchantment.type}`) }}:
+                  {{
+                    itemName(
+                      gem.enchantment.type,
+                      gem.enchantment.definitionId,
+                      gem.enchantment.label,
+                    )
+                  }}
+                </small>
+              </div>
+            </li>
+          </ul>
+        </section>
+
+        <section v-if="item.enchantment" class="item-detail-section">
+          <h3>{{ t("itemDetail.enchantment") }}</h3>
+          <div class="detail-list">
+            <div>
+              <ItemArtwork
+                :definition-id="item.enchantment.definitionId"
+                :kind="item.enchantment.type"
+              />
+              <div>
+                <strong>{{
+                  itemName(
+                    item.enchantment.type,
+                    item.enchantment.definitionId,
+                    item.enchantment.label,
+                  )
+                }}</strong>
+                <small>{{
+                  t("itemDetail.enchantmentDamage", {
+                    type: t(`itemType.${item.enchantment.type}`),
+                    damage: item.enchantment.damage,
+                  })
+                }}</small>
+              </div>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
+import { X } from "@lucide/vue";
+
 type DetailStat = {
   label: string;
   current: number;
@@ -287,10 +306,36 @@ const props = defineProps<{
 }>();
 const { t } = useI18n();
 const contentText = useContentText();
+const dialogElement = ref<HTMLElement | null>(null);
+let triggerElement: HTMLElement | null = null;
+let previousBodyOverflow = "";
+let pageLocked = false;
 
-defineEmits<{
+const emit = defineEmits<{
   clear: [];
 }>();
+
+watch(
+  () => props.item,
+  async (item) => {
+    if (item) {
+      await openModal();
+    } else {
+      restorePageState();
+    }
+  },
+);
+
+onMounted(async () => {
+  window.addEventListener("keydown", handleKeydown);
+  if (props.item) {
+    await openModal();
+  }
+});
+onBeforeUnmount(() => {
+  window.removeEventListener("keydown", handleKeydown);
+  restorePageState();
+});
 
 const kind = computed(() => {
   const item = props.item;
@@ -415,6 +460,40 @@ function isDetailEntry(entry: {
 
 function hasNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
+}
+
+function closeModal(): void {
+  emit("clear");
+}
+
+async function openModal(): Promise<void> {
+  if (!pageLocked) {
+    if (document.activeElement instanceof HTMLElement) {
+      triggerElement = document.activeElement;
+    }
+    previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    pageLocked = true;
+  }
+  await nextTick();
+  dialogElement.value?.focus();
+}
+
+function restorePageState(): void {
+  if (!pageLocked) {
+    return;
+  }
+  document.body.style.overflow = previousBodyOverflow;
+  pageLocked = false;
+  const element = triggerElement;
+  triggerElement = null;
+  nextTick(() => element?.focus());
+}
+
+function handleKeydown(event: KeyboardEvent): void {
+  if (event.key === "Escape" && props.item) {
+    closeModal();
+  }
 }
 
 function itemName(type: string, id: string, fallback: string): string {

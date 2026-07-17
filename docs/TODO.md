@@ -4,7 +4,7 @@ This is the centralized working TODO for BattleNess. It focuses on what remains 
 
 ## Current Focus
 
-The player-facing visual redesign now covers the application shell, home, collection inventory, all battle surfaces, equipment, saved loadouts, Forge, Game Market, Player Market, and private market history. The next visual slice is Profile/Settings, followed by the final cross-application audit. Google Cloud credentials and consent-screen setup remain an environment deployment task.
+The player-facing visual redesign now covers the application shell, home, collection inventory, all battle surfaces, equipment, saved loadouts, Forge, Game Market, Player Market, private market history, Profile, Progression, and Settings. The next visual task is the final cross-application accessibility, responsive-layout, reduced-motion, and localization audit. Google Cloud credentials and consent-screen setup remain an environment deployment task.
 
 ## Phase 1 - Game App Data Foundation
 
@@ -161,7 +161,7 @@ The player-facing visual redesign now covers the application shell, home, collec
 - [x] Decide whether Nuxt DOM is enough for battle presentation or whether Phaser is needed. Nuxt DOM is the initial implementation; Phaser remains optional for future animation-heavy scene requirements.
 - [ ] If Phaser is chosen, isolate it to the battle view and keep the combat engine framework-independent.
 - [x] Build mobile-first battle controls with horizontally scrollable unit and ring rows plus a sticky command tray.
-- [x] Improve target selection ergonomics with a prepare-source, select-legal-target, confirm-action flow and client-visible Taunt restrictions.
+- [x] Improve target selection ergonomics with direct source-card selection followed by immediate execution on a legal target card, with client-visible Taunt restrictions.
 - [x] Add restrained CSS feedback after the action/state model is stable: source and target pulses, aggregated damage numbers, status labels, and reduced-motion support.
 - [x] Preserve accessibility and readable combat state with semantic controls, meters, localized labels, and collapsible technical diagnostics.
 
@@ -170,14 +170,16 @@ The player-facing visual redesign now covers the application shell, home, collec
 - [x] Decide the visual direction: dark-first tactical competitive presentation, medium content density, restrained rarity and element accents, and fast functional motion.
 - [x] Replace the prototype-style horizontal header with a desktop sidebar, compact resource top bar, and mobile bottom navigation.
 - [x] Rebuild the home view as a player command center with battle entry, resource summary, quick destinations, and collection artwork.
+- [x] Replace the generic Forge, Inventory, and Market hub mockups with real data-backed workflow dashboards, and enrich the Battle Hub with campaign, history, performance, and reward context.
 - [x] Apply the first shared item-card and inventory presentation pass, including mobile detail behavior and hidden player-facing technical IDs.
+- [x] Replace inline item inspection side panels with one shared accessible modal that closes from its top-right control, backdrop, or Escape key.
 - [x] Apply the design system to the Battle hub and Campaign journey, readiness, encounter, reward, and opponent-intelligence views.
 - [x] Apply the design system consistently to the PvP hub and private, casual, and ranked matchmaking views.
 - [x] Apply the design system consistently to Battle history and result views.
 - [x] Apply the design system consistently to Inventory equipment and loadout workflows.
 - [x] Apply the design system consistently to Forge workflows.
 - [x] Apply the design system consistently to Game Market and Player Market workflows.
-- [ ] Apply the design system consistently to Profile and Settings workflows.
+- [x] Apply the design system consistently to Profile and Settings workflows.
 - [ ] Perform a final accessibility, responsive layout, reduced-motion, and localization visual audit.
 
 ## Phase 14 - Production And Operations

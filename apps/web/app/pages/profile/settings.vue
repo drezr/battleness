@@ -1,5 +1,5 @@
 <template>
-  <main class="shell">
+  <main class="shell profile-settings-page">
     <nav class="section-nav" :aria-label="t('accessibility.profileNavigation')">
       <NuxtLink
         v-for="link in sectionLinks.profile"
@@ -11,7 +11,7 @@
       </NuxtLink>
     </nav>
 
-    <header class="view-header">
+    <header class="view-header settings-header">
       <div class="view-title">
         <span class="eyebrow">{{ t("profile.section") }}</span>
         <h1>{{ t("settings.title") }}</h1>
@@ -22,156 +22,178 @@
     <p v-if="pending" class="panel">{{ t("settings.loading") }}</p>
     <p v-else-if="error || !state" class="panel">{{ t("settings.loadError") }}</p>
 
-    <form v-else class="settings-form" @submit.prevent="saveSettings">
-      <section class="panel settings-section">
-        <div class="settings-section-heading">
-          <div>
-            <span class="eyebrow">{{ t("settings.profile.section") }}</span>
-            <h2>{{ t("settings.profile.title") }}</h2>
-          </div>
-          <p class="muted">{{ t("settings.profile.description") }}</p>
+    <form v-else class="settings-workspace" @submit.prevent="saveSettings">
+      <aside class="settings-account-summary">
+        <span class="settings-avatar" aria-hidden="true">{{ profileInitials }}</span>
+        <div>
+          <span class="eyebrow">{{ t("settings.accountSummary") }}</span>
+          <h2>{{ form.displayName }}</h2>
+          <p>@{{ state.profile.username }}</p>
         </div>
-
-        <div class="settings-field-grid">
-          <label>
-            <span class="field-label">{{ t("settings.profile.displayName") }}</span>
-            <input v-model="form.displayName" autocomplete="nickname" maxlength="32" />
-          </label>
-          <label>
-            <span class="field-label">{{ t("settings.profile.visibility") }}</span>
-            <select v-model="form.profileVisibility">
-              <option value="public">{{ t("settings.profile.public") }}</option>
-              <option value="private">{{ t("settings.profile.private") }}</option>
-            </select>
-          </label>
-        </div>
-
-        <dl class="settings-metadata">
+        <dl>
           <div>
-            <dt>{{ t("settings.profile.username") }}</dt>
-            <dd>{{ state.profile.username }}</dd>
+            <dt><UserRound :size="14" /> {{ t("settings.profile.visibility") }}</dt>
+            <dd>{{ t(`settings.profile.${form.profileVisibility}`) }}</dd>
           </div>
           <div>
-            <dt>{{ t("settings.profile.createdAt") }}</dt>
+            <dt><CalendarDays :size="14" /> {{ t("settings.profile.createdAt") }}</dt>
             <dd>{{ formatDate(state.profile.createdAt) }}</dd>
           </div>
           <div>
-            <dt>{{ t("settings.profile.lastActiveAt") }}</dt>
+            <dt><Activity :size="14" /> {{ t("settings.profile.lastActiveAt") }}</dt>
             <dd>{{ formatDate(state.profile.lastActiveAt) }}</dd>
           </div>
         </dl>
-      </section>
+        <p class="settings-account-note">
+          <ShieldCheck :size="16" /> {{ t("settings.accountManaged") }}
+        </p>
+      </aside>
 
-      <section class="panel settings-section">
-        <div class="settings-section-heading">
-          <div>
-            <span class="eyebrow">{{ t("settings.language.section") }}</span>
-            <h2>{{ t("settings.language.title") }}</h2>
-          </div>
-          <p class="muted">{{ t("settings.language.description") }}</p>
-        </div>
-
-        <label class="settings-narrow-field">
-          <span class="field-label">{{ t("settings.language.label") }}</span>
-          <select v-model="form.locale">
-            <option v-for="entry in availableLocales" :key="entry.code" :value="entry.code">
-              {{ entry.name }}
-            </option>
-          </select>
-        </label>
-      </section>
-
-      <section class="panel settings-section">
-        <div class="settings-section-heading">
-          <div>
-            <span class="eyebrow">{{ t("settings.appearance.section") }}</span>
-            <h2>{{ t("settings.appearance.title") }}</h2>
-          </div>
-          <p class="muted">{{ t("settings.appearance.description") }}</p>
-        </div>
-
-        <div class="settings-field-grid">
-          <fieldset>
-            <legend class="field-label">{{ t("settings.appearance.theme") }}</legend>
-            <div class="segmented-control settings-three-options">
-              <button
-                v-for="theme in themeOptions"
-                :key="theme"
-                type="button"
-                :class="{ active: form.theme === theme }"
-                :aria-pressed="form.theme === theme"
-                @click="form.theme = theme"
-              >
-                {{ t(`settings.appearance.${theme}`) }}
-              </button>
+      <div class="settings-preference-stack">
+        <section class="settings-preference-section">
+          <div class="settings-section-icon"><UserRound :size="20" /></div>
+          <div class="settings-section-content">
+            <div class="settings-section-heading">
+              <div>
+                <span class="eyebrow">{{ t("settings.profile.section") }}</span>
+                <h2>{{ t("settings.profile.title") }}</h2>
+              </div>
+              <p class="muted">{{ t("settings.profile.description") }}</p>
             </div>
-          </fieldset>
-
-          <fieldset>
-            <legend class="field-label">{{ t("settings.appearance.density") }}</legend>
-            <div class="segmented-control">
-              <button
-                v-for="density in densityOptions"
-                :key="density"
-                type="button"
-                :class="{ active: form.interfaceDensity === density }"
-                :aria-pressed="form.interfaceDensity === density"
-                @click="form.interfaceDensity = density"
-              >
-                {{ t(`settings.appearance.${density}`) }}
-              </button>
+            <div class="settings-field-grid">
+              <label>
+                <span class="field-label">{{ t("settings.profile.displayName") }}</span>
+                <input v-model="form.displayName" autocomplete="nickname" maxlength="32" />
+              </label>
+              <label>
+                <span class="field-label">{{ t("settings.profile.visibility") }}</span>
+                <select v-model="form.profileVisibility">
+                  <option value="public">{{ t("settings.profile.public") }}</option>
+                  <option value="private">{{ t("settings.profile.private") }}</option>
+                </select>
+              </label>
             </div>
-          </fieldset>
-        </div>
-
-        <label class="settings-toggle-row">
-          <input v-model="form.reducedMotion" type="checkbox" />
-          <span>
-            <strong>{{ t("settings.appearance.reducedMotion") }}</strong>
-            <small>{{ t("settings.appearance.reducedMotionDescription") }}</small>
-          </span>
-        </label>
-      </section>
-
-      <section class="panel settings-section">
-        <div class="settings-section-heading">
-          <div>
-            <span class="eyebrow">{{ t("settings.audio.section") }}</span>
-            <h2>{{ t("settings.audio.title") }}</h2>
           </div>
-          <p class="muted">{{ t("settings.audio.description") }}</p>
-        </div>
+        </section>
 
-        <label class="settings-toggle-row">
-          <input v-model="form.muted" type="checkbox" />
-          <span
-            ><strong>{{ t("settings.audio.muted") }}</strong></span
-          >
-        </label>
+        <section class="settings-preference-section">
+          <div class="settings-section-icon"><Languages :size="20" /></div>
+          <div class="settings-section-content">
+            <div class="settings-section-heading">
+              <div>
+                <span class="eyebrow">{{ t("settings.language.section") }}</span>
+                <h2>{{ t("settings.language.title") }}</h2>
+              </div>
+              <p class="muted">{{ t("settings.language.description") }}</p>
+            </div>
+            <label class="settings-narrow-field">
+              <span class="field-label">{{ t("settings.language.label") }}</span>
+              <select v-model="form.locale">
+                <option v-for="entry in availableLocales" :key="entry.code" :value="entry.code">
+                  {{ entry.name }}
+                </option>
+              </select>
+            </label>
+          </div>
+        </section>
 
-        <div class="settings-slider-list" :class="{ disabled: form.muted }">
-          <label v-for="volume in volumeOptions" :key="volume.field">
-            <span class="settings-slider-label">
-              <span>{{ t(volume.labelKey) }}</span>
-              <output>{{ t("settings.audio.percent", { value: form[volume.field] }) }}</output>
-            </span>
-            <input
-              v-model.number="form[volume.field]"
-              type="range"
-              min="0"
-              max="100"
-              step="1"
-              :disabled="form.muted"
-            />
-          </label>
-        </div>
-      </section>
+        <section class="settings-preference-section">
+          <div class="settings-section-icon"><MonitorCog :size="20" /></div>
+          <div class="settings-section-content">
+            <div class="settings-section-heading">
+              <div>
+                <span class="eyebrow">{{ t("settings.appearance.section") }}</span>
+                <h2>{{ t("settings.appearance.title") }}</h2>
+              </div>
+              <p class="muted">{{ t("settings.appearance.description") }}</p>
+            </div>
+            <div class="settings-field-grid">
+              <fieldset>
+                <legend class="field-label">{{ t("settings.appearance.theme") }}</legend>
+                <div class="segmented-control settings-three-options">
+                  <button
+                    v-for="theme in themeOptions"
+                    :key="theme"
+                    type="button"
+                    :class="{ active: form.theme === theme }"
+                    :aria-pressed="form.theme === theme"
+                    @click="form.theme = theme"
+                  >
+                    {{ t(`settings.appearance.${theme}`) }}
+                  </button>
+                </div>
+              </fieldset>
+              <fieldset>
+                <legend class="field-label">{{ t("settings.appearance.density") }}</legend>
+                <div class="segmented-control">
+                  <button
+                    v-for="density in densityOptions"
+                    :key="density"
+                    type="button"
+                    :class="{ active: form.interfaceDensity === density }"
+                    :aria-pressed="form.interfaceDensity === density"
+                    @click="form.interfaceDensity = density"
+                  >
+                    {{ t(`settings.appearance.${density}`) }}
+                  </button>
+                </div>
+              </fieldset>
+            </div>
+            <label class="settings-toggle-row">
+              <input v-model="form.reducedMotion" type="checkbox" />
+              <span
+                ><strong>{{ t("settings.appearance.reducedMotion") }}</strong
+                ><small>{{ t("settings.appearance.reducedMotionDescription") }}</small></span
+              >
+            </label>
+          </div>
+        </section>
+
+        <section class="settings-preference-section">
+          <div class="settings-section-icon"><Volume2 :size="20" /></div>
+          <div class="settings-section-content">
+            <div class="settings-section-heading">
+              <div>
+                <span class="eyebrow">{{ t("settings.audio.section") }}</span>
+                <h2>{{ t("settings.audio.title") }}</h2>
+              </div>
+              <p class="muted">{{ t("settings.audio.description") }}</p>
+            </div>
+            <label class="settings-toggle-row settings-mute-toggle">
+              <input v-model="form.muted" type="checkbox" />
+              <span
+                ><strong>{{ t("settings.audio.muted") }}</strong
+                ><small>{{ t("settings.audio.mutedDescription") }}</small></span
+              >
+            </label>
+            <div class="settings-slider-list" :class="{ disabled: form.muted }">
+              <label v-for="volume in volumeOptions" :key="volume.field">
+                <span class="settings-slider-label"
+                  ><span>{{ t(volume.labelKey) }}</span
+                  ><output>{{
+                    t("settings.audio.percent", { value: form[volume.field] })
+                  }}</output></span
+                >
+                <input
+                  v-model.number="form[volume.field]"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  :disabled="form.muted"
+                />
+              </label>
+            </div>
+          </div>
+        </section>
+      </div>
 
       <div class="settings-save-bar">
         <p v-if="saveMessage" class="positive">{{ saveMessage }}</p>
         <p v-else-if="saveError" class="settings-error">{{ saveError }}</p>
         <span v-else />
         <button type="submit" :disabled="saving">
+          <Save :size="17" aria-hidden="true" />
           {{ saving ? t("settings.saving") : t("settings.save") }}
         </button>
       </div>
@@ -180,6 +202,16 @@
 </template>
 
 <script setup lang="ts">
+import {
+  Activity,
+  CalendarDays,
+  Languages,
+  MonitorCog,
+  Save,
+  ShieldCheck,
+  UserRound,
+  Volume2,
+} from "@lucide/vue";
 import type { ProfileSettingsState } from "~/utils/playerState";
 import { sectionLinks } from "~/utils/viewData";
 
@@ -231,6 +263,13 @@ const availableLocales = computed(() =>
       ? { code: entry, name: entry }
       : { code: entry.code, name: entry.name },
   ),
+);
+const profileInitials = computed(() =>
+  (form.displayName || "BN")
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join(""),
 );
 
 watch(

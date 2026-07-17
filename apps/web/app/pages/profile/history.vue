@@ -1,5 +1,5 @@
 <template>
-  <main class="shell">
+  <main class="shell battle-history-page profile-history-page">
     <nav class="section-nav" :aria-label="t('accessibility.profileNavigation')">
       <NuxtLink
         v-for="link in sectionLinks.profile"
@@ -11,22 +11,15 @@
       </NuxtLink>
     </nav>
 
-    <header class="view-header">
+    <header class="view-header battle-history-header">
       <div class="view-title">
         <span class="eyebrow">{{ t("profile.section") }}</span>
         <h1>{{ t("profile.history.title") }}</h1>
         <p class="muted">{{ t("profile.history.description") }}</p>
       </div>
-      <dl v-if="state" class="summary-grid compact-summary">
-        <div class="stat">
-          <dt>{{ t("profile.history.heroXp") }}</dt>
-          <dd>{{ state.player.experience }}</dd>
-        </div>
-        <div class="stat">
-          <dt>{{ t("common.level") }}</dt>
-          <dd>{{ state.player.level }}</dd>
-        </div>
-      </dl>
+      <NuxtLink class="battle-history-new-match" to="/battle">
+        <Swords :size="18" /> {{ t("battle.history.newBattle") }} <ArrowRight :size="16" />
+      </NuxtLink>
     </header>
 
     <p v-if="pending" class="panel">{{ t("profile.history.loading") }}</p>
@@ -34,22 +27,72 @@
 
     <template v-else-if="state">
       <p v-if="feedback" class="feedback">{{ feedback }}</p>
+      <section class="battle-history-overview" :aria-label="t('battle.history.overview')">
+        <div>
+          <History :size="20" />
+          <span
+            ><small>{{ t("battle.history.totalBattles") }}</small
+            ><strong>{{ state.records.length }}</strong></span
+          >
+        </div>
+        <div class="wins">
+          <Trophy :size="20" />
+          <span
+            ><small>{{ t("battle.history.victories") }}</small
+            ><strong>{{ winCount }}</strong></span
+          >
+        </div>
+        <div>
+          <Zap :size="20" />
+          <span
+            ><small>{{ t("profile.history.heroXp") }}</small
+            ><strong>{{ state.player.experience }}</strong></span
+          >
+        </div>
+        <div :class="{ pending: unclaimedCount > 0 }">
+          <Gift :size="20" />
+          <span
+            ><small>{{ t("battle.history.pendingRewards") }}</small
+            ><strong>{{ unclaimedCount }}</strong></span
+          >
+        </div>
+      </section>
       <RankedSeasonRewardList
         :rewards="state.seasonRewards"
         :claiming-reward-id="claimingRewardId"
         @claim="claimReward"
       />
-      <BattleHistoryList
-        :records="state.records"
-        :claiming-reward-id="claimingRewardId"
-        @claim="claimReward"
-      />
+      <section class="battle-history-browser">
+        <div class="battle-history-toolbar">
+          <div>
+            <span class="eyebrow">{{ t("battle.history.archiveLabel") }}</span>
+            <h2>{{ t("battle.history.archiveTitle") }}</h2>
+          </div>
+          <div class="battle-history-filters" :aria-label="t('battle.history.filterLabel')">
+            <button
+              v-for="filter in filters"
+              :key="filter.value"
+              type="button"
+              :class="{ active: activeFilter === filter.value }"
+              @click="activeFilter = filter.value"
+            >
+              {{ t(filter.labelKey) }} <span>{{ filter.count }}</span>
+            </button>
+          </div>
+        </div>
+        <BattleHistoryList
+          :records="filteredRecords"
+          :claiming-reward-id="claimingRewardId"
+          @claim="claimReward"
+        />
+      </section>
     </template>
   </main>
 </template>
 
 <script setup lang="ts">
-import type { BattleHistoryState } from "~/utils/playerState";
+import { ArrowRight, Gift, History, Swords, Trophy, Zap } from "@lucide/vue";
+import type { BattleHistoryRecordView, BattleHistoryState } from "~/utils/playerState";
 import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
@@ -57,6 +100,30 @@ const { t } = useI18n();
 const { data: state, error, pending } = await useFetch<BattleHistoryState>("/api/battle/history");
 const claimingRewardId = ref("");
 const feedback = ref("");
+const activeFilter = ref<"all" | BattleHistoryRecordView["outcome"]>("all");
+const winCount = computed(
+  () => state.value?.records.filter((record) => record.outcome === "win").length ?? 0,
+);
+const unclaimedCount = computed(
+  () =>
+    (state.value?.records.filter((record) => record.reward?.status === "unclaimed").length ?? 0) +
+    (state.value?.seasonRewards.filter((entry) => entry.reward.status === "unclaimed").length ?? 0),
+);
+const filters = computed(() =>
+  (["all", "win", "draw", "loss"] as const).map((value) => ({
+    value,
+    labelKey: `battle.history.filter.${value}`,
+    count:
+      value === "all"
+        ? (state.value?.records.length ?? 0)
+        : (state.value?.records.filter((record) => record.outcome === value).length ?? 0),
+  })),
+);
+const filteredRecords = computed(() =>
+  activeFilter.value === "all"
+    ? (state.value?.records ?? [])
+    : (state.value?.records.filter((record) => record.outcome === activeFilter.value) ?? []),
+);
 
 async function claimReward(rewardGrantId: string): Promise<void> {
   claimingRewardId.value = rewardGrantId;
