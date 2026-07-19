@@ -675,7 +675,7 @@ This section separates executable game rules from implementation decisions. It i
 
 #### PvP Information Visibility
 
-- Status: decided; pre-combat API sanitization, in-battle staged reveal, and complete participant result loadouts are implemented, while public profile implementation remains pending.
+- Status: decided and implemented across pre-combat API sanitization, in-battle staged reveal, complete participant result loadouts, and public competitive profiles.
 - Apply the same visibility rules to private, casual, and ranked PvP.
 - Matchmaking search reveals no opponent information. After a match is created and before combat starts, participants see only the opponent's display name, hero level, visible rank, and readiness state.
 - Before use, the opponent's complete loadout, ring count, item identities, rarities, elements, gems, enchantments, and detailed statistics remain server-hidden.
@@ -683,6 +683,11 @@ This section separates executable game rules from implementation decisions. It i
 - A ring becomes visible when first used and remains visible for the rest of the match. Its socketed gems become visible with that use because their resolved damage, energy, or cooldown values contributed to the action. A spell or monster enchantment remains hidden until it actually casts or summons, then remains visible afterward.
 - Reveal state is reconstructed deterministically from the immutable setup and persisted action journal rather than stored as mutable parallel state. Opponent DTOs contain only revealed rings, contributing gems, and triggered enchantments; unrevealed item counts and placeholder records are omitted. The live interface presents revealed items in a separate read-only dock.
 - Finished participant results reveal both complete loadouts from the immutable initial setup. The localized result view presents every resolved ring, gem, and enchantment without consulting mutable post-battle inventory state.
+- Public competitive profiles expose only the current season's visible rank, rating, peak rank, wins, losses, and match count. Ratings and ranks remain hidden during placement matches. Inventory, equipment, loadouts, item progression, and technical account data are omitted. Public leaderboard names link to these profiles; private players remain anonymous and private profile requests are indistinguishable from unknown players. A player may still preview their own profile while their visibility is private.
+- Regression coverage uses one shared player-facing policy for private, casual, and ranked PvP. Its
+  test matrix locks anonymous search, limited pre-combat identity, staged live ring and effect
+  reveals, own-only lobby loadout details, and complete participant loadouts after battle. API
+  integration assertions independently verify that server responses respect the same boundaries.
 - A summoned monster immediately reveals all current combat statistics and its skill.
 - Finished battle results and participant-accessible replays reveal both complete loadout snapshots, including items that were never used.
 - Public PvP profiles show visible rank, rating, peak rank, wins, losses, and match count. They never expose inventory, equipment, or saved loadouts.

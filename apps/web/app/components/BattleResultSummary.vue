@@ -70,7 +70,7 @@
       <p class="battle-loadout-note">{{ t("battle.summary.loadoutsDescription") }}</p>
       <div class="battle-result-loadouts">
         <section
-          v-for="(loadout, playerIndex) in summary.loadouts"
+          v-for="(loadout, playerIndex) in visibleLoadouts"
           :key="loadout.playerId"
           class="battle-result-loadout"
         >
@@ -240,13 +240,19 @@ import type {
   BattleResultSummaryView,
   BattleRewardView,
 } from "~/utils/playerState";
+import { visibleBattleResultLoadouts } from "~/utils/pvpPresentation";
 
 const props = defineProps<{
+  mode: string;
   summary: BattleResultSummaryView;
   reward?: BattleRewardView | null;
 }>();
 const { t } = useI18n();
 const contentText = useContentText();
+
+const visibleLoadouts = computed(() =>
+  visibleBattleResultLoadouts(props.mode, props.summary.loadouts),
+);
 
 const totalDamage = computed(() =>
   props.summary.players.reduce((total, player) => total + player.damage, 0),

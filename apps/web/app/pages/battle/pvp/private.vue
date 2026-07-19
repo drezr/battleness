@@ -101,7 +101,15 @@
                 })
               }}
             </p>
-            <p v-if="participant.isCurrentPlayer">
+            <p
+              v-if="
+                canShowPvpParticipantLoadout(
+                  'private_pvp',
+                  'preCombat',
+                  participant.isCurrentPlayer,
+                )
+              "
+            >
               {{ participant.loadoutName || t("privateMatch.noLoadout") }}
               <template v-if="participant.loadoutName">
                 - {{ t("privateMatch.ringCount", { count: participant.ringCount }) }}
@@ -203,6 +211,7 @@ import {
   Wifi,
 } from "@lucide/vue";
 import type { PrivateMatchState, PvpVisibleRank } from "~/utils/playerState";
+import { canShowPvpParticipantLoadout } from "~/utils/pvpPresentation";
 import { sectionLinks } from "~/utils/viewData";
 
 const { t } = useI18n();

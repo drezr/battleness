@@ -1637,6 +1637,64 @@ export async function getRankedLeaderboardState() {
   };
 }
 
+export async function getPublicPvpProfileState(playerId: string) {
+  const normalizedPlayerId = playerId.trim();
+  if (!normalizedPlayerId) {
+    throw new Error("Player profile was not found.");
+  }
+
+  const prisma = usePrisma();
+  await seedDevelopmentPlayer(prisma);
+  await runRankedSeasonMaintenance(prisma);
+  const [player, season] = await Promise.all([
+    prisma.player.findUnique({ where: { id: normalizedPlayerId } }),
+    ensureActiveRankedSeason(prisma),
+  ]);
+  const isCurrentPlayer = normalizedPlayerId === currentPlayerId();
+
+  if (!player || (player.profileVisibility !== "public" && !isCurrentPlayer)) {
+    throw new Error("Player profile was not found.");
+  }
+
+  const rating = season
+    ? await prisma.rankedSeasonRating.findUnique({
+        where: { seasonId_playerId: { seasonId: season.id, playerId: player.id } },
+      })
+    : null;
+  const placed = Boolean(
+    rating && rating.placementMatches >= rankedGlicko2Config.placementMatchCount,
+  );
+  const peakRating = placed && rating ? (rating.peakRating ?? rating.rating) : null;
+
+  return {
+    profile: {
+      playerId: player.id,
+      displayName: player.displayName ?? player.username,
+      isCurrentPlayer,
+    },
+    season: season ? { id: season.id, endsAt: season.endsAt.toISOString() } : null,
+    rating: rating
+      ? {
+          value: placed ? Math.round(rating.rating) : null,
+          placementMatches: rating.placementMatches,
+          placementTarget: rankedGlicko2Config.placementMatchCount,
+          standing: placed ? publicPvpRank(rating) : null,
+          peakRating: peakRating === null ? null : Math.round(peakRating),
+          peakStanding:
+            peakRating === null
+              ? null
+              : publicPvpRank({
+                  rating: peakRating,
+                  placementMatches: rankedGlicko2Config.placementMatchCount,
+                }),
+          wins: rating.wins,
+          losses: rating.losses,
+          matchCount: rating.wins + rating.losses + rating.draws,
+        }
+      : null,
+  };
+}
+
 export async function enterRankedMatchmaking() {
   const prisma = usePrisma();
   await seedDevelopmentPlayer(prisma);

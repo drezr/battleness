@@ -438,6 +438,33 @@ type PvpOpponentApiResponse = {
   ready: boolean;
 };
 
+function expectLimitedPvpOpponent(
+  opponent: PvpOpponentApiResponse,
+  expected: Partial<PvpOpponentApiResponse>,
+): void {
+  expect(opponent).toMatchObject(expected);
+  expect(Object.keys(opponent).sort()).toEqual(["displayName", "level", "rank", "ready"]);
+  expect(JSON.stringify(opponent)).not.toMatch(/loadout|ringCount|ringItem|inventory/i);
+}
+
+function expectHiddenPvpLiveLoadout(battle: LiveBattleApiResponse, mode: string): void {
+  expect(battle.mode).toBe(mode);
+  expect(battle.viewer.rings?.length).toBeGreaterThan(0);
+  expect(battle.opponent.rings).toBeUndefined();
+  expect(battle.summary).toBeNull();
+}
+
+function expectCompletePvpResultLoadouts(
+  battle: LiveBattleApiResponse,
+  expectedPlayerIds: readonly string[],
+): void {
+  expect(battle.status).toBe("finished");
+  expect(battle.summary?.loadouts.map((loadout) => loadout.playerId).sort()).toEqual(
+    [...expectedPlayerIds].sort(),
+  );
+  expect(battle.summary?.loadouts.every((loadout) => loadout.rings.length > 0)).toBe(true);
+}
+
 type RankedLeaderboardApiResponse = {
   season: { id: string; endsAt: string } | null;
   top: {
@@ -454,6 +481,22 @@ type RankedLeaderboardApiResponse = {
   }[];
   current: RankedLeaderboardApiResponse["top"][number] | null;
   nearby: RankedLeaderboardApiResponse["top"];
+};
+
+type PublicPvpProfileApiResponse = {
+  profile: { playerId: string; displayName: string; isCurrentPlayer: boolean };
+  season: { id: string; endsAt: string } | null;
+  rating: {
+    value: number | null;
+    placementMatches: number;
+    placementTarget: number;
+    standing: { tier: string; division: number | null } | null;
+    peakRating: number | null;
+    peakStanding: { tier: string; division: number | null } | null;
+    wins: number;
+    losses: number;
+    matchCount: number;
+  } | null;
 };
 
 type PlayerMarketBrowseApiResponse = {
@@ -519,6 +562,7 @@ let casualMatchPostHandler: H3ApiHandler;
 let rankedMatchGetHandler: H3ApiHandler;
 let rankedMatchPostHandler: H3ApiHandler;
 let rankedLeaderboardGetHandler: H3ApiHandler;
+let publicPvpProfileGetHandler: H3ApiHandler;
 let battleStartHandler: ApiHandler;
 let battleLiveGetHandler: ApiHandler;
 let battleActionHandler: ApiHandler;
@@ -577,6 +621,7 @@ describe("Nuxt Game App APIs", () => {
       rankedMatchGetModule,
       rankedMatchPostModule,
       rankedLeaderboardGetModule,
+      publicPvpProfileGetModule,
       battleStartModule,
       battleLiveGetModule,
       battleActionModule,
@@ -619,6 +664,7 @@ describe("Nuxt Game App APIs", () => {
       import("./pvp/ranked.get"),
       import("./pvp/ranked.post"),
       import("./pvp/ranked/leaderboard.get"),
+      import("./pvp/profile/[playerId].get"),
       import("./battle/start.post"),
       import("./battle/live/[battleId].get"),
       import("./battle/live/[battleId]/actions.post"),
@@ -662,6 +708,7 @@ describe("Nuxt Game App APIs", () => {
     rankedMatchGetHandler = rankedMatchGetModule.default;
     rankedMatchPostHandler = rankedMatchPostModule.default;
     rankedLeaderboardGetHandler = rankedLeaderboardGetModule.default;
+    publicPvpProfileGetHandler = publicPvpProfileGetModule.default;
     battleStartHandler = battleStartModule.default;
     battleLiveGetHandler = battleLiveGetModule.default;
     battleActionHandler = battleActionModule.default;
@@ -2311,6 +2358,13 @@ describe("Nuxt Game App APIs", () => {
     const created = (await privateMatchPostHandler(createdEvent.event)) as PrivateMatchApiResponse;
     expect(created.match?.code).toMatch(/^BN-[A-Z2-9]{6}$/);
     expect(created.match?.participants).toHaveLength(1);
+    expect(created.match?.participants[0]).toMatchObject({
+      isCurrentPlayer: true,
+      displayName: "Dev Player",
+      loadoutId: null,
+      loadoutName: null,
+      ringCount: 0,
+    });
     const reloaded = (await privateMatchGetHandler(
       createH3TestEvent(hostCookie).event,
     )) as PrivateMatchApiResponse;
@@ -2360,6 +2414,20 @@ describe("Nuxt Game App APIs", () => {
       guestReadyEvent.event,
     )) as PrivateMatchApiResponse;
     expect(guestReady.match?.status).toBe("waiting");
+    const hostBeforeStart = (await privateMatchGetHandler(
+      createH3TestEvent(hostCookie).event,
+    )) as PrivateMatchApiResponse;
+    const guestSeenByHost = hostBeforeStart.match?.participants.find(
+      (participant) => !participant.isCurrentPlayer,
+    );
+    expect(guestSeenByHost).toEqual({
+      isCurrentPlayer: false,
+      displayName: "Private Guest",
+      level: 0,
+      rank: null,
+      slot: "guest",
+      ready: true,
+    });
 
     const hostReadyEvent = createH3TestEvent(hostCookie, {
       action: "ready",
@@ -2382,10 +2450,10 @@ describe("Nuxt Game App APIs", () => {
       guestBattleEvent.event as unknown as TestEvent,
     )) as LiveBattleApiResponse;
 
-    expect(hostBattle).toMatchObject({ mode: "private_pvp", viewer: { id: "devPlayer" } });
+    expect(hostBattle).toMatchObject({ viewer: { id: "devPlayer" } });
     expect(guestBattle).toMatchObject({ mode: "private_pvp", viewer: { id: guestId } });
-    expect(hostBattle.opponent.rings).toBeUndefined();
-    expect(guestBattle.opponent.rings).toBeUndefined();
+    expectHiddenPvpLiveLoadout(hostBattle, "private_pvp");
+    expectHiddenPvpLiveLoadout(guestBattle, "private_pvp");
 
     expect(hostBattle).toMatchObject({
       status: "choosingFirstPlayer",
@@ -2474,6 +2542,7 @@ describe("Nuxt Game App APIs", () => {
       type: "winner",
       loserId: timedOutPlayerId,
     });
+    expectCompletePvpResultLoadouts(timedOutBattle, ["devPlayer", guestId]);
     await expect(
       prisma.privateMatch.findUniqueOrThrow({ where: { id: started.match!.id } }),
     ).resolves.toMatchObject({
@@ -2663,7 +2732,9 @@ describe("Nuxt Game App APIs", () => {
       status: "searching",
       activeLoadout: { id: hostLoadout.id, ringCount: 1 },
       queue: { id: expect.any(String) },
+      match: null,
     });
+    expect(JSON.stringify(queued)).not.toContain(guestId);
 
     await prisma.loadoutRing.deleteMany({ where: { loadoutId: hostLoadout.id } });
     await prisma.loadoutRing.create({
@@ -2690,21 +2761,21 @@ describe("Nuxt Game App APIs", () => {
         opponent: { displayName: "Casual Guest", level: 0, rank: null, ready: true },
       },
     });
-    expect(Object.keys(matchedHost.match!.opponent).sort()).toEqual([
-      "displayName",
-      "level",
-      "rank",
-      "ready",
-    ]);
+    expectLimitedPvpOpponent(matchedHost.match!.opponent, {
+      displayName: "Casual Guest",
+      level: 0,
+      rank: null,
+      ready: true,
+    });
 
     const hostBattleEvent = createH3TestEvent(hostCookie);
     hostBattleEvent.event.context.params = { battleId: matchedGuest.match!.battleId };
     const hostBattle = (await battleLiveGetHandler(
       hostBattleEvent.event as unknown as TestEvent,
     )) as LiveBattleApiResponse;
-    expect(hostBattle).toMatchObject({ mode: "casual_pvp", viewer: { id: "devPlayer" } });
+    expect(hostBattle).toMatchObject({ viewer: { id: "devPlayer" } });
     expect(hostBattle.viewer.rings?.map((ring) => ring.id)).toEqual([hostRingId]);
-    expect(hostBattle.opponent.rings).toBeUndefined();
+    expectHiddenPvpLiveLoadout(hostBattle, "casual_pvp");
 
     const concedeEvent = createH3TestEvent(hostCookie, {
       expectedActionCount: hostBattle.actionCount,
@@ -2715,6 +2786,7 @@ describe("Nuxt Game App APIs", () => {
       concedeEvent.event as unknown as TestEvent,
     )) as LiveBattleActionApiResponse;
     expect(conceded.battle).toMatchObject({ status: "finished", reward: null });
+    expectCompletePvpResultLoadouts(conceded.battle, ["devPlayer", guestId]);
     await expect(
       prisma.rewardGrant.findFirst({ where: { battleRecordId: hostBattle.id } }),
     ).resolves.toBeNull();
@@ -2869,7 +2941,10 @@ describe("Nuxt Game App APIs", () => {
       status: "searching",
       rating: { value: 1500, placementMatches: 0 },
       queue: { ratingRange: 100, heroLevelRange: 2 },
+      proposal: null,
+      match: null,
     });
+    expect(JSON.stringify(queued)).not.toContain(guestId);
     const proposedGuest = (await rankedMatchPostHandler(
       createH3TestEvent(guestCookie, { action: "enter" }).event,
     )) as RankedMatchmakingApiResponse;
@@ -2891,6 +2966,18 @@ describe("Nuxt Game App APIs", () => {
         opponent: { displayName: "Ranked Queue Guest", level: 0, rank: null, ready: false },
       },
     });
+    expectLimitedPvpOpponent(proposedGuest.proposal!.opponent, {
+      displayName: "Dev Player",
+      level: 0,
+      rank: null,
+      ready: false,
+    });
+    expectLimitedPvpOpponent(proposedHost.proposal!.opponent, {
+      displayName: "Ranked Queue Guest",
+      level: 0,
+      rank: null,
+      ready: false,
+    });
 
     const acceptanceResults = (await Promise.all([
       rankedMatchPostHandler(createH3TestEvent(hostCookie, { action: "accept" }).event),
@@ -2906,12 +2993,12 @@ describe("Nuxt Game App APIs", () => {
         opponent: { displayName: "Dev Player", level: 0, rank: null, ready: true },
       },
     });
-    expect(Object.keys(matchedGuest.match!.opponent).sort()).toEqual([
-      "displayName",
-      "level",
-      "rank",
-      "ready",
-    ]);
+    expectLimitedPvpOpponent(matchedGuest.match!.opponent, {
+      displayName: "Dev Player",
+      level: 0,
+      rank: null,
+      ready: true,
+    });
     expect(acceptanceResults.some((state) => state.status === "matched")).toBe(true);
     const matchedProposalEntries = await prisma.rankedQueueEntry.findMany({
       where: { pairingKey: proposedGuest.proposal!.pairingKey },
@@ -2928,8 +3015,8 @@ describe("Nuxt Game App APIs", () => {
     const battle = (await battleLiveGetHandler(
       battleEvent.event as unknown as TestEvent,
     )) as LiveBattleApiResponse;
-    expect(battle).toMatchObject({ mode: "ranked_pvp", viewer: { id: "devPlayer" } });
-    expect(battle.opponent.rings).toBeUndefined();
+    expect(battle).toMatchObject({ viewer: { id: "devPlayer" } });
+    expectHiddenPvpLiveLoadout(battle, "ranked_pvp");
 
     const concedeEvent = createH3TestEvent(hostCookie, {
       expectedActionCount: battle.actionCount,
@@ -2940,6 +3027,7 @@ describe("Nuxt Game App APIs", () => {
       concedeEvent.event as unknown as TestEvent,
     )) as LiveBattleActionApiResponse;
     expect(conceded.battle).toMatchObject({ status: "finished", reward: null });
+    expectCompletePvpResultLoadouts(conceded.battle, ["devPlayer", guestId]);
     await expect(
       prisma.rankedRatingAdjustment.count({ where: { battleRecordId: battle.id } }),
     ).resolves.toBe(2);
@@ -3124,6 +3212,58 @@ describe("Nuxt Game App APIs", () => {
       wins: 10,
     });
     expect(leaderboard.nearby.map((entry) => entry.position)).toEqual([1, 2, 3, 4, 5]);
+
+    await prisma.rankedSeasonRating.update({
+      where: { seasonId_playerId: { seasonId, playerId: "leaderboardAlpha" } },
+      data: { peakRating: 1_920 },
+    });
+    const publicProfileEvent = createH3TestEvent(cookie);
+    publicProfileEvent.event.context.params = { playerId: "leaderboardAlpha" };
+    const publicProfile = (await publicPvpProfileGetHandler(
+      publicProfileEvent.event,
+    )) as PublicPvpProfileApiResponse;
+    expect(publicProfile).toEqual({
+      profile: {
+        playerId: "leaderboardAlpha",
+        displayName: "Alpha",
+        isCurrentPlayer: false,
+      },
+      season: { id: seasonId, endsAt: expect.any(String) },
+      rating: {
+        value: 1_800,
+        placementMatches: 5,
+        placementTarget: 5,
+        standing: { tier: "platinum", division: 3 },
+        peakRating: 1_920,
+        peakStanding: { tier: "platinum", division: 2 },
+        wins: 2,
+        losses: 1,
+        matchCount: 3,
+      },
+    });
+    expect(publicProfile).not.toHaveProperty("inventory");
+    expect(publicProfile).not.toHaveProperty("loadouts");
+
+    const privateProfileEvent = createH3TestEvent(cookie);
+    privateProfileEvent.event.context.params = { playerId: "leaderboardPrivate" };
+    await expect(publicPvpProfileGetHandler(privateProfileEvent.event)).rejects.toMatchObject({
+      statusCode: 404,
+    });
+
+    await prisma.player.update({
+      where: { id: "devPlayer" },
+      data: { profileVisibility: "private" },
+    });
+    const ownPrivateProfileEvent = createH3TestEvent(cookie);
+    ownPrivateProfileEvent.event.context.params = { playerId: "devPlayer" };
+    await expect(publicPvpProfileGetHandler(ownPrivateProfileEvent.event)).resolves.toMatchObject({
+      profile: { playerId: "devPlayer", isCurrentPlayer: true },
+      rating: { value: 1_600, wins: 10, losses: 2, matchCount: 13 },
+    });
+    await prisma.player.update({
+      where: { id: "devPlayer" },
+      data: { profileVisibility: "public" },
+    });
 
     await prisma.rankedSeason.delete({ where: { id: seasonId } });
     await prisma.player.deleteMany({

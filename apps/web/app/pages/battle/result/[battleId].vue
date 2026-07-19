@@ -82,6 +82,7 @@
 
       <BattleResultSummary
         v-if="record.summary"
+        :mode="record.mode"
         :summary="record.summary"
         :reward="record.reward"
       />

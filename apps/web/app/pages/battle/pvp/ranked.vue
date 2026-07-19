@@ -179,17 +179,17 @@
         </button>
       </article>
 
-      <article v-else-if="state.status === 'accepting'" class="pvp-accept-state">
+      <article v-else-if="state.status === 'accepting' && visibleProposal" class="pvp-accept-state">
         <div class="pvp-match-ready-icon"><UserCheck :size="29" /></div>
         <div>
           <span class="eyebrow">{{ t("rankedMatch.proposalLabel") }}</span>
           <h2>
-            {{ t("rankedMatch.proposalTitle", { opponent: state.proposal?.opponent.displayName }) }}
+            {{ t("rankedMatch.proposalTitle", { opponent: visibleProposal.opponent.displayName }) }}
           </h2>
           <p class="muted">
             {{ t("rankedMatch.acceptanceTime", { time: acceptanceTimeRemaining }) }}
           </p>
-          <p v-if="state.proposal" class="muted">{{ opponentSummary(state.proposal.opponent) }}</p>
+          <p class="muted">{{ opponentSummary(visibleProposal.opponent) }}</p>
           <p v-if="state.proposal?.accepted" class="muted">
             {{ t("rankedMatch.waitingForOpponent") }}
           </p>
@@ -213,17 +213,17 @@
         </div>
       </article>
 
-      <article v-else-if="state.status === 'matched' && state.match" class="pvp-match-found">
+      <article v-else-if="state.status === 'matched' && visibleMatch" class="pvp-match-found">
         <div class="pvp-match-ready-icon"><Swords :size="29" /></div>
         <div>
           <span class="eyebrow">{{ t("rankedMatch.matchedLabel") }}</span>
           <h2>
-            {{ t("rankedMatch.matchedTitle", { opponent: state.match.opponent.displayName }) }}
+            {{ t("rankedMatch.matchedTitle", { opponent: visibleMatch.opponent.displayName }) }}
           </h2>
-          <p class="muted">{{ opponentSummary(state.match.opponent) }}</p>
+          <p class="muted">{{ opponentSummary(visibleMatch.opponent) }}</p>
           <p class="muted">{{ t("rankedMatch.redirecting") }}</p>
         </div>
-        <NuxtLink class="button-link" :to="`/battle/live/${state.match.battleId}`">
+        <NuxtLink class="button-link" :to="`/battle/live/${visibleMatch.battleId}`">
           {{ t("rankedMatch.enterBattle") }} <ArrowRight :size="17" />
         </NuxtLink>
       </article>
@@ -272,9 +272,16 @@
             :class="{ current: entry.isCurrentPlayer }"
           >
             <strong class="ranked-position">#{{ entry.position }}</strong>
-            <span class="ranked-player-name">
-              {{ entry.username || t("rankedLeaderboard.anonymousPlayer") }}
+            <NuxtLink
+              v-if="entry.username"
+              class="ranked-player-name ranked-player-profile-link"
+              :to="`/profile/pvp/${entry.playerId}`"
+            >
+              {{ entry.username }}
               <small v-if="entry.isCurrentPlayer">{{ t("rankedLeaderboard.you") }}</small>
+            </NuxtLink>
+            <span v-else class="ranked-player-name">
+              {{ t("rankedLeaderboard.anonymousPlayer") }}
             </span>
             <span :data-label="t('rankedLeaderboard.rank')">{{ leaderboardRankLabel(entry) }}</span>
             <span :data-label="t('rankedLeaderboard.rating')">
@@ -309,9 +316,16 @@
             :class="{ current: entry.isCurrentPlayer }"
           >
             <strong class="ranked-position">#{{ entry.position }}</strong>
-            <span class="ranked-player-name">
-              {{ entry.username || t("rankedLeaderboard.anonymousPlayer") }}
+            <NuxtLink
+              v-if="entry.username"
+              class="ranked-player-name ranked-player-profile-link"
+              :to="`/profile/pvp/${entry.playerId}`"
+            >
+              {{ entry.username }}
               <small v-if="entry.isCurrentPlayer">{{ t("rankedLeaderboard.you") }}</small>
+            </NuxtLink>
+            <span v-else class="ranked-player-name">
+              {{ t("rankedLeaderboard.anonymousPlayer") }}
             </span>
             <span :data-label="t('rankedLeaderboard.rank')">{{ leaderboardRankLabel(entry) }}</span>
             <span :data-label="t('rankedLeaderboard.rating')">
@@ -342,6 +356,7 @@ import type {
   RankedMatchmakingState,
   PvpOpponentIdentity,
 } from "~/utils/playerState";
+import { visiblePvpOpponent } from "~/utils/pvpPresentation";
 import { sectionLinks } from "~/utils/viewData";
 
 const { t, locale } = useI18n();
@@ -368,6 +383,16 @@ const { status: realtimeStatus } = useGameRealtime((event) => {
     void refresh();
     void refreshLeaderboard();
   }
+});
+const visibleProposal = computed(() => {
+  const proposal = state.value?.proposal;
+  const opponent = visiblePvpOpponent("ranked_pvp", "preCombat", proposal?.opponent);
+  return proposal && opponent ? { ...proposal, opponent } : null;
+});
+const visibleMatch = computed(() => {
+  const match = state.value?.match;
+  const opponent = visiblePvpOpponent("ranked_pvp", "preCombat", match?.opponent);
+  return match && opponent ? { ...match, opponent } : null;
 });
 
 const rankLabel = computed(() => {

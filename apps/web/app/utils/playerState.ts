@@ -433,6 +433,26 @@ export type RankedLeaderboardState = {
   nearby: RankedLeaderboardEntry[];
 };
 
+export type PublicPvpProfileState = {
+  profile: {
+    playerId: string;
+    displayName: string;
+    isCurrentPlayer: boolean;
+  };
+  season: { id: string; endsAt: string } | null;
+  rating: {
+    value: number | null;
+    placementMatches: number;
+    placementTarget: number;
+    standing: PvpVisibleRank;
+    peakRating: number | null;
+    peakStanding: PvpVisibleRank;
+    wins: number;
+    losses: number;
+    matchCount: number;
+  } | null;
+};
+
 export type CampaignRewardPreview = {
   credits: number;
   heroExperience: number;

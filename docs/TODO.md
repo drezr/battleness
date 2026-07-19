@@ -142,8 +142,11 @@ The player-facing visual redesign and cross-application audit now cover the appl
 - [x] Enforce the decided pre-combat PvP DTO across private, casual, and ranked modes: anonymous search, limited identity after matching, and no opponent loadout or ring count.
 - [x] Persist and expose per-participant staged reveals for used rings and effect-producing gems or enchantments, while keeping unrevealed content out of opponent responses. Reveal state is deterministically reconstructed from the persisted battle snapshot and action journal.
 - [x] Reveal full monster combat data on summon and both complete loadout snapshots in participant results and replays. Result loadouts are rebuilt from the immutable initial battle setup and include resolved rings, gems, and enchantments for both participants.
-- [ ] Add public PvP profile statistics for visible rank, rating, peak rank, wins, losses, and match count without inventory or loadout data.
-- [ ] Add API and presentation regression coverage for every PvP visibility phase and mode.
+- [x] Add public PvP profile statistics for visible rank, rating, peak rank, wins, losses, and match count without inventory or loadout data. Public leaderboard identities link to the localized profile view; private profiles remain anonymous and return the same not-found response as unknown players.
+- [x] Add API and presentation regression coverage for every PvP visibility phase and mode. A
+      shared presentation policy and integration assertions now cover anonymous search, limited
+      pre-combat identity, staged live reveals, and complete participant results across private,
+      casual, and ranked PvP.
 
 ## Phase 11 - Player Market
 
@@ -196,8 +199,29 @@ The player-facing visual redesign and cross-application audit now cover the appl
 
 - [ ] Decide deployment platform.
 - [ ] Decide PostgreSQL hosting.
-- [ ] Add production environment configuration.
-- [ ] Add database backup strategy.
+- [ ] Add validated staging and production environment configuration, including public origin,
+      database connection, OAuth credentials, proxy behavior, and an explicit production ban on
+      development authentication.
+- [ ] Configure separate Google OAuth clients, consent screens, secrets, and redirect URIs for
+      staging and production.
+- [ ] Add unauthenticated liveness and dependency-aware readiness endpoints for deployment health
+      checks without exposing diagnostics.
+- [ ] Add the production HTTP security baseline: trusted origins for state-changing requests,
+      security headers, request-size limits, and rate limits for authentication, matchmaking,
+      market mutations, and combat commands.
+- [ ] Define and automate expired session, OAuth attempt, queue, and operational journal cleanup
+      without deleting permanent player history or market records.
+- [ ] Add database backup and retention strategy, then prove restoration into an isolated database.
+- [ ] Define the production migration, release, rollback, and emergency maintenance runbook.
+- [ ] Add production monitoring and alerts for availability, error rate, database health, failed
+      match settlement, queue maintenance, WebSocket reconnect rate, and backup failures.
+- [ ] Run staging smoke tests for login, inventory, Forge, markets, campaign, private PvP, casual PvP,
+      ranked PvP, reconnects, rewards, and localization against PostgreSQL.
+- [ ] Run load and soak tests for polling, WebSocket invalidations, matchmaking, market concurrency,
+      and authoritative battle actions before public access.
+- [ ] Run a dependency and production security review before the public release candidate.
+- [ ] Keep the first deployment to one Game App instance, or replace the process-local WebSocket
+      event hub with shared pub/sub before enabling horizontal scaling.
 - [x] Extend CI to enforce formatting, build the Nuxt Game App for production, and run PostgreSQL migration, drift, and smoke checks.
 - [x] Add basic request correlation, structured server and match-failure logging, and protected development diagnostics without recording request secrets.
 

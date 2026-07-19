@@ -4,6 +4,10 @@ These instructions are persistent project context for future agents working on B
 
 ## Documentation
 
+- Before making changes, read `docs/AGENT.md`, `docs/PROJECT.md`, `docs/TODO.md`, and
+  `docs/STATE.md`, then read any task-specific documentation and finish with `docs/RESUME.md`.
+- Read the root `README.md` for environment setup, development commands, OAuth configuration, and
+  PostgreSQL workflows.
 - For all future discussions and implementation work, record project modifications in `docs/STATE.md`.
 - `docs/STATE.md` should track changes made to code, docs, configuration, data files, tests, and other project artifacts.
 - Keep `docs/STATE.md` concise and ordered by date, with newest entries easy to find.
@@ -11,6 +15,14 @@ These instructions are persistent project context for future agents working on B
 - Record persistent project instructions in `docs/AGENT.md`.
 - Record the project summary, game rules, and technical decisions in `docs/PROJECT.md`.
 - Update `docs/PROJECT.md` when framework, architecture, database, deployment, or gameplay-rule decisions are made.
+
+## Repository Safety
+
+- Inspect `git status` and the relevant diff before editing. The worktree may contain intentional
+  uncommitted user or agent changes.
+- Never revert, overwrite, or reformat unrelated existing changes. Work with relevant changes that
+  are already present.
+- The user handles commits and pushes unless they explicitly request Git operations.
 
 ## Project Direction
 
@@ -82,11 +94,14 @@ These instructions are persistent project context for future agents working on B
 - Preserve the private PvP opening-duel timeout rule: the separate 90-second deadline starts with battle creation and continues through disconnects; choices are hidden, locked, and immutable; each tied duel resets the full deadline; one missing choice is a journaled concession; no choices produce a journaled draw without rewards; and three ties use a deterministic seed-based tiebreaker recorded in the event log.
 - Preserve the decided PvP visibility contract across private, casual, and ranked modes: reveal nothing during search; show only display name, hero level, visible rank, and readiness before combat; hide the complete loadout and ring count until staged in-match reveals; retain used rings and effect-producing gems or enchantments as visible; show full monster combat data on summon; reveal both complete loadouts to participants after combat and in replays; and expose only rank, rating, peak rank, wins, losses, and match count on public PvP profiles.
 
-## Current Discussion Status
+## Current Implementation Status
 
-- The initial Game App framework is Nuxt in `apps/web`.
+- The player-facing Game App is implemented with Nuxt in `apps/web`.
 - The architecture keeps the pure engine and content packages separate from the Dev Lab and Game App.
-- Phaser can be introduced later for the combat view after the Nuxt app shell and engine integration are stable.
+- The current combat presentation uses mobile-first Nuxt DOM. Phaser remains optional for a later
+  animation-heavy battle scene and must stay isolated from the combat engine if introduced.
 - The long-term deployment platform has not been selected yet; a classic Node server or VPS is preferred if feasible.
-- The combat UI direction has not been selected yet; a simple UI is enough for the first prototype.
-- Tooling choices such as bundler, tests, linting, and asset pipeline have not been finalized yet.
+- The Game App visual direction is dark-first, tactical, competitive, responsive, and localization-first.
+- Tooling is established: pnpm workspaces, TypeScript, Vite/Nuxt, Vitest, ESLint, Prettier, Prisma,
+  SQLite development persistence, PostgreSQL production migrations, and GitHub Actions CI.
+- The current planning focus is Phase 14 production and operations work in `docs/TODO.md`.

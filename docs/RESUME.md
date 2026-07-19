@@ -4,11 +4,52 @@ This file is a handoff for continuing BattleNess development on another computer
 
 ## Read First
 
-Read these files before making changes:
+Use this onboarding order before making changes:
 
 - `docs/AGENT.md`: persistent instructions for future agents.
 - `docs/PROJECT.md`: project summary, rules, glossary, proposed rules specification, and technical decisions.
+- `docs/TODO.md`: centralized remaining work and current production priorities.
 - `docs/STATE.md`: change log for agent-assisted project modifications.
+- Task-specific documents such as `docs/OBSERVABILITY.md`, `docs/UI_WIREFRAMES.md`, or the content
+  proposals when they are relevant.
+- Root `README.md`: environment setup, development commands, OAuth configuration, and PostgreSQL
+  workflows.
+- `docs/RESUME.md`: read this handoff last so its current-state summary is the final context loaded.
+
+Before editing, inspect `git status` and the relevant diff. The worktree may intentionally contain
+uncommitted changes from the user or another agent. Do not revert or overwrite unrelated changes.
+The user handles commits and pushes unless they explicitly request otherwise.
+
+## Local Setup And Validation
+
+- Required runtime: Node.js `24.13.0` from `.node-version` and pnpm `10.14.0` from the root
+  `packageManager` field. Use Corepack to provide pnpm.
+- SQLite is the default local persistence target. Automated SQLite tests create isolated temporary
+  databases and do not require an external service.
+- Google OAuth credentials are not required for the automated test suite; provider calls are mocked.
+- PostgreSQL validation requires Docker or another reachable PostgreSQL 17 instance. Follow the root
+  `README.md` and `compose.postgres.yml`.
+
+Run the standard validation gate from the repository root:
+
+```sh
+corepack enable
+pnpm install --frozen-lockfile
+pnpm format:check
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm --filter @battleness/web build
+```
+
+The validated baseline on 2026-07-19 is 19 Vitest files and 256 passing tests. If a validation count
+changes, investigate whether tests were intentionally added or removed instead of treating the count
+as a permanent invariant.
+
+On Windows, stop the Nuxt development server before commands that regenerate Prisma Client, including
+`typecheck` and the Nuxt production build. A running server can lock the Prisma query-engine DLL and
+cause an `EPERM` rename failure. Start the player-facing app with `pnpm dev:web`; `pnpm dev` starts the
+separate permanent Dev Lab prototype.
 
 ## Current Project State
 
@@ -21,7 +62,7 @@ Read these files before making changes:
 - The prototype includes deterministic combat state creation, ring and monster actions, direct-damage spells, summons, all six current monster skills, first-turn protection, battle end checks, combat-start resolution, JSON scenarios, versioned battle-record export/import and replay, a battle setup screen, a first sketch-inspired battle board with prepare-action-then-target interaction for rings and monsters, both players' rings visible for development testing, manual browser controls, localized event-log rendering, Taunt-aware target selection, and DOM interaction tests for critical board flows.
 - `apps/prototype` should stay as a permanent Dev Lab for engine, content, inventory, reward, and combat diagnostics.
 - `apps/web` is the Nuxt Game App. It has Prisma-backed player state, inventory, forge, game market, campaign, authenticated live battles, Google OAuth support, private PvP invitation lobbies, casual matchmaking, and ranked matchmaking with Glicko-2 seasons and rewards. PvP queue, lobby, and battle changes use authenticated WebSocket invalidations with HTTP polling fallback. Critical queue, acceptance, discipline, action, and timeout transitions use optimistic or serializable single-writer guards with concurrent integration coverage. Casual and private PvP currently grant no rewards.
-- PvP information visibility is decided consistently for private, casual, and ranked modes. Search reveals nothing; pre-combat reveals only display name, hero level, visible rank, and readiness; loadouts and ring counts remain hidden. This pre-combat boundary is enforced in server DTOs, including own-only private-lobby loadout metadata and no opponent ring count in live battle responses. In combat, reveal state is reconstructed from the persisted setup and journal: first use permanently reveals a ring and its contributing gems, while a spell or monster enchantment remains omitted until it actually casts or summons. The live UI renders only revealed opponent items. Summoned monsters expose complete combat data. Finished participant results and replays expose both complete resolved loadout snapshots from the immutable initial setup, including rings, gems, and enchantments. Public PvP profiles must expose rank, rating, peak rank, wins, losses, and match count, but never inventory or loadouts; that profile presentation remains to be implemented.
+- PvP information visibility is implemented consistently for private, casual, and ranked modes. Search reveals nothing; pre-combat reveals only display name, hero level, visible rank, and readiness; loadouts and ring counts remain hidden. This pre-combat boundary is enforced in server DTOs, including own-only private-lobby loadout metadata and no opponent ring count in live battle responses. In combat, reveal state is reconstructed from the persisted setup and journal: first use permanently reveals a ring and its contributing gems, while a spell or monster enchantment remains omitted until it actually casts or summons. The live UI renders only revealed opponent items. Summoned monsters expose complete combat data. Finished participant results and replays expose both complete resolved loadout snapshots from the immutable initial setup, including rings, gems, and enchantments. Public PvP profiles expose only current-season rank, rating, peak rank, wins, losses, and match count; inventory and loadouts remain omitted. Private leaderboard identities remain anonymous and private profile requests return not found, while owners can preview their own profile. A shared presentation-policy matrix and API integration assertions now lock every visibility phase for all three PvP modes.
 - The confirmed Game App presentation is dark-first and tactical competitive. Completed redesign and audit slices include the persistent application shell, local authentication, home, all four functional section hubs, collection inventory, all Battle and PvP surfaces, history/results, Equipment/Loadouts, Forge, Game Market, Player Market, private market history, Profile, Progression, and Settings. Battle summarizes campaign, history, performance, rewards, modes, and the active loadout; Forge reports recipe and workshop readiness; Inventory combines collection and combat-kit status; Market separates fixed and player economies with account-level exchange context. Preserve the separate Dev Lab diagnostics while selecting the next production, operations, infrastructure, or open-design task.
 - Item inspection across Battle, Forge, and Inventory now uses the shared `ItemDetailPanel` as a teleported modal rather than an inline side panel. It supports a top-right close control, backdrop dismissal, Escape dismissal, initial and restored focus, internal scrolling, and page-scroll locking.
 - Inventory item details now expose persisted socket and enchantment composition as read-only information and link rings, gems, spells, and monsters into Forge > Socket with the relevant item preselected. Forge permits independent gem and target selection, validates compatibility server-side, and atomically replaces an existing enchantment after confirmation. Replacement and removal are free, preserve both items, allow all elemental combinations, and apply to equipped rings outside combat.

@@ -107,14 +107,16 @@
       </button>
     </section>
 
-    <section v-else-if="state?.status === 'matched' && state.match" class="pvp-match-found">
+    <section v-else-if="state?.status === 'matched' && visibleMatch" class="pvp-match-found">
       <div class="pvp-match-ready-icon"><Swords :size="29" /></div>
       <div>
         <span class="eyebrow">{{ t("casualMatch.matchedLabel") }}</span>
-        <h2>{{ t("casualMatch.matchedTitle", { opponent: state.match.opponent.displayName }) }}</h2>
-        <p>{{ opponentSummary(state.match.opponent) }}</p>
+        <h2>
+          {{ t("casualMatch.matchedTitle", { opponent: visibleMatch.opponent.displayName }) }}
+        </h2>
+        <p>{{ opponentSummary(visibleMatch.opponent) }}</p>
       </div>
-      <NuxtLink class="button-link" :to="`/battle/live/${state.match.battleId}`">
+      <NuxtLink class="button-link" :to="`/battle/live/${visibleMatch.battleId}`">
         {{ t("casualMatch.enterBattle") }} <ArrowRight :size="17" />
       </NuxtLink>
     </section>
@@ -135,6 +137,7 @@ import {
   X,
 } from "@lucide/vue";
 import type { CasualMatchmakingState, PvpOpponentIdentity } from "~/utils/playerState";
+import { visiblePvpOpponent } from "~/utils/pvpPresentation";
 import { sectionLinks } from "~/utils/viewData";
 
 const { t } = useI18n();
@@ -163,6 +166,11 @@ const { status: realtimeStatus } = useGameRealtime((event) => {
   if (event.type === "casualQueueChanged" || event.type === "battleChanged") {
     void refresh();
   }
+});
+const visibleMatch = computed(() => {
+  const match = state.value?.match;
+  const opponent = visiblePvpOpponent("casual_pvp", "preCombat", match?.opponent);
+  return match && opponent ? { ...match, opponent } : null;
 });
 
 const queueTimeRemaining = computed(() => {

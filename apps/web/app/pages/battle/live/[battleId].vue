@@ -66,7 +66,7 @@
           </div>
           <span class="pill">{{
             t(
-              battle.opponent.rings?.length
+              visibleOpponentRings.length
                 ? "battle.live.revealedLoadout"
                 : "battle.live.hiddenLoadout",
             )
@@ -196,7 +196,7 @@
           </div>
         </div>
 
-        <div v-if="battle.opponent.rings?.length" class="live-opponent-reveals">
+        <div v-if="visibleOpponentRings.length" class="live-opponent-reveals">
           <div class="live-loadout-heading">
             <div>
               <span class="eyebrow">{{ t("battle.live.revealedLoadout") }}</span>
@@ -205,7 +205,7 @@
           </div>
           <div class="live-ring-dock opponent-ring-dock">
             <article
-              v-for="ring in battle.opponent.rings"
+              v-for="ring in visibleOpponentRings"
               :key="ring.id"
               :class="['live-ring', `rarity-border-${ring.rarity}`]"
             >
@@ -572,6 +572,7 @@
 
       <BattleResultSummary
         v-if="battle.status === 'finished' && battle.summary"
+        :mode="battle.mode"
         :summary="battle.summary"
         :reward="battle.reward"
       />
@@ -654,6 +655,7 @@ import {
   type LiveBattleEventPresentation,
   type LiveBattleResolutionEffects,
 } from "~/utils/liveBattlePresentation";
+import { isPvpBattleMode, visiblePvpOpponentRings } from "~/utils/pvpPresentation";
 import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
@@ -666,9 +668,14 @@ const {
   pending,
   refresh,
 } = await useFetch<LiveBattleState>(() => `/api/battle/live/${battleId.value}`);
-const isPvpBattle = computed(() =>
-  ["private_pvp", "casual_pvp", "ranked_pvp"].includes(battle.value?.mode ?? ""),
-);
+const isPvpBattle = computed(() => isPvpBattleMode(battle.value?.mode ?? ""));
+const visibleOpponentRings = computed(() => {
+  const currentBattle = battle.value;
+  if (!currentBattle) return [];
+  return isPvpBattleMode(currentBattle.mode)
+    ? visiblePvpOpponentRings(currentBattle.mode, "live", currentBattle.opponent.rings)
+    : (currentBattle.opponent.rings ?? []);
+});
 const { status: realtimeStatus } = useGameRealtime((event) => {
   if (event.type === "battleChanged" && event.battleId === battleId.value) void refresh();
 });
