@@ -727,7 +727,7 @@ describe("Nuxt Game App APIs", () => {
 
   beforeEach(async () => {
     await resetHandler({});
-  });
+  }, 30_000);
 
   afterAll(async () => {
     await prisma?.$disconnect();
@@ -1656,7 +1656,7 @@ describe("Nuxt Game App APIs", () => {
         where: { listingId: creation.listingId, action: "purchase" },
       }),
     ).toBe(1);
-  });
+  }, 30_000);
 
   it("returns only the current player's permanent market history with stable pagination", async () => {
     const otherSellerId = "historyOtherSeller";

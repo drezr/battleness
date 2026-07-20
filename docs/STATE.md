@@ -4,6 +4,9 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- The Nuxt API integration suite now gives the Prisma reset hook and the intentionally concurrent
+  player-market purchase race test a 30-second timeout, matching their database-heavy behavior on
+  slower GitHub Actions runners without changing the tested market semantics.
 - Agent handoff documentation now defines a complete reading order, requires inspection and
   preservation of existing worktree changes, records the supported local toolchain and validation
   gate, distinguishes SQLite, PostgreSQL, and OAuth prerequisites, documents the Windows Prisma DLL
@@ -150,6 +153,12 @@ This file records modifications made to the project during agent-assisted work.
 - Added a centralized project TODO in `docs/TODO.md` covering Game App persistence, inventory, forge, battle integration, campaign, rewards, market, profile, authentication, PvP, player market, presentation, production, and open design questions.
 
 ## Change Log
+
+### 2026-07-20
+
+- Increased the Nuxt API integration reset hook and contested player-market purchase race test
+  timeouts to 30 seconds so GitHub Actions runners do not fail the concurrency coverage at Vitest's
+  five-second default timeout.
 
 ### 2026-07-15
 
