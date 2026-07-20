@@ -1,8 +1,9 @@
 import { definePlayerHandler } from "../../utils/playerHandler";
+import { isPublicDeployment } from "../../utils/deploymentEnvironment";
 import { listOperationalErrors, operationalErrorCapacity } from "../../utils/observability";
 
 export default definePlayerHandler((event) => {
-  if (process.env.NODE_ENV === "production") {
+  if (isPublicDeployment()) {
     throw createError({ statusCode: 404, statusMessage: "Not found." });
   }
 

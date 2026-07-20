@@ -54,6 +54,39 @@ separate permanent Dev Lab prototype.
 ## Current Project State
 
 - The Nuxt server assigns or preserves a safe `x-request-id`, emits structured JSON for request and ranked-maintenance failures, and keeps a bounded 100-record in-memory development buffer. Authenticated development diagnostics are available through `GET` and `DELETE /api/dev/diagnostics`; they are disabled by the handler in production. See `docs/OBSERVABILITY.md` for the data policy and production follow-up.
+- Phase 14 deployment direction is now OVH VPS hosting with Debian stable, Nginx, one initial Game
+  App instance, and a separate self-managed PostgreSQL server reached over public IP with firewall
+  restrictions. Staging should use `staging.battleness.com` before production uses
+  `battleness.com`. See `docs/DEPLOYMENT.md`.
+- Public app environments use `BATTLENESS_APP_ENV=staging` or `production`, require
+  `BATTLENESS_PUBLIC_ORIGIN`, PostgreSQL `BATTLENESS_DATABASE_URL`, Google OAuth credentials, and
+  `BATTLENESS_DEV_AUTH=disabled`, and expose unauthenticated `/api/health/live` plus
+  `/api/health/ready`.
+- Public app environments apply a first HTTP security baseline in Nitro: security headers,
+  no-store API responses, trusted-origin enforcement for mutating API requests, content-length caps,
+  and process-local rate limits for auth, matchmaking, market mutations, combat commands, and
+  generic mutations. Nginx edge hardening and distributed limits remain production follow-up work.
+- The first OVH VPS bootstrap is complete. The app host `bnapp` runs Debian 13 with Nginx, UFW,
+  fail2ban, Node `v24.18.0`, pnpm `10.14.0`, and a PostgreSQL client. The database host `bndb` runs
+  Debian 13 with PostgreSQL 17, UFW, and fail2ban. PostgreSQL has separate staging and production
+  databases and only accepts port 5432 from the app VPS public address. Staging database connectivity
+  from the app host has been verified. Real secrets remain outside the repo.
+- The first staging release is deployed under `/opt/battleness`, migrations have been applied to the
+  staging PostgreSQL database, `battleness-staging.service` is active, and Nginx proxies HTTP
+  `staging.battleness.com` requests to Nitro. Health checks pass through the local service and the
+  Nginx HTTP proxy. Public PostgreSQL builds must use `pnpm --filter @battleness/web build:postgres`
+  so the generated Prisma client targets PostgreSQL instead of the local SQLite schema.
+- `staging.battleness.com` resolves to the app VPS and has a Let's Encrypt certificate installed
+  through Certbot's Nginx integration. Public HTTPS `/api/health/live` and `/api/health/ready` pass,
+  `/api/auth/google` starts the staging Google OAuth redirect, Google OAuth login has been verified
+  by the user, and the first Battle hub latency issue has been fixed and redeployed. The root cause
+  was public deployments creating a new Prisma client per request and running development seeding on
+  read paths; staging now reuses the Prisma client per database URL and skips development seeding
+  outside local development. Post-fix authenticated Battle hub API timings were about 90-170 ms on
+  the app host and 180-275 ms through public HTTPS. Certbot's renewal timer exists, but
+  `certbot renew --dry-run --non-interactive` timed out during bootstrap and should be rechecked.
+- `battleness.com` currently points elsewhere and should not be changed until staging is proven.
+  Production OAuth credentials remain pending.
 - CI installs dependencies, checks the Prettier baseline, type checks, lints, runs the full test suite, builds the Nuxt Game App for production, and validates PostgreSQL migrations, drift, and relational smoke behavior.
 - Project name: BattleNess.
 - Current phase: the authenticated Game App player-facing visual redesign and cross-application audit are complete, while the original deterministic prototype remains a permanent Dev Lab.

@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import type { H3Event } from "h3";
 import { createError, deleteCookie, getCookie, getRequestURL, setCookie } from "h3";
 import { createPlayerSession } from "./authSession";
+import { publicOrigin, secureCookieRequired } from "./deploymentEnvironment";
 import { seedDevelopmentPlayer, usePrisma } from "./gameState";
 import { runAsPlayer } from "./playerContext";
 
@@ -124,7 +125,10 @@ function googleOAuthConfig(event: H3Event): GoogleOAuthConfig {
     clientSecret,
     redirectUri:
       process.env.GOOGLE_OAUTH_REDIRECT_URI?.trim() ||
-      new URL("/api/auth/google/callback", getRequestURL(event).origin).toString(),
+      new URL(
+        "/api/auth/google/callback",
+        publicOrigin() ?? getRequestURL(event).origin,
+      ).toString(),
   };
 }
 
@@ -260,7 +264,7 @@ function oauthCookieOptions() {
   return {
     httpOnly: true,
     sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
+    secure: secureCookieRequired(),
     path: "/api/auth/google",
   };
 }

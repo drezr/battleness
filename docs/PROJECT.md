@@ -819,6 +819,10 @@ This section separates executable game rules from implementation decisions. It i
 ### Not Decided Yet
 
 - Long-term deployment platform. A classic Node server or VPS is currently preferred if feasible, but this should be confirmed when backend and multiplayer requirements are clearer.
+- Initial deployment direction: use OVH VPS hosting with Debian stable, Nginx, one Game App server
+  instance, and a separate self-managed PostgreSQL server reachable by public IP with strict firewall
+  rules. Deploy `staging.battleness.com` before `battleness.com`, use separate Google OAuth clients,
+  and keep development authentication disabled on every public environment.
 - Exact Phaser integration approach for the combat presentation.
 
 ## Open Technical Topics

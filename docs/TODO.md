@@ -4,7 +4,13 @@ This is the centralized working TODO for BattleNess. It focuses on what remains 
 
 ## Current Focus
 
-The player-facing visual redesign and cross-application audit now cover the application shell, authentication, home, collection inventory, all battle surfaces, equipment, saved loadouts, Forge, Game Market, Player Market, private market history, Profile, Progression, and Settings. The next planning work should select among the remaining production and operations tasks, deferred external OAuth configuration, shared realtime pub/sub, and explicit open design questions.
+Phase 14 has started with the initial deployment direction: OVH VPS hosting, Debian stable, Nginx,
+one Game App instance, and a separate self-managed PostgreSQL server protected by firewall rules.
+The first VPS bootstrap and HTTPS staging deployment are complete. The next production work should
+smoke-test staging login and core flows, recheck Certbot renewal, then complete backups, runbooks,
+monitoring, and staging smoke/load validation. The first Battle hub latency issue on staging has
+been fixed by reusing the production Prisma client and skipping development seeding in public
+deployments.
 
 ## Phase 1 - Game App Data Foundation
 
@@ -197,18 +203,34 @@ The player-facing visual redesign and cross-application audit now cover the appl
 
 ## Phase 14 - Production And Operations
 
-- [ ] Decide deployment platform.
-- [ ] Decide PostgreSQL hosting.
-- [ ] Add validated staging and production environment configuration, including public origin,
+- [x] Decide deployment platform. Initial direction: OVH VPS on Debian stable with Nginx.
+- [x] Decide PostgreSQL hosting. Initial direction: separate self-managed PostgreSQL server reached
+      over public IP with firewall restrictions.
+- [x] Add validated staging and production environment configuration, including public origin,
       database connection, OAuth credentials, proxy behavior, and an explicit production ban on
       development authentication.
-- [ ] Configure separate Google OAuth clients, consent screens, secrets, and redirect URIs for
-      staging and production.
-- [ ] Add unauthenticated liveness and dependency-aware readiness endpoints for deployment health
+- [ ] Configure the actual separate Google OAuth clients, consent screens, secrets, and redirect URIs
+      for staging and production. Staging credentials are installed and the Google redirect starts;
+      production credentials remain pending.
+- [x] Add unauthenticated liveness and dependency-aware readiness endpoints for deployment health
       checks without exposing diagnostics.
-- [ ] Add the production HTTP security baseline: trusted origins for state-changing requests,
+- [x] Add the production HTTP security baseline: trusted origins for state-changing requests,
       security headers, request-size limits, and rate limits for authentication, matchmaking,
       market mutations, and combat commands.
+- [x] Bootstrap the initial clean OVH app and database VPS instances with Debian 13, UFW, fail2ban,
+      Nginx on the app host, PostgreSQL 17 on the database host, Node 24, pnpm 10.14.0, and verified
+      app-to-database staging connectivity.
+- [x] Point `staging.battleness.com` at the app VPS public address.
+- [x] Configure the first staging systemd service and Nginx HTTP reverse proxy.
+- [x] Deploy the staging app, run PostgreSQL migrations, and verify `/api/health/live` plus
+      `/api/health/ready` locally and through the Nginx HTTP proxy.
+- [x] Enable Let's Encrypt for `staging.battleness.com` and verify the same health checks over HTTPS
+      after DNS resolves.
+- [x] Fix the first staging Battle hub API latency issue by caching the production Prisma client,
+      preventing PostgreSQL idle-connection buildup, skipping development seeding in public
+      deployments, and redeploying the corrected staging release.
+- [ ] Recheck `certbot renew --dry-run --non-interactive`; the initial certificate was issued and
+      the renewal timer exists, but the dry-run timed out during bootstrap.
 - [ ] Define and automate expired session, OAuth attempt, queue, and operational journal cleanup
       without deleting permanent player history or market records.
 - [ ] Add database backup and retention strategy, then prove restoration into an isolated database.

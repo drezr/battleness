@@ -49,6 +49,7 @@ import {
   type TargetId,
 } from "@battleness/engine";
 import { assertValidPlayerGameState } from "./gameStateValidation";
+import { isPublicDeployment } from "./deploymentEnvironment";
 import { publishGameRealtimeEvent } from "./gameRealtime";
 import { liveBattleRevealState, type LiveBattleRevealState } from "./liveBattleVisibility";
 import { currentPlayerId, developmentPlayerId } from "./playerContext";
@@ -3478,10 +3479,8 @@ export function usePrisma(): PrismaClient {
     },
   });
 
-  if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.battlenessPrisma = client;
-    globalForPrisma.battlenessPrismaUrl = databaseUrl;
-  }
+  globalForPrisma.battlenessPrisma = client;
+  globalForPrisma.battlenessPrismaUrl = databaseUrl;
 
   return client;
 }
@@ -3526,6 +3525,10 @@ async function registerCurrentContentRelease(client: PrismaContext): Promise<voi
 }
 
 export async function seedDevelopmentPlayer(client: PrismaContext): Promise<void> {
+  if (isPublicDeployment()) {
+    return;
+  }
+
   await registerCurrentContentRelease(client);
 
   const playerId = currentPlayerId();
@@ -4953,7 +4956,7 @@ async function ensureActiveRankedSeason(client: PrismaContext) {
     where: { status: "active", startsAt: { lte: now }, endsAt: { gt: now } },
     orderBy: [{ startsAt: "desc" }, { id: "asc" }],
   });
-  if (active || process.env.NODE_ENV === "production") {
+  if (active || isPublicDeployment()) {
     return active;
   }
 

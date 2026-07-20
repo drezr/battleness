@@ -4,6 +4,37 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- Phase 14 deployment foundation has started. The initial production direction is OVH VPS hosting on
+  Debian stable with Nginx, one Game App instance, and a separate self-managed PostgreSQL server
+  reached by public IP with firewall restrictions. `staging.battleness.com` is the first public
+  environment before `battleness.com`. The Nuxt server now validates `BATTLENESS_APP_ENV`,
+  `BATTLENESS_PUBLIC_ORIGIN`, PostgreSQL database URLs, disabled development authentication, and
+  Google OAuth credentials for staging and production; secure cookies and dev-only routes now follow
+  the public deployment model; and unauthenticated live/readiness health endpoints are available.
+- Public deployments now run an application-level HTTP security baseline before route handlers:
+  security headers, API `no-store`, trusted-origin checks for mutating API calls, content-length
+  limits, and process-local rate limits for authentication, matchmaking, market mutations, combat
+  commands, and generic mutating requests.
+- The first OVH VPS bootstrap is complete. The app host has Debian 13, Nginx, UFW, fail2ban, Node
+  `v24.18.0`, pnpm `10.14.0`, and a PostgreSQL client. The database host has Debian 13, PostgreSQL
+  17, UFW, and fail2ban. Separate staging and production PostgreSQL databases exist, and staging
+  database connectivity from the app VPS has been verified.
+- The first staging release is deployed on the app VPS. PostgreSQL migrations have been applied to
+  the staging database, `battleness-staging.service` is active, and Nginx proxies HTTP
+  `staging.battleness.com` requests to Nitro. Health checks pass locally and through the HTTP proxy.
+  The repo now has a dedicated `build:postgres` script for public PostgreSQL builds so deployment
+  does not accidentally package the local SQLite Prisma client.
+- `staging.battleness.com` now resolves to the app VPS and serves HTTPS through a Let's Encrypt
+  certificate managed by Certbot's Nginx integration. Public HTTPS live/readiness checks pass, and
+  the staging Google OAuth route starts the expected Google redirect. The user has verified Google
+  login on staging. Certbot's renewal timer exists, but the noninteractive renewal dry-run timed out
+  and remains a follow-up check.
+- Staging API latency from the Battle hub was diagnosed and fixed. Public deployment builds now reuse
+  one cached Prisma client per database URL instead of creating a new `PrismaClient` per request, and
+  development player seeding is skipped entirely for `staging` and `production` environments. The
+  fix removed the PostgreSQL idle-connection buildup that had reached the server limit and reduced
+  representative authenticated Battle hub API timings from roughly 1.2-1.8 seconds to about
+  90-170 ms locally on the app host and 180-275 ms through public HTTPS.
 - The Nuxt API integration suite now gives the Prisma reset hook and the intentionally concurrent
   player-market purchase race test a 30-second timeout, matching their database-heavy behavior on
   slower GitHub Actions runners without changing the tested market semantics.
@@ -156,6 +187,29 @@ This file records modifications made to the project during agent-assisted work.
 
 ### 2026-07-20
 
+- Added the first Phase 14 deployment foundation: validated local/staging/production environment
+  handling, strict public-environment requirements, secure-cookie and dev-route guards, liveness and
+  readiness endpoints, staging/production environment templates, and an OVH Debian/Nginx deployment
+  runbook outline.
+- Added the first production HTTP security baseline in Nitro with public-environment response
+  headers, trusted-origin enforcement, request-size caps, and process-local route-category rate
+  limits.
+- Bootstrapped the first clean OVH VPS pair for Phase 14: app host with Nginx, firewall, fail2ban,
+  Node 24, pnpm 10.14.0, and PostgreSQL client; database host with PostgreSQL 17, firewall, and
+  fail2ban; separate staging and production databases; and verified staging database connectivity
+  from the app host. Real credentials and generated deployment secrets were kept outside the repo.
+- Deployed the first staging release to the app VPS, applied all PostgreSQL migrations to the
+  staging database, started the `battleness-staging.service` systemd unit, configured Nginx as the
+  HTTP reverse proxy, verified live/readiness health through the service and proxy, and added a
+  `build:postgres` package script to avoid generating a SQLite Prisma client for public builds.
+- Pointed `staging.battleness.com` at the app VPS, installed the Let's Encrypt certificate through
+  Certbot's Nginx integration, verified public HTTPS live/readiness health, and verified that the
+  staging Google OAuth route starts a Google redirect with the HTTPS callback URI. The Certbot
+  renewal timer exists, but the renewal dry-run timed out and still needs rechecking.
+- Fixed the first observed staging Battle hub latency issue by caching the Prisma client for public
+  deployments, skipping development seeding in staging/production read paths, redeploying the
+  staging release, clearing the prior idle-connection buildup, and recording post-fix authenticated
+  API timings.
 - Increased the Nuxt API integration reset hook and contested player-market purchase race test
   timeouts to 30 seconds so GitHub Actions runners do not fail the concurrency coverage at Vitest's
   five-second default timeout.

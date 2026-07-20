@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import type { H3Event } from "h3";
 import { createError, deleteCookie, getCookie, setCookie } from "h3";
+import { isDevelopmentAuthAllowed, secureCookieRequired } from "./deploymentEnvironment";
 import { seedDevelopmentPlayer, usePrisma } from "./gameState";
 import { developmentPlayerId, runAsPlayer } from "./playerContext";
 
@@ -21,7 +22,7 @@ export type AuthenticatedPlayerSession = {
 };
 
 export function isDevelopmentAuthEnabled(): boolean {
-  return process.env.NODE_ENV !== "production" && process.env.BATTLENESS_DEV_AUTH !== "disabled";
+  return isDevelopmentAuthAllowed();
 }
 
 export async function readPlayerSession(
@@ -202,7 +203,7 @@ function sessionCookieOptions() {
   return {
     httpOnly: true,
     sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
+    secure: secureCookieRequired(),
     path: "/",
   };
 }
