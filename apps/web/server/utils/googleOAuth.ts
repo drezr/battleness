@@ -4,7 +4,7 @@ import type { H3Event } from "h3";
 import { createError, deleteCookie, getCookie, getRequestURL, setCookie } from "h3";
 import { createPlayerSession } from "./authSession";
 import { publicOrigin, secureCookieRequired } from "./deploymentEnvironment";
-import { seedDevelopmentPlayer, usePrisma } from "./gameState";
+import { ensurePlayerOnboarding, seedDevelopmentPlayer, usePrisma } from "./gameState";
 import { runAsPlayer } from "./playerContext";
 
 const googleAuthorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -105,7 +105,10 @@ export async function completeGoogleOAuth(
   const accessToken = await exchangeAuthorizationCode(config, input.code, attempt.codeVerifier);
   const userInfo = await loadGoogleUserInfo(accessToken);
   const playerId = await resolveGooglePlayer(userInfo);
-  await runAsPlayer(playerId, () => seedDevelopmentPlayer(prisma));
+  await runAsPlayer(playerId, async () => {
+    await seedDevelopmentPlayer(prisma);
+    await ensurePlayerOnboarding(prisma);
+  });
   await createPlayerSession(event, playerId);
 
   return { returnTo: attempt.returnTo };

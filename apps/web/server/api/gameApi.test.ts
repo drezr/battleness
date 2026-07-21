@@ -10,6 +10,7 @@ import { createEvent, type H3Event } from "h3";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { settleRankedBattleRating } from "../utils/rankedRatingSettlement";
 import { runRankedSeasonMaintenance } from "../utils/rankedSeasonMaintenance";
+import { runAsPlayer } from "../utils/playerContext";
 
 type TestEvent = {
   body?: unknown;
@@ -580,6 +581,7 @@ let createPlayerSession: (
   playerId: string,
 ) => Promise<{ id: string; player: { id: string } }>;
 let disconnectGameStateClientForTests: () => Promise<void>;
+let ensurePlayerOnboarding: (client: PrismaClient) => Promise<void>;
 let prisma: PrismaClient;
 
 describe("Nuxt Game App APIs", () => {
@@ -723,6 +725,7 @@ describe("Nuxt Game App APIs", () => {
     googleStartHandler = googleStartModule.default;
     googleCallbackHandler = googleCallbackModule.default;
     disconnectGameStateClientForTests = gameStateModule.disconnectGameStateClientForTests;
+    ensurePlayerOnboarding = gameStateModule.ensurePlayerOnboarding;
   }, 30_000);
 
   beforeEach(async () => {
@@ -3273,9 +3276,11 @@ describe("Nuxt Game App APIs", () => {
 
   it("completes Google OAuth with browser-bound state, PKCE, and stable account identity", async () => {
     const originalFetch = globalThis.fetch;
+    const originalAppEnvironment = process.env.BATTLENESS_APP_ENV;
     process.env.GOOGLE_OAUTH_CLIENT_ID = "google-client-id";
     process.env.GOOGLE_OAUTH_CLIENT_SECRET = "google-client-secret";
     process.env.GOOGLE_OAUTH_REDIRECT_URI = "http://127.0.0.1:3000/api/auth/google/callback";
+    process.env.BATTLENESS_APP_ENV = "staging";
 
     try {
       const start = createH3TestEvent(undefined, undefined, "/api/auth/google?returnTo=%2Fprofile");
@@ -3335,11 +3340,75 @@ describe("Nuxt Game App APIs", () => {
             providerAccountId: "google-account-123",
           },
         },
-        include: { player: { include: { materialStock: true } } },
+        include: {
+          player: {
+            include: {
+              inventoryItems: { orderBy: { type: "asc" } },
+              ringSockets: true,
+              gemEnchantments: true,
+              equippedRings: true,
+              loadouts: { include: { rings: true } },
+            },
+          },
+        },
       });
       expect(identity.email).toBe("player@example.com");
       expect(identity.player.displayName).toBe("Google Player");
-      expect(identity.player.materialStock.length).toBeGreaterThan(0);
+      expect(identity.player.onboardingVersion).toBe(1);
+      expect(identity.player.inventoryItems).toEqual([
+        expect.objectContaining({
+          id: `${identity.playerId}.starter.v1.gem`,
+          type: "gem",
+          definitionId: "rubyShard",
+        }),
+        expect.objectContaining({
+          id: `${identity.playerId}.starter.v1.ring`,
+          type: "ring",
+          definitionId: "trainingFlameBand",
+          equipped: true,
+        }),
+        expect.objectContaining({
+          id: `${identity.playerId}.starter.v1.spell`,
+          type: "spell",
+          definitionId: "firebolt",
+        }),
+      ]);
+      expect(identity.player.ringSockets).toEqual([
+        expect.objectContaining({
+          ringItemId: `${identity.playerId}.starter.v1.ring`,
+          gemItemId: `${identity.playerId}.starter.v1.gem`,
+          socketIndex: 0,
+        }),
+      ]);
+      expect(identity.player.gemEnchantments).toEqual([
+        expect.objectContaining({
+          gemItemId: `${identity.playerId}.starter.v1.gem`,
+          targetItemId: `${identity.playerId}.starter.v1.spell`,
+          targetType: "spell",
+        }),
+      ]);
+      expect(identity.player.equippedRings).toEqual([
+        expect.objectContaining({
+          ringItemId: `${identity.playerId}.starter.v1.ring`,
+          slotIndex: 0,
+        }),
+      ]);
+      expect(identity.player.activeLoadoutId).toBe(`${identity.playerId}.starter.v1.loadout`);
+      expect(identity.player.loadouts).toEqual([
+        expect.objectContaining({
+          id: `${identity.playerId}.starter.v1.loadout`,
+          name: "Starter Loadout",
+          rings: [
+            expect.objectContaining({
+              ringItemId: `${identity.playerId}.starter.v1.ring`,
+              slotIndex: 0,
+            }),
+          ],
+        }),
+      ]);
+
+      await runAsPlayer(identity.playerId, () => ensurePlayerOnboarding(prisma));
+      expect(await prisma.inventoryItem.count({ where: { playerId: identity.playerId } })).toBe(3);
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(String(fetchMock.mock.calls[0]?.[1]?.body)).toContain("code_verifier=");
       expect(fetchMock.mock.calls[1]?.[1]?.headers).toMatchObject({
@@ -3352,7 +3421,30 @@ describe("Nuxt Game App APIs", () => {
       delete process.env.GOOGLE_OAUTH_CLIENT_ID;
       delete process.env.GOOGLE_OAUTH_CLIENT_SECRET;
       delete process.env.GOOGLE_OAUTH_REDIRECT_URI;
+      if (originalAppEnvironment === undefined) {
+        delete process.env.BATTLENESS_APP_ENV;
+      } else {
+        process.env.BATTLENESS_APP_ENV = originalAppEnvironment;
+      }
     }
+  });
+
+  it("marks existing players as onboarded without granting duplicate starter items", async () => {
+    const before = await prisma.player.findUniqueOrThrow({
+      where: { id: "devPlayer" },
+      include: { inventoryItems: true, materialStock: true },
+    });
+
+    await runAsPlayer("devPlayer", () => ensurePlayerOnboarding(prisma));
+
+    const after = await prisma.player.findUniqueOrThrow({
+      where: { id: "devPlayer" },
+      include: { inventoryItems: true, materialStock: true },
+    });
+    expect(after.onboardingVersion).toBe(1);
+    expect(after.inventoryItems).toHaveLength(before.inventoryItems.length);
+    expect(after.materialStock).toHaveLength(before.materialStock.length);
+    expect(after.inventoryItems.some((item) => item.id.includes(".starter.v1."))).toBe(false);
   });
 
   it("rejects reusing a content version for different definitions", async () => {

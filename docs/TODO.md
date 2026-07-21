@@ -256,8 +256,15 @@ in place.
 - [x] Run the authenticated read-only staging route sweep against PostgreSQL for login, inventory,
       Forge, markets, campaign, private PvP, casual PvP, ranked PvP, profile, and localization. All
       25 player-facing routes loaded successfully on 2026-07-21.
+- [x] Add a versioned, transactionally idempotent public-account starter loadout so newly authenticated
+      players can enter campaign and PvP without development seeding. Existing players are marked
+      onboarded without receiving duplicate items.
 - [ ] Complete mutation and multiplayer staging smoke tests for Forge, markets, campaign, private
-      PvP, casual PvP, ranked PvP, reconnects, and rewards. PvP requires a second Google test account.
+      PvP, casual PvP, ranked PvP, reconnects, and rewards. Forge, fixed/player markets, campaign,
+      replay, and reward claiming have passed. Deploy the starter-loadout migration, sign the second
+      Google test account in again, and resume the two-account PvP checks.
+- [ ] Make `prisma:postgres:check` line-ending independent so an exact Git archive with CRLF does not
+      fail the Linux pre-build gate before `build:postgres` regenerates the same effective schema.
 - [ ] Run load and soak tests for polling, WebSocket invalidations, matchmaking, market concurrency,
       and authoritative battle actions before public access.
 - [ ] Run a dependency and production security review before the public release candidate.

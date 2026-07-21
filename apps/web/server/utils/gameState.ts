@@ -87,6 +87,7 @@ const pvpTransactionOptions = {
   timeout: 30_000,
 } as const;
 const pvpTransactionAttempts = 4;
+const currentOnboardingVersion = 1;
 
 async function runPvpTransaction<T>(
   client: PrismaClient,
@@ -3522,6 +3523,116 @@ async function registerCurrentContentRelease(client: PrismaContext): Promise<voi
       data: { contentVersion: legacyContentVersion },
     }),
   ]);
+}
+
+export async function ensurePlayerOnboarding(client: PrismaClient): Promise<void> {
+  const playerId = currentPlayerId();
+  const starterRingId = `${playerId}.starter.v1.ring`;
+  const starterGemId = `${playerId}.starter.v1.gem`;
+  const starterSpellId = `${playerId}.starter.v1.spell`;
+  const starterLoadoutId = `${playerId}.starter.v1.loadout`;
+
+  const granted = await client.$transaction(async (transaction) => {
+    const claim = await transaction.player.updateMany({
+      where: { id: playerId, onboardingVersion: { lt: currentOnboardingVersion } },
+      data: { onboardingVersion: currentOnboardingVersion },
+    });
+    if (claim.count === 0) {
+      return false;
+    }
+
+    await registerCurrentContentRelease(transaction);
+    const [player, inventoryCount, materialCount, loadoutCount] = await Promise.all([
+      transaction.player.findUniqueOrThrow({
+        where: { id: playerId },
+        select: { credits: true, experience: true },
+      }),
+      transaction.inventoryItem.count({ where: { playerId } }),
+      transaction.materialStock.count({ where: { playerId } }),
+      transaction.loadout.count({ where: { playerId } }),
+    ]);
+
+    if (
+      player.credits > 0 ||
+      player.experience > 0 ||
+      inventoryCount > 0 ||
+      materialCount > 0 ||
+      loadoutCount > 0
+    ) {
+      return false;
+    }
+
+    await transaction.inventoryItem.createMany({
+      data: [
+        {
+          id: starterRingId,
+          playerId,
+          type: "ring",
+          definitionId: "trainingFlameBand",
+          contentVersion,
+          experience: 0,
+          quality: 0,
+          socketCount: 1,
+          socketedGemInstanceIds: JSON.stringify([starterGemId]),
+          equipped: true,
+        },
+        {
+          id: starterGemId,
+          playerId,
+          type: "gem",
+          definitionId: "rubyShard",
+          contentVersion,
+          experience: 0,
+          quality: 0,
+          socketCount: null,
+          enchantment: JSON.stringify({ type: "spell", spellInstanceId: starterSpellId }),
+          equipped: false,
+        },
+        {
+          id: starterSpellId,
+          playerId,
+          type: "spell",
+          definitionId: "firebolt",
+          contentVersion,
+          experience: 0,
+          quality: 0,
+          socketCount: null,
+          equipped: false,
+        },
+      ],
+    });
+    await transaction.ringSocket.create({
+      data: { playerId, ringItemId: starterRingId, gemItemId: starterGemId, socketIndex: 0 },
+    });
+    await transaction.gemEnchantment.create({
+      data: {
+        playerId,
+        gemItemId: starterGemId,
+        targetItemId: starterSpellId,
+        targetType: "spell",
+      },
+    });
+    await transaction.equippedRing.create({
+      data: { playerId, ringItemId: starterRingId, slotIndex: 0 },
+    });
+    await transaction.loadout.create({
+      data: {
+        id: starterLoadoutId,
+        playerId,
+        name: "Starter Loadout",
+        rings: { create: { ringItemId: starterRingId, slotIndex: 0 } },
+      },
+    });
+    await transaction.player.update({
+      where: { id: playerId },
+      data: { activeLoadoutId: starterLoadoutId },
+    });
+    return true;
+  });
+
+  if (granted) {
+    await assertValidPlayerGameState(client, playerId);
+  }
 }
 
 export async function seedDevelopmentPlayer(client: PrismaContext): Promise<void> {

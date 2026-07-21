@@ -1,0 +1,1 @@
+ALTER TABLE "Player" ADD COLUMN "onboardingVersion" INTEGER NOT NULL DEFAULT 0;

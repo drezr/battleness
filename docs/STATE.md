@@ -24,11 +24,20 @@ This file records modifications made to the project during agent-assisted work.
   `staging.battleness.com` requests to Nitro. Health checks pass locally and through the HTTP proxy.
   The repo now has a dedicated `build:postgres` script for public PostgreSQL builds so deployment
   does not accidentally package the local SQLite Prisma client.
+- Staging currently runs commit `a05c68d8172165709975f1aea3f7a26038b219dc` from immutable release
+  `/opt/battleness/releases/20260721T154353Z-a05c68d8`. Deployment on 2026-07-21 used verified backup
+  `20260721T154320Z`, found no pending migrations, passed local and public health checks, and passed
+  authenticated browser checks for the five main hubs plus the three corrected date-time routes.
 - `staging.battleness.com` now resolves to the app VPS and serves HTTPS through a Let's Encrypt
   certificate managed by Certbot's Nginx integration. Public HTTPS live/readiness checks pass, and
   the staging Google OAuth route starts the expected Google redirect. The user has verified Google
   login on staging. Certbot's renewal timer is active, and a simulated renewal succeeded on
   2026-07-21. The earlier timeout was Certbot's normal randomized delay rather than a TLS failure.
+- Public Google OAuth completion now applies a versioned starter loadout to otherwise empty accounts:
+  one Training Flame Band socketed with a Ruby Shard enchanted by Firebolt, equipped and active.
+  The grant and onboarding marker are atomic and idempotent; accounts with existing gameplay state
+  are marked without receiving duplicates. The SQLite/PostgreSQL migration and automated coverage
+  are complete locally but are not yet deployed to staging.
 - Staging API latency from the Battle hub was diagnosed and fixed. Public deployment builds now reuse
   one cached Prisma client per database URL instead of creating a new `PrismaClient` per request, and
   development player seeding is skipped entirely for `staging` and `production` environments. The
@@ -271,9 +280,22 @@ This file records modifications made to the project during agent-assisted work.
   Added a shared SSR-safe date-time formatter, applied it to every client date-time surface, and
   verified the three affected routes locally with no browser warnings or errors. Mutation and
   two-account PvP smoke coverage remains pending.
+- Deployed CI-validated commit `a05c68d8` as immutable staging release
+  `20260721T154353Z-a05c68d8` after a verified pre-release backup. No migrations were pending. The
+  service, local/public liveness and readiness checks, authenticated hub smoke checks, and the three
+  date-time hydration regression checks passed; the new process reported no restart or application
+  errors. The release build exposed a line-ending-only false positive in
+  `prisma:postgres:check` when a Git archive retains CRLF in the generated schema marker; the normal
+  PostgreSQL build regeneration produced an identical effective schema and should be made
+  platform-independent in a follow-up commit.
 - Increased the Nuxt API integration reset hook and contested player-market purchase race test
   timeouts to 30 seconds so GitHub Actions runners do not fail the concurrency coverage at Vitest's
   five-second default timeout.
+- Added production-safe public-player onboarding after staging mutation smoke tests revealed that a
+  newly authenticated account had no inventory or active loadout. OAuth now transactionally claims
+  a durable onboarding version and grants an empty account the canonical Training Flame Band, Ruby
+  Shard, and Firebolt starter graph plus an active loadout. Existing accounts receive no duplicate
+  resources. Added matching SQLite/PostgreSQL migrations and OAuth/idempotence regression coverage.
 
 ### 2026-07-15
 

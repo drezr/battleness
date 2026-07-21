@@ -86,6 +86,14 @@ separate permanent Dev Lab prototype.
   the app host and 180-275 ms through public HTTPS. Certbot's renewal timer is active, and
   `certbot renew --dry-run --non-interactive --no-random-sleep-on-renew` completed successfully on
   2026-07-21. The earlier timeout was caused by Certbot's normal randomized renewal delay.
+- Staging mutation smoke tests passed for preferences, Forge crafting, fixed-market sales and
+  purchases, player-listing creation/cancellation, campaign combat, replay, and reward claiming. A
+  second Google account exposed that public OAuth accounts previously received no playable state
+  because development seeding is correctly disabled. The local worktree now adds a durable,
+  transactionally idempotent onboarding version and grants otherwise empty OAuth accounts a
+  Training Flame Band, socketed Ruby Shard, Firebolt enchantment, and active starter loadout. Existing
+  accounts are only marked and receive no duplicates. Commit, pass CI, deploy the new dual-database
+  migration, then sign the second account in again and resume private/casual/ranked PvP smoke tests.
 - The database VPS runs the first local PostgreSQL backup system through
   `battleness-postgresql-backup.timer`: daily custom-format dumps for `battleness_staging` and
   `battleness_production`, checksum manifests, and 14-day local retention under
@@ -119,9 +127,15 @@ separate permanent Dev Lab prototype.
   every route loaded successfully in 0.43 to 1.03 seconds. It exposed Vue hydration mismatches on
   Profile History, Settings, and Battle History caused by server/client timezone differences. A
   shared SSR-safe date-time formatter now keeps the initial render in UTC and switches to the browser
-  timezone after mount; local browser verification of the three affected routes has no warnings or
-  errors. This correction is not on staging until the current changes are committed, CI-validated,
-  and deployed. Mutation smoke tests and two-account PvP coverage remain pending.
+  timezone after mount. CI-validated commit `a05c68d8` is deployed as staging release
+  `20260721T154353Z-a05c68d8`; local/public health checks, the five main hubs, and the three affected
+  routes pass without browser warnings or errors. Mutation smoke tests and two-account PvP coverage
+  remain pending.
+- The latest release build found a platform-specific false positive in
+  `prisma:postgres:check`: a Git archive can retain CRLF on the generated PostgreSQL schema marker,
+  while the Linux generator writes that marker with LF. Regenerating the checked file before the
+  build changes only that line ending and produces the same effective Prisma schema. Normalize this
+  comparison in a follow-up commit.
 - `battleness.com` currently points elsewhere and should not be changed until staging is proven.
   Production OAuth credentials remain pending.
 - CI installs dependencies, checks the Prettier baseline, type checks, lints, runs the full test suite, builds the Nuxt Game App for production, and validates PostgreSQL migrations, drift, and relational smoke behavior.

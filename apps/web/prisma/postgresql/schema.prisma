@@ -16,6 +16,7 @@ model Player {
   experience                  Int                       @default(0)
   credits                     Int                       @default(0)
   nextItemSequence            Int                       @default(1)
+  onboardingVersion           Int                       @default(0)
   createdAt                   DateTime                  @default(now())
   lastActiveAt                DateTime                  @default(now())
   activeLoadoutId             String?

@@ -87,15 +87,18 @@ On `bndb`, start a fresh backup and verify its checksums:
 
 ```sh
 sudo systemctl start battleness-postgresql-backup.service
-sudo systemctl status battleness-postgresql-backup.service --no-pager
+sudo systemctl show battleness-postgresql-backup.service \
+  -p Result -p ExecMainStatus -p ActiveState
 sudo -u postgres sh -c \
   'cd /var/backups/battleness/postgresql/latest && sha256sum -c SHA256SUMS'
-readlink -f /var/backups/battleness/postgresql/latest
+sudo readlink -f /var/backups/battleness/postgresql/latest
 ```
 
-Record the resolved backup directory. Do not continue if the service or checksum verification
-fails. The normal release procedure does not require restoring this backup; it is the recovery
-point for an incompatible migration or data incident.
+For the successful `oneshot` service, require `Result=success` and `ExecMainStatus=0`;
+`ActiveState=inactive` is expected after completion. Record the resolved backup directory. Do not
+continue if the service or checksum verification fails. The normal release procedure does not
+require restoring this backup; it is the recovery point for an incompatible migration or data
+incident.
 
 ## Build A Release
 
