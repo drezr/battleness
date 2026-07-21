@@ -262,8 +262,9 @@ in place.
 - [ ] Complete mutation and multiplayer staging smoke tests for Forge, markets, campaign, private
       PvP, casual PvP, ranked PvP, reconnects, and rewards. Forge, fixed/player markets, campaign,
       replay, reward claiming, public onboarding, private lobby creation/join, loadout locking, and
-      battle creation have passed. Deploy the pending PvP snapshot-definition merge fix, then resume
-      private combat, casual/ranked matchmaking, reconnect, settlement, and reward checks.
+      battle creation have passed. The PvP snapshot-definition merge is deployed; deploy the pending
+      completed-lobby reset fix, then resume private combat, casual/ranked matchmaking, reconnect,
+      settlement, and reward checks.
 - [ ] Make `prisma:postgres:check` line-ending independent so an exact Git archive with CRLF does not
       fail the Linux pre-build gate before `build:postgres` regenerates the same effective schema.
 - [ ] Run load and soak tests for polling, WebSocket invalidations, matchmaking, market concurrency,

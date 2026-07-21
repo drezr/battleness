@@ -2600,13 +2600,15 @@ describe("Nuxt Game App APIs", () => {
         (action) => action.type === "concede" && action.playerId === timedOutPlayerId,
       ),
     ).toHaveLength(1);
-
-    await prisma.privateMatch.delete({ where: { id: started.match!.id } });
-    await prisma.battleRecord.delete({ where: { id: started.match!.battleId! } });
+    const finishedPrivateState = (await privateMatchGetHandler(
+      createH3TestEvent(hostCookie).event,
+    )) as PrivateMatchApiResponse;
+    expect(finishedPrivateState.match).toBeNull();
 
     const timeoutMatchCreated = (await privateMatchPostHandler(
       createH3TestEvent(hostCookie, { action: "create" }).event,
     )) as PrivateMatchApiResponse;
+    expect(timeoutMatchCreated.match?.id).not.toBe(started.match!.id);
     await privateMatchPostHandler(
       createH3TestEvent(guestCookie, {
         action: "join",
@@ -2677,6 +2679,8 @@ describe("Nuxt Game App APIs", () => {
 
     await prisma.privateMatch.delete({ where: { id: timeoutMatchStarted.match!.id } });
     await prisma.battleRecord.delete({ where: { id: timeoutMatchStarted.match!.battleId! } });
+    await prisma.privateMatch.delete({ where: { id: started.match!.id } });
+    await prisma.battleRecord.delete({ where: { id: started.match!.battleId! } });
     await prisma.player.delete({ where: { id: guestId } });
   });
 

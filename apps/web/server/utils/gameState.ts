@@ -772,6 +772,7 @@ export async function getPrivateMatchState() {
     prisma.privateMatch.findFirst({
       where: {
         matchType: "private",
+        status: { in: ["waiting", "starting", "active", "timing_out"] },
         participants: { some: { playerId: currentPlayerId() } },
       },
       orderBy: { updatedAt: "desc" },

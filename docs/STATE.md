@@ -24,10 +24,9 @@ This file records modifications made to the project during agent-assisted work.
   `staging.battleness.com` requests to Nitro. Health checks pass locally and through the HTTP proxy.
   The repo now has a dedicated `build:postgres` script for public PostgreSQL builds so deployment
   does not accidentally package the local SQLite Prisma client.
-- Staging currently runs commit `07eb26f14dfff1115aaea097421df60995dc89f9` from immutable release
-  `/opt/battleness/releases/20260721T172633Z-07eb26f1`. Deployment on 2026-07-21 used verified backup
-  `20260721T172429Z`, applied `20260721190000_add_player_onboarding`, and passed local/public health
-  plus authenticated first- and second-account onboarding checks.
+- Staging currently runs commit `095a8926b0ffd4906b371542ba8f0ab2f0403029` from immutable release
+  `/opt/battleness/releases/20260721T190126Z-095a8926`. Deployment on 2026-07-21 used verified backup
+  `20260721T190019Z`, found no pending migrations, and passed local/public health checks.
 - `staging.battleness.com` now resolves to the app VPS and serves HTTPS through a Let's Encrypt
   certificate managed by Certbot's Nginx integration. Public HTTPS live/readiness checks pass, and
   the staging Google OAuth route starts the expected Google redirect. The user has verified Google
@@ -40,8 +39,11 @@ This file records modifications made to the project during agent-assisted work.
   empty second Google account received exactly the three starter items and active loadout on login.
 - The first two-account private-match staging test exposed a pre-existing PvP snapshot bug: battle
   setup combined both players but retained only the first player's monster/spell instance-definition
-  maps, so the guest could not load a distinct enchanted ring. The local fix merges both maps and
-  adds an integration regression with a guest-owned Ruby Shard and Firebolt; deployment is pending.
+  maps, so the guest could not load a distinct enchanted ring. The deployed fix merges both maps and
+  adds an integration regression with a guest-owned Ruby Shard and Firebolt. Post-deployment smoke
+  then exposed that a finished private match remained selected by the lobby and prevented creating a
+  replacement through the UI. The local fix limits lobby state to ongoing statuses and verifies a
+  second match can be created while retaining the finished record; deployment is pending.
 - Staging API latency from the Battle hub was diagnosed and fixed. Public deployment builds now reuse
   one cached Prisma client per database URL instead of creating a new `PrismaClient` per request, and
   development player seeding is skipped entirely for `staging` and `production` environments. The
@@ -306,6 +308,11 @@ This file records modifications made to the project during agent-assisted work.
 - Reproduced a two-account private PvP failure in staging where the guest's distinct spell instance
   was absent from the persisted battle definition map. Updated PvP setup composition to merge both
   players' monster and spell definitions and added regression coverage using an enchanted guest ring.
+- Deployed CI-validated commit `095a8926` as release `20260721T190126Z-095a8926` after verified backup
+  `20260721T190019Z`; no migrations were pending, and service plus local/public health checks passed.
+- Found that a finished private match remained the lobby's current match and hid the create/join
+  controls. Limited private-lobby state to ongoing statuses and extended integration coverage to
+  create a second match without deleting the retained finished match.
 
 ### 2026-07-15
 
