@@ -82,9 +82,9 @@ This file records modifications made to the project during agent-assisted work.
   seven-day session, immediate OAuth, and 30-day queue policy. It currently targets staging only
   because the reserved production database has not received its schema migrations; a verify mode
   exercises deletions and rolls back. Both VPS also cap journald at 30 days and 512 MiB.
-- The Nuxt API integration suite now gives the Prisma reset hook and the intentionally concurrent
-  player-market purchase race test a 30-second timeout, matching their database-heavy behavior on
-  slower GitHub Actions runners without changing the tested market semantics.
+- The Nuxt API integration suite gives the Prisma reset hook a 30-second timeout and the intentionally
+  concurrent player-market purchase race test a 60-second timeout, matching their database-heavy
+  behavior on slower GitHub Actions runners without changing the tested market semantics.
 - Agent handoff documentation now defines a complete reading order, requires inspection and
   preservation of existing worktree changes, records the supported local toolchain and validation
   gate, distinguishes SQLite, PostgreSQL, and OAuth prerequisites, documents the Windows Prisma DLL
@@ -294,9 +294,9 @@ This file records modifications made to the project during agent-assisted work.
   `prisma:postgres:check` when a Git archive retains CRLF in the generated schema marker; the normal
   PostgreSQL build regeneration produced an identical effective schema and should be made
   platform-independent in a follow-up commit.
-- Increased the Nuxt API integration reset hook and contested player-market purchase race test
-  timeouts to 30 seconds so GitHub Actions runners do not fail the concurrency coverage at Vitest's
-  five-second default timeout.
+- Increased the Nuxt API integration reset hook timeout to 30 seconds and, after a later runner
+  exceeded that budget, the contested player-market purchase race timeout to 60 seconds without
+  changing its concurrency assertions.
 - Added production-safe public-player onboarding after staging mutation smoke tests revealed that a
   newly authenticated account had no inventory or active loadout. OAuth now transactionally claims
   a durable onboarding version and grants an empty account the canonical Training Flame Band, Ruby

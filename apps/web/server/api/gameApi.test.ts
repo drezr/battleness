@@ -1659,7 +1659,7 @@ describe("Nuxt Game App APIs", () => {
         where: { listingId: creation.listingId, action: "purchase" },
       }),
     ).toBe(1);
-  }, 30_000);
+  }, 60_000);
 
   it("returns only the current player's permanent market history with stable pagination", async () => {
     const otherSellerId = "historyOtherSeller";
