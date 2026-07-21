@@ -8,10 +8,10 @@ Phase 14 has started with the initial deployment direction: OVH VPS hosting, Deb
 one Game App instance, and a separate self-managed PostgreSQL server protected by firewall rules.
 The first VPS bootstrap and HTTPS staging deployment are complete. Private and casual two-account
 smoke tests now pass, and the first eight-week staging ranked season is active. The current work is
-to deploy and verify the live-arena background-refresh fix, complete ranked matchmaking and
-settlement smoke, then proceed to load/soak validation and the remaining production monitoring and
-security work. Certbot renewal and the first local plus app-VPS off-host PostgreSQL backup path are
-verified.
+to verify the deployed live-arena background-refresh fix in a fresh two-account action sequence,
+complete ranked matchmaking and settlement smoke, then proceed to load/soak validation and the
+remaining production monitoring and security work. Certbot renewal and the first local plus app-VPS
+off-host PostgreSQL backup path are verified.
 
 ## Phase 1 - Game App Data Foundation
 
@@ -263,9 +263,10 @@ verified.
       PvP, casual PvP, ranked PvP, reconnects, and rewards. Forge, fixed/player markets, campaign,
       replay, reward claiming, public onboarding, private and casual matchmaking, distinct-loadout
       battle creation, turn synchronization, reconnect, concession, settlement, complete results,
-      and history have passed. Deploy and verify the pending live-arena background-refresh fix, then
-      complete ranked matchmaking, bilateral acceptance, settlement, leaderboard, and season-reward
-      checks against active staging season `staging-ranked-season-20260721`.
+      and history have passed. The live-arena background-refresh fix is deployed and passed a static
+      authenticated browser smoke; verify it during fresh two-account combat actions, then complete
+      ranked matchmaking, bilateral acceptance, settlement, leaderboard, and season-reward checks
+      against active staging season `staging-ranked-season-20260721`.
 - [ ] Make `prisma:postgres:check` line-ending independent so an exact Git archive with CRLF does not
       fail the Linux pre-build gate before `build:postgres` regenerates the same effective schema.
 - [ ] Run load and soak tests for polling, WebSocket invalidations, matchmaking, market concurrency,

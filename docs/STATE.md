@@ -24,9 +24,10 @@ This file records modifications made to the project during agent-assisted work.
   `staging.battleness.com` requests to Nitro. Health checks pass locally and through the HTTP proxy.
   The repo now has a dedicated `build:postgres` script for public PostgreSQL builds so deployment
   does not accidentally package the local SQLite Prisma client.
-- Staging currently runs commit `7799af486969cfcfd1df7d6552011394e276b7cb` from immutable release
-  `/opt/battleness/releases/20260721T192606Z-7799af48`. Deployment on 2026-07-21 used verified backup
-  `20260721T192602Z`, found no pending migrations, and passed local/public health checks.
+- Staging currently runs commit `389febed9d7d670c3bbc9a7c90c5e5d15646d6b1` from immutable release
+  `/opt/battleness/releases/20260721T215331Z-389febed`. Deployment on 2026-07-21 used verified backup
+  `20260721T215322Z`, found no pending migrations, and passed local/public health checks plus an
+  authenticated Chrome smoke of live combat and ranked season state.
 - `staging.battleness.com` now resolves to the app VPS and serves HTTPS through a Let's Encrypt
   certificate managed by Certbot's Nginx integration. Public HTTPS live/readiness checks pass, and
   the staging Google OAuth route starts the expected Google redirect. The user has verified Google
@@ -51,7 +52,8 @@ This file records modifications made to the project during agent-assisted work.
 - Live PvP refreshes no longer replace an already-rendered arena with the initial loading state.
   Realtime invalidations and the polling fallback had toggled Nuxt `useFetch` pending state and
   unmounted the entire combat subtree on every refresh. The local fix keeps existing battle data
-  visible during background refreshes and adds focused regression coverage; deployment is pending.
+  visible during background refreshes and adds focused regression coverage. The fix is deployed;
+  a fresh two-account action sequence remains to confirm the visual behavior under live updates.
 - Staging API latency from the Battle hub was diagnosed and fixed. Public deployment builds now reuse
   one cached Prisma client per database URL instead of creating a new `PrismaClient` per request, and
   development player seeding is skipped entirely for `staging` and `production` environments. The

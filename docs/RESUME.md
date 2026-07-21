@@ -98,8 +98,11 @@ separate permanent Dev Lab prototype.
 - A user-observed live-combat blink was traced to the battle page replacing its complete arena when
   Nuxt `useFetch` entered pending state during realtime or polling refreshes. The local worktree now
   preserves the existing battle DOM during background refreshes and tests the initial-loading
-  boundary. Format, typecheck, lint, 270 tests, and the full build pass. Commit, pass CI, deploy this
-  application-only fix, verify it in a fresh two-account match, then complete ranked smoke.
+  boundary. Format, typecheck, lint, 270 tests, the full build, and CI #35 pass. Commit `389febed` is
+  deployed as release `20260721T215331Z-389febed` after verified backup `20260721T215322Z`; local and
+  public health checks, live-combat reload, and ranked-season browser state pass without console
+  errors. Verify the blink fix during a fresh two-account action sequence, then complete ranked
+  smoke.
 - The database VPS runs the first local PostgreSQL backup system through
   `battleness-postgresql-backup.timer`: daily custom-format dumps for `battleness_staging` and
   `battleness_production`, checksum manifests, and 14-day local retention under
