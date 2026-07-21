@@ -102,8 +102,180 @@ allowlist rather than enabling local development authentication.
 10. Verify `/api/health/live`, `/api/health/ready`, Google login, and a small smoke path before
     promoting production traffic.
 
-Backups, restore drills, release rollback, production monitoring, rate limits, and HTTP security
-edge configuration remain follow-up Phase 14 work.
+The executable manual release, migration, rollback, database recovery, and emergency containment
+procedures are defined in `docs/OPERATIONS_RUNBOOK.md`. Production monitoring, rate limits, and HTTP
+security edge configuration remain follow-up Phase 14 work.
+
+## PostgreSQL Backups
+
+The database host should run daily local PostgreSQL custom-format dumps through systemd:
+
+- Script: `ops/postgresql/backup-postgresql.sh`
+- Restore drill script: `ops/postgresql/restore-check.sh`
+- Encrypted off-host copy script: `ops/postgresql/replicate-offhost.sh`
+- Backup health script: `ops/postgresql/check-backups.sh`
+- Service: `ops/postgresql/battleness-postgresql-backup.service`
+- Timer: `ops/postgresql/battleness-postgresql-backup.timer`
+- Off-host service: `ops/postgresql/battleness-postgresql-offhost.service`
+- Off-host timer: `ops/postgresql/battleness-postgresql-offhost.timer`
+- Monitor service: `ops/postgresql/battleness-postgresql-monitor.service`
+- Monitor timer: `ops/postgresql/battleness-postgresql-monitor.timer`
+- Operational cleanup script: `ops/postgresql/cleanup-operational-data.sh`
+- Operational cleanup service: `ops/postgresql/battleness-operational-cleanup.service`
+- Operational cleanup timer: `ops/postgresql/battleness-operational-cleanup.timer`
+
+The default backup target is `/var/backups/battleness/postgresql`. Each run creates one timestamped
+directory containing `battleness_staging.dump`, `battleness_production.dump`, and `SHA256SUMS`, then
+updates the `latest` symlink. The initial local retention target is 14 days.
+
+As of 2026-07-21, this local backup service and timer are installed on `bndb`. A manual run produced
+both staging and production dumps, checksum verification passed, and the staging dump was restored
+into an isolated `battleness_restore_check*` database before the throwaway database was dropped.
+
+`bndb` also encrypts the latest timestamped backup archive with the public recipient certificate in
+`/etc/battleness/postgresql-backup/recipient.pem` and copies it to `bnapp` under
+`/var/backups/battleness/postgresql-offhost`. The off-host copy uses a dedicated SSH key owned by the
+`postgres` user on `bndb`, accepted only by the `deploy` account on `bnapp`. The off-host retention
+target is 30 days. The private decryption key is intentionally kept outside the repository and off
+the servers at `C:\Users\dumon\Desktop\battleness-postgresql-backup-private-key.pem`.
+
+Install on the database host as root:
+
+```sh
+install -o postgres -g postgres -m 0750 -d /var/backups/battleness/postgresql
+install -o root -g root -m 0755 ops/postgresql/backup-postgresql.sh \
+  /usr/local/sbin/battleness-postgresql-backup
+install -o root -g root -m 0755 ops/postgresql/restore-check.sh \
+  /usr/local/sbin/battleness-postgresql-restore-check
+install -o root -g root -m 0644 ops/postgresql/battleness-postgresql-backup.service \
+  /etc/systemd/system/battleness-postgresql-backup.service
+install -o root -g root -m 0644 ops/postgresql/battleness-postgresql-backup.timer \
+  /etc/systemd/system/battleness-postgresql-backup.timer
+systemctl daemon-reload
+systemctl enable --now battleness-postgresql-backup.timer
+```
+
+Install the encrypted off-host copy service on the database host after provisioning the recipient
+certificate, SSH key, known-hosts file, and remote directory:
+
+```sh
+install -o postgres -g postgres -m 0750 -d /etc/battleness/postgresql-backup
+install -o postgres -g postgres -m 0640 recipient.pem \
+  /etc/battleness/postgresql-backup/recipient.pem
+install -o root -g root -m 0755 ops/postgresql/replicate-offhost.sh \
+  /usr/local/sbin/battleness-postgresql-replicate-offhost
+install -o root -g root -m 0644 ops/postgresql/battleness-postgresql-offhost.service \
+  /etc/systemd/system/battleness-postgresql-offhost.service
+install -o root -g root -m 0644 ops/postgresql/battleness-postgresql-offhost.timer \
+  /etc/systemd/system/battleness-postgresql-offhost.timer
+systemctl daemon-reload
+systemctl enable --now battleness-postgresql-offhost.timer
+```
+
+Install the backup watchdog after the local and off-host services:
+
+```sh
+install -o root -g root -m 0755 ops/postgresql/check-backups.sh \
+  /usr/local/sbin/battleness-postgresql-check-backups
+install -o root -g root -m 0644 ops/postgresql/battleness-postgresql-monitor.service \
+  /etc/systemd/system/battleness-postgresql-monitor.service
+install -o root -g root -m 0644 ops/postgresql/battleness-postgresql-monitor.timer \
+  /etc/systemd/system/battleness-postgresql-monitor.timer
+systemctl daemon-reload
+systemctl enable --now battleness-postgresql-monitor.timer
+systemctl start battleness-postgresql-monitor.service
+systemctl show battleness-postgresql-monitor.service --property=Result --property=ExecMainStatus
+```
+
+Install and activate the approved staging operational cleanup policy:
+
+```sh
+install -o root -g root -m 0755 ops/postgresql/cleanup-operational-data.sh \
+  /usr/local/sbin/battleness-operational-cleanup
+install -o root -g root -m 0644 ops/postgresql/battleness-operational-cleanup.service \
+  /etc/systemd/system/battleness-operational-cleanup.service
+install -o root -g root -m 0644 ops/postgresql/battleness-operational-cleanup.timer \
+  /etc/systemd/system/battleness-operational-cleanup.timer
+systemctl daemon-reload
+systemctl enable --now battleness-operational-cleanup.timer
+systemctl start battleness-operational-cleanup.service
+systemctl show battleness-operational-cleanup.service --property=Result --property=ExecMainStatus
+```
+
+Install the journald retention policy on both VPS:
+
+```sh
+install -o root -g root -m 0755 -d /etc/systemd/journald.conf.d
+install -o root -g root -m 0644 ops/systemd/journald-battleness.conf \
+  /etc/systemd/journald.conf.d/90-battleness-retention.conf
+systemctl restart systemd-journald.service
+systemd-analyze cat-config systemd/journald.conf
+journalctl --disk-usage
+```
+
+Run and verify a manual backup:
+
+```sh
+systemctl start battleness-postgresql-backup.service
+systemctl status battleness-postgresql-backup.service --no-pager
+sudo -u postgres sh -c \
+  'cd /var/backups/battleness/postgresql/latest && sha256sum -c SHA256SUMS'
+```
+
+Prove restore into an isolated throwaway database:
+
+```sh
+sudo -u postgres battleness-postgresql-restore-check \
+  /var/backups/battleness/postgresql/latest/battleness_staging.dump
+```
+
+Verify the encrypted off-host copy by decrypting the newest archive with the private key and listing
+the archive contents:
+
+```sh
+openssl cms -decrypt -inform DER \
+  -in /path/to/20YYYYMMDDTHHMMSSZ.tar.gz.cms \
+  -recip battleness-postgresql-backup-recipient.pem \
+  -inkey battleness-postgresql-backup-private-key.pem |
+  tar -tzf -
+```
+
+The restore-check script only creates databases named `battleness_restore_check*` and drops the
+throwaway database after validation unless `KEEP_RESTORE_DATABASE=1` is set. It validates that the
+restored database contains public tables and Prisma migration history.
+
+The current off-host target is the app VPS, which protects against loss of the database VPS but not
+against provider-account, region, or credential-wide incidents. A second encrypted copy target
+outside the app/database VPS pair is intentionally deferred for now because no high-availability
+home server or paid storage service is available yet. The intended future option is a private home
+server with acceptable availability, likely a Raspberry Pi. Before public launch, revisit that
+target or choose a low-cost object-storage provider, monitor backup age and service failures, and
+periodically restore the newest production backup into an isolated database.
+
+The database host also runs `battleness-postgresql-monitor.timer` after the daily local and off-host
+jobs. It checks that both oneshot services last succeeded, the newest local backup is at most 30
+hours old, both database dumps and the checksum manifest are present, all checksums pass, and a
+non-empty encrypted archive with the same timestamp exists on the app VPS and is at most 30 hours
+old. Failures produce `CRITICAL backup_monitor` records in journald and a failed systemd unit. This
+local watchdog is installed and verified. External notification delivery is intentionally on
+standby at the user's request: no hosted heartbeat, webhook, or SMTP credentials will be configured
+for now. When this work resumes, the preferred option is an external heartbeat service with email
+delivery because it can also detect a missing timer or a completely unavailable VPS.
+
+The operational cleanup job runs daily in apply mode after the backup window. It targets only
+`battleness_staging` until the production schema is deployed. The approved retention policy is seven
+days after session expiry or revocation, immediate removal of expired OAuth attempts, and 30 days for
+terminal casual/ranked queue entries, cancelled private lobbies without a battle, and inactive
+ranked queue-discipline state. Matched queue entries are eligible only after their linked battle is
+finished. Permanent battle records, rating adjustments, market transactions, player-market listings
+and mutation idempotency journals, reward grants, season history, and player data are never cleanup
+targets. `CLEANUP_MODE=verify` executes the deletion statements inside a transaction that is always
+rolled back. Add `battleness_production` only after its migrations are deployed and report/verify
+checks pass against that database.
+
+Both VPS use a journald retention drop-in from `ops/systemd/journald-battleness.conf`. Persistent
+system journals are limited to 30 days and 512 MiB per server. These limits apply to operational
+logs only and do not alter permanent gameplay or market records.
 
 ## Current OVH Bootstrap Status
 
@@ -126,8 +298,20 @@ As of 2026-07-20, the first two clean OVH VPS instances have been bootstrapped o
   `/api/health/ready`.
 - The staging Google OAuth client secret is installed in the server environment, and the public
   `/api/auth/google` route starts a Google redirect with the staging HTTPS callback URI.
-- Certbot installed its systemd renewal timer, but `certbot renew --dry-run --non-interactive`
-  timed out during this bootstrap and should be rechecked before relying on unattended renewal.
+- Certbot installed its systemd renewal timer. A simulated renewal succeeded on 2026-07-21 with
+  `certbot renew --dry-run --non-interactive --no-random-sleep-on-renew`. The extra flag only skips
+  Certbot's normal randomized renewal delay, which caused the earlier bootstrap check to time out.
+- The database host runs `battleness-postgresql-backup.timer`, which creates daily local custom-format
+  dumps for `battleness_staging` and `battleness_production` under
+  `/var/backups/battleness/postgresql` with 14-day local retention. The first manual staging restore
+  drill passed on 2026-07-21.
+- The database host also runs `battleness-postgresql-offhost.timer`, which encrypts the latest local
+  backup archive and copies it to the app VPS under
+  `/var/backups/battleness/postgresql-offhost` with 30-day off-host retention. The first encrypted
+  copy and decrypt/list verification passed on 2026-07-21.
+- A second encrypted backup destination outside both VPS is intentionally pending. The current
+  preferred future direction is a private home server with good availability, likely a Raspberry Pi,
+  rather than paying for object storage immediately.
 
 Generated deployment secrets and database URLs are intentionally kept outside the repository. Do not
 commit real environment files, database passwords, OAuth credentials, SSH passwords, or private keys.
@@ -137,5 +321,4 @@ The next external prerequisites are OAuth and smoke testing:
 - `battleness.com` currently does not point to the app VPS and should not be changed until staging is
   proven.
 - A production Google OAuth client and redirect URI are still required before production promotion.
-- The staging Google login callback still needs a browser smoke test with a real allowed Google
-  account.
+- Staging Google login has been verified with a real allowed Google account.

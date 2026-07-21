@@ -236,6 +236,7 @@ type SettingsForm = {
 
 const route = useRoute();
 const { locale, locales, setLocale, t } = useI18n();
+const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 const {
   data: state,
   error,
@@ -323,6 +324,6 @@ async function saveSettings(): Promise<void> {
 }
 
 function formatDate(value: string): string {
-  return new Date(value).toLocaleString(locale.value);
+  return formatLocalizedDateTime(value, { dateStyle: "medium", timeStyle: "short" });
 }
 </script>

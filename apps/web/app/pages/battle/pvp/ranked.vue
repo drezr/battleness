@@ -360,6 +360,7 @@ import { visiblePvpOpponent } from "~/utils/pvpPresentation";
 import { sectionLinks } from "~/utils/viewData";
 
 const { t, locale } = useI18n();
+const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 const route = useRoute();
 const mutating = ref(false);
 const claimingRewardId = ref("");
@@ -482,14 +483,14 @@ function countdown(value?: string): string {
 }
 
 function formatDate(value: string): string {
-  return new Intl.DateTimeFormat(locale.value, { dateStyle: "medium" }).format(new Date(value));
+  return formatLocalizedDateTime(value, { dateStyle: "medium" });
 }
 
 function formatDateTime(value: string): string {
-  return new Intl.DateTimeFormat(locale.value, {
+  return formatLocalizedDateTime(value, {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(value));
+  });
 }
 
 function leaderboardRankLabel(entry: RankedLeaderboardEntry): string {

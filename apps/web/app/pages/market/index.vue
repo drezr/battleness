@@ -164,6 +164,7 @@ import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
 const { locale, t } = useI18n();
+const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 const [gameRequest, playerRequest] = await Promise.all([
   useFetch<GameMarketState>("/api/market/game", { key: "market-hub-game" }),
   useFetch<PlayerMarketBrowseState>("/api/market/players", { key: "market-hub-players" }),
@@ -181,6 +182,6 @@ const sellableItemCount = computed(
 const recentTransactions = computed(() => gameMarket.value?.transactions.slice(0, 4) ?? []);
 
 function formatDate(value: string): string {
-  return new Intl.DateTimeFormat(locale.value, { dateStyle: "medium" }).format(new Date(value));
+  return formatLocalizedDateTime(value, { dateStyle: "medium" });
 }
 </script>

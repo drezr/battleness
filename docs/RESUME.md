@@ -83,8 +83,45 @@ separate permanent Dev Lab prototype.
   was public deployments creating a new Prisma client per request and running development seeding on
   read paths; staging now reuses the Prisma client per database URL and skips development seeding
   outside local development. Post-fix authenticated Battle hub API timings were about 90-170 ms on
-  the app host and 180-275 ms through public HTTPS. Certbot's renewal timer exists, but
-  `certbot renew --dry-run --non-interactive` timed out during bootstrap and should be rechecked.
+  the app host and 180-275 ms through public HTTPS. Certbot's renewal timer is active, and
+  `certbot renew --dry-run --non-interactive --no-random-sleep-on-renew` completed successfully on
+  2026-07-21. The earlier timeout was caused by Certbot's normal randomized renewal delay.
+- The database VPS runs the first local PostgreSQL backup system through
+  `battleness-postgresql-backup.timer`: daily custom-format dumps for `battleness_staging` and
+  `battleness_production`, checksum manifests, and 14-day local retention under
+  `/var/backups/battleness/postgresql`. The first manual backup and staging restore drill into an
+  isolated throwaway database passed on 2026-07-21. `battleness-postgresql-offhost.timer` also
+  encrypts the latest local backup and copies it to the app VPS under
+  `/var/backups/battleness/postgresql-offhost` with 30-day retention. The private decryption key is
+  outside the repo and off the servers at
+  `C:\Users\dumon\Desktop\battleness-postgresql-backup-private-key.pem`; the first encrypted copy and
+  decrypt/list verification passed on 2026-07-21. A second encrypted target outside the VPS pair is
+  intentionally pending: the user does not want to pay for storage right now and may later provide a
+  private high-availability home server, likely a Raspberry Pi.
+- `docs/OPERATIONS_RUNBOOK.md` defines the first manual Phase 14 release procedure: deploy only a
+  CI-validated commit, take a verified pre-migration backup, build in an immutable release directory,
+  classify and apply migrations, atomically switch `/opt/battleness/current`, run health and browser
+  smoke checks, and preserve rollback artifacts. It also distinguishes application rollback from
+  destructive database recovery and documents emergency containment and production prerequisites.
+- `battleness-postgresql-monitor.timer` runs daily on the database VPS after the local and off-host
+  backup timers. Its watchdog verifies prior service results, a maximum backup age of 30 hours, both
+  dumps, their checksum manifest, and the matching encrypted archive on the app VPS. Failures become
+  failed systemd units with `CRITICAL backup_monitor` journal records. External heartbeat and
+  notification delivery are intentionally on standby at the user's request, so complete VPS failure
+  is not yet detected outside the VPS pair.
+- A guarded PostgreSQL cleanup script and daily systemd timer run in apply mode for staging. The
+  approved policy keeps expired or revoked sessions for seven days, removes expired OAuth attempts
+  immediately, and keeps terminal queue, cancelled lobby, and inactive discipline state for 30 days.
+  It excludes all permanent gameplay, rating, reward, season, player, and market history. Production
+  remains excluded until its migrations exist; verify mode runs deletion SQL and rolls the
+  transaction back. Both VPS retain journald records for at most 30 days and 512 MiB.
+- An authenticated read-only staging sweep covered all 25 player-facing routes against PostgreSQL;
+  every route loaded successfully in 0.43 to 1.03 seconds. It exposed Vue hydration mismatches on
+  Profile History, Settings, and Battle History caused by server/client timezone differences. A
+  shared SSR-safe date-time formatter now keeps the initial render in UTC and switches to the browser
+  timezone after mount; local browser verification of the three affected routes has no warnings or
+  errors. This correction is not on staging until the current changes are committed, CI-validated,
+  and deployed. Mutation smoke tests and two-account PvP coverage remain pending.
 - `battleness.com` currently points elsewhere and should not be changed until staging is proven.
   Production OAuth credentials remain pending.
 - CI installs dependencies, checks the Prettier baseline, type checks, lints, runs the full test suite, builds the Nuxt Game App for production, and validates PostgreSQL migrations, drift, and relational smoke behavior.

@@ -117,6 +117,7 @@ defineProps<{
   claimingRewardId?: string;
 }>();
 const { t, locale } = useI18n();
+const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 
 defineEmits<{
   claim: [rewardGrantId: string];
@@ -131,10 +132,10 @@ function totalItemExperience(reward: BattleRewardView): number {
 }
 
 function formatDate(value: string): string {
-  return new Intl.DateTimeFormat(locale.value, {
+  return formatLocalizedDateTime(value, {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(value));
+  });
 }
 
 function outcomeLabel(outcome: string): string {

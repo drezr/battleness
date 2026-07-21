@@ -460,6 +460,7 @@ import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
 const { t, locale } = useI18n();
+const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 const contentText = useContentText();
 const { data: state, error, pending } = await useFetch<GameMarketState>("/api/market/game");
 const resourceView = ref<"materials" | "items">("materials");
@@ -634,6 +635,6 @@ function transactionName(transaction: GameMarketTransactionView): string {
       );
 }
 function formatTransactionDate(value: string): string {
-  return new Date(value).toLocaleString(locale.value);
+  return formatLocalizedDateTime(value, { dateStyle: "medium", timeStyle: "short" });
 }
 </script>

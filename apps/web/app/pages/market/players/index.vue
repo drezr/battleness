@@ -354,6 +354,7 @@ import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
 const { t, locale } = useI18n();
+const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 const contentText = useContentText();
 const createKind = ref<"item" | "material">("item");
 const createResourceId = ref("");
@@ -474,7 +475,7 @@ function formatNumber(value: number): string {
   return new Intl.NumberFormat(locale.value).format(value);
 }
 function formatDate(value: string): string {
-  return new Intl.DateTimeFormat(locale.value, { dateStyle: "medium" }).format(new Date(value));
+  return formatLocalizedDateTime(value, { dateStyle: "medium" });
 }
 
 async function createListing(): Promise<void> {

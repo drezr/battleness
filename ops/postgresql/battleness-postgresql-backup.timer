@@ -1,0 +1,10 @@
+[Unit]
+Description=Run BattleNess PostgreSQL backup daily
+
+[Timer]
+OnCalendar=*-*-* 03:15:00 UTC
+RandomizedDelaySec=20m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -27,14 +27,46 @@ This file records modifications made to the project during agent-assisted work.
 - `staging.battleness.com` now resolves to the app VPS and serves HTTPS through a Let's Encrypt
   certificate managed by Certbot's Nginx integration. Public HTTPS live/readiness checks pass, and
   the staging Google OAuth route starts the expected Google redirect. The user has verified Google
-  login on staging. Certbot's renewal timer exists, but the noninteractive renewal dry-run timed out
-  and remains a follow-up check.
+  login on staging. Certbot's renewal timer is active, and a simulated renewal succeeded on
+  2026-07-21. The earlier timeout was Certbot's normal randomized delay rather than a TLS failure.
 - Staging API latency from the Battle hub was diagnosed and fixed. Public deployment builds now reuse
   one cached Prisma client per database URL instead of creating a new `PrismaClient` per request, and
   development player seeding is skipped entirely for `staging` and `production` environments. The
   fix removed the PostgreSQL idle-connection buildup that had reached the server limit and reduced
   representative authenticated Battle hub API timings from roughly 1.2-1.8 seconds to about
   90-170 ms locally on the app host and 180-275 ms through public HTTPS.
+- The database VPS now has a first local PostgreSQL backup system: daily systemd-timer custom-format
+  dumps for `battleness_staging` and `battleness_production`, 14-day local retention under
+  `/var/backups/battleness/postgresql`, checksum manifests, and a restore-check script. The first
+  manual run and staging restore drill passed on 2026-07-21. Off-host encrypted copies and backup
+  monitoring remain production follow-up work.
+- The first encrypted off-host backup path is installed: `bndb` archives the latest local PostgreSQL
+  backup, encrypts it with the public backup recipient certificate, and copies it to `bnapp` under
+  `/var/backups/battleness/postgresql-offhost` with 30-day retention. The private decryption key
+  remains outside the repo and off the servers on the user's desktop. The first encrypted copy and
+  decrypt/list verification passed on 2026-07-21. A second off-pair backup target and alerting remain
+  production follow-up work.
+- The second backup destination outside the two VPS is intentionally deferred. The user does not want
+  to pay for object storage right now and does not yet have a high-availability home server. The
+  documented future direction is a private home server, likely a Raspberry Pi, once it can provide
+  acceptable availability.
+- The first operations runbook now defines exact-commit release packaging, immutable release
+  directories, pre-migration backups, PostgreSQL migration gates, atomic symlink activation,
+  post-deployment checks, application rollback, destructive database recovery safeguards,
+  emergency containment, production promotion prerequisites, and release retention.
+- The database backup path now includes a daily systemd watchdog that checks the last local and
+  off-host service results, enforces a 30-hour maximum age, validates both dumps and their checksums,
+  and requires a non-empty matching encrypted archive on the app VPS. It fails with structured
+  `CRITICAL backup_monitor` journal records. External delivery and missed-run detection are
+  intentionally on standby at the user's request; no hosted heartbeat, webhook, or SMTP integration
+  is configured.
+- A PostgreSQL operational cleanup job runs daily in apply mode. It removes expired or
+  revoked sessions, expired OAuth attempts, old terminal casual/ranked queue entries, cancelled
+  private lobbies without battles, and inactive ranked discipline state while explicitly preserving
+  permanent battle, rating, reward, season, player, and market records. It uses the user-approved
+  seven-day session, immediate OAuth, and 30-day queue policy. It currently targets staging only
+  because the reserved production database has not received its schema migrations; a verify mode
+  exercises deletions and rolls back. Both VPS also cap journald at 30 days and 512 MiB.
 - The Nuxt API integration suite now gives the Prisma reset hook and the intentionally concurrent
   player-market purchase race test a 30-second timeout, matching their database-heavy behavior on
   slower GitHub Actions runners without changing the tested market semantics.
@@ -204,12 +236,41 @@ This file records modifications made to the project during agent-assisted work.
   `build:postgres` package script to avoid generating a SQLite Prisma client for public builds.
 - Pointed `staging.battleness.com` at the app VPS, installed the Let's Encrypt certificate through
   Certbot's Nginx integration, verified public HTTPS live/readiness health, and verified that the
-  staging Google OAuth route starts a Google redirect with the HTTPS callback URI. The Certbot
-  renewal timer exists, but the renewal dry-run timed out and still needs rechecking.
+  staging Google OAuth route starts a Google redirect with the HTTPS callback URI.
+- Verified the Certbot systemd renewal timer and completed a successful simulated renewal on
+  2026-07-21 using `--no-random-sleep-on-renew`; the earlier bootstrap timeout was caused by
+  Certbot's randomized renewal delay.
 - Fixed the first observed staging Battle hub latency issue by caching the Prisma client for public
   deployments, skipping development seeding in staging/production read paths, redeploying the
   staging release, clearing the prior idle-connection buildup, and recording post-fix authenticated
   API timings.
+- Added versioned PostgreSQL backup and restore-check scripts plus systemd service/timer units,
+  installed them on the database VPS, enabled the daily backup timer, ran the first manual backup,
+  verified dump checksums, and restored the staging dump into an isolated throwaway database.
+- Added a versioned encrypted off-host backup-copy script plus systemd service/timer units, generated
+  the backup recipient key material outside the repo, installed the public certificate on the
+  database VPS, configured a dedicated SSH transfer key to the app VPS, enabled the daily off-host
+  copy timer, and verified that the uploaded archive decrypts and contains both database dumps.
+- Documented that a second encrypted backup target outside the VPS pair is intentionally pending
+  until a private high-availability home server, likely a Raspberry Pi, is available or a paid
+  storage provider is chosen.
+- Added the Phase 14 operations runbook for manual release, migration, atomic activation, smoke
+  testing, application rollback, database recovery, emergency containment, production promotion,
+  and release retention.
+- Added and installed the PostgreSQL backup watchdog script and systemd service/timer, then verified
+  it against the live local dumps, checksum manifest, prior service results, SSH path, and encrypted
+  app-VPS archive. Documented the user's decision to place external missed-run and failure
+  notification on standby while leaving the local watchdog active.
+- Added, installed, and enabled the guarded PostgreSQL operational cleanup script and daily systemd
+  timer with the approved retention policy, then applied the 30-day and 512-MiB journald limits on
+  both VPS.
+- Completed an authenticated read-only staging sweep of all 25 player-facing routes against
+  PostgreSQL. Every route loaded successfully, with full navigation measured between 0.43 and 1.03
+  seconds. The browser console exposed hydration mismatches on Profile History, Settings, and Battle
+  History because server UTC and browser-local date formatting produced different initial text.
+  Added a shared SSR-safe date-time formatter, applied it to every client date-time surface, and
+  verified the three affected routes locally with no browser warnings or errors. Mutation and
+  two-account PvP smoke coverage remains pending.
 - Increased the Nuxt API integration reset hook and contested player-market purchase race test
   timeouts to 30 seconds so GitHub Actions runners do not fail the concurrency coverage at Vitest's
   five-second default timeout.

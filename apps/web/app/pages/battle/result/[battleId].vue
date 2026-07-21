@@ -142,6 +142,7 @@ import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
 const { t, locale } = useI18n();
+const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 const { data: state, error, pending } = await useFetch<BattleHistoryState>("/api/battle/history");
 const claimingRewardId = ref("");
 const feedback = ref("");
@@ -151,9 +152,7 @@ const record = computed(
 );
 
 function formatDate(value: string): string {
-  return new Intl.DateTimeFormat(locale.value, { dateStyle: "long", timeStyle: "short" }).format(
-    new Date(value),
-  );
+  return formatLocalizedDateTime(value, { dateStyle: "long", timeStyle: "short" });
 }
 
 function battleMode(mode: string): string {

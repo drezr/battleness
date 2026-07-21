@@ -209,6 +209,7 @@ import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
 const { locale, t } = useI18n();
+const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 const [playerRequest, settingsRequest, historyRequest, campaignRequest] = await Promise.all([
   useFetch<PlayerState>("/api/player"),
   useFetch<ProfileSettingsState>("/api/profile/settings", { key: "profile-overview-settings" }),
@@ -267,6 +268,6 @@ const profileInitials = computed(() =>
 );
 
 function formatDate(value: string): string {
-  return new Intl.DateTimeFormat(locale.value, { dateStyle: "medium" }).format(new Date(value));
+  return formatLocalizedDateTime(value, { dateStyle: "medium" });
 }
 </script>

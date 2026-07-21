@@ -124,6 +124,7 @@ import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
 const { locale, t } = useI18n();
+const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 const playerId = computed(() => String(route.params.playerId));
 const {
   data: state,
@@ -143,6 +144,6 @@ function rankLabel(rank: PvpVisibleRank): string {
 }
 
 function formatDate(value: string): string {
-  return new Intl.DateTimeFormat(locale.value, { dateStyle: "medium" }).format(new Date(value));
+  return formatLocalizedDateTime(value, { dateStyle: "medium" });
 }
 </script>

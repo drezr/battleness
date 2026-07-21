@@ -149,6 +149,7 @@ import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
 const { t, locale } = useI18n();
+const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 const contentText = useContentText();
 const roles = ["all", "buyer", "seller"] as const;
 const role = ref<(typeof roles)[number]>("all");
@@ -171,8 +172,6 @@ function formatNumber(value: number): string {
   return new Intl.NumberFormat(locale.value).format(value);
 }
 function formatDate(value: string): string {
-  return new Intl.DateTimeFormat(locale.value, { dateStyle: "medium", timeStyle: "short" }).format(
-    new Date(value),
-  );
+  return formatLocalizedDateTime(value, { dateStyle: "medium", timeStyle: "short" });
 }
 </script>

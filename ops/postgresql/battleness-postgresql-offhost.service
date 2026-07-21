@@ -1,0 +1,25 @@
+[Unit]
+Description=BattleNess PostgreSQL encrypted off-host backup copy
+After=network-online.target battleness-postgresql-backup.service
+Wants=network-online.target
+Documentation=file:/usr/local/share/battleness/postgresql-backup/DEPLOYMENT.md
+
+[Service]
+Type=oneshot
+User=postgres
+Group=postgres
+Environment=BACKUP_ROOT=/var/backups/battleness/postgresql
+Environment=ENCRYPTION_CERT=/etc/battleness/postgresql-backup/recipient.pem
+Environment=OFFSITE_SSH_KEY=/etc/battleness/postgresql-backup/offsite_ed25519
+Environment=OFFSITE_SSH_TARGET=deploy@145.239.72.77
+Environment=OFFSITE_REMOTE_DIR=/var/backups/battleness/postgresql-offhost
+Environment=OFFSITE_RETENTION_DAYS=30
+Environment=SSH_KNOWN_HOSTS=/etc/battleness/postgresql-backup/known_hosts
+ExecStart=/usr/local/sbin/battleness-postgresql-replicate-offhost
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ReadOnlyPaths=/var/backups/battleness/postgresql /etc/battleness/postgresql-backup

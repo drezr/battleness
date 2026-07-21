@@ -1,0 +1,10 @@
+[Unit]
+Description=Run BattleNess encrypted off-host PostgreSQL backup copy daily
+
+[Timer]
+OnCalendar=*-*-* 04:00:00 UTC
+RandomizedDelaySec=20m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

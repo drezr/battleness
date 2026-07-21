@@ -1,0 +1,23 @@
+[Unit]
+Description=Check BattleNess PostgreSQL backup health
+After=network-online.target battleness-postgresql-backup.service battleness-postgresql-offhost.service
+Wants=network-online.target
+Documentation=file:/usr/local/share/battleness/postgresql-backup/DEPLOYMENT.md
+
+[Service]
+Type=oneshot
+User=postgres
+Group=postgres
+Environment=BACKUP_ROOT=/var/backups/battleness/postgresql
+Environment=MAX_LOCAL_AGE_SECONDS=108000
+Environment=MAX_OFFSITE_AGE_SECONDS=108000
+Environment=OFFSITE_SSH_KEY=/etc/battleness/postgresql-backup/offsite_ed25519
+Environment=OFFSITE_SSH_TARGET=deploy@145.239.72.77
+Environment=OFFSITE_REMOTE_DIR=/var/backups/battleness/postgresql-offhost
+Environment=SSH_KNOWN_HOSTS=/etc/battleness/postgresql-backup/known_hosts
+ExecStart=/usr/local/sbin/battleness-postgresql-check-backups
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadOnlyPaths=/var/backups/battleness/postgresql /etc/battleness/postgresql-backup

@@ -1,0 +1,22 @@
+[Unit]
+Description=Clean BattleNess temporary PostgreSQL operational data
+After=postgresql.service battleness-postgresql-backup.service
+Documentation=file:/usr/local/share/battleness/postgresql-backup/DEPLOYMENT.md
+
+[Service]
+Type=oneshot
+User=postgres
+Group=postgres
+Environment=CLEANUP_DATABASES=battleness_staging
+Environment=CLEANUP_MODE=apply
+Environment=SESSION_RETENTION_DAYS=7
+Environment=OAUTH_RETENTION_HOURS=0
+Environment=QUEUE_RETENTION_DAYS=30
+ExecStart=/usr/local/sbin/battleness-operational-cleanup
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict

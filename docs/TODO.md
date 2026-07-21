@@ -7,10 +7,11 @@ This is the centralized working TODO for BattleNess. It focuses on what remains 
 Phase 14 has started with the initial deployment direction: OVH VPS hosting, Debian stable, Nginx,
 one Game App instance, and a separate self-managed PostgreSQL server protected by firewall rules.
 The first VPS bootstrap and HTTPS staging deployment are complete. The next production work should
-smoke-test staging login and core flows, recheck Certbot renewal, then complete backups, runbooks,
-monitoring, and staging smoke/load validation. The first Battle hub latency issue on staging has
-been fixed by reusing the production Prisma client and skipping development seeding in public
-deployments.
+smoke-test staging core flows, then complete runbooks, monitoring, and staging smoke/load
+validation. Certbot renewal and the first off-host encrypted database backup path are verified. The first Battle hub latency
+issue on staging has been fixed by reusing the production Prisma client and skipping development
+seeding in public deployments, and the first local plus app-VPS off-host PostgreSQL backup path is
+in place.
 
 ## Phase 1 - Game App Data Foundation
 
@@ -229,16 +230,34 @@ deployments.
 - [x] Fix the first staging Battle hub API latency issue by caching the production Prisma client,
       preventing PostgreSQL idle-connection buildup, skipping development seeding in public
       deployments, and redeploying the corrected staging release.
-- [ ] Recheck `certbot renew --dry-run --non-interactive`; the initial certificate was issued and
-      the renewal timer exists, but the dry-run timed out during bootstrap.
-- [ ] Define and automate expired session, OAuth attempt, queue, and operational journal cleanup
-      without deleting permanent player history or market records.
-- [ ] Add database backup and retention strategy, then prove restoration into an isolated database.
-- [ ] Define the production migration, release, rollback, and emergency maintenance runbook.
+- [x] Verify the Certbot renewal timer and simulated renewal. The simulation succeeded on 2026-07-21
+      with `--no-random-sleep-on-renew`; Certbot's randomized delay caused the earlier timeout.
+- [x] Activate daily operational cleanup with seven-day expired/revoked-session retention, immediate
+      expired OAuth-attempt removal, 30-day terminal queue/lobby/discipline retention, and 30-day,
+      512-MiB-per-VPS journald retention. Permanent gameplay, rating, reward, and market history is
+      explicitly excluded.
+- [x] Add the first local PostgreSQL backup and retention strategy on the database VPS, then prove
+      staging restoration into an isolated database.
+- [x] Add the first encrypted off-host database backup copy path from the database VPS to the app VPS
+      and verify decryptability.
+- [ ] Add a second encrypted backup copy target outside the app/database VPS pair. This is
+      intentionally deferred until a private high-availability home server is available, likely a
+      Raspberry Pi, or until a paid storage service is chosen.
+- [x] Add a daily local backup watchdog for backup age, dump presence and checksums, matching
+      encrypted off-host copy age, and previous backup-service failures.
+- [ ] Connect backup watchdog failures and missed runs to an external notification channel before
+      public production launch. This is intentionally on standby at the user's request; the local
+      watchdog remains active, and an external heartbeat with email delivery is the preferred future
+      option.
+- [x] Define the production migration, release, rollback, database recovery, and emergency
+      maintenance runbook.
 - [ ] Add production monitoring and alerts for availability, error rate, database health, failed
       match settlement, queue maintenance, WebSocket reconnect rate, and backup failures.
-- [ ] Run staging smoke tests for login, inventory, Forge, markets, campaign, private PvP, casual PvP,
-      ranked PvP, reconnects, rewards, and localization against PostgreSQL.
+- [x] Run the authenticated read-only staging route sweep against PostgreSQL for login, inventory,
+      Forge, markets, campaign, private PvP, casual PvP, ranked PvP, profile, and localization. All
+      25 player-facing routes loaded successfully on 2026-07-21.
+- [ ] Complete mutation and multiplayer staging smoke tests for Forge, markets, campaign, private
+      PvP, casual PvP, ranked PvP, reconnects, and rewards. PvP requires a second Google test account.
 - [ ] Run load and soak tests for polling, WebSocket invalidations, matchmaking, market concurrency,
       and authoritative battle actions before public access.
 - [ ] Run a dependency and production security review before the public release candidate.

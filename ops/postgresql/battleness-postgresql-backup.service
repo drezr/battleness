@@ -1,0 +1,19 @@
+[Unit]
+Description=BattleNess PostgreSQL backup
+Documentation=file:/usr/local/share/battleness/postgresql-backup/DEPLOYMENT.md
+
+[Service]
+Type=oneshot
+User=postgres
+Group=postgres
+Environment=BACKUP_ROOT=/var/backups/battleness/postgresql
+Environment="BACKUP_DATABASES=battleness_staging battleness_production"
+Environment=BACKUP_RETENTION_DAYS=14
+ExecStart=/usr/local/sbin/battleness-postgresql-backup
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ReadWritePaths=/var/backups/battleness/postgresql
