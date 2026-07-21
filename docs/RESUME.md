@@ -89,11 +89,14 @@ separate permanent Dev Lab prototype.
 - Staging mutation smoke tests passed for preferences, Forge crafting, fixed-market sales and
   purchases, player-listing creation/cancellation, campaign combat, replay, and reward claiming. A
   second Google account exposed that public OAuth accounts previously received no playable state
-  because development seeding is correctly disabled. The local worktree now adds a durable,
-  transactionally idempotent onboarding version and grants otherwise empty OAuth accounts a
-  Training Flame Band, socketed Ruby Shard, Firebolt enchantment, and active starter loadout. Existing
-  accounts are only marked and receive no duplicates. Commit, pass CI, deploy the new dual-database
-  migration, then sign the second account in again and resume private/casual/ranked PvP smoke tests.
+  because development seeding is correctly disabled. CI-validated commit `07eb26f1` is deployed as
+  release `20260721T172633Z-07eb26f1`; migration `20260721190000_add_player_onboarding` grants an
+  otherwise empty account a Training Flame Band, socketed Ruby Shard, Firebolt enchantment, and active
+  starter loadout. The second account received exactly that state on login. A private lobby then
+  created and locked both distinct loadouts, but the guest could not load the battle because the PvP
+  snapshot retained only the host's monster/spell definition maps. The local worktree now merges both
+  maps and adds an enchanted-guest integration regression. Commit, pass CI, deploy this application-only
+  fix, then resume private combat, casual/ranked matchmaking, reconnect, settlement, and reward smoke tests.
 - The database VPS runs the first local PostgreSQL backup system through
   `battleness-postgresql-backup.timer`: daily custom-format dumps for `battleness_staging` and
   `battleness_production`, checksum manifests, and 14-day local retention under

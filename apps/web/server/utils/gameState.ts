@@ -4720,6 +4720,10 @@ function livePvpBattleSetup(
     ...firstSetup,
     id: `${mode}.${matchId}`,
     seed: `${mode}.${matchId}`,
+    definitions: {
+      monsters: { ...firstSetup.definitions.monsters, ...secondSetup.definitions.monsters },
+      spells: { ...firstSetup.definitions.spells, ...secondSetup.definitions.spells },
+    },
     players: [firstSetup.players[0]!, secondSetup.players[0]!],
   };
 }

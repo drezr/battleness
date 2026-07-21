@@ -2297,6 +2297,8 @@ describe("Nuxt Game App APIs", () => {
     const hostRingId = "devPlayer.ring.private";
     const guestId = "privateGuest";
     const guestRingId = `${guestId}.ring.private`;
+    const guestGemId = `${guestId}.gem.private`;
+    const guestSpellId = `${guestId}.spell.private`;
 
     await prisma.player.create({
       data: {
@@ -2329,9 +2331,41 @@ describe("Nuxt Game App APIs", () => {
           experience: 0,
           quality: 0,
           socketCount: 1,
-          socketedGemInstanceIds: "[]",
+          socketedGemInstanceIds: JSON.stringify([guestGemId]),
+        },
+        {
+          id: guestGemId,
+          playerId: guestId,
+          type: "gem",
+          definitionId: "rubyShard",
+          contentVersion: "prototype-6",
+          experience: 0,
+          quality: 0,
+          socketCount: null,
+          enchantment: JSON.stringify({ type: "spell", spellInstanceId: guestSpellId }),
+        },
+        {
+          id: guestSpellId,
+          playerId: guestId,
+          type: "spell",
+          definitionId: "firebolt",
+          contentVersion: "prototype-6",
+          experience: 0,
+          quality: 0,
+          socketCount: null,
         },
       ],
+    });
+    await prisma.ringSocket.create({
+      data: { playerId: guestId, ringItemId: guestRingId, gemItemId: guestGemId, socketIndex: 0 },
+    });
+    await prisma.gemEnchantment.create({
+      data: {
+        playerId: guestId,
+        gemItemId: guestGemId,
+        targetItemId: guestSpellId,
+        targetType: "spell",
+      },
     });
     const [hostLoadout, guestLoadout] = await Promise.all([
       prisma.loadout.create({
@@ -2455,6 +2489,10 @@ describe("Nuxt Game App APIs", () => {
 
     expect(hostBattle).toMatchObject({ viewer: { id: "devPlayer" } });
     expect(guestBattle).toMatchObject({ mode: "private_pvp", viewer: { id: guestId } });
+    expect(guestBattle.viewer.rings?.[0]?.gems[0]?.enchantment).toMatchObject({
+      type: "spell",
+      definitionId: "firebolt",
+    });
     expectHiddenPvpLiveLoadout(hostBattle, "private_pvp");
     expectHiddenPvpLiveLoadout(guestBattle, "private_pvp");
 
