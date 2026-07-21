@@ -6,12 +6,12 @@ This is the centralized working TODO for BattleNess. It focuses on what remains 
 
 Phase 14 has started with the initial deployment direction: OVH VPS hosting, Debian stable, Nginx,
 one Game App instance, and a separate self-managed PostgreSQL server protected by firewall rules.
-The first VPS bootstrap and HTTPS staging deployment are complete. The next production work should
-smoke-test staging core flows, then complete runbooks, monitoring, and staging smoke/load
-validation. Certbot renewal and the first off-host encrypted database backup path are verified. The first Battle hub latency
-issue on staging has been fixed by reusing the production Prisma client and skipping development
-seeding in public deployments, and the first local plus app-VPS off-host PostgreSQL backup path is
-in place.
+The first VPS bootstrap and HTTPS staging deployment are complete. Private and casual two-account
+smoke tests now pass, and the first eight-week staging ranked season is active. The current work is
+to deploy and verify the live-arena background-refresh fix, complete ranked matchmaking and
+settlement smoke, then proceed to load/soak validation and the remaining production monitoring and
+security work. Certbot renewal and the first local plus app-VPS off-host PostgreSQL backup path are
+verified.
 
 ## Phase 1 - Game App Data Foundation
 
@@ -261,10 +261,11 @@ in place.
       onboarded without receiving duplicate items.
 - [ ] Complete mutation and multiplayer staging smoke tests for Forge, markets, campaign, private
       PvP, casual PvP, ranked PvP, reconnects, and rewards. Forge, fixed/player markets, campaign,
-      replay, reward claiming, public onboarding, private lobby creation/join, loadout locking, and
-      battle creation have passed. The PvP snapshot-definition merge is deployed; deploy the pending
-      completed-lobby reset fix, then resume private combat, casual/ranked matchmaking, reconnect,
-      settlement, and reward checks.
+      replay, reward claiming, public onboarding, private and casual matchmaking, distinct-loadout
+      battle creation, turn synchronization, reconnect, concession, settlement, complete results,
+      and history have passed. Deploy and verify the pending live-arena background-refresh fix, then
+      complete ranked matchmaking, bilateral acceptance, settlement, leaderboard, and season-reward
+      checks against active staging season `staging-ranked-season-20260721`.
 - [ ] Make `prisma:postgres:check` line-ending independent so an exact Git archive with CRLF does not
       fail the Linux pre-build gate before `build:postgres` regenerates the same effective schema.
 - [ ] Run load and soak tests for polling, WebSocket invalidations, matchmaking, market concurrency,

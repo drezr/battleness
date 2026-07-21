@@ -29,6 +29,13 @@ export type LiveBattleTarget = {
   firstTurnProtected: boolean;
 };
 
+export function shouldShowInitialBattleLoading(
+  pending: boolean,
+  battle: LiveBattleState | null | undefined,
+): boolean {
+  return pending && !battle;
+}
+
 export function actionAvailability(
   battle: LiveBattleState,
   source: LiveBattleActionSource,

@@ -22,8 +22,10 @@
       </div>
     </header>
 
-    <p v-if="pending" class="panel">{{ t("battle.live.loading") }}</p>
-    <p v-else-if="error || !battle" class="panel">{{ t("battle.live.notFound") }}</p>
+    <p v-if="shouldShowInitialBattleLoading(pending, battle)" class="panel">
+      {{ t("battle.live.loading") }}
+    </p>
+    <p v-else-if="!battle" class="panel">{{ t("battle.live.notFound") }}</p>
 
     <template v-else>
       <section class="live-match-strip" :aria-label="t('accessibility.battleStatus')">
@@ -651,6 +653,7 @@ import {
   battleResolutionEffects,
   battleTargets,
   presentBattleEvent,
+  shouldShowInitialBattleLoading,
   type LiveBattleActionSource,
   type LiveBattleEventPresentation,
   type LiveBattleResolutionEffects,
@@ -664,7 +667,6 @@ const contentText = useContentText();
 const battleId = computed(() => String(route.params.battleId));
 const {
   data: battle,
-  error,
   pending,
   refresh,
 } = await useFetch<LiveBattleState>(() => `/api/battle/live/${battleId.value}`);

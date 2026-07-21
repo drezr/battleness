@@ -5,6 +5,7 @@ import {
   battleResolutionEffects,
   battleTargets,
   presentBattleEvent,
+  shouldShowInitialBattleLoading,
   type LiveBattleActionSource,
 } from "./liveBattlePresentation";
 
@@ -70,6 +71,14 @@ function ringSource(energyCost = 2, currentCooldown = 0): LiveBattleActionSource
 }
 
 describe("live battle presentation", () => {
+  it("keeps the battle visible during a background refresh", () => {
+    const battle = battleState();
+
+    expect(shouldShowInitialBattleLoading(true, null)).toBe(true);
+    expect(shouldShowInitialBattleLoading(true, battle)).toBe(false);
+    expect(shouldShowInitialBattleLoading(false, battle)).toBe(false);
+  });
+
   it("reports why a source cannot be prepared", () => {
     const battle = battleState();
     expect(actionAvailability(battle, ringSource())).toEqual({ available: true, reason: "ready" });

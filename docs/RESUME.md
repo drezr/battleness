@@ -42,7 +42,7 @@ pnpm test
 pnpm --filter @battleness/web build
 ```
 
-The validated baseline on 2026-07-19 is 19 Vitest files and 256 passing tests. If a validation count
+The validated baseline on 2026-07-21 is 22 Vitest files and 270 passing tests. If a validation count
 changes, investigate whether tests were intentionally added or removed instead of treating the count
 as a permanent invariant.
 
@@ -87,19 +87,19 @@ separate permanent Dev Lab prototype.
   `certbot renew --dry-run --non-interactive --no-random-sleep-on-renew` completed successfully on
   2026-07-21. The earlier timeout was caused by Certbot's normal randomized renewal delay.
 - Staging mutation smoke tests passed for preferences, Forge crafting, fixed-market sales and
-  purchases, player-listing creation/cancellation, campaign combat, replay, and reward claiming. A
-  second Google account exposed that public OAuth accounts previously received no playable state
-  because development seeding is correctly disabled. CI-validated commit `07eb26f1` is deployed as
-  release `20260721T172633Z-07eb26f1`; migration `20260721190000_add_player_onboarding` grants an
-  otherwise empty account a Training Flame Band, socketed Ruby Shard, Firebolt enchantment, and active
-  starter loadout. The second account received exactly that state on login. A private lobby then
-  exposed that the battle snapshot retained only the host's monster/spell definition maps. The merge
-  fix and enchanted-guest regression are deployed in CI-validated release
-  `20260721T190126Z-095a8926`. Post-deployment smoke exposed a second blocker: a finished private match
-  remains selected and hides the create/join controls. The local worktree now limits lobby state to
-  ongoing statuses and verifies a second match can be created while retaining the finished record.
-  Commit, pass CI, deploy this application-only fix, then resume private combat, casual/ranked
-  matchmaking, reconnect, settlement, and reward smoke tests.
+  purchases, player-listing creation/cancellation, campaign combat, replay, reward claiming, public
+  onboarding, and two-account private and casual PvP. CI-validated commit `7799af48` is deployed as
+  release `20260721T192606Z-7799af48`; it includes the cross-player snapshot-definition merge and the
+  completed-private-lobby reset. Private and casual smoke verified distinct enchanted loadouts,
+  battle entry, turn synchronization, reconnect, concession, settlement, complete result snapshots,
+  and history. Staging ranked season `staging-ranked-season-20260721` is active from
+  `2026-07-21T21:50:00Z` through `2026-09-15T21:50:00Z`, created after verified backup
+  `20260721T214832Z`. Ranked two-account matchmaking and settlement smoke remains pending.
+- A user-observed live-combat blink was traced to the battle page replacing its complete arena when
+  Nuxt `useFetch` entered pending state during realtime or polling refreshes. The local worktree now
+  preserves the existing battle DOM during background refreshes and tests the initial-loading
+  boundary. Format, typecheck, lint, 270 tests, and the full build pass. Commit, pass CI, deploy this
+  application-only fix, verify it in a fresh two-account match, then complete ranked smoke.
 - The database VPS runs the first local PostgreSQL backup system through
   `battleness-postgresql-backup.timer`: daily custom-format dumps for `battleness_staging` and
   `battleness_production`, checksum manifests, and 14-day local retention under

@@ -24,9 +24,9 @@ This file records modifications made to the project during agent-assisted work.
   `staging.battleness.com` requests to Nitro. Health checks pass locally and through the HTTP proxy.
   The repo now has a dedicated `build:postgres` script for public PostgreSQL builds so deployment
   does not accidentally package the local SQLite Prisma client.
-- Staging currently runs commit `095a8926b0ffd4906b371542ba8f0ab2f0403029` from immutable release
-  `/opt/battleness/releases/20260721T190126Z-095a8926`. Deployment on 2026-07-21 used verified backup
-  `20260721T190019Z`, found no pending migrations, and passed local/public health checks.
+- Staging currently runs commit `7799af486969cfcfd1df7d6552011394e276b7cb` from immutable release
+  `/opt/battleness/releases/20260721T192606Z-7799af48`. Deployment on 2026-07-21 used verified backup
+  `20260721T192602Z`, found no pending migrations, and passed local/public health checks.
 - `staging.battleness.com` now resolves to the app VPS and serves HTTPS through a Let's Encrypt
   certificate managed by Certbot's Nginx integration. Public HTTPS live/readiness checks pass, and
   the staging Google OAuth route starts the expected Google redirect. The user has verified Google
@@ -40,10 +40,18 @@ This file records modifications made to the project during agent-assisted work.
 - The first two-account private-match staging test exposed a pre-existing PvP snapshot bug: battle
   setup combined both players but retained only the first player's monster/spell instance-definition
   maps, so the guest could not load a distinct enchanted ring. The deployed fix merges both maps and
-  adds an integration regression with a guest-owned Ruby Shard and Firebolt. Post-deployment smoke
-  then exposed that a finished private match remained selected by the lobby and prevented creating a
-  replacement through the UI. The local fix limits lobby state to ongoing statuses and verifies a
-  second match can be created while retaining the finished record; deployment is pending.
+  adds an integration regression with a guest-owned Ruby Shard and Firebolt. A second deployed fix
+  limits private-lobby state to ongoing statuses so completed matches no longer hide the create/join
+  controls. Two-account private and casual smoke tests now cover distinct loadouts, battle entry,
+  turn synchronization, reconnect, concession, settlement, complete result snapshots, and history.
+- Staging has its first active ranked season, `staging-ranked-season-20260721`, from
+  `2026-07-21T21:50:00Z` through `2026-09-15T21:50:00Z`. It was inserted transactionally only after
+  verifying backup `20260721T214832Z`; ranked two-account matchmaking and settlement smoke remains
+  pending.
+- Live PvP refreshes no longer replace an already-rendered arena with the initial loading state.
+  Realtime invalidations and the polling fallback had toggled Nuxt `useFetch` pending state and
+  unmounted the entire combat subtree on every refresh. The local fix keeps existing battle data
+  visible during background refreshes and adds focused regression coverage; deployment is pending.
 - Staging API latency from the Battle hub was diagnosed and fixed. Public deployment builds now reuse
   one cached Prisma client per database URL instead of creating a new `PrismaClient` per request, and
   development player seeding is skipped entirely for `staging` and `production` environments. The
