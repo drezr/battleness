@@ -42,7 +42,7 @@ pnpm test
 pnpm --filter @battleness/web build
 ```
 
-The validated baseline on 2026-07-21 is 22 Vitest files and 270 passing tests. If a validation count
+The validated baseline on 2026-07-22 is 23 Vitest files and 272 passing tests. If a validation count
 changes, investigate whether tests were intentionally added or removed instead of treating the count
 as a permanent invariant.
 
@@ -140,11 +140,10 @@ separate permanent Dev Lab prototype.
   `20260721T154353Z-a05c68d8`; local/public health checks, the five main hubs, and the three affected
   routes pass without browser warnings or errors. Mutation smoke tests and two-account PvP coverage
   remain pending.
-- The latest release build found a platform-specific false positive in
-  `prisma:postgres:check`: a Git archive can retain CRLF on the generated PostgreSQL schema marker,
-  while the Linux generator writes that marker with LF. Regenerating the checked file before the
-  build changes only that line ending and produces the same effective Prisma schema. Normalize this
-  comparison in a follow-up commit.
+- `prisma:postgres:check` now normalizes CRLF, CR, and LF before comparing the generated PostgreSQL
+  schema with the versioned target. It still rejects substantive schema differences, and focused
+  tests cover both line-ending equivalence and stale content. Exact Git archives no longer require a
+  preparatory regeneration solely because the operator and Linux builder use different line endings.
 - `battleness.com` currently points elsewhere and should not be changed until staging is proven.
   Production OAuth credentials remain pending.
 - CI installs dependencies, checks the Prettier baseline, type checks, lints, runs the full test suite, builds the Nuxt Game App for production, and validates PostgreSQL migrations, drift, and relational smoke behavior.

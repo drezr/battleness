@@ -304,6 +304,9 @@ This file records modifications made to the project during agent-assisted work.
   `prisma:postgres:check` when a Git archive retains CRLF in the generated schema marker; the normal
   PostgreSQL build regeneration produced an identical effective schema and should be made
   platform-independent in a follow-up commit.
+- Made `prisma:postgres:check` platform-independent by normalizing line endings only for comparison.
+  The generator remains deterministic, substantive schema changes still fail the stale-schema gate,
+  and focused tests cover LF, CRLF, legacy CR, and genuinely different content.
 - Increased the Nuxt API integration reset hook timeout to 30 seconds and, after a later runner
   exceeded that budget, the contested player-market purchase race timeout to 60 seconds without
   changing its concurrency assertions.

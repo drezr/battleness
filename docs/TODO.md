@@ -267,7 +267,7 @@ off-host PostgreSQL backup path are verified.
       authenticated browser smoke; verify it during fresh two-account combat actions, then complete
       ranked matchmaking, bilateral acceptance, settlement, leaderboard, and season-reward checks
       against active staging season `staging-ranked-season-20260721`.
-- [ ] Make `prisma:postgres:check` line-ending independent so an exact Git archive with CRLF does not
+- [x] Make `prisma:postgres:check` line-ending independent so an exact Git archive with CRLF does not
       fail the Linux pre-build gate before `build:postgres` regenerates the same effective schema.
 - [ ] Run load and soak tests for polling, WebSocket invalidations, matchmaking, market concurrency,
       and authoritative battle actions before public access.
