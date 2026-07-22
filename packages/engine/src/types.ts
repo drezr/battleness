@@ -66,6 +66,7 @@ export type RingCombatInstance = {
   cooldown: number;
   currentCooldown: number;
   speed: number;
+  socketCount: number;
   gems: GemCombatInstance[];
 };
 

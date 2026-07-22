@@ -4,6 +4,27 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- The live battle view now runs as a focused full-screen combat surface. The global application
+  sidebar, top bar, mobile navigation, and route section navigation are hidden on live battle routes.
+  The arena places both hero panels and turn actions in the left combat column, keeps monsters in the
+  central battlefield, makes the player's ring dock substantially more compact, and moves the last
+  resolution feed plus battle diagnostics behind a development-only modal.
+- Live battle ring and monster cards now use a larger trading-card presentation inspired by the
+  provided mockups: rarity-colored frames, title bars with element badges, large artwork areas,
+  icon-based combat stats, ring energy-cost medallions, and three socket indicators that distinguish
+  socketed gems, empty unlocked sockets, and locked sockets. Ring combat snapshots now carry
+  `socketCount` as descriptive display data.
+- The live battle card interaction model now keeps rarity frames visible across default, hover, and
+  selected states. Hover uses a short shine transition, selection adds a separate green inset
+  indicator, and clicking the selected ring or monster again clears the prepared source.
+- Live battle cards now show ready cooldowns with a green check-style indicator, and ring damage
+  displays the resolved ring-plus-gem damage instead of only the base ring value. Ring and monster
+  cooldowns decrement only on their controller's own turn.
+- The Nuxt live battle arena now uses `apps/web/public/assets/backgrounds/live-battle-elemental-arena.jpg`
+  as its full-screen background, with translucent overlays for the battlefield and ring dock.
+- Monster summons now use monotonic per-player/per-definition instance numbers for the battle, so a
+  destroyed monster's instance ID cannot be reused by a later summon in the same action or battle.
+  This prevents a destruction effect from being associated with a newly summoned replacement monster.
 - The user has temporarily paused Phase 14 production work to continue ergonomics and UI changes in
   a separate agent context. Phase 14 remains incomplete; its remaining staging acceptance,
   monitoring, load/soak, security, production-promotion, single-instance, backup-target, and external
@@ -245,6 +266,42 @@ This file records modifications made to the project during agent-assisted work.
 - Added a centralized project TODO in `docs/TODO.md` covering Game App persistence, inventory, forge, battle integration, campaign, rewards, market, profile, authentication, PvP, player market, presentation, production, and open design questions.
 
 ## Change Log
+
+### 2026-07-22
+
+- Reworked the Nuxt live battle page into a focused full-screen combat surface. The global app
+  chrome and section navigation are hidden on live battle routes, combat remains within `100vw` and
+  `100dvh` without document scroll, hero panels and turn controls stay in the left column, monsters
+  occupy the field, and the viewer's rings occupy a compact bottom dock.
+- Moved the old prepared-action, last-resolution, and battle-diagnostics panels out of the main
+  combat surface. Source selection now happens directly on ring or monster cards, a second click on
+  the selected source deselects it, and development diagnostics are available through an explicit
+  modal.
+- Rebuilt live battle ring and monster cards toward the provided mockups: compact title bars,
+  element badges, rarity-colored frames, large artwork regions, icon-based damage/health/cooldown
+  stats, ring energy medallions, and socket indicators for socketed gems, empty sockets, and locked
+  sockets. Hover preserves rarity and uses a shine transition; selection adds a separate green inset
+  outline without replacing rarity.
+- Added `socketCount` to combat ring snapshots and presentation helpers so live rings can display
+  unlocked and locked sockets correctly.
+- Updated live battle presentation to show ring damage as total ring-plus-gem damage and to display
+  ready cooldowns with a green check-style indicator instead of a clock plus `0`.
+- Fixed cooldown timing so ring and monster cooldowns decrement only at the start of the controller's
+  own turn, not on the opponent's turn, with focused engine regression coverage.
+- Fixed a summon identity bug exposed by Storm Coil destroying and immediately re-summoning Ember
+  Imp. Summoned monster instance IDs are now monotonic within a battle, so a destroyed
+  `emberImp.1` is followed by `emberImp.2` rather than reusing the old ID and confusing UI
+  resolution effects.
+- Added the provided arena artwork as
+  `apps/web/public/assets/backgrounds/live-battle-elemental-arena.jpg` and applied it as the live
+  battle background with translucent battlefield and ring-dock overlays.
+- Verified the live battle background in Chrome against the user's open local battle. The background
+  loaded from `/assets/backgrounds/live-battle-elemental-arena.jpg`, the page remained scroll-free at
+  the browser viewport size, and `pnpm lint` plus `pnpm format:check` passed after the background
+  change.
+- Validated the engine and presentation changes with `pnpm format:check`, the PostgreSQL schema
+  consistency check, `pnpm typecheck`, `pnpm lint`, all 276 Vitest tests, and the Nuxt production
+  build after stopping the local dev server that could lock Prisma Client files on Windows.
 
 ### 2026-07-20
 

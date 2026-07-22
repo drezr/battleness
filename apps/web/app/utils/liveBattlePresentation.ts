@@ -55,6 +55,16 @@ export function actionAvailability(
   return { available: true, reason: "ready" };
 }
 
+export function ringTotalDamage(ring: LiveBattleRingView): number {
+  return ring.damage + ring.gems.reduce((total, gem) => total + gem.damage, 0);
+}
+
+export function cooldownReady(
+  item: Pick<LiveBattleMonsterView | LiveBattleRingView, "currentCooldown">,
+): boolean {
+  return item.currentCooldown <= 0;
+}
+
 export function battleTargets(battle: LiveBattleState): LiveBattleTarget[] {
   const opponentTaunts = new Set(
     battle.opponent.monsters

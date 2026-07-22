@@ -207,6 +207,7 @@ function createRingCombatInstance(
     cooldown: definition.baseCooldown + cooldownPenalty,
     currentCooldown: 0,
     speed: definition.baseSpeed,
+    socketCount: instance.socketCount,
     gems,
   };
 }

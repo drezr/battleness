@@ -40,6 +40,7 @@ const ring: RingCombatInstance = {
   cooldown: 2,
   currentCooldown: 0,
   speed: 2,
+  socketCount: 3,
   gems: [spellGem, monsterGem("opponent.gem.monster.1"), monsterGem("opponent.gem.monster.2")],
 };
 

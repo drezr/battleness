@@ -4,7 +4,9 @@ import {
   actionAvailability,
   battleResolutionEffects,
   battleTargets,
+  cooldownReady,
   presentBattleEvent,
+  ringTotalDamage,
   shouldShowInitialBattleLoading,
   type LiveBattleActionSource,
 } from "./liveBattlePresentation";
@@ -50,7 +52,10 @@ function battleState(): LiveBattleState {
   };
 }
 
-function ringSource(energyCost = 2, currentCooldown = 0): LiveBattleActionSource {
+function ringSource(
+  energyCost = 2,
+  currentCooldown = 0,
+): Extract<LiveBattleActionSource, { kind: "ring" }> {
   return {
     kind: "ring",
     id: "ring",
@@ -65,6 +70,7 @@ function ringSource(energyCost = 2, currentCooldown = 0): LiveBattleActionSource
       cooldown: 2,
       currentCooldown,
       speed: 2,
+      socketCount: 1,
       gems: [],
     },
   };
@@ -93,6 +99,30 @@ describe("live battle presentation", () => {
 
     battle.activePlayerId = "opponent";
     expect(actionAvailability(battle, ringSource()).reason).toBe("opponentTurn");
+  });
+
+  it("presents ring damage with socketed gem damage", () => {
+    const source = ringSource();
+    source.item.gems = [
+      {
+        id: "gem",
+        definitionId: "emberShard",
+        label: "Ember Shard",
+        element: "fire",
+        rarity: "normal",
+        damage: 2,
+        energyPenalty: 0,
+        cooldownPenalty: 0,
+        enchantment: null,
+      },
+    ];
+
+    expect(ringTotalDamage(source.item)).toBe(6);
+  });
+
+  it("marks cooldown zero as ready for compact stats", () => {
+    expect(cooldownReady(ringSource(2, 0).item)).toBe(true);
+    expect(cooldownReady(ringSource(2, 1).item)).toBe(false);
   });
 
   it("only exposes Taunt monsters as legal opponent targets", () => {

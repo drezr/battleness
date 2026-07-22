@@ -5836,6 +5836,7 @@ function toLiveBattlePlayerView(
       cooldown: ring.cooldown,
       currentCooldown: ring.currentCooldown,
       speed: ring.speed,
+      socketCount: Math.min(3, Math.max(1, ring.socketCount ?? ring.gems.length)),
       gems: ring.gems
         .filter((gem) => visibility === "full" || visibility.gemIds.has(gem.id))
         .map((gem) => ({

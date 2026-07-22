@@ -760,8 +760,7 @@ function summonMonster(
     throw new Error(`Monster definition ${resolvedDefinitionId} was not found.`);
   }
 
-  const instanceNumber =
-    player.monsters.filter((monster) => monster.definitionId === monsterId).length + 1;
+  const instanceNumber = getNextMonsterInstanceNumber(state, player.id, monsterId);
   const monsterInstance: MonsterCombatInstance = {
     id: `${player.id}.monster.${monsterId}.${instanceNumber}`,
     definitionId: monsterId,
@@ -800,6 +799,47 @@ function summonMonster(
   }
 
   return events;
+}
+
+function getNextMonsterInstanceNumber(
+  state: BattleState,
+  playerId: string,
+  monsterId: string,
+): number {
+  const prefix = `${playerId}.monster.${monsterId}.`;
+  let maxInstanceNumber = 0;
+
+  const trackInstanceId = (instanceId: string): void => {
+    if (!instanceId.startsWith(prefix)) {
+      return;
+    }
+
+    const suffix = instanceId.slice(prefix.length);
+    const instanceNumber = /^\d+$/.test(suffix) ? Number.parseInt(suffix, 10) : Number.NaN;
+    if (Number.isFinite(instanceNumber) && instanceNumber > 0) {
+      maxInstanceNumber = Math.max(maxInstanceNumber, instanceNumber);
+    }
+  };
+
+  for (const player of state.initialSetup.players) {
+    for (const monster of player.monsters) {
+      trackInstanceId(monster.id);
+    }
+  }
+
+  for (const player of state.players) {
+    for (const monster of player.monsters) {
+      trackInstanceId(monster.id);
+    }
+  }
+
+  for (const event of state.log) {
+    if (event.type === "monsterSummoned") {
+      trackInstanceId(event.monsterInstanceId);
+    }
+  }
+
+  return maxInstanceNumber + 1;
 }
 
 function applyDamage(

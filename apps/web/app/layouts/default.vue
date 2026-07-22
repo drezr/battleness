@@ -1,6 +1,6 @@
 <template>
   <div class="app-shell" :class="preferenceClasses">
-    <aside class="app-sidebar">
+    <aside v-if="!isCombatRoute" class="app-sidebar">
       <NuxtLink class="shell-brand" to="/" :aria-label="t('app.brand')">
         <img src="/assets/brand/battleness-icon.png" :alt="t('app.brand')" />
         <span>
@@ -41,7 +41,7 @@
     </aside>
 
     <div class="app-workspace">
-      <header class="app-topbar">
+      <header v-if="!isCombatRoute" class="app-topbar">
         <div class="topbar-context">
           <span>{{ t("app.gameApp") }}</span>
           <strong>{{ currentSectionLabel }}</strong>
@@ -73,7 +73,7 @@
       </div>
     </div>
 
-    <nav class="mobile-nav" :aria-label="t('accessibility.mainNavigation')">
+    <nav v-if="!isCombatRoute" class="mobile-nav" :aria-label="t('accessibility.mainNavigation')">
       <NuxtLink
         v-for="item in navigationItems"
         :key="item.to"
@@ -133,12 +133,16 @@ const currentSectionLabel = computed(() => {
   const item = [...navigationItems].reverse().find((entry) => isActive(entry.to));
   return t(item?.labelKey ?? "navigation.home");
 });
+const isCombatRoute = computed(() => route.path.startsWith("/battle/live/"));
 const preferenceClasses = computed(() => {
   const preferences = profileSettings.value?.preferences;
   return [
     `theme-${preferences?.theme ?? "system"}`,
     `density-${preferences?.interfaceDensity ?? "comfortable"}`,
-    { "reduced-motion": preferences?.reducedMotion ?? false },
+    {
+      "reduced-motion": preferences?.reducedMotion ?? false,
+      "combat-shell": isCombatRoute.value,
+    },
   ];
 });
 

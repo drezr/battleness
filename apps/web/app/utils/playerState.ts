@@ -541,6 +541,7 @@ export type LiveBattleRingView = {
   cooldown: number;
   currentCooldown: number;
   speed: number;
+  socketCount: number;
   gems: {
     id: string;
     definitionId: string;

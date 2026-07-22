@@ -64,6 +64,7 @@ const setup: BattleSetup = {
           cooldown: 1,
           currentCooldown: 0,
           speed: 3,
+          socketCount: 1,
           gems: [
             {
               id: "playerOne.gem.sparkPrism",
@@ -539,6 +540,76 @@ describe("createBattleState", () => {
     });
   });
 
+  it("does not reuse a destroyed monster instance ID when a ring summons the same monster", () => {
+    const summonSetup = structuredClone(setup);
+    summonSetup.definitions.monsters.emberImp = {
+      id: "emberImp",
+      nameKey: "monster.emberImp.name",
+      element: "fire",
+      rarity: "common",
+      baseHealth: 3,
+      baseDamage: 1,
+      baseCooldown: 1,
+      baseSpeed: 0,
+      skill: "rage",
+    };
+    summonSetup.players[0].rings[0] = {
+      ...summonSetup.players[0].rings[0],
+      damage: 4,
+      energyCost: 2,
+      cooldown: 1,
+      currentCooldown: 0,
+      gems: [
+        {
+          ...summonSetup.players[0].rings[0].gems[0],
+          damage: 2,
+          enchantment: { type: "monster", monsterId: "emberImp" },
+        },
+      ],
+    };
+    const state = createBattleState(summonSetup);
+    state.players[0].energy.current = 2;
+    state.players[0].energy.maxForTurn = 2;
+    state.players[0].energy.turnCount = 2;
+
+    const firstUse = applyBattleAction(state, {
+      type: "useRing",
+      playerId: "playerOne",
+      ringInstanceId: "playerOne.ring.sparkBand",
+      targetId: "playerOne.hero",
+    });
+
+    expect(firstUse.state.players[0].monsters).toHaveLength(1);
+    expect(firstUse.state.players[0].monsters[0].id).toBe("playerOne.monster.emberImp.1");
+
+    firstUse.state.players[0].rings[0].currentCooldown = 0;
+    firstUse.state.players[0].energy.current = 2;
+
+    const secondUse = applyBattleAction(firstUse.state, {
+      type: "useRing",
+      playerId: "playerOne",
+      ringInstanceId: "playerOne.ring.sparkBand",
+      targetId: "playerOne.monster.emberImp.1",
+    });
+
+    expect(secondUse.events).toContainEqual({
+      type: "monsterDestroyed",
+      monsterInstanceId: "playerOne.monster.emberImp.1",
+    });
+    expect(secondUse.events).toContainEqual({
+      type: "monsterSummoned",
+      playerId: "playerOne",
+      monsterInstanceId: "playerOne.monster.emberImp.2",
+      monsterId: "emberImp",
+    });
+    expect(secondUse.state.players[0].monsters).toHaveLength(1);
+    expect(secondUse.state.players[0].monsters[0]).toMatchObject({
+      id: "playerOne.monster.emberImp.2",
+      health: 3,
+      maxHealth: 3,
+    });
+  });
+
   it("activates Rage below half health and rounds the damage bonus down", () => {
     const rageSetup = structuredClone(setup);
     rageSetup.players[0].monsters = [
@@ -758,6 +829,39 @@ describe("createBattleState", () => {
       to: 0,
     });
     expect(playerOneTurn.state.players[0].rings[0].currentCooldown).toBe(0);
+  });
+
+  it("does not decrement monster cooldown during the opponent turn", () => {
+    const cooldownSetup = structuredClone(setup);
+    cooldownSetup.players[0].monsters = [createMonster("playerOne", "emberImp")];
+    const state = createBattleState(cooldownSetup);
+
+    const afterMonster = applyBattleAction(state, {
+      type: "useMonster",
+      playerId: "playerOne",
+      monsterInstanceId: "playerOne.monster.emberImp.1",
+      targetId: "playerTwo.hero",
+    }).state;
+    expect(afterMonster.players[0].monsters[0].currentCooldown).toBe(1);
+
+    const playerTwoTurn = applyBattleAction(afterMonster, {
+      type: "endTurn",
+      playerId: "playerOne",
+    }).state;
+    expect(playerTwoTurn.players[0].monsters[0].currentCooldown).toBe(1);
+
+    const playerOneTurn = applyBattleAction(playerTwoTurn, {
+      type: "endTurn",
+      playerId: "playerTwo",
+    });
+
+    expect(playerOneTurn.events).toContainEqual({
+      type: "cooldownChanged",
+      targetId: "playerOne.monster.emberImp.1",
+      from: 1,
+      to: 0,
+    });
+    expect(playerOneTurn.state.players[0].monsters[0].currentCooldown).toBe(0);
   });
 });
 

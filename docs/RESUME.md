@@ -42,7 +42,7 @@ pnpm test
 pnpm --filter @battleness/web build
 ```
 
-The validated baseline on 2026-07-22 is 23 Vitest files and 272 passing tests. If a validation count
+The validated baseline on 2026-07-22 is 23 Vitest files and 276 passing tests. If a validation count
 changes, investigate whether tests were intentionally added or removed instead of treating the count
 as a permanent invariant.
 
@@ -53,9 +53,10 @@ separate permanent Dev Lab prototype.
 
 ## Immediate Handoff
 
-- The user is intentionally pausing Phase 14 production work to start a separate ergonomics and UI
-  iteration with a new agent. Begin by asking which player workflow or screen should be changed and
-  inspect the existing implementation and design conventions before proposing or editing UI.
+- The user intentionally paused Phase 14 production work to run a live battle ergonomics and UI
+  iteration. The first priority screen was the Nuxt live battle view, and the implemented iteration
+  includes that redesign plus focused combat-engine fixes. Continue from the user's next requested
+  battle UX or gameplay issue instead of restarting the screen-selection question.
 - Do not treat Phase 14 as complete. `docs/TODO.md` contains a consolidated Phase 14 resume checklist
   covering the live-refresh visual confirmation, complete ranked staging smoke, production
   monitoring, load/soak testing, security review, production OAuth and promotion, the single-instance
@@ -116,6 +117,24 @@ separate permanent Dev Lab prototype.
   public health checks, live-combat reload, and ranked-season browser state pass without console
   errors. Verify the blink fix during a fresh two-account action sequence, then complete ranked
   smoke.
+- The current live battle iteration hides global application chrome during combat, keeps the
+  battle page within `100vw` and `100dvh` without scroll, places hero panels and turn controls in the
+  left column, centers monsters in their field slots, and uses a compact bottom dock for the viewer's
+  rings. The prepared-action label, last-resolution panel, and battle-diagnostics panel are no
+  longer part of the main combat surface; developer diagnostics are opened from an explicit modal.
+- Live battle ring and monster cards now use the trading-card direction from the user's mockups:
+  rarity-colored outer frames, separate hover shine, separate green selected inset, element badges,
+  large artwork, icon stats, ring energy medallions, and socket indicators. Selecting the already
+  selected ring or monster deselects it. Ring damage display includes socketed gem damage, and ready
+  cooldowns use a green check-style indicator.
+- The Nuxt live battle arena now uses
+  `apps/web/public/assets/backgrounds/live-battle-elemental-arena.jpg` as a covered full-screen
+  background with translucent overlays. Chrome verification against a local battle confirmed the
+  asset URL, visible backdrop, and no page scroll at the viewport size.
+- The combat engine now gives summoned monsters monotonic per-player/per-definition instance numbers
+  within a battle. This fixes the Storm Coil/Ember Imp ambiguity where a destroyed monster and a
+  same-action replacement could reuse the same instance ID, causing the UI to display a destruction
+  effect on a newly summoned intact monster.
 - The database VPS runs the first local PostgreSQL backup system through
   `battleness-postgresql-backup.timer`: daily custom-format dumps for `battleness_staging` and
   `battleness_production`, checksum manifests, and 14-day local retention under
@@ -372,6 +391,8 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - Each side can control up to 3 monsters.
 - Monsters are removed immediately after the effect that reduces their health to 0.
 - Duplicate monster summons create new monster instances if the board is not full.
+- Duplicate monster summons use a new runtime instance ID that has not been used earlier in the
+  battle, even if a previous copy was destroyed.
 - First-turn protection prevents all damage to the opposing hero during the starting player's first turn.
 - All rings begin battle ready.
 - Ring use resolves as: pay energy, put the ring on cooldown, apply ring and gem damage, trigger enchantments in socket order, then check win conditions.
@@ -466,10 +487,15 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 
 ## Battle Layout Direction
 
-- The future battle screen should follow the user's sketch direction: heroes on the left, monster battlefield in the center, rings in a bottom row, and energy bars visible at top and bottom.
-- Monster cards should clearly expose skill, damage, and health zones.
-- Ring cards should clearly expose damage, energy/cost information, and socketed gems.
-- The current prototype has a first sketch-inspired battle board, but it remains an engine/debug interface until the combat flow is stable enough for a final battle view.
+- The current Nuxt live battle screen follows the user's sketch direction: heroes and turn actions on
+  the left, monster battlefield in the center, rings in a bottom row, and energy rails at the top and
+  bottom.
+- Monster cards clearly expose skill, damage, health, cooldown, element, rarity, and artwork.
+- Ring cards clearly expose total ring-plus-gem damage, cooldown readiness, energy cost, socketed
+  gems, empty sockets, locked sockets, element, rarity, and artwork.
+- The live battle page should remain a focused combat surface without global navigation, visible
+  diagnostics, or page scroll. Future animation work should make same-action destruction and summon
+  sequences visually distinct.
 
 ## Important Agent Behavior
 

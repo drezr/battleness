@@ -152,14 +152,19 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 
 ### Battle Layout Direction
 
-- The player-facing live battle screen follows the user's sketch direction through a responsive Nuxt DOM arena: heroes anchor each side, three monster slots form the field, the viewer's rings form a bottom dock, and energy rails frame the arena. The action flow prepares a ring or monster, selects a server-compatible legal target on the board, and confirms through a sticky command tray. Complete engine events are converted into localized resolution messages and short source, impact, aggregated-damage, and status feedback that respects the persisted reduced-motion preference. Opponent rings remain hidden. Phaser remains an optional later layer for animation-heavy scene needs rather than a current dependency.
+- The player-facing live battle screen follows the user's sketch direction through a responsive Nuxt DOM arena: heroes anchor the left combat column, three monster slots form each side of the field, the viewer's rings form a bottom dock, and energy rails frame the arena. Live battles hide the global sidebar, top bar, mobile navigation, route section navigation, and raw diagnostics by default so combat owns the full `100vw` by `100dvh` viewport without page scroll. Opponent rings remain hidden. Phaser remains an optional later layer for animation-heavy scene needs rather than a current dependency.
 - Monster cards should expose skill, damage, and health zones clearly.
-- Ring cards should expose damage and energy/cost information, with socketed gems visible along the bottom of each ring.
+- Ring cards should expose total ring damage, including socketed gem damage, and energy/cost information, with socketed gems visible along the bottom of each ring.
+- Ready rings and monsters are selected directly from their cards, legal targets are then chosen on the board, and clicking the selected source again deselects it. The UI should not repeat the selected source name in a separate prepared-action label.
 - Ring, gem, and monster frames identify rarity consistently: common uses light gray, refined uses blue, rare uses orange, and epic uses purple.
 - Selection, targeting, and blocked-state indicators remain separate from rarity framing so interaction state does not replace item identity.
+- Hover should preserve the rarity frame and use a short shine transition instead of replacing the frame with another outline.
 - Ring, gem, and monster cards also display a localized elemental badge in the top-right corner: Electric uses yellow, Fire uses pink-red, and Ice uses light cyan.
 - Compact socketed gems use their elemental fill color while retaining rarity on the surrounding border.
-- The current prototype now includes a first sketch-inspired battle board, but it is still a functional prototype/debug interface rather than the final battle layout.
+- Development-only battle diagnostics and last-resolution details should stay available through an explicit developer modal rather than being visible in the main combat layout.
+- The current Nuxt live battle background uses the public asset
+  `apps/web/public/assets/backgrounds/live-battle-elemental-arena.jpg`, rendered as a covered
+  full-screen arena backdrop with translucent combat overlays.
 
 ### Progression And Economy
 
@@ -245,7 +250,7 @@ This section separates executable game rules from implementation decisions. It i
 - A monster enchantment summons that monster to fight alongside the hero.
 - A spell enchantment applies that spell's effect.
 - Multiple socketed gems trigger in socket order.
-- If a monster enchantment summons a monster that is already in play, it creates a new monster instance as long as the controller's monster board is not full.
+- If a monster enchantment summons a monster that is already in play, it creates a new monster instance as long as the controller's monster board is not full. Runtime monster instance IDs must not be reused after destruction within the same battle; a later summon receives a higher instance number.
 - If a ring's damage kills its target before that ring's enchantments trigger, enchantments still trigger unless they specifically require the dead target.
 
 ### Monsters
@@ -259,7 +264,7 @@ This section separates executable game rules from implementation decisions. It i
 - A monster can damage a legal hero or monster target when it is ready and its controller uses it.
 - Using a monster puts that monster on cooldown.
 - Each side can control up to 3 monsters.
-- If a monster enchantment summons a monster that is already in play, it creates a new monster instance as long as the controller's monster board is not full.
+- If a monster enchantment summons a monster that is already in play, it creates a new monster instance as long as the controller's monster board is not full. Destroyed monster instance IDs are not reused later in the battle.
 - If a monster enchantment would summon a monster while the controller already has 3 monsters, the summon fails without cancelling the rest of the action.
 - Rings and monsters can target heroes or monsters by default.
 - Some monsters may have Taunt. If a player controls one or more monsters with Taunt, the opponent cannot target that player's non-Taunt targets with rings, monsters, or direct-damage spells unless a rule or effect explicitly allows it.

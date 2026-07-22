@@ -1,51 +1,48 @@
 <template>
-  <main class="shell live-battle-page">
-    <nav class="section-nav" :aria-label="t('accessibility.battleNavigation')">
-      <NuxtLink v-for="link in sectionLinks.battle" :key="link.to" :to="link.to">
-        {{ $t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
-    <header class="view-header live-view-header">
-      <div class="view-title">
-        <span class="eyebrow">{{ battle?.mode ?? t("battle.section") }}</span>
-        <h1>{{ t("battle.live.title") }}</h1>
-        <p class="muted">{{ statusLabel }}</p>
-      </div>
-      <div class="view-status-stack">
-        <span :class="['pill', `realtime-${realtimeStatus}`]">
-          {{ t(`realtime.${realtimeStatus}`) }}
-        </span>
-        <NuxtLink class="button-link secondary-button" to="/battle">
-          {{ t("battle.live.leave") }}
-        </NuxtLink>
-      </div>
-    </header>
-
-    <p v-if="shouldShowInitialBattleLoading(pending, battle)" class="panel">
+  <main class="live-battle-page">
+    <p v-if="shouldShowInitialBattleLoading(pending, battle)" class="panel live-loading-panel">
       {{ t("battle.live.loading") }}
     </p>
-    <p v-else-if="!battle" class="panel">{{ t("battle.live.notFound") }}</p>
+    <p v-else-if="!battle" class="panel live-loading-panel">{{ t("battle.live.notFound") }}</p>
 
     <template v-else>
-      <section class="live-match-strip" :aria-label="t('accessibility.battleStatus')">
-        <div>
-          <span class="eyebrow">{{ t("battle.live.turn") }}</span>
-          <strong>{{ battle.turnCount }}</strong>
+      <header class="live-combat-toolbar">
+        <img src="/assets/brand/battleness-logo.png" :alt="t('app.brand')" />
+        <div class="live-combat-status" :aria-label="t('accessibility.battleStatus')">
+          <span>{{ t(`battle.mode.${battle.mode}`) }}</span>
+          <strong>{{ statusLabel }}</strong>
+          <small v-if="isPvpBattle && deadlineSecondsRemaining !== null">
+            {{ deadlineLabel }}: {{ formattedDeadlineTime }}
+          </small>
         </div>
-        <div class="live-turn-owner">
-          <span class="eyebrow">{{ t("battle.live.activePlayer") }}</span>
-          <strong>{{ activePlayerName }}</strong>
+        <div class="live-combat-actions">
+          <span :class="['pill', `realtime-${realtimeStatus}`]">
+            {{ t(`realtime.${realtimeStatus}`) }}
+          </span>
+          <button
+            v-if="isDevelopment"
+            class="icon-button live-toolbar-button"
+            type="button"
+            :aria-label="t('battle.live.devTools')"
+            :title="t('battle.live.devTools')"
+            @click="showDeveloperModal = true"
+          >
+            <Bug :size="20" aria-hidden="true" />
+          </button>
+          <NuxtLink
+            class="icon-button live-toolbar-button"
+            to="/battle"
+            :aria-label="t('battle.live.leave')"
+            :title="t('battle.live.leave')"
+          >
+            <LogOut :size="20" aria-hidden="true" />
+          </NuxtLink>
         </div>
-        <div v-if="isPvpBattle && deadlineSecondsRemaining !== null">
-          <span class="eyebrow">{{ deadlineLabel }}</span>
-          <strong>{{ formattedDeadlineTime }}</strong>
-        </div>
-      </section>
+      </header>
 
       <section class="live-arena" :aria-label="t('battle.live.arena')">
         <div class="live-energy-rail opponent-energy">
-          <span>{{ t("stats.energy") }}</span>
+          <span>{{ battle.opponent.username }} {{ t("stats.energy") }}</span>
           <div class="live-energy-slots" aria-hidden="true">
             <i
               v-for="slot in 8"
@@ -61,334 +58,328 @@
           >
         </div>
 
-        <div class="live-side-heading opponent-side-heading">
-          <div>
-            <span class="eyebrow">{{ t("battle.live.opponent") }}</span>
-            <strong>{{ battle.opponent.username }}</strong>
-          </div>
-          <span class="pill">{{
-            t(
-              visibleOpponentRings.length
-                ? "battle.live.revealedLoadout"
-                : "battle.live.hiddenLoadout",
-            )
-          }}</span>
-        </div>
-
-        <div class="live-side-zone opponent-zone">
-          <article
-            :class="targetCardClasses(battle.opponent.heroTargetId, 'live-hero')"
-            :data-target-id="battle.opponent.heroTargetId"
-            :role="canSelectTarget(battle.opponent.heroTargetId) ? 'button' : undefined"
-            :tabindex="canSelectTarget(battle.opponent.heroTargetId) ? 0 : -1"
-            :aria-label="targetInteractionLabel(battle.opponent.heroTargetId)"
-            @click="executeTarget(battle.opponent.heroTargetId)"
-            @keydown.enter.prevent="executeTarget(battle.opponent.heroTargetId)"
-            @keydown.space.prevent="executeTarget(battle.opponent.heroTargetId)"
-          >
-            <span
-              v-if="resolutionEffect(battle.opponent.heroTargetId)?.damage"
-              :key="`opponent-hero-damage-${resolutionSequence}`"
-              class="live-damage-pop"
-              >-{{ resolutionEffect(battle.opponent.heroTargetId)?.damage }}</span
-            >
-            <div class="live-card-heading">
-              <span class="eyebrow">{{ t("common.hero") }}</span>
-              <strong>{{ battle.opponent.username }}</strong>
-            </div>
-            <div class="live-health-line">
-              <meter
-                :value="battle.opponent.hero.health"
-                :max="battle.opponent.hero.maxHealth"
-                :aria-label="t('stats.health')"
-              />
-              <strong
-                >{{ battle.opponent.hero.health }}/{{ battle.opponent.hero.maxHealth }}</strong
-              >
-            </div>
-            <dl class="live-inline-stats">
-              <div>
-                <dt>{{ t("common.level") }}</dt>
-                <dd>{{ battle.opponent.level }}</dd>
-              </div>
-              <div>
-                <dt>{{ t("stats.speed") }}</dt>
-                <dd>{{ battle.opponent.hero.speed }}</dd>
-              </div>
-            </dl>
-            <small
-              v-if="targetState(battle.opponent.heroTargetId)?.firstTurnProtected"
-              class="live-protection-note"
-            >
-              {{ t("battle.live.firstTurnProtected") }}
-            </small>
-          </article>
-
-          <div class="live-monster-grid">
+        <div class="live-battle-board">
+          <aside class="live-hero-column">
             <article
-              v-for="monster in battle.opponent.monsters"
-              :key="monster.id"
-              :class="targetCardClasses(monster.id, 'live-monster', monster.rarity)"
-              :data-target-id="monster.id"
-              :role="canSelectTarget(monster.id) ? 'button' : undefined"
-              :tabindex="canSelectTarget(monster.id) ? 0 : -1"
-              :aria-label="targetInteractionLabel(monster.id)"
-              @click="executeTarget(monster.id)"
-              @keydown.enter.prevent="executeTarget(monster.id)"
-              @keydown.space.prevent="executeTarget(monster.id)"
+              :class="targetCardClasses(battle.opponent.heroTargetId, 'live-hero')"
+              :data-target-id="battle.opponent.heroTargetId"
+              :role="canSelectTarget(battle.opponent.heroTargetId) ? 'button' : undefined"
+              :tabindex="canSelectTarget(battle.opponent.heroTargetId) ? 0 : -1"
+              :aria-label="targetInteractionLabel(battle.opponent.heroTargetId)"
+              @click="executeTarget(battle.opponent.heroTargetId)"
+              @keydown.enter.prevent="executeTarget(battle.opponent.heroTargetId)"
+              @keydown.space.prevent="executeTarget(battle.opponent.heroTargetId)"
             >
               <span
-                v-if="resolutionEffect(monster.id)?.damage"
-                :key="`${monster.id}-damage-${resolutionSequence}`"
+                v-if="resolutionEffect(battle.opponent.heroTargetId)?.damage"
+                :key="`opponent-hero-damage-${resolutionSequence}`"
                 class="live-damage-pop"
-                >-{{ resolutionEffect(monster.id)?.damage }}</span
+                >-{{ resolutionEffect(battle.opponent.heroTargetId)?.damage }}</span
               >
-              <span
-                v-if="resolutionEffect(monster.id)?.statuses.length"
-                :key="`${monster.id}-status-${resolutionSequence}`"
-                class="live-status-pop"
-                >{{ resolutionStatusLabel(monster.id) }}</span
-              >
-              <div class="live-artwork-wrap">
-                <ItemArtwork :definition-id="monster.definitionId" kind="monster" />
-                <span :class="['pill', `element-${monster.element}`]">{{
-                  t(`element.${monster.element}`)
-                }}</span>
+              <div class="live-card-heading">
+                <span class="eyebrow">{{ t("battle.live.opponent") }}</span>
+                <strong>{{ battle.opponent.username }}</strong>
               </div>
-              <strong>{{ monsterName(monster) }}</strong>
               <div class="live-health-line">
                 <meter
-                  :value="monster.health"
-                  :max="monster.maxHealth"
+                  :value="battle.opponent.hero.health"
+                  :max="battle.opponent.hero.maxHealth"
                   :aria-label="t('stats.health')"
                 />
-                <strong>{{ monster.health }}/{{ monster.maxHealth }}</strong>
+                <strong
+                  >{{ battle.opponent.hero.health }}/{{ battle.opponent.hero.maxHealth }}</strong
+                >
               </div>
               <dl class="live-inline-stats">
                 <div>
-                  <dt>{{ t("stats.damage") }}</dt>
-                  <dd>{{ monster.damage }}</dd>
+                  <dt>{{ t("common.level") }}</dt>
+                  <dd>{{ battle.opponent.level }}</dd>
                 </div>
                 <div>
-                  <dt>{{ t("stats.cooldown") }}</dt>
-                  <dd>{{ monster.currentCooldown }}/{{ monster.cooldown }}</dd>
+                  <dt>{{ t("stats.speed") }}</dt>
+                  <dd>{{ battle.opponent.hero.speed }}</dd>
                 </div>
               </dl>
-              <div
-                v-if="monster.skill || monster.shieldActive || monster.rageActive"
-                class="live-status-badges"
+              <small
+                v-if="targetState(battle.opponent.heroTargetId)?.firstTurnProtected"
+                class="live-protection-note"
               >
-                <span v-if="monster.skill" class="pill muted-pill">{{
-                  skillLabel(monster.skill)
-                }}</span>
-                <span v-if="monster.shieldActive" class="pill element-ice">{{
-                  t("battle.live.shieldActive")
-                }}</span>
-                <span v-if="monster.rageActive" class="pill element-fire">{{
-                  t("battle.live.rageActive")
-                }}</span>
-              </div>
-            </article>
-            <div
-              v-for="slot in Math.max(0, 3 - battle.opponent.monsters.length)"
-              :key="`opponent-empty-${slot}`"
-              class="live-monster empty-slot"
-              :aria-label="t('accessibility.emptyMonsterSlot')"
-            />
-          </div>
-        </div>
-
-        <div v-if="visibleOpponentRings.length" class="live-opponent-reveals">
-          <div class="live-loadout-heading">
-            <div>
-              <span class="eyebrow">{{ t("battle.live.revealedLoadout") }}</span>
-              <strong>{{ t("battle.live.revealedByUse") }}</strong>
-            </div>
-          </div>
-          <div class="live-ring-dock opponent-ring-dock">
-            <article
-              v-for="ring in visibleOpponentRings"
-              :key="ring.id"
-              :class="['live-ring', `rarity-border-${ring.rarity}`]"
-            >
-              <div class="live-artwork-wrap">
-                <ItemArtwork :definition-id="ring.definitionId" kind="ring" />
-                <span :class="['pill', `element-${ring.element}`]">{{
-                  t(`element.${ring.element}`)
-                }}</span>
-              </div>
-              <strong>{{ ringName(ring) }}</strong>
-              <dl class="live-inline-stats">
-                <div>
-                  <dt>{{ t("stats.damage") }}</dt>
-                  <dd>{{ ring.damage }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t("stats.energy") }}</dt>
-                  <dd>{{ ring.energyCost }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t("stats.cooldown") }}</dt>
-                  <dd>{{ ring.currentCooldown }}/{{ ring.cooldown }}</dd>
-                </div>
-              </dl>
-              <div class="live-gem-row">
-                <div v-for="gem in ring.gems" :key="gem.id" class="live-revealed-gem">
-                  <ItemArtwork
-                    :definition-id="gem.definitionId"
-                    kind="gem"
-                    :title="contentText(`gem.${gem.definitionId}.name`, gem.label)"
-                  />
-                  <ItemArtwork
-                    v-if="gem.enchantment"
-                    :definition-id="gem.enchantment.definitionId"
-                    :kind="gem.enchantment.type"
-                    :title="gem.enchantment.label"
-                  />
-                </div>
-                <span v-if="ring.gems.length === 0" class="muted">{{
-                  t("battle.live.noRevealedGems")
-                }}</span>
-              </div>
-            </article>
-          </div>
-        </div>
-
-        <div class="live-arena-divider">
-          <span>{{ t(isViewerTurn ? "battle.live.yourTurn" : "battle.live.opponentTurn") }}</span>
-        </div>
-
-        <div class="live-side-zone viewer-zone">
-          <article
-            :class="targetCardClasses(battle.viewer.heroTargetId, 'live-hero')"
-            :data-target-id="battle.viewer.heroTargetId"
-            :role="canSelectTarget(battle.viewer.heroTargetId) ? 'button' : undefined"
-            :tabindex="canSelectTarget(battle.viewer.heroTargetId) ? 0 : -1"
-            :aria-label="targetInteractionLabel(battle.viewer.heroTargetId)"
-            @click="executeTarget(battle.viewer.heroTargetId)"
-            @keydown.enter.prevent="executeTarget(battle.viewer.heroTargetId)"
-            @keydown.space.prevent="executeTarget(battle.viewer.heroTargetId)"
-          >
-            <span
-              v-if="resolutionEffect(battle.viewer.heroTargetId)?.damage"
-              :key="`viewer-hero-damage-${resolutionSequence}`"
-              class="live-damage-pop"
-              >-{{ resolutionEffect(battle.viewer.heroTargetId)?.damage }}</span
-            >
-            <div class="live-card-heading">
-              <span class="eyebrow">{{ t("common.hero") }}</span>
-              <strong>{{ battle.viewer.username }}</strong>
-            </div>
-            <div class="live-health-line">
-              <meter
-                :value="battle.viewer.hero.health"
-                :max="battle.viewer.hero.maxHealth"
-                :aria-label="t('stats.health')"
-              />
-              <strong>{{ battle.viewer.hero.health }}/{{ battle.viewer.hero.maxHealth }}</strong>
-            </div>
-            <dl class="live-inline-stats">
-              <div>
-                <dt>{{ t("common.level") }}</dt>
-                <dd>{{ battle.viewer.level }}</dd>
-              </div>
-              <div>
-                <dt>{{ t("stats.speed") }}</dt>
-                <dd>{{ battle.viewer.hero.speed }}</dd>
-              </div>
-            </dl>
-          </article>
-
-          <div class="live-monster-grid">
-            <article
-              v-for="monster in battle.viewer.monsters"
-              :key="monster.id"
-              :class="[
-                ...targetCardClasses(monster.id, 'live-monster', monster.rarity),
-                {
-                  'source-selected': selectedSource?.id === monster.id,
-                  'source-available': canPrepareSource(monsterSource(monster)),
-                },
-              ]"
-              :data-target-id="monster.id"
-              :role="canInteractWithViewerMonster(monster) ? 'button' : undefined"
-              :tabindex="canInteractWithViewerMonster(monster) ? 0 : -1"
-              :aria-pressed="selectedSource?.id === monster.id || undefined"
-              :aria-label="viewerMonsterInteractionLabel(monster)"
-              @click="handleViewerMonsterInteraction(monster)"
-              @keydown.enter.prevent="handleViewerMonsterInteraction(monster)"
-              @keydown.space.prevent="handleViewerMonsterInteraction(monster)"
-            >
-              <span
-                v-if="resolutionEffect(monster.id)?.damage"
-                :key="`${monster.id}-damage-${resolutionSequence}`"
-                class="live-damage-pop"
-                >-{{ resolutionEffect(monster.id)?.damage }}</span
-              >
-              <span
-                v-if="resolutionEffect(monster.id)?.statuses.length"
-                :key="`${monster.id}-status-${resolutionSequence}`"
-                class="live-status-pop"
-                >{{ resolutionStatusLabel(monster.id) }}</span
-              >
-              <div class="live-artwork-wrap">
-                <ItemArtwork :definition-id="monster.definitionId" kind="monster" />
-                <span :class="['pill', `element-${monster.element}`]">{{
-                  t(`element.${monster.element}`)
-                }}</span>
-              </div>
-              <strong>{{ monsterName(monster) }}</strong>
-              <div class="live-health-line">
-                <meter
-                  :value="monster.health"
-                  :max="monster.maxHealth"
-                  :aria-label="t('stats.health')"
-                />
-                <strong>{{ monster.health }}/{{ monster.maxHealth }}</strong>
-              </div>
-              <dl class="live-inline-stats">
-                <div>
-                  <dt>{{ t("stats.damage") }}</dt>
-                  <dd>{{ monster.damage }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t("stats.cooldown") }}</dt>
-                  <dd>{{ monster.currentCooldown }}/{{ monster.cooldown }}</dd>
-                </div>
-              </dl>
-              <div
-                v-if="monster.skill || monster.shieldActive || monster.rageActive"
-                class="live-status-badges"
-              >
-                <span v-if="monster.skill" class="pill muted-pill">{{
-                  skillLabel(monster.skill)
-                }}</span>
-                <span v-if="monster.shieldActive" class="pill element-ice">{{
-                  t("battle.live.shieldActive")
-                }}</span>
-                <span v-if="monster.rageActive" class="pill element-fire">{{
-                  t("battle.live.rageActive")
-                }}</span>
-              </div>
-              <small v-if="!sourceAvailability(monsterSource(monster)).available" class="muted">
-                {{ availabilityLabel(monsterSource(monster)) }}
+                {{ t("battle.live.firstTurnProtected") }}
               </small>
             </article>
-            <div
-              v-for="slot in Math.max(0, 3 - battle.viewer.monsters.length)"
-              :key="`viewer-empty-${slot}`"
-              class="live-monster empty-slot"
-              :aria-label="t('accessibility.emptyMonsterSlot')"
-            />
-          </div>
-        </div>
 
-        <div class="live-loadout-heading">
-          <div>
-            <span class="eyebrow">{{ t("battle.live.activeLoadout") }}</span>
-            <strong>{{
-              t("battle.live.ringCount", { count: battle.viewer.rings?.length ?? 0 })
-            }}</strong>
+            <div class="live-turn-console">
+              <span class="live-turn-counter">
+                {{ t("battle.live.turn") }} <strong>{{ battle.turnCount }}</strong>
+              </span>
+              <button
+                type="button"
+                class="live-end-turn-button"
+                :disabled="!canAct || submitting"
+                @click="endTurn"
+              >
+                {{ t("battle.live.endTurn") }}
+              </button>
+              <button
+                type="button"
+                class="icon-button danger-action live-concede-button"
+                :disabled="battle.status === 'finished' || submitting"
+                :aria-label="t('battle.live.concede')"
+                :title="t('battle.live.concede')"
+                @click="concede"
+              >
+                <Flag :size="18" aria-hidden="true" />
+              </button>
+            </div>
+
+            <article
+              :class="targetCardClasses(battle.viewer.heroTargetId, 'live-hero')"
+              :data-target-id="battle.viewer.heroTargetId"
+              :role="canSelectTarget(battle.viewer.heroTargetId) ? 'button' : undefined"
+              :tabindex="canSelectTarget(battle.viewer.heroTargetId) ? 0 : -1"
+              :aria-label="targetInteractionLabel(battle.viewer.heroTargetId)"
+              @click="executeTarget(battle.viewer.heroTargetId)"
+              @keydown.enter.prevent="executeTarget(battle.viewer.heroTargetId)"
+              @keydown.space.prevent="executeTarget(battle.viewer.heroTargetId)"
+            >
+              <span
+                v-if="resolutionEffect(battle.viewer.heroTargetId)?.damage"
+                :key="`viewer-hero-damage-${resolutionSequence}`"
+                class="live-damage-pop"
+                >-{{ resolutionEffect(battle.viewer.heroTargetId)?.damage }}</span
+              >
+              <div class="live-card-heading">
+                <span class="eyebrow">{{ t("battle.live.viewer") }}</span>
+                <strong>{{ battle.viewer.username }}</strong>
+              </div>
+              <div class="live-health-line">
+                <meter
+                  :value="battle.viewer.hero.health"
+                  :max="battle.viewer.hero.maxHealth"
+                  :aria-label="t('stats.health')"
+                />
+                <strong>{{ battle.viewer.hero.health }}/{{ battle.viewer.hero.maxHealth }}</strong>
+              </div>
+              <dl class="live-inline-stats">
+                <div>
+                  <dt>{{ t("common.level") }}</dt>
+                  <dd>{{ battle.viewer.level }}</dd>
+                </div>
+                <div>
+                  <dt>{{ t("stats.speed") }}</dt>
+                  <dd>{{ battle.viewer.hero.speed }}</dd>
+                </div>
+              </dl>
+            </article>
+          </aside>
+
+          <div class="live-field-stack">
+            <div class="live-monster-grid opponent-monsters">
+              <article
+                v-for="monster in battle.opponent.monsters"
+                :key="monster.id"
+                :class="targetCardClasses(monster.id, 'live-monster', monster.rarity)"
+                :data-target-id="monster.id"
+                :role="canSelectTarget(monster.id) ? 'button' : undefined"
+                :tabindex="canSelectTarget(monster.id) ? 0 : -1"
+                :aria-label="targetInteractionLabel(monster.id)"
+                @click="executeTarget(monster.id)"
+                @keydown.enter.prevent="executeTarget(monster.id)"
+                @keydown.space.prevent="executeTarget(monster.id)"
+              >
+                <span
+                  v-if="resolutionEffect(monster.id)?.damage"
+                  :key="`${monster.id}-damage-${resolutionSequence}`"
+                  class="live-damage-pop"
+                  >-{{ resolutionEffect(monster.id)?.damage }}</span
+                >
+                <span
+                  v-if="resolutionEffect(monster.id)?.statuses.length"
+                  :key="`${monster.id}-status-${resolutionSequence}`"
+                  class="live-status-pop"
+                  >{{ resolutionStatusLabel(monster.id) }}</span
+                >
+                <div class="live-card-titlebar">
+                  <strong>{{ monsterName(monster) }}</strong>
+                  <span :class="['live-element-token', `element-${monster.element}`]">{{
+                    t(`element.${monster.element}`)
+                  }}</span>
+                </div>
+                <div class="live-card-art live-monster-art">
+                  <ItemArtwork :definition-id="monster.definitionId" kind="monster" />
+                  <div
+                    v-if="monster.skill || monster.shieldActive || monster.rageActive"
+                    class="live-card-status-row"
+                  >
+                    <span v-if="monster.skill" class="pill muted-pill">{{
+                      skillLabel(monster.skill)
+                    }}</span>
+                    <span v-if="monster.shieldActive" class="pill element-ice">{{
+                      t("battle.live.shieldActive")
+                    }}</span>
+                    <span v-if="monster.rageActive" class="pill element-fire">{{
+                      t("battle.live.rageActive")
+                    }}</span>
+                  </div>
+                </div>
+                <dl class="live-card-stats live-monster-stats">
+                  <div>
+                    <dt class="sr-only">{{ t("stats.damage") }}</dt>
+                    <dd>
+                      <Sword :size="16" aria-hidden="true" />
+                      <span>{{ monster.damage }}</span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="sr-only">{{ t("stats.health") }}</dt>
+                    <dd>
+                      <Heart :size="16" aria-hidden="true" />
+                      <span>{{ monster.health }}</span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="sr-only">{{ t("stats.cooldown") }}</dt>
+                    <dd :aria-label="cooldownStatLabel(monster)">
+                      <CheckCircle2
+                        v-if="cooldownReady(monster)"
+                        class="live-cooldown-ready"
+                        :size="16"
+                        aria-hidden="true"
+                      />
+                      <template v-else>
+                        <Timer :size="16" aria-hidden="true" />
+                        <span>{{ monster.currentCooldown }}/{{ monster.cooldown }}</span>
+                      </template>
+                    </dd>
+                  </div>
+                </dl>
+              </article>
+              <div
+                v-for="slot in Math.max(0, 3 - battle.opponent.monsters.length)"
+                :key="`opponent-empty-${slot}`"
+                class="live-monster empty-slot"
+                :aria-label="t('accessibility.emptyMonsterSlot')"
+              />
+            </div>
+
+            <div v-if="visibleOpponentRings.length" class="live-opponent-reveals">
+              <span class="eyebrow">{{ t("battle.live.revealedLoadout") }}</span>
+              <div class="live-reveal-strip">
+                <article
+                  v-for="ring in visibleOpponentRings"
+                  :key="ring.id"
+                  :class="['live-reveal-chip', `rarity-border-${ring.rarity}`]"
+                >
+                  <ItemArtwork :definition-id="ring.definitionId" kind="ring" />
+                  <strong>{{ ringName(ring) }}</strong>
+                  <small>{{ ringTotalDamage(ring) }} / {{ ring.energyCost }}</small>
+                </article>
+              </div>
+            </div>
+
+            <div class="live-arena-divider">
+              <span>{{
+                t(isViewerTurn ? "battle.live.yourTurn" : "battle.live.opponentTurn")
+              }}</span>
+            </div>
+
+            <div class="live-monster-grid viewer-monsters">
+              <article
+                v-for="monster in battle.viewer.monsters"
+                :key="monster.id"
+                :class="[
+                  ...targetCardClasses(monster.id, 'live-monster', monster.rarity),
+                  {
+                    'source-selected': selectedSource?.id === monster.id,
+                    'source-available': canPrepareSource(monsterSource(monster)),
+                  },
+                ]"
+                :data-target-id="monster.id"
+                :role="canInteractWithViewerMonster(monster) ? 'button' : undefined"
+                :tabindex="canInteractWithViewerMonster(monster) ? 0 : -1"
+                :aria-pressed="selectedSource?.id === monster.id || undefined"
+                :aria-label="viewerMonsterInteractionLabel(monster)"
+                @click="handleViewerMonsterInteraction(monster)"
+                @keydown.enter.prevent="handleViewerMonsterInteraction(monster)"
+                @keydown.space.prevent="handleViewerMonsterInteraction(monster)"
+              >
+                <span
+                  v-if="resolutionEffect(monster.id)?.damage"
+                  :key="`${monster.id}-damage-${resolutionSequence}`"
+                  class="live-damage-pop"
+                  >-{{ resolutionEffect(monster.id)?.damage }}</span
+                >
+                <span
+                  v-if="resolutionEffect(monster.id)?.statuses.length"
+                  :key="`${monster.id}-status-${resolutionSequence}`"
+                  class="live-status-pop"
+                  >{{ resolutionStatusLabel(monster.id) }}</span
+                >
+                <div class="live-card-titlebar">
+                  <strong>{{ monsterName(monster) }}</strong>
+                  <span :class="['live-element-token', `element-${monster.element}`]">{{
+                    t(`element.${monster.element}`)
+                  }}</span>
+                </div>
+                <div class="live-card-art live-monster-art">
+                  <ItemArtwork :definition-id="monster.definitionId" kind="monster" />
+                  <div
+                    v-if="monster.skill || monster.shieldActive || monster.rageActive"
+                    class="live-card-status-row"
+                  >
+                    <span v-if="monster.skill" class="pill muted-pill">{{
+                      skillLabel(monster.skill)
+                    }}</span>
+                    <span v-if="monster.shieldActive" class="pill element-ice">{{
+                      t("battle.live.shieldActive")
+                    }}</span>
+                    <span v-if="monster.rageActive" class="pill element-fire">{{
+                      t("battle.live.rageActive")
+                    }}</span>
+                  </div>
+                </div>
+                <dl class="live-card-stats live-monster-stats">
+                  <div>
+                    <dt class="sr-only">{{ t("stats.damage") }}</dt>
+                    <dd>
+                      <Sword :size="16" aria-hidden="true" />
+                      <span>{{ monster.damage }}</span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="sr-only">{{ t("stats.health") }}</dt>
+                    <dd>
+                      <Heart :size="16" aria-hidden="true" />
+                      <span>{{ monster.health }}</span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt class="sr-only">{{ t("stats.cooldown") }}</dt>
+                    <dd :aria-label="cooldownStatLabel(monster)">
+                      <CheckCircle2
+                        v-if="cooldownReady(monster)"
+                        class="live-cooldown-ready"
+                        :size="16"
+                        aria-hidden="true"
+                      />
+                      <template v-else>
+                        <Timer :size="16" aria-hidden="true" />
+                        <span>{{ monster.currentCooldown }}/{{ monster.cooldown }}</span>
+                      </template>
+                    </dd>
+                  </div>
+                </dl>
+                <small v-if="!sourceAvailability(monsterSource(monster)).available" class="muted">
+                  {{ availabilityLabel(monsterSource(monster)) }}
+                </small>
+              </article>
+              <div
+                v-for="slot in Math.max(0, 3 - battle.viewer.monsters.length)"
+                :key="`viewer-empty-${slot}`"
+                class="live-monster empty-slot"
+                :aria-label="t('accessibility.emptyMonsterSlot')"
+              />
+            </div>
           </div>
         </div>
 
@@ -414,36 +405,72 @@
             @keydown.enter.prevent="prepareSource(ringSource(ring))"
             @keydown.space.prevent="prepareSource(ringSource(ring))"
           >
-            <div class="live-artwork-wrap">
-              <ItemArtwork :definition-id="ring.definitionId" kind="ring" />
-              <span :class="['pill', `element-${ring.element}`]">{{
+            <div class="live-ring-titlebar">
+              <strong>{{ ringName(ring) }}</strong>
+              <span :class="['live-element-token', `element-${ring.element}`]">{{
                 t(`element.${ring.element}`)
               }}</span>
             </div>
-            <strong>{{ ringName(ring) }}</strong>
-            <dl class="live-inline-stats">
+            <div class="live-card-art live-ring-art">
+              <ItemArtwork :definition-id="ring.definitionId" kind="ring" />
+            </div>
+            <dl class="live-card-stats live-ring-stats">
               <div>
-                <dt>{{ t("stats.damage") }}</dt>
-                <dd>{{ ring.damage }}</dd>
+                <dt class="sr-only">{{ t("stats.damage") }}</dt>
+                <dd>
+                  <Sword :size="16" aria-hidden="true" />
+                  <span>{{ ringTotalDamage(ring) }}</span>
+                </dd>
               </div>
               <div>
-                <dt>{{ t("stats.energy") }}</dt>
-                <dd>{{ ring.energyCost }}</dd>
-              </div>
-              <div>
-                <dt>{{ t("stats.cooldown") }}</dt>
-                <dd>{{ ring.currentCooldown }}/{{ ring.cooldown }}</dd>
+                <dt class="sr-only">{{ t("stats.cooldown") }}</dt>
+                <dd :aria-label="cooldownStatLabel(ring)">
+                  <CheckCircle2
+                    v-if="cooldownReady(ring)"
+                    class="live-cooldown-ready"
+                    :size="16"
+                    aria-hidden="true"
+                  />
+                  <template v-else>
+                    <Timer :size="16" aria-hidden="true" />
+                    <span>{{ ring.currentCooldown }}/{{ ring.cooldown }}</span>
+                  </template>
+                </dd>
               </div>
             </dl>
-            <div class="live-gem-row">
-              <ItemArtwork
-                v-for="gem in ring.gems"
-                :key="gem.id"
-                :definition-id="gem.definitionId"
-                kind="gem"
-                :title="contentText(`gem.${gem.definitionId}.name`, gem.label)"
-              />
-              <span v-if="ring.gems.length === 0" class="muted">{{ t("battle.live.noGems") }}</span>
+            <div class="live-ring-footer">
+              <dl class="live-ring-energy-cost">
+                <div>
+                  <dt class="sr-only">{{ t("stats.energy") }}</dt>
+                  <dd>
+                    <Zap :size="18" aria-hidden="true" />
+                    <span>{{ ring.energyCost }}</span>
+                  </dd>
+                </div>
+              </dl>
+              <div class="live-socket-track" :aria-label="t('stats.sockets')">
+                <span
+                  v-for="slot in liveRingSocketSlots(ring)"
+                  :key="`${ring.id}-socket-${slot.index}`"
+                  :class="[
+                    'live-socket',
+                    slot.gem ? `rarity-border-${slot.gem.rarity}` : '',
+                    { filled: slot.gem, locked: slot.locked },
+                  ]"
+                  :title="
+                    slot.gem
+                      ? contentText(`gem.${slot.gem.definitionId}.name`, slot.gem.label)
+                      : t(slot.locked ? 'battle.live.lockedSocket' : 'battle.live.emptySocket')
+                  "
+                >
+                  <ItemArtwork
+                    v-if="slot.gem"
+                    :definition-id="slot.gem.definitionId"
+                    kind="gem"
+                    :title="contentText(`gem.${slot.gem.definitionId}.name`, slot.gem.label)"
+                  />
+                </span>
+              </div>
             </div>
             <small v-if="!sourceAvailability(ringSource(ring)).available" class="muted">
               {{ availabilityLabel(ringSource(ring)) }}
@@ -452,7 +479,7 @@
         </div>
 
         <div class="live-energy-rail viewer-energy">
-          <span>{{ t("stats.energy") }}</span>
+          <span>{{ battle.viewer.username }} {{ t("stats.energy") }}</span>
           <div class="live-energy-slots" aria-hidden="true">
             <i
               v-for="slot in 8"
@@ -491,86 +518,84 @@
         </div>
       </section>
 
-      <section class="live-command-tray" :aria-label="t('accessibility.battleCommands')">
-        <div class="live-command-selection" aria-live="polite">
-          <span class="eyebrow">{{ t("battle.live.preparedAction") }}</span>
-          <strong>{{ selectedSourceLabel }}</strong>
-          <small class="muted">{{ selectedTargetLabel }}</small>
-        </div>
-        <div class="live-command-buttons">
-          <button
-            type="button"
-            class="secondary-button"
-            :disabled="!selectedSource"
-            @click="clearPreparedAction"
-          >
-            {{ t("battle.live.cancelAction") }}
-          </button>
-          <button
-            type="button"
-            class="secondary-button"
-            :disabled="!canAct || submitting"
-            @click="endTurn"
-          >
-            {{ t("battle.live.endTurn") }}
-          </button>
-          <button
-            type="button"
-            class="secondary-button danger-button"
-            :disabled="battle.status === 'finished' || submitting"
-            @click="concede"
-          >
-            {{ t("battle.live.concede") }}
-          </button>
-        </div>
-      </section>
-
       <p v-if="actionError" class="panel live-action-error" role="alert">{{ actionError }}</p>
-      <section
-        v-else-if="presentedEvents.length > 0"
-        class="live-resolution-feed"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        <div class="live-resolution-heading">
-          <span class="eyebrow">{{ t("battle.live.lastResolution") }}</span>
-          <strong>{{ t("battle.live.resolutionComplete") }}</strong>
-        </div>
-        <ol>
-          <li
-            v-for="(event, index) in presentedEvents"
-            :key="`${resolutionSequence}-${index}-${event.key}`"
-            :class="`event-${event.tone}`"
-          >
-            {{ t(event.key, localizedEventParams(event.params)) }}
-          </li>
-        </ol>
-      </section>
 
-      <details class="live-diagnostics">
-        <summary>{{ t("battle.live.diagnostics") }}</summary>
-        <dl class="summary-grid">
-          <div class="stat">
-            <dt>{{ t("stats.actions") }}</dt>
-            <dd>{{ battle.actionCount }}</dd>
-          </div>
-          <div class="stat">
-            <dt>{{ t("battle.live.status") }}</dt>
-            <dd>{{ battle.status }}</dd>
-          </div>
-          <div class="stat">
-            <dt>{{ t("battle.result.rules") }}</dt>
-            <dd>{{ battle.rulesVersion }}</dd>
-          </div>
-          <div class="stat">
-            <dt>{{ t("battle.result.content") }}</dt>
-            <dd>{{ battle.contentVersion }}</dd>
-          </div>
-        </dl>
-        <p v-if="lastEvents.length > 0" class="muted live-raw-events">
-          {{ lastEvents.map((event) => event.type).join(" - ") }}
-        </p>
-      </details>
+      <Teleport to="body">
+        <div
+          v-if="showDeveloperModal"
+          class="live-developer-modal-backdrop"
+          role="presentation"
+          @click.self="showDeveloperModal = false"
+        >
+          <aside
+            class="panel live-developer-modal"
+            role="dialog"
+            aria-modal="true"
+            :aria-label="t('battle.live.devTools')"
+          >
+            <div class="card-heading">
+              <div>
+                <span class="eyebrow">{{ t("battle.live.diagnostics") }}</span>
+                <h2>{{ t("battle.live.devTools") }}</h2>
+              </div>
+              <button
+                class="icon-button"
+                type="button"
+                :aria-label="t('battle.live.closeDiagnostics')"
+                :title="t('battle.live.closeDiagnostics')"
+                @click="showDeveloperModal = false"
+              >
+                <X :size="19" aria-hidden="true" />
+              </button>
+            </div>
+
+            <section
+              v-if="presentedEvents.length > 0"
+              class="live-resolution-feed"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              <div class="live-resolution-heading">
+                <span class="eyebrow">{{ t("battle.live.lastResolution") }}</span>
+                <strong>{{ t("battle.live.resolutionComplete") }}</strong>
+              </div>
+              <ol>
+                <li
+                  v-for="(event, index) in presentedEvents"
+                  :key="`${resolutionSequence}-${index}-${event.key}`"
+                  :class="`event-${event.tone}`"
+                >
+                  {{ t(event.key, localizedEventParams(event.params)) }}
+                </li>
+              </ol>
+            </section>
+
+            <section class="live-diagnostics">
+              <dl class="summary-grid">
+                <div class="stat">
+                  <dt>{{ t("stats.actions") }}</dt>
+                  <dd>{{ battle.actionCount }}</dd>
+                </div>
+                <div class="stat">
+                  <dt>{{ t("battle.live.status") }}</dt>
+                  <dd>{{ battle.status }}</dd>
+                </div>
+                <div class="stat">
+                  <dt>{{ t("battle.result.rules") }}</dt>
+                  <dd>{{ battle.rulesVersion }}</dd>
+                </div>
+                <div class="stat">
+                  <dt>{{ t("battle.result.content") }}</dt>
+                  <dd>{{ battle.contentVersion }}</dd>
+                </div>
+              </dl>
+              <p v-if="lastEvents.length > 0" class="muted live-raw-events">
+                {{ lastEvents.map((event) => event.type).join(" - ") }}
+              </p>
+            </section>
+          </aside>
+        </div>
+      </Teleport>
 
       <BattleResultSummary
         v-if="battle.status === 'finished' && battle.summary"
@@ -641,6 +666,7 @@
 </template>
 
 <script setup lang="ts">
+import { Bug, CheckCircle2, Flag, Heart, LogOut, Sword, Timer, X, Zap } from "@lucide/vue";
 import type {
   LiveBattleActionCommand,
   LiveBattleActionResponse,
@@ -652,14 +678,15 @@ import {
   actionAvailability,
   battleResolutionEffects,
   battleTargets,
+  cooldownReady,
   presentBattleEvent,
+  ringTotalDamage,
   shouldShowInitialBattleLoading,
   type LiveBattleActionSource,
   type LiveBattleEventPresentation,
   type LiveBattleResolutionEffects,
 } from "~/utils/liveBattlePresentation";
 import { isPvpBattleMode, visiblePvpOpponentRings } from "~/utils/pvpPresentation";
-import { sectionLinks } from "~/utils/viewData";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -686,10 +713,12 @@ const canAct = computed(
   () => battle.value?.status === "active" && isViewerTurn.value && !submitting.value,
 );
 const elements = ["electric", "fire", "ice"] as const;
+const maxLiveRingSockets = 3;
 const selectedSource = ref<LiveBattleActionSource | null>(null);
 const selectedTargetId = ref<string | null>(null);
 const submitting = ref(false);
 const claimingReward = ref(false);
+const showDeveloperModal = ref(false);
 const actionError = ref("");
 const lastEvents = ref<LiveBattleActionResponse["events"]>([]);
 const eventLabels = ref<Record<string, string>>({});
@@ -701,16 +730,6 @@ const targetStates = computed(
   () =>
     new Map((battle.value ? battleTargets(battle.value) : []).map((target) => [target.id, target])),
 );
-const selectedSourceLabel = computed(() => {
-  if (!selectedSource.value) return t("battle.live.selectSource");
-  return selectedSource.value.kind === "ring"
-    ? ringName(selectedSource.value.item)
-    : monsterName(selectedSource.value.item);
-});
-const selectedTargetLabel = computed(() => {
-  if (!selectedSource.value) return t("battle.live.selectSourceHint");
-  return t("battle.live.directTargetHint");
-});
 const presentedEvents = computed(() =>
   lastEvents.value.map((event) => presentBattleEvent(event, eventLabel)),
 );
@@ -779,6 +798,19 @@ const statusLabel = computed(() => {
   if (battle.value.status === "finished") return t("battle.live.finished");
   return t(isViewerTurn.value ? "battle.live.yourTurnStatus" : "battle.live.opponentTurnStatus");
 });
+const isDevelopment = import.meta.dev;
+
+function liveRingSocketSlots(ring: LiveBattleRingView) {
+  return Array.from({ length: maxLiveRingSockets }, (_, index) => {
+    const gem = ring.gems[index] ?? null;
+
+    return {
+      index,
+      gem,
+      locked: index >= ring.socketCount && !gem,
+    };
+  });
+}
 
 watch(
   () => battle.value?.actionCount,
@@ -807,6 +839,13 @@ function monsterName(monster: LiveBattleMonsterView): string {
 }
 function skillLabel(skill: string): string {
   return t(`battle.live.skill.${skill}`);
+}
+function cooldownStatLabel(
+  item: Pick<LiveBattleMonsterView | LiveBattleRingView, "currentCooldown" | "cooldown">,
+): string {
+  return cooldownReady(item)
+    ? t("battle.live.cooldownReady")
+    : `${t("stats.cooldown")} ${item.currentCooldown}/${item.cooldown}`;
 }
 function targetState(targetId: string) {
   return targetStates.value.get(targetId);
@@ -912,6 +951,10 @@ function showResolution(
   }, 1400);
 }
 function prepareSource(source: LiveBattleActionSource): void {
+  if (selectedSource.value?.id === source.id) {
+    clearPreparedAction();
+    return;
+  }
   if (!canPrepareSource(source)) return;
   selectedSource.value = source;
   selectedTargetId.value = null;
@@ -937,6 +980,10 @@ function viewerMonsterInteractionLabel(monster: LiveBattleMonsterView): string {
     : sourceInteractionLabel(monsterSource(monster));
 }
 function handleViewerMonsterInteraction(monster: LiveBattleMonsterView): void {
+  if (selectedSource.value?.id === monster.id) {
+    clearPreparedAction();
+    return;
+  }
   if (selectedSource.value) {
     void executeTarget(monster.id);
     return;
