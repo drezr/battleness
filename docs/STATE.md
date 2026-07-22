@@ -14,6 +14,9 @@ This file records modifications made to the project during agent-assisted work.
   icon-based combat stats, ring energy-cost medallions, and three socket indicators that distinguish
   socketed gems, empty unlocked sockets, and locked sockets. Ring combat snapshots now carry
   `socketCount` as descriptive display data.
+- Live battle ring cards now use dedicated rarity-specific frame PNG assets from
+  `apps/web/public/assets/cards/` as their card backgrounds, while monster cards retain their CSS
+  frame treatment for now.
 - The live battle card interaction model now keeps rarity frames visible across default, hover, and
   selected states. Hover uses a short shine transition, selection adds a separate green inset
   indicator, and clicking the selected ring or monster again clears the prepared source.
@@ -272,6 +275,19 @@ This file records modifications made to the project during agent-assisted work.
 - Added a centralized project TODO in `docs/TODO.md` covering Game App persistence, inventory, forge, battle integration, campaign, rewards, market, profile, authentication, PvP, player market, presentation, production, and open design questions.
 
 ## Change Log
+
+### 2026-07-23
+
+- Added the provided ring card frame PNGs to `apps/web/public/assets/cards/` as
+  `ring-frame-common.png`, `ring-frame-refined.png`, `ring-frame-rare.png`, and
+  `ring-frame-epic.png`, then updated the live battle ring CSS to use the matching background image
+  by rarity.
+- Reworked live ring internal positioning around the new frame assets: the title, element badge,
+  artwork, damage and cooldown values, energy cost, and socketed gems are positioned over the
+  transparent or dedicated zones in the frame while preserving semantic HTML content.
+- Verified the frame integration in Chrome on a local training battle with rare and common rings.
+  The live view remained scroll-free, `rare` and `common` cards loaded their matching frame URLs, and
+  all four frame assets returned `200 image/png` from the Nuxt public asset path.
 
 ### 2026-07-22
 

@@ -157,6 +157,9 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - Ring cards should expose total ring damage, including socketed gem damage, and energy/cost information, with socketed gems visible along the bottom of each ring.
 - Ready rings and monsters are selected directly from their cards, legal targets are then chosen on the board, and clicking the selected source again deselects it. The UI should not repeat the selected source name in a separate prepared-action label.
 - Ring, gem, and monster frames identify rarity consistently: common uses light gray, refined uses blue, rare uses orange, and epic uses purple.
+- Live battle ring cards use rarity-specific frame image assets under `apps/web/public/assets/cards/`:
+  `ring-frame-common.png`, `ring-frame-refined.png`, `ring-frame-rare.png`, and
+  `ring-frame-epic.png`.
 - Selection, targeting, and blocked-state indicators remain separate from rarity framing so interaction state does not replace item identity.
 - Hover should preserve the rarity frame and use a short shine transition instead of replacing the frame with another outline.
 - Ring, gem, and monster cards also display a localized elemental badge in the top-right corner: Electric uses yellow, Fire uses pink-red, and Ice uses light cyan.
