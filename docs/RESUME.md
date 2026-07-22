@@ -127,6 +127,14 @@ separate permanent Dev Lab prototype.
   large artwork, icon stats, ring energy medallions, and socket indicators. Selecting the already
   selected ring or monster deselects it. Ring damage display includes socketed gem damage, and ready
   cooldowns use a green check-style indicator.
+- CI-validated commit `772eb554dab55cc83ccadd10ed5e9d7a20f2f2aa` is deployed to staging as
+  immutable release `20260722T205342Z-772eb554`. There were no pending migrations. Local/public
+  health checks and an authenticated Chrome live-battle smoke passed; the new arena image returned
+  `200`, the page had no document scroll or global navigation, and the fresh smoke tab had no console
+  errors.
+- Before the next database-changing operation, refresh the locally recorded `bndb` sudo password.
+  It was rejected when starting an extra pre-release backup on 2026-07-22. The scheduled backup from
+  `03:24:04 UTC` completed successfully, and this UI release did not apply a migration.
 - The Nuxt live battle arena now uses
   `apps/web/public/assets/backgrounds/live-battle-elemental-arena.jpg` as a covered full-screen
   background with translucent overlays. Chrome verification against a local battle confirmed the

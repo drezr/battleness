@@ -49,10 +49,16 @@ This file records modifications made to the project during agent-assisted work.
   `staging.battleness.com` requests to Nitro. Health checks pass locally and through the HTTP proxy.
   The repo now has a dedicated `build:postgres` script for public PostgreSQL builds so deployment
   does not accidentally package the local SQLite Prisma client.
-- Staging currently runs commit `389febed9d7d670c3bbc9a7c90c5e5d15646d6b1` from immutable release
-  `/opt/battleness/releases/20260721T215331Z-389febed`. Deployment on 2026-07-21 used verified backup
-  `20260721T215322Z`, found no pending migrations, and passed local/public health checks plus an
-  authenticated Chrome smoke of live combat and ranked season state.
+- Staging currently runs CI-validated commit `772eb554dab55cc83ccadd10ed5e9d7a20f2f2aa` from
+  immutable release `/opt/battleness/releases/20260722T205342Z-772eb554`. Deployment on 2026-07-22
+  found no pending migrations and passed local/public health checks, direct arena-asset validation,
+  and an authenticated Chrome smoke of live combat. The smoke confirmed a scroll-free viewport,
+  hidden global navigation and diagnostics, the new arena background, and no browser-console errors.
+- The scheduled PostgreSQL backup completed successfully on 2026-07-22 at `03:24:04 UTC`, but the
+  locally recorded `deploy` sudo password for `bndb` was rejected when attempting an additional
+  pre-release backup. This release had no database migration, so deployment proceeded against the
+  successful daily backup. Refresh the recorded `bndb` sudo credential and run a manual verified
+  backup before the next database-changing operation or production promotion.
 - `staging.battleness.com` now resolves to the app VPS and serves HTTPS through a Let's Encrypt
   certificate managed by Certbot's Nginx integration. Public HTTPS live/readiness checks pass, and
   the staging Google OAuth route starts the expected Google redirect. The user has verified Google
@@ -269,6 +275,19 @@ This file records modifications made to the project during agent-assisted work.
 
 ### 2026-07-22
 
+- Pushed live battle redesign commit `772eb554` to `main`; GitHub Actions run `29956651776` passed
+  both `checks` and `postgresql`. Built the exact commit on `bnapp`, confirmed all 17 migrations were
+  already applied, and activated immutable staging release `20260722T205342Z-772eb554` atomically.
+- Verified the deployed release through local and public live/readiness probes, `NRestarts=0`, a
+  `200` response for the 718161-byte arena image, and an authenticated Chrome live-battle smoke.
+  The full-screen arena had no horizontal or vertical document scroll, no global navigation or
+  visible diagnostics, and no fresh-tab browser console errors. Two old chunk requests from a tab
+  open across the release switch returned expected `404` responses and did not recur in the fresh
+  smoke tab.
+- Confirmed the scheduled database backup service last completed successfully at `03:24:04 UTC`.
+  An extra manual backup could not be started because the saved `bndb` sudo password was rejected;
+  no migrations were pending or applied. The credential must be refreshed before the next operation
+  requiring a manual database backup.
 - Reworked the Nuxt live battle page into a focused full-screen combat surface. The global app
   chrome and section navigation are hidden on live battle routes, combat remains within `100vw` and
   `100dvh` without document scroll, hero panels and turn controls stay in the left column, monsters
