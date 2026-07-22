@@ -4,6 +4,10 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- The user has temporarily paused Phase 14 production work to continue ergonomics and UI changes in
+  a separate agent context. Phase 14 remains incomplete; its remaining staging acceptance,
+  monitoring, load/soak, security, production-promotion, single-instance, backup-target, and external
+  notification work is consolidated in `docs/TODO.md` for later resumption.
 - Phase 14 deployment foundation has started. The initial production direction is OVH VPS hosting on
   Debian stable with Nginx, one Game App instance, and a separate self-managed PostgreSQL server
   reached by public IP with firewall restrictions. `staging.battleness.com` is the first public

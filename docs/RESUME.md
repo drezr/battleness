@@ -51,6 +51,19 @@ On Windows, stop the Nuxt development server before commands that regenerate Pri
 cause an `EPERM` rename failure. Start the player-facing app with `pnpm dev:web`; `pnpm dev` starts the
 separate permanent Dev Lab prototype.
 
+## Immediate Handoff
+
+- The user is intentionally pausing Phase 14 production work to start a separate ergonomics and UI
+  iteration with a new agent. Begin by asking which player workflow or screen should be changed and
+  inspect the existing implementation and design conventions before proposing or editing UI.
+- Do not treat Phase 14 as complete. `docs/TODO.md` contains a consolidated Phase 14 resume checklist
+  covering the live-refresh visual confirmation, complete ranked staging smoke, production
+  monitoring, load/soak testing, security review, production OAuth and promotion, the single-instance
+  constraint, and the two intentionally deferred backup/notification items.
+- Preserve the deployed staging environment and existing production-operational decisions while
+  making UI changes. Do not change infrastructure, production DNS, OAuth, or database state unless
+  the user explicitly returns to those tasks.
+
 ## Current Project State
 
 - The Nuxt server assigns or preserves a safe `x-request-id`, emits structured JSON for request and ranked-maintenance failures, and keeps a bounded 100-record in-memory development buffer. Authenticated development diagnostics are available through `GET` and `DELETE /api/dev/diagnostics`; they are disabled by the handler in production. See `docs/OBSERVABILITY.md` for the data policy and production follow-up.

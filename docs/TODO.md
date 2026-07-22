@@ -4,14 +4,10 @@ This is the centralized working TODO for BattleNess. It focuses on what remains 
 
 ## Current Focus
 
-Phase 14 has started with the initial deployment direction: OVH VPS hosting, Debian stable, Nginx,
-one Game App instance, and a separate self-managed PostgreSQL server protected by firewall rules.
-The first VPS bootstrap and HTTPS staging deployment are complete. Private and casual two-account
-smoke tests now pass, and the first eight-week staging ranked season is active. The current work is
-to verify the deployed live-arena background-refresh fix in a fresh two-account action sequence,
-complete ranked matchmaking and settlement smoke, then proceed to load/soak validation and the
-remaining production monitoring and security work. Certbot renewal and the first local plus app-VPS
-off-host PostgreSQL backup path are verified.
+The product focus is temporarily moving from Phase 14 production work to a new ergonomics and UI
+iteration handled in a separate agent context. Phase 14 is paused, not complete or cancelled. Its
+remaining acceptance, hardening, monitoring, and production-promotion work is consolidated in the
+resume checklist at the end of the Phase 14 section so it can be resumed after the UI work.
 
 ## Phase 1 - Game App Data Foundation
 
@@ -276,6 +272,33 @@ off-host PostgreSQL backup path are verified.
       event hub with shared pub/sub before enabling horizontal scaling.
 - [x] Extend CI to enforce formatting, build the Nuxt Game App for production, and run PostgreSQL migration, drift, and smoke checks.
 - [x] Add basic request correlation, structured server and match-failure logging, and protected development diagnostics without recording request secrets.
+
+### Phase 14 Resume Checklist
+
+Required before public production promotion:
+
+- [ ] Verify the deployed live-arena refresh fix during a fresh two-account action sequence.
+- [ ] Complete the two-account ranked staging smoke: matchmaking, bilateral acceptance, battle,
+      reconnect, settlement, rating and placement updates, leaderboard visibility, history, and
+      season-reward behavior where practical.
+- [ ] Add production monitoring and alerts for availability, latency, application errors, PostgreSQL,
+      failed match settlement, queue maintenance, WebSocket reconnects, and backup failures.
+- [ ] Run load and soak tests for polling, WebSocket invalidations, matchmaking, market concurrency,
+      authoritative battle actions, PostgreSQL connections, and process memory.
+- [ ] Run the dependency and production security review, including Nginx/TLS, cookies, OAuth,
+      rate limits, secrets, system permissions, and network exposure.
+- [ ] Configure the distinct production Google OAuth client and secrets, prepare the production
+      environment, migrate `battleness_production`, deploy a CI-validated release, switch
+      `battleness.com`, enable TLS, run production smoke checks, and retain rollback artifacts.
+- [ ] Keep production on one Game App instance until the process-local realtime hub is replaced by
+      shared pub/sub.
+
+Intentionally deferred, but retained for a later infrastructure pass:
+
+- [ ] Add a second encrypted backup destination outside the VPS pair when the planned private
+      high-availability server, likely a Raspberry Pi, is available or paid storage is accepted.
+- [ ] Connect backup failures and missed runs to an external notification channel. This remains on
+      standby by user decision and must be reconsidered before broader public exposure.
 
 ## Open Design Questions
 
