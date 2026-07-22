@@ -132,9 +132,10 @@ separate permanent Dev Lab prototype.
   health checks and an authenticated Chrome live-battle smoke passed; the new arena image returned
   `200`, the page had no document scroll or global navigation, and the fresh smoke tab had no console
   errors.
-- Before the next database-changing operation, refresh the locally recorded `bndb` sudo password.
-  It was rejected when starting an extra pre-release backup on 2026-07-22. The scheduled backup from
-  `03:24:04 UTC` completed successfully, and this UI release did not apply a migration.
+- The locally recorded `bndb` sudo password is valid. When automating from Windows PowerShell, read
+  `vpspw.txt` explicitly as UTF-8 because its special characters are corrupted by the legacy default
+  decoding. Manual backup `20260722T211255Z` and SHA-256 verification of both database dumps passed
+  after correcting the decoder.
 - The Nuxt live battle arena now uses
   `apps/web/public/assets/backgrounds/live-battle-elemental-arena.jpg` as a covered full-screen
   background with translucent overlays. Chrome verification against a local battle confirmed the

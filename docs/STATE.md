@@ -54,11 +54,11 @@ This file records modifications made to the project during agent-assisted work.
   found no pending migrations and passed local/public health checks, direct arena-asset validation,
   and an authenticated Chrome smoke of live combat. The smoke confirmed a scroll-free viewport,
   hidden global navigation and diagnostics, the new arena background, and no browser-console errors.
-- The scheduled PostgreSQL backup completed successfully on 2026-07-22 at `03:24:04 UTC`, but the
-  locally recorded `deploy` sudo password for `bndb` was rejected when attempting an additional
-  pre-release backup. This release had no database migration, so deployment proceeded against the
-  successful daily backup. Refresh the recorded `bndb` sudo credential and run a manual verified
-  backup before the next database-changing operation or production promotion.
+- The scheduled PostgreSQL backup completed successfully on 2026-07-22 at `03:24:04 UTC`. A manual
+  post-release backup also passed at `21:12:56 UTC` under `20260722T211255Z`, including SHA-256
+  verification of both staging and production dumps. The earlier sudo rejection was caused by
+  Windows PowerShell decoding the UTF-8 credential file with its legacy default encoding; the
+  recorded `bndb` password and server configuration were correct.
 - `staging.battleness.com` now resolves to the app VPS and serves HTTPS through a Let's Encrypt
   certificate managed by Certbot's Nginx integration. Public HTTPS live/readiness checks pass, and
   the staging Google OAuth route starts the expected Google redirect. The user has verified Google
@@ -284,10 +284,11 @@ This file records modifications made to the project during agent-assisted work.
   visible diagnostics, and no fresh-tab browser console errors. Two old chunk requests from a tab
   open across the release switch returned expected `404` responses and did not recur in the fresh
   smoke tab.
-- Confirmed the scheduled database backup service last completed successfully at `03:24:04 UTC`.
-  An extra manual backup could not be started because the saved `bndb` sudo password was rejected;
-  no migrations were pending or applied. The credential must be refreshed before the next operation
-  requiring a manual database backup.
+- Confirmed the scheduled database backup service completed successfully at `03:24:04 UTC`. The
+  first manual retry incorrectly rejected the valid `bndb` sudo password because Windows PowerShell
+  used its legacy default decoding for the UTF-8 credential file and altered special characters.
+  Reading the file explicitly as UTF-8 fixed the automation; manual backup `20260722T211255Z` then
+  completed successfully and both staging and production dump checksums passed.
 - Reworked the Nuxt live battle page into a focused full-screen combat surface. The global app
   chrome and section navigation are hidden on live battle routes, combat remains within `100vw` and
   `100dvh` without document scroll, hero panels and turn controls stay in the left column, monsters
