@@ -4,6 +4,13 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- Staging deployment can now be run by the operator from Windows with
+  `ops/deploy-staging.ps1`. It verifies a clean `main` checkout, exact `origin/main` identity, the
+  GitHub Actions `checks` and `postgresql` jobs, current health, a fresh checksummed database backup,
+  immutable remote build, PostgreSQL schema and migrations, atomic activation, systemd state, and
+  local/public health. Existing migrations cannot change or disappear, and new migration directories
+  require explicit `-AllowMigrations`; authenticated browser smoke and rollback remain manual
+  safeguards.
 - The live battle view now runs as a focused full-screen combat surface. The global application
   sidebar, top bar, mobile navigation, and route section navigation are hidden on live battle routes.
   The arena places both hero panels and turn actions in the left combat column, keeps monsters in the
@@ -275,6 +282,16 @@ This file records modifications made to the project during agent-assisted work.
 - Added a centralized project TODO in `docs/TODO.md` covering Game App persistence, inventory, forge, battle integration, campaign, rewards, market, profile, authentication, PvP, player market, presentation, production, and open design questions.
 
 ## Change Log
+
+### 2026-07-26
+
+- Added `ops/deploy-staging.ps1` as the operator-owned staging deployment orchestrator. It packages
+  only the exact CI-green `origin/main` commit, reads the two VPS sudo credentials explicitly as
+  UTF-8, verifies a fresh PostgreSQL backup, builds an immutable release, gates new migrations behind
+  `-AllowMigrations`, activates the release atomically, and verifies systemd plus all health
+  endpoints. Optional `-RunLocalValidation` repeats the complete local CI-equivalent gate.
+- Documented the automated path in `docs/OPERATIONS_RUNBOOK.md`. Authenticated browser smoke,
+  migration classification, and rollback decisions remain explicit operator responsibilities.
 
 ### 2026-07-23
 

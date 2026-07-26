@@ -32,8 +32,8 @@
   --live-ring-footer-height: 34px;
   --live-ring-height: calc(var(--live-ring-width) * var(--live-ring-frame-ratio));
   --live-ring-energy-size: calc(var(--live-ring-width) * 0.218);
-  --live-socket-size: calc(var(--live-ring-width) * 0.16);
-  --live-gem-size: calc(var(--live-ring-width) * 0.12);
+  --live-socket-size: calc(var(--live-ring-width) * 0.19);
+  --live-gem-size: calc(var(--live-ring-width) * 0.24);
   --live-monster-width: clamp(132px, 8.8vw, 176px);
   --live-monster-height: calc(var(--live-monster-width) * 1.2);
   --live-hero-height: min(
@@ -531,8 +531,7 @@
     0 12px 28px rgb(0 0 0 / 28%);
 }
 
-.live-arena .live-monster::before,
-.live-arena .live-ring::before {
+.live-arena .live-monster::before {
   position: absolute;
   z-index: 4;
   inset: 0;
@@ -547,21 +546,13 @@
 }
 
 .live-arena
-  :is(.live-ring, .live-monster).source-available:not(.source-selected):not(
-    .target-selected
-  ):hover::before,
+  .live-monster.source-available:not(.source-selected):not(.target-selected):hover::before,
 .live-arena
-  :is(.live-ring, .live-monster).target-available:not(.source-selected):not(
-    .target-selected
-  ):hover::before,
+  .live-monster.target-available:not(.source-selected):not(.target-selected):hover::before,
 .live-arena
-  :is(.live-ring, .live-monster).source-available:not(.source-selected):not(
-    .target-selected
-  ):focus-visible::before,
+  .live-monster.source-available:not(.source-selected):not(.target-selected):focus-visible::before,
 .live-arena
-  :is(.live-ring, .live-monster).target-available:not(.source-selected):not(
-    .target-selected
-  ):focus-visible::before {
+  .live-monster.target-available:not(.source-selected):not(.target-selected):focus-visible::before {
   opacity: 1;
 }
 
@@ -647,7 +638,6 @@
 .live-card-art .item-artwork {
   width: 100%;
   max-width: none;
-  filter: drop-shadow(0 10px 18px rgb(0 0 0 / 42%));
 }
 
 .live-monster-art {
@@ -658,17 +648,6 @@
 .live-monster-art .item-artwork {
   height: 100%;
   object-fit: cover;
-}
-
-.live-ring-art {
-  min-height: 58px;
-  aspect-ratio: 1.55;
-}
-
-.live-ring-art .item-artwork {
-  height: 100%;
-  object-fit: contain;
-  padding: 5px;
 }
 
 .live-card-status-row {
@@ -733,8 +712,7 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.live-monster-stats > div + div,
-.live-ring-stats > div + div {
+.live-monster-stats > div + div {
   border-left: 1px solid rgb(255 255 255 / 16%);
 }
 
@@ -844,12 +822,6 @@
   background: #071119;
 }
 
-.live-socket.locked {
-  border-color: rgb(0 0 0 / 52%);
-  background: #8d9294;
-  opacity: 0.72;
-}
-
 .live-socket .item-artwork {
   width: 92%;
   height: 92%;
@@ -875,9 +847,7 @@
 }
 
 .live-arena .live-monster.source-selected,
-.live-arena .live-monster.target-selected,
-.live-arena .live-ring.source-selected,
-.live-arena .live-ring.target-selected {
+.live-arena .live-monster.target-selected {
   outline: 0;
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb, var(--live-rarity-color) 42%, transparent),
@@ -887,9 +857,7 @@
 }
 
 .live-arena .live-monster.source-selected::after,
-.live-arena .live-monster.target-selected::after,
-.live-arena .live-ring.source-selected::after,
-.live-arena .live-ring.target-selected::after {
+.live-arena .live-monster.target-selected::after {
   position: absolute;
   z-index: 5;
   inset: 0;
@@ -902,7 +870,7 @@
 
 .live-arena .live-ring.resolution-source,
 .live-arena .live-monster.resolution-source {
-  animation: live-card-source-pulse 0.7s ease-out;
+  animation: live-card-source-pulse 0.1s ease-out;
 }
 
 @keyframes live-card-source-pulse {
@@ -911,7 +879,7 @@
   }
 
   35% {
-    transform: translateY(-4px) scale(1.03);
+    transform: translateY(0) scale(1.01);
   }
 
   100% {
@@ -1091,7 +1059,7 @@
   min-height: 0;
   border: 0;
   border-radius: 0;
-  background: var(--live-ring-frame-url) center center / 100% 100% no-repeat;
+  background: transparent;
   box-shadow:
     0 0 14px var(--live-rarity-glow),
     0 12px 28px rgb(0 0 0 / 28%);
@@ -1099,11 +1067,67 @@
   padding: 0;
 }
 
-.live-arena
-  .live-ring
-  > :is(.live-ring-titlebar, .live-ring-art, .live-ring-stats, .live-ring-footer) {
+.live-arena .live-ring > :is(.live-ring-titlebar, .live-ring-stats, .live-ring-footer) {
   position: absolute;
-  z-index: 1;
+  z-index: 3;
+}
+
+.live-ring-frame {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  background: var(--live-ring-frame-url) center center / 100% 100% no-repeat;
+  pointer-events: none;
+  transition: filter 200ms ease;
+}
+
+.live-arena
+  .live-ring.source-available:not(.source-selected):not(.target-selected):hover
+  .live-ring-frame,
+.live-arena
+  .live-ring.target-available:not(.source-selected):not(.target-selected):hover
+  .live-ring-frame,
+.live-arena
+  .live-ring.source-available:not(.source-selected):not(.target-selected):focus-visible
+  .live-ring-frame,
+.live-arena
+  .live-ring.target-available:not(.source-selected):not(.target-selected):focus-visible
+  .live-ring-frame {
+  filter: brightness(1.3) saturate(1.2) drop-shadow(0 0 2px var(--live-rarity-color));
+}
+
+.live-arena .live-ring.source-available:not(.source-selected):not(.target-selected):hover,
+.live-arena .live-ring.target-available:not(.source-selected):not(.target-selected):hover,
+.live-arena .live-ring.source-available:not(.source-selected):not(.target-selected):focus-visible,
+.live-arena .live-ring.target-available:not(.source-selected):not(.target-selected):focus-visible {
+  border-color: transparent;
+  outline: 0;
+  box-shadow: 0 12px 28px rgb(0 0 0 / 28%);
+}
+
+.live-arena .live-ring.source-selected,
+.live-arena .live-ring.target-selected {
+  border-color: transparent;
+  outline: 0;
+  box-shadow:
+    0 0 14px var(--live-rarity-glow),
+    0 12px 28px rgb(0 0 0 / 28%);
+}
+
+.live-arena .live-ring.source-selected .live-ring-frame,
+.live-arena .live-ring.target-selected .live-ring-frame {
+  animation: live-ring-frame-selected-pulse 2s ease-in-out infinite;
+}
+
+@keyframes live-ring-frame-selected-pulse {
+  0%,
+  100% {
+    filter: brightness(1.55) saturate(1.35) drop-shadow(0 0 2px var(--live-rarity-color));
+  }
+
+  50% {
+    filter: brightness(1.05) saturate(1.05) drop-shadow(0 0 1px var(--live-rarity-color));
+  }
 }
 
 .live-ring-titlebar {
@@ -1120,15 +1144,19 @@
 
 .live-ring-titlebar strong {
   min-width: 0;
-  font-size: clamp(0.58rem, calc(var(--live-ring-width) * 0.052), 0.78rem);
+  font-size: clamp(0.58rem, calc(var(--live-ring-width) * 0.8), 0.78rem);
   line-height: 1;
+  position: relative;
+  top: -8%;
 }
 
 .live-ring-titlebar .live-element-token {
   justify-self: end;
   max-width: none;
   padding: 1px 4px;
-  font-size: clamp(0.4rem, calc(var(--live-ring-width) * 0.032), 0.52rem);
+  font-size: clamp(0.4rem, calc(var(--live-ring-width) * 0.05), 0.7rem);
+  position: relative;
+  top: -8%;
 }
 
 .live-arena .live-monster .live-card-titlebar {
@@ -1140,11 +1168,14 @@
 }
 
 .live-ring-art {
-  top: 14%;
+  position: absolute;
+  z-index: 1;
+  aspect-ratio: 1;
+  top: 0%;
   right: 5.6%;
-  left: 5.6%;
+  left: 3%;
   min-height: 0;
-  height: 47.8%;
+  height: 76%;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -1162,12 +1193,16 @@
 }
 
 .live-ring-stats {
-  top: 61.4%;
+  top: 62%;
   right: 5.2%;
-  left: 5.2%;
+  left: 15%;
   height: 17.8%;
   border: 0;
   border-radius: 0;
+  background: transparent;
+}
+
+.live-ring-stats > div {
   background: transparent;
 }
 
@@ -1185,15 +1220,17 @@
 .live-ring-stats dd:has(.live-cooldown-ready) {
   justify-content: center;
   padding-left: 0;
-}
-
-.live-ring-stats svg:not(.live-cooldown-ready) {
-  display: none;
+  position: relative;
+  top: 1%;
 }
 
 .live-ring-stats .live-cooldown-ready {
-  width: calc(var(--live-ring-width) * 0.09);
-  height: calc(var(--live-ring-width) * 0.09);
+  width: auto;
+  height: auto;
+  color: var(--app-green);
+  font-size: clamp(0.42rem, calc(var(--live-ring-width) * 0.042), 0.66rem);
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 
 .live-ring-footer {
@@ -1207,8 +1244,7 @@
 
 .live-ring-energy-cost {
   position: absolute;
-  bottom: 0;
-  left: 0.2%;
+  bottom: -8%;
   width: var(--live-ring-energy-size);
   height: var(--live-ring-energy-size);
 }
@@ -1228,15 +1264,21 @@
   font-size: clamp(0.76rem, calc(var(--live-ring-width) * 0.07), 1.08rem);
 }
 
+.live-arena .live-ring .live-stat-warning {
+  color: #ff9d2e;
+  text-shadow: 0 0 5px rgb(255 123 34 / 46%);
+}
+
 .live-ring-energy-cost svg {
   display: none;
 }
 
 .live-socket-track {
   position: absolute;
-  right: 5.1%;
-  bottom: 4.4%;
-  left: 27.3%;
+  right: 10%;
+  top: 17%;
+  left: 23%;
+  bottom: 8%;
   grid-template-columns: repeat(3, var(--live-socket-size));
   gap: 0;
   align-content: center;
@@ -1249,36 +1291,41 @@
   position: relative;
   overflow: visible;
   border: 0;
-  background: transparent;
+  background: url("/assets/cards/ring-socket.png") center / contain no-repeat;
   box-shadow: none;
 }
 
-.live-socket.locked::after {
-  position: absolute;
-  inset: 15%;
-  border-radius: 50%;
-  background: rgb(156 163 166 / 58%);
-  box-shadow: inset 0 1px 2px rgb(255 255 255 / 24%);
-  content: "";
+.live-socket.rarity-border-common {
+  --live-gem-rarity-color: #f2f5f7;
+}
+
+.live-socket.rarity-border-refined {
+  --live-gem-rarity-color: #16a7ff;
+}
+
+.live-socket.rarity-border-rare {
+  --live-gem-rarity-color: #ff7b22;
+}
+
+.live-socket.rarity-border-epic {
+  --live-gem-rarity-color: #b100e8;
 }
 
 .live-arena .live-ring .live-socket .item-artwork {
   width: var(--live-gem-size);
+  width: round(var(--live-gem-size), 1px);
   height: var(--live-gem-size);
+  height: round(var(--live-gem-size), 1px);
   align-self: center;
   justify-self: center;
   position: relative;
   z-index: 1;
+  overflow: hidden;
   padding: 0;
-  border: 0;
+  border: 2px solid var(--live-gem-rarity-color);
+  border-radius: 50%;
   background-color: transparent;
-  filter: drop-shadow(0 1px 3px rgb(0 0 0 / 75%));
-}
-
-.live-arena .live-ring.source-selected::after,
-.live-arena .live-ring.target-selected::after {
-  inset: 3.2%;
-  border-radius: 6%;
+  image-rendering: -webkit-optimize-contrast;
 }
 
 .live-arena .live-ring > .muted,
@@ -1296,8 +1343,8 @@
     --live-ring-stats-height: 24px;
     --live-ring-footer-height: 28px;
     --live-ring-energy-size: calc(var(--live-ring-width) * 0.218);
-    --live-socket-size: calc(var(--live-ring-width) * 0.16);
-    --live-gem-size: calc(var(--live-ring-width) * 0.12);
+    --live-socket-size: calc(var(--live-ring-width) * 0.19);
+    --live-gem-size: calc(var(--live-ring-width) * 0.24);
     --live-monster-width: clamp(104px, 14vw, 128px);
     --live-hero-height: min(
       140px,
@@ -1345,8 +1392,8 @@
     --live-ring-stats-height: 20px;
     --live-ring-footer-height: 22px;
     --live-ring-energy-size: calc(var(--live-ring-width) * 0.218);
-    --live-socket-size: calc(var(--live-ring-width) * 0.16);
-    --live-gem-size: calc(var(--live-ring-width) * 0.12);
+    --live-socket-size: calc(var(--live-ring-width) * 0.19);
+    --live-gem-size: calc(var(--live-ring-width) * 0.24);
     --live-monster-width: clamp(78px, 15vw, 96px);
     --live-hero-height: min(
       136px,

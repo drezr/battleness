@@ -47,6 +47,41 @@ Before starting, record these values in the deployment ticket or operator notes:
 Use a release ID containing UTC time and the short commit SHA, for example
 `20260721T140000Z-a2e35f8`.
 
+## Automated Staging Deployment
+
+The preferred staging path is the repository-owned PowerShell orchestrator:
+
+```powershell
+.\ops\deploy-staging.ps1
+```
+
+Run it from a clean `main` worktree after pushing the intended commit and waiting for GitHub Actions
+to pass. The script:
+
+- requires `HEAD` to equal `origin/main`;
+- verifies the exact commit's `CI` workflow and its `checks` and `postgresql` jobs through the GitHub
+  API;
+- verifies current staging health and disk use;
+- reads the `app` and `postgres` sudo passwords from the operator's ignored `vpspw.txt`, explicitly
+  as UTF-8; the known `~/Desktop/vpspw.txt` and `~/Desktop/bn/vpspw.txt` locations are detected;
+- creates and checksum-verifies a fresh PostgreSQL backup;
+- archives the exact Git commit, builds a new immutable release on `bnapp`, and validates the
+  PostgreSQL schema;
+- rejects changed or removed existing migrations and refuses new migration directories unless the
+  operator explicitly uses `-AllowMigrations`;
+- deploys and verifies migrations, atomically switches the active release, restarts systemd, and
+  runs local plus public health checks.
+
+The default SSH key is `~/.ssh/battleness_deploy_ed25519`. Override operator paths with
+`-SshKeyPath` or `-CredentialsPath` when necessary. Use `-RunLocalValidation` to repeat the complete
+local install, format, typecheck, lint, test, and Nuxt build gate in addition to the mandatory CI
+check.
+
+The script does not automate authenticated Google/browser smoke testing or application rollback.
+Complete the smoke checklist printed at the end. On failure, inspect the recorded candidate and
+previous release paths; do not roll back an application automatically after an incompatible
+migration.
+
 ## Pre-Deployment Gate
 
 On the operator workstation, confirm the exact revision and run the same validation classes as CI:

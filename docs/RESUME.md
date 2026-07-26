@@ -42,7 +42,7 @@ pnpm test
 pnpm --filter @battleness/web build
 ```
 
-The validated baseline on 2026-07-22 is 23 Vitest files and 276 passing tests. If a validation count
+The validated baseline on 2026-07-26 is 23 Vitest files and 277 passing tests. If a validation count
 changes, investigate whether tests were intentionally added or removed instead of treating the count
 as a permanent invariant.
 
@@ -161,6 +161,12 @@ separate permanent Dev Lab prototype.
   classify and apply migrations, atomically switch `/opt/battleness/current`, run health and browser
   smoke checks, and preserve rollback artifacts. It also distinguishes application rollback from
   destructive database recovery and documents emergency containment and production prerequisites.
+- `ops/deploy-staging.ps1` automates the non-browser staging runbook from the Windows operator
+  workstation. It requires a clean `main` equal to `origin/main`, verifies both required CI jobs,
+  creates and checksum-verifies a fresh database backup, builds and activates an immutable release,
+  and runs migration and health gates. New migration directories require `-AllowMigrations`;
+  `-RunLocalValidation` optionally repeats the full local gate. Authenticated browser smoke and
+  rollback remain manual.
 - `battleness-postgresql-monitor.timer` runs daily on the database VPS after the local and off-host
   backup timers. Its watchdog verifies prior service results, a maximum backup age of 30 hours, both
   dumps, their checksum manifest, and the matching encrypted archive on the app VPS. Failures become

@@ -414,25 +414,24 @@
             <div class="live-card-art live-ring-art">
               <ItemArtwork :definition-id="ring.definitionId" kind="ring" />
             </div>
+            <div class="live-ring-frame" aria-hidden="true"></div>
             <dl class="live-card-stats live-ring-stats">
               <div>
                 <dt class="sr-only">{{ t("stats.damage") }}</dt>
                 <dd>
-                  <Sword :size="16" aria-hidden="true" />
                   <span>{{ ringTotalDamage(ring) }}</span>
                 </dd>
               </div>
               <div>
                 <dt class="sr-only">{{ t("stats.cooldown") }}</dt>
-                <dd :aria-label="cooldownStatLabel(ring)">
-                  <CheckCircle2
-                    v-if="cooldownReady(ring)"
-                    class="live-cooldown-ready"
-                    :size="16"
-                    aria-hidden="true"
-                  />
+                <dd
+                  :class="{ 'live-stat-warning': ringAvailabilityReason(ring) === 'cooldown' }"
+                  :aria-label="cooldownStatLabel(ring)"
+                >
+                  <span v-if="cooldownReady(ring)" class="live-cooldown-ready">
+                    {{ t("battle.live.cooldownReady") }}
+                  </span>
                   <template v-else>
-                    <Timer :size="16" aria-hidden="true" />
                     <span>{{ ring.currentCooldown }}/{{ ring.cooldown }}</span>
                   </template>
                 </dd>
@@ -442,25 +441,29 @@
               <dl class="live-ring-energy-cost">
                 <div>
                   <dt class="sr-only">{{ t("stats.energy") }}</dt>
-                  <dd>
+                  <dd :class="{ 'live-stat-warning': ringAvailabilityReason(ring) === 'energy' }">
                     <Zap :size="18" aria-hidden="true" />
                     <span>{{ ring.energyCost }}</span>
                   </dd>
                 </div>
               </dl>
-              <div class="live-socket-track" :aria-label="t('stats.sockets')">
+              <div
+                v-if="ring.socketCount > 0"
+                class="live-socket-track"
+                :aria-label="t('stats.sockets')"
+              >
                 <span
                   v-for="slot in liveRingSocketSlots(ring)"
                   :key="`${ring.id}-socket-${slot.index}`"
                   :class="[
                     'live-socket',
                     slot.gem ? `rarity-border-${slot.gem.rarity}` : '',
-                    { filled: slot.gem, locked: slot.locked },
+                    { filled: slot.gem },
                   ]"
                   :title="
                     slot.gem
                       ? contentText(`gem.${slot.gem.definitionId}.name`, slot.gem.label)
-                      : t(slot.locked ? 'battle.live.lockedSocket' : 'battle.live.emptySocket')
+                      : t('battle.live.emptySocket')
                   "
                 >
                   <ItemArtwork
@@ -713,7 +716,6 @@ const canAct = computed(
   () => battle.value?.status === "active" && isViewerTurn.value && !submitting.value,
 );
 const elements = ["electric", "fire", "ice"] as const;
-const maxLiveRingSockets = 3;
 const selectedSource = ref<LiveBattleActionSource | null>(null);
 const selectedTargetId = ref<string | null>(null);
 const submitting = ref(false);
@@ -801,15 +803,10 @@ const statusLabel = computed(() => {
 const isDevelopment = import.meta.dev;
 
 function liveRingSocketSlots(ring: LiveBattleRingView) {
-  return Array.from({ length: maxLiveRingSockets }, (_, index) => {
-    const gem = ring.gems[index] ?? null;
-
-    return {
-      index,
-      gem,
-      locked: index >= ring.socketCount && !gem,
-    };
-  });
+  return Array.from({ length: ring.socketCount }, (_, index) => ({
+    index,
+    gem: ring.gems[index] ?? null,
+  }));
 }
 
 watch(
@@ -827,6 +824,9 @@ function sourceAvailability(source: LiveBattleActionSource) {
   return battle.value
     ? actionAvailability(battle.value, source)
     : { available: false, reason: "battleInactive" as const };
+}
+function ringAvailabilityReason(ring: LiveBattleRingView) {
+  return sourceAvailability(ringSource(ring)).reason;
 }
 function availabilityLabel(source: LiveBattleActionSource): string {
   return t(`battle.live.availability.${sourceAvailability(source).reason}`);
