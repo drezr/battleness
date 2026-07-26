@@ -1,0 +1,256 @@
+/* Private market history */
+.market-history-toolbar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.market-history-toolbar label {
+  min-width: 220px;
+}
+
+.market-ledger-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.market-ledger-list article {
+  display: grid;
+  grid-template-columns: auto 68px minmax(180px, 1.2fr) minmax(180px, 0.9fr) minmax(170px, 0.8fr);
+  gap: 11px;
+  align-items: center;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 8px;
+  padding: 9px 11px;
+  background: rgb(255 255 255 / 3%);
+}
+
+.market-ledger-list .item-artwork {
+  width: 64px;
+}
+
+.ledger-item-copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.ledger-item-copy h2 {
+  overflow: hidden;
+  margin: 0;
+  font-size: 0.94rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ledger-item-copy > span:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+}
+
+.ledger-item-copy > span:last-child > small {
+  color: var(--app-muted);
+}
+
+.ledger-settlement {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  text-align: right;
+}
+
+.ledger-settlement small {
+  color: var(--app-muted);
+  font-size: 0.62rem;
+}
+
+.ledger-settlement strong {
+  color: #f3cf77;
+}
+
+@media (max-width: 1100px) {
+  .game-market-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .market-transaction-desk {
+    position: static;
+  }
+
+  .player-listing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .market-ledger-list article {
+    grid-template-columns: auto 60px minmax(0, 1fr) auto;
+  }
+
+  .ledger-stats {
+    grid-column: 3;
+  }
+
+  .ledger-settlement {
+    grid-row: 1 / span 2;
+    grid-column: 4;
+  }
+}
+
+@media (max-width: 760px) {
+  .market-view-header {
+    align-items: start;
+  }
+
+  .market-mode-bar,
+  .market-history-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .market-mode-tabs {
+    display: flex;
+  }
+
+  .market-mode-tabs button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .market-filter-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .market-filter-strip > svg {
+    display: none;
+  }
+
+  .market-filter-strip > .pill {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .game-market-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .player-market-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .player-market-overview dl > div:first-child {
+    border-left: 0;
+  }
+
+  .player-listing-form,
+  .player-market-primary-filters,
+  .player-market-advanced-filters > div {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .listing-resource-field,
+  .player-listing-form button {
+    grid-column: 1 / -1;
+  }
+
+  .market-history-toolbar label {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .market-catalogue,
+  .market-transaction-desk,
+  .market-activity-section,
+  .player-market-search,
+  .market-history-toolbar {
+    padding: 13px;
+  }
+
+  .game-market-card {
+    grid-template-columns: 60px minmax(0, 1fr);
+  }
+
+  .game-market-card > .item-artwork {
+    width: 56px;
+  }
+
+  .player-market-overview dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 0;
+  }
+
+  .player-market-overview dl > div:nth-child(3) {
+    grid-column: 1 / -1;
+    border-left: 0;
+  }
+
+  .player-market-seller > summary {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .player-market-seller > summary > .pill {
+    grid-column: 1 / -1;
+    width: fit-content;
+  }
+
+  .player-listing-form,
+  .player-market-primary-filters,
+  .player-market-advanced-filters > div {
+    grid-template-columns: 1fr;
+  }
+
+  .player-listing-grid > article {
+    grid-template-columns: 76px minmax(0, 1fr);
+  }
+
+  .player-listing-art .item-artwork {
+    width: 72px;
+  }
+
+  .player-listing-price {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) auto;
+    justify-items: start;
+    align-items: center;
+    border-top: 1px solid var(--app-border);
+    padding-top: 9px;
+  }
+
+  .player-listing-price > small {
+    display: none;
+  }
+
+  .player-listing-price button {
+    justify-self: end;
+  }
+
+  .market-ledger-list article {
+    grid-template-columns: auto 54px minmax(0, 1fr);
+  }
+
+  .market-ledger-list .item-artwork {
+    width: 50px;
+  }
+
+  .ledger-stats {
+    grid-column: 2 / -1;
+  }
+
+  .ledger-settlement {
+    grid-row: auto;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) auto;
+    justify-items: start;
+    align-items: center;
+    border-top: 1px solid var(--app-border);
+    padding-top: 8px;
+    text-align: left;
+  }
+
+  .ledger-settlement strong {
+    justify-self: end;
+  }
+}

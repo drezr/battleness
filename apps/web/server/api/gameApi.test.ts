@@ -5007,6 +5007,41 @@ describe("Nuxt Game App APIs", () => {
     expect(history.records).toHaveLength(0);
   });
 
+  it("keeps history available when an old finished battle can no longer be replayed", async () => {
+    const { ringItemId } = await createAndActivateRingLoadout();
+    const started = (await battleStartHandler({
+      body: { requestId: "stale-history-replay" },
+    })) as LiveBattleApiResponse;
+    const persisted = await prisma.battleRecord.findUniqueOrThrow({ where: { id: started.id } });
+    const actions = JSON.parse(persisted.actionLogJson) as unknown[];
+
+    await prisma.battleRecord.update({
+      where: { id: started.id },
+      data: {
+        status: "finished",
+        result: "win",
+        finalStateChecksum: "fnv1a32:stale",
+        actionLogJson: JSON.stringify([
+          ...actions,
+          {
+            type: "useRing",
+            playerId: "devPlayer",
+            ringInstanceId: ringItemId,
+            targetId: "devPlayer.monster.missing.1",
+          },
+        ]),
+      },
+    });
+
+    const history = (await battleHistoryGetHandler({})) as BattleHistoryApiResponse;
+    expect(history.records[0]).toMatchObject({
+      id: started.id,
+      outcome: "win",
+      replayAvailable: false,
+      summary: null,
+    });
+  });
+
   it("submits live actions authoritatively and advances the passive training opponent", async () => {
     await createAndActivateRingLoadout();
     const started = (await battleStartHandler({

@@ -1,0 +1,454 @@
+/* Market workflows */
+.market-view-header {
+  align-items: end;
+}
+
+.market-view-header .button-link,
+.market-credit-balance,
+.market-mode-bar .text-link,
+.player-listing-price strong,
+.ledger-settlement strong {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.market-credit-balance {
+  border: 1px solid rgb(245 190 71 / 25%);
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: #f3cf77;
+  background: rgb(245 190 71 / 7%);
+  font-size: 0.78rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.market-mode-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--app-border);
+  padding-bottom: 12px;
+}
+
+.market-mode-tabs,
+.market-action-tabs {
+  display: inline-flex;
+  gap: 4px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 3px;
+  background: rgb(255 255 255 / 3%);
+}
+
+.market-mode-tabs button,
+.market-action-tabs button {
+  display: inline-flex;
+  min-height: 34px;
+  gap: 7px;
+  align-items: center;
+  border-color: transparent;
+  padding: 6px 11px;
+  color: var(--app-muted);
+  background: transparent;
+}
+
+.market-mode-tabs button.active,
+.market-action-tabs button.active {
+  color: #e9fbff;
+  background: rgb(37 215 242 / 12%);
+}
+
+.market-filter-strip {
+  display: grid;
+  grid-template-columns: auto repeat(2, minmax(160px, 230px)) minmax(0, 1fr);
+  gap: 9px;
+  align-items: end;
+  margin-top: 14px;
+}
+
+.market-filter-strip > svg {
+  align-self: center;
+  color: var(--app-muted);
+}
+
+.market-filter-strip label,
+.player-market-primary-filters label,
+.player-market-advanced-filters label,
+.player-listing-form label,
+.market-history-toolbar label {
+  display: grid;
+  gap: 5px;
+}
+
+.market-filter-strip > .pill {
+  align-self: center;
+  justify-self: end;
+}
+
+.game-market-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(290px, 0.42fr);
+  gap: 12px;
+  align-items: start;
+  margin-top: 14px;
+}
+
+.market-catalogue,
+.market-transaction-desk,
+.market-activity-section,
+.player-market-search,
+.market-history-toolbar {
+  min-width: 0;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 16px;
+  background: rgb(255 255 255 / 3%);
+}
+
+.game-market-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.game-market-card {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 10px;
+  min-height: 98px;
+  align-items: center;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 8px;
+  padding: 8px;
+  color: var(--app-text);
+  text-align: left;
+  background: rgb(255 255 255 / 3%);
+}
+
+.game-market-card:hover,
+.game-market-card.selected {
+  border-color: rgb(37 215 242 / 48%);
+  background: rgb(37 215 242 / 7%);
+}
+
+.game-market-card.blocked {
+  opacity: 0.68;
+}
+
+.game-market-card > .item-artwork {
+  width: 68px;
+}
+
+.game-market-card-copy {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: start;
+}
+
+.game-market-card-copy > span:first-child {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.game-market-card-copy strong,
+.game-market-card-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-market-card-copy small {
+  color: var(--app-muted);
+  font-size: 0.65rem;
+}
+
+.market-card-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-column: 1 / -1;
+  gap: 4px;
+}
+
+.market-card-metrics > span {
+  display: grid;
+  gap: 1px;
+  border-left: 1px solid var(--app-border);
+  padding-left: 7px;
+}
+
+.market-card-metrics strong {
+  font-size: 0.82rem;
+}
+
+.market-transaction-desk {
+  position: sticky;
+  top: 78px;
+  border-top: 3px solid var(--app-cyan);
+  background: rgb(13 30 39 / 72%);
+}
+
+.valuation-desk {
+  border-top-color: #f3b83f;
+  background: rgb(31 28 20 / 56%);
+}
+
+.market-desk-heading,
+.player-market-search-heading {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.market-desk-heading > div:last-child {
+  min-width: 0;
+  flex: 1;
+}
+
+.market-desk-heading h2,
+.player-market-search-heading h2 {
+  margin: 2px 0 0;
+}
+
+.market-desk-icon,
+.player-market-overview-icon,
+.player-market-seller-icon,
+.market-history-icon {
+  display: grid;
+  width: 40px;
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgb(37 215 242 / 25%);
+  border-radius: 8px;
+  color: var(--app-cyan);
+  background: rgb(37 215 242 / 8%);
+}
+
+.valuation-desk .market-desk-icon {
+  border-color: rgb(245 190 71 / 28%);
+  color: #f3b83f;
+  background: rgb(245 190 71 / 8%);
+}
+
+.market-action-tabs {
+  display: flex;
+  margin-top: 14px;
+}
+
+.market-action-tabs button {
+  flex: 1;
+  justify-content: center;
+}
+
+.market-desk-empty,
+.player-market-empty {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  border: 1px dashed rgb(255 255 255 / 17%);
+  border-radius: 8px;
+  margin-top: 14px;
+  padding: 18px;
+  color: var(--app-muted);
+  background: rgb(255 255 255 / 2%);
+}
+
+.market-desk-empty.compact {
+  padding: 13px;
+}
+
+.market-desk-empty p,
+.player-market-empty p,
+.player-market-empty h2 {
+  margin: 0;
+}
+
+.player-market-empty > div {
+  display: grid;
+  gap: 4px;
+}
+
+.market-selected-resource {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  border-block: 1px solid var(--app-border);
+  margin-top: 14px;
+  padding: 14px 0;
+}
+
+.market-selected-resource .item-artwork {
+  width: 68px;
+}
+
+.market-selected-resource > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.market-selected-resource h3 {
+  overflow: hidden;
+  margin: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.market-selected-resource .pill {
+  width: fit-content;
+}
+
+.market-quantity-field {
+  display: grid;
+  gap: 5px;
+  margin-top: 13px;
+}
+
+.market-transaction-preview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin: 13px 0 0;
+}
+
+.market-transaction-preview > div {
+  display: grid;
+  gap: 3px;
+  border-left: 1px solid var(--app-border);
+  padding-left: 8px;
+}
+
+.market-transaction-preview dt {
+  color: var(--app-muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.market-transaction-preview dd {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.market-primary-action {
+  display: flex;
+  width: 100%;
+  gap: 7px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.market-recipe-valuation {
+  display: grid;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  margin-top: 13px;
+  overflow: hidden;
+}
+
+.market-valuation-heading,
+.market-valuation-row,
+.market-buyback-line {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+}
+
+.market-valuation-heading {
+  background: rgb(255 255 255 / 5%);
+  font-weight: 900;
+}
+
+.market-valuation-row,
+.market-buyback-line {
+  border-top: 1px solid var(--app-border);
+  font-size: 0.76rem;
+}
+
+.market-valuation-row small {
+  color: var(--app-muted);
+}
+
+.market-buyback-line {
+  color: #f3cf77;
+}
+
+.market-blocked-reason {
+  display: flex;
+  gap: 7px;
+  align-items: start;
+  margin: 12px 0 0;
+  color: #f0a2a6;
+  font-size: 0.74rem;
+}
+
+.market-activity-section {
+  margin-top: 18px;
+}
+
+.market-activity-list {
+  display: grid;
+  gap: 0;
+  margin-top: 10px;
+}
+
+.market-activity-list article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  border-top: 1px solid var(--app-border);
+  padding: 9px 2px;
+}
+
+.market-activity-list article:first-child {
+  border-top: 0;
+}
+
+.market-activity-list article > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.market-activity-list small {
+  overflow: hidden;
+  color: var(--app-muted);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.market-activity-icon,
+.ledger-direction-icon {
+  display: grid;
+  width: 32px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 7px;
+}
+
+.market-activity-icon.buy,
+.ledger-direction-icon.purchase {
+  color: var(--app-cyan);
+  background: rgb(37 215 242 / 9%);
+}
+
+.market-activity-icon.sell,
+.ledger-direction-icon.sale {
+  color: #5ee193;
+  background: rgb(94 225 147 / 9%);
+}

@@ -1,0 +1,25 @@
+/* Matchmaking overrides kept after legacy PvP rules. */
+.ranked-leaderboard-panel .pill {
+  border-color: var(--app-border-strong);
+  color: var(--app-muted);
+  background: var(--app-raised);
+}
+
+.ranked-leaderboard-list > li {
+  background: var(--app-raised);
+}
+
+.ranked-leaderboard-list > li.current {
+  background: rgb(72 220 133 / 10%);
+}
+
+@media (max-width: 760px) {
+  .pvp-command-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pvp-command-actions > * {
+    width: 100%;
+  }
+}

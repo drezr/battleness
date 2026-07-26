@@ -1,0 +1,880 @@
+/* PvP hub and matchmaking */
+.pvp-hub-page,
+.pvp-flow-page {
+  display: grid;
+  gap: 24px;
+}
+
+.pvp-hub-page > .section-nav,
+.pvp-flow-page > .section-nav,
+.pvp-hub-page > .view-header,
+.pvp-flow-page > .view-header {
+  margin-bottom: 0;
+}
+
+.pvp-view-header {
+  align-items: center;
+}
+
+.pvp-readiness-link {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  min-width: 260px;
+  gap: 9px;
+  align-items: center;
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  padding: 9px 11px;
+  background: var(--app-surface);
+  text-decoration: none;
+}
+
+.pvp-readiness-link > svg:first-child {
+  box-sizing: content-box;
+  border-radius: 6px;
+  padding: 8px;
+  color: var(--app-green);
+  background: rgb(72 220 133 / 9%);
+}
+
+.pvp-readiness-link > span {
+  display: grid;
+  gap: 2px;
+}
+
+.pvp-readiness-link small,
+.pvp-countdown small {
+  color: var(--app-muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.pvp-readiness-link strong {
+  font-size: 0.78rem;
+}
+
+.pvp-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pvp-mode-tile {
+  --pvp-accent: var(--app-cyan);
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(128px, 1fr) auto auto;
+  min-width: 0;
+  gap: 14px;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 18px;
+  background: var(--app-surface);
+}
+
+.pvp-mode-tile::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: var(--pvp-accent);
+  content: "";
+}
+
+.private-mode-tile {
+  --pvp-accent: #b2a7ff;
+}
+
+.casual-mode-tile {
+  --pvp-accent: var(--app-cyan);
+}
+
+.ranked-mode-tile {
+  --pvp-accent: var(--app-gold);
+}
+
+.pvp-mode-emblem,
+.pvp-entry-icon,
+.pvp-console-icon,
+.pvp-match-ready-icon,
+.ranked-emblem {
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+}
+
+.pvp-mode-emblem {
+  width: 48px;
+  aspect-ratio: 1;
+  color: var(--pvp-accent);
+  background: color-mix(in srgb, var(--pvp-accent) 11%, transparent);
+}
+
+.pvp-mode-content {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+}
+
+.pvp-mode-content h2,
+.pvp-entry-card h2,
+.pvp-console-copy h2,
+.pvp-loadout-card h2,
+.pvp-recent-card h2,
+.private-player-copy h2,
+.pvp-search-copy h2,
+.pvp-match-found h2,
+.pvp-match-ready h2,
+.ranked-standing-copy h2,
+.ranked-notice-card h2,
+.pvp-accept-state h2 {
+  margin: 0;
+}
+
+.pvp-mode-content h2 {
+  font-size: 1.32rem;
+}
+
+.pvp-mode-content p,
+.pvp-entry-card p,
+.pvp-console-copy p,
+.pvp-loadout-card p,
+.pvp-recent-card p,
+.private-player-copy p,
+.pvp-search-copy p,
+.pvp-match-found p,
+.pvp-match-ready p,
+.pvp-accept-state p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.pvp-feature-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  border-top: 1px solid var(--app-border);
+  padding: 12px 0 0;
+  list-style: none;
+}
+
+.pvp-feature-list li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: #b8cbd2;
+  font-size: 0.72rem;
+}
+
+.pvp-feature-list svg {
+  flex: 0 0 auto;
+  color: var(--pvp-accent);
+}
+
+.pvp-mode-button {
+  display: flex;
+  width: 100%;
+  gap: 8px;
+  justify-content: space-between;
+  border-color: color-mix(in srgb, var(--pvp-accent) 55%, transparent);
+  background: color-mix(in srgb, var(--pvp-accent) 13%, var(--app-raised));
+  font-weight: 850;
+}
+
+.pvp-mode-button.primary {
+  border-color: var(--app-cyan);
+  color: #061217;
+  background: var(--app-cyan);
+}
+
+.pvp-system-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+}
+
+.pvp-system-strip > div {
+  display: flex;
+  min-width: 0;
+  gap: 9px;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--app-border);
+  padding: 12px;
+  color: var(--app-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.pvp-system-strip > div:last-child {
+  border-right: 0;
+}
+
+.pvp-system-strip svg {
+  flex: 0 0 auto;
+  color: var(--app-green);
+}
+
+.pvp-live-status,
+.pvp-state-pill,
+.private-ready-state {
+  display: inline-flex;
+  min-height: 27px;
+  gap: 6px;
+  align-items: center;
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  padding: 0 9px;
+  color: var(--app-muted);
+  background: var(--app-surface);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.pvp-live-status.realtime-connected {
+  border-color: rgb(72 220 133 / 30%);
+  color: var(--app-green);
+}
+
+.pvp-entry-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pvp-entry-card {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 14px;
+  align-content: start;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 20px;
+  background: var(--app-surface);
+}
+
+.pvp-entry-card > button,
+.pvp-entry-card > label {
+  grid-column: 1 / -1;
+}
+
+.pvp-entry-card > button {
+  gap: 8px;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.pvp-entry-icon {
+  width: 46px;
+  aspect-ratio: 1;
+  color: var(--app-cyan);
+  background: var(--app-cyan-soft);
+}
+
+.join-private-card .pvp-entry-icon {
+  color: #b2a7ff;
+  background: rgb(178 167 255 / 10%);
+}
+
+.pvp-entry-card > div:nth-child(2) {
+  display: grid;
+  gap: 7px;
+}
+
+.pvp-code-field,
+.pvp-loadout-select {
+  display: grid;
+  gap: 6px;
+  color: var(--app-muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.pvp-code-field input {
+  min-height: 46px;
+  font-size: 1rem;
+  font-weight: 850;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.private-lobby-banner {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgb(178 167 255 / 30%);
+  border-radius: 8px;
+  padding: 16px 18px;
+  background: rgb(178 167 255 / 7%);
+}
+
+.private-lobby-banner > div {
+  display: grid;
+  gap: 3px;
+}
+
+.private-lobby-banner strong {
+  color: #d8d2ff;
+  font-size: 1.8rem;
+  letter-spacing: 0;
+}
+
+.private-lobby-banner small {
+  color: var(--app-muted);
+  font-size: 0.7rem;
+}
+
+.private-lobby-banner button,
+.pvp-command-actions,
+.pvp-command-actions button,
+.pvp-match-found .button-link,
+.pvp-match-ready .button-link {
+  display: flex;
+  gap: 8px;
+}
+
+.private-lobby-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.private-player-slot {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  min-height: 126px;
+  gap: 13px;
+  align-items: center;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--app-surface);
+}
+
+.private-player-slot.ready {
+  border-color: rgb(72 220 133 / 30%);
+}
+
+.private-player-slot.empty {
+  border-style: dashed;
+}
+
+.private-player-avatar {
+  display: grid;
+  width: 52px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 7px;
+  color: var(--app-cyan);
+  background: var(--app-cyan-soft);
+}
+
+.private-player-slot.empty .private-player-avatar {
+  color: var(--app-muted);
+  background: rgb(255 255 255 / 5%);
+}
+
+.private-player-copy {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.private-ready-state.ready {
+  border-color: rgb(72 220 133 / 30%);
+  color: var(--app-green);
+}
+
+.pvp-command-bar {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  gap: 14px;
+  align-items: end;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--app-surface);
+}
+
+.pvp-command-actions {
+  align-items: center;
+}
+
+.pvp-matchmaking-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
+  gap: 12px;
+}
+
+.pvp-queue-console {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 16px;
+  align-content: start;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 22px;
+  background: var(--app-surface);
+}
+
+.pvp-console-icon {
+  width: 58px;
+  aspect-ratio: 1;
+  color: var(--app-cyan);
+  background: var(--app-cyan-soft);
+}
+
+.pvp-console-copy {
+  display: grid;
+  align-content: center;
+  gap: 6px;
+}
+
+.pvp-primary-command,
+.pvp-queue-rules,
+.ranked-console > .pvp-command-actions,
+.ranked-console > .settings-error,
+.ranked-console > .muted {
+  grid-column: 1 / -1;
+}
+
+.pvp-primary-command {
+  min-height: 48px;
+  gap: 9px;
+  margin-top: 12px;
+  border-color: var(--app-cyan);
+  color: #061217;
+  background: var(--app-cyan);
+  font-weight: 900;
+}
+
+.pvp-queue-rules {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 7px;
+  background: var(--app-border);
+}
+
+.pvp-queue-rules span {
+  display: flex;
+  min-height: 48px;
+  gap: 7px;
+  align-items: center;
+  justify-content: center;
+  padding: 9px;
+  color: var(--app-muted);
+  background: var(--app-raised);
+  font-size: 0.68rem;
+  font-weight: 750;
+  text-align: center;
+}
+
+.pvp-queue-rules svg {
+  flex: 0 0 auto;
+  color: var(--app-green);
+}
+
+.pvp-side-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.pvp-loadout-card,
+.pvp-recent-card,
+.ranked-notice-card {
+  display: grid;
+  gap: 9px;
+  align-content: start;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--app-surface);
+}
+
+.pvp-loadout-card.blocked {
+  border-color: rgb(255 209 102 / 30%);
+}
+
+.pvp-card-heading {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pvp-small-icon {
+  display: grid;
+  width: 30px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 6px;
+  color: var(--app-green);
+  background: rgb(72 220 133 / 9%);
+}
+
+.pvp-text-link {
+  display: flex;
+  min-height: 44px;
+  gap: 6px;
+  align-items: center;
+  width: fit-content;
+  margin-top: 3px;
+  color: var(--app-cyan);
+  font-size: 0.75rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.pvp-search-state,
+.pvp-accept-state,
+.pvp-match-found,
+.pvp-match-ready {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  min-height: 150px;
+  gap: 18px;
+  align-items: center;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 22px;
+  background: var(--app-surface);
+}
+
+.pvp-search-radar {
+  position: relative;
+  display: grid;
+  width: 82px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgb(37 215 242 / 30%);
+  border-radius: 50%;
+  color: var(--app-cyan);
+  background: var(--app-cyan-soft);
+}
+
+.pvp-search-radar span {
+  position: absolute;
+  border: 1px solid rgb(37 215 242 / 18%);
+  border-radius: 50%;
+  animation: pvp-radar 2s ease-out infinite;
+  inset: 8px;
+}
+
+.pvp-search-radar span:nth-child(2) {
+  animation-delay: 1s;
+}
+
+@keyframes pvp-radar {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.45);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+}
+
+.pvp-search-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.pvp-countdown {
+  display: grid;
+  min-width: 98px;
+  gap: 3px;
+  border-left: 1px solid var(--app-border);
+  padding-left: 18px;
+}
+
+.pvp-countdown strong {
+  color: var(--app-cyan);
+  font-size: 1.55rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvp-match-ready-icon {
+  width: 56px;
+  aspect-ratio: 1;
+  color: var(--app-green);
+  background: rgb(72 220 133 / 10%);
+}
+
+.pvp-accept-state {
+  border-color: rgb(255 209 102 / 34%);
+}
+
+.pvp-accept-state .pvp-match-ready-icon {
+  color: var(--app-gold);
+  background: rgb(255 209 102 / 10%);
+}
+
+.pvp-match-found,
+.pvp-match-ready {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  border-color: rgb(72 220 133 / 34%);
+}
+
+.ranked-command-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.7fr) minmax(0, 1.3fr);
+  gap: 12px;
+}
+
+.ranked-standing-card {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 14px;
+  align-content: start;
+  border: 1px solid rgb(255 209 102 / 28%);
+  border-radius: 8px;
+  padding: 18px;
+  background: var(--app-surface);
+}
+
+.ranked-emblem {
+  width: 64px;
+  aspect-ratio: 1;
+  color: var(--app-gold);
+  background: rgb(255 209 102 / 10%);
+}
+
+.ranked-standing-copy {
+  display: grid;
+  align-content: center;
+  gap: 5px;
+}
+
+.ranked-standing-card .summary-grid {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+}
+
+.ranked-standing-card .summary-grid > div {
+  background: var(--app-raised);
+}
+
+.ranked-notice-card,
+.ranked-recent-card {
+  grid-column: 1 / -1;
+}
+
+.ranked-console,
+.ranked-search-state,
+.pvp-accept-state,
+.ranked-command-layout > .pvp-match-found {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.ranked-console.unavailable {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.ranked-recent-card .button-link {
+  width: fit-content;
+}
+
+.ranked-leaderboard-panel {
+  border-color: var(--app-border);
+  background: var(--app-surface);
+}
+
+.ranked-leaderboard-list > li {
+  background: var(--app-raised);
+}
+
+.ranked-leaderboard-list > li.current {
+  background: rgb(72 220 133 / 10%);
+}
+
+.pvp-spin {
+  animation: pvp-spin 1.5s linear infinite;
+}
+
+@keyframes pvp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 920px) {
+  .pvp-mode-grid,
+  .ranked-command-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .pvp-mode-tile {
+    grid-template-columns: auto minmax(0, 1fr) minmax(180px, 0.65fr);
+    grid-template-rows: auto auto;
+  }
+
+  .pvp-feature-list {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-content: center;
+    border-top: 0;
+    border-left: 1px solid var(--app-border);
+    padding: 0 0 0 16px;
+  }
+
+  .pvp-mode-button {
+    grid-column: 2;
+  }
+
+  .ranked-console,
+  .ranked-search-state,
+  .pvp-accept-state,
+  .ranked-command-layout > .pvp-match-found {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .pvp-hub-page,
+  .pvp-flow-page {
+    gap: 16px;
+  }
+
+  .pvp-view-header {
+    align-items: stretch;
+  }
+
+  .pvp-readiness-link {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .pvp-mode-tile {
+    grid-template-columns: 48px minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+  }
+
+  .pvp-mode-content {
+    grid-column: 2;
+  }
+
+  .pvp-feature-list {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    border-top: 1px solid var(--app-border);
+    border-left: 0;
+    padding: 12px 0 0;
+  }
+
+  .pvp-mode-button {
+    grid-column: 1 / -1;
+  }
+
+  .pvp-system-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .pvp-system-strip > div {
+    justify-content: flex-start;
+    border-right: 0;
+    border-bottom: 1px solid var(--app-border);
+    text-align: left;
+  }
+
+  .pvp-system-strip > div:last-child {
+    border-bottom: 0;
+  }
+
+  .pvp-entry-grid,
+  .private-lobby-grid,
+  .pvp-matchmaking-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .private-lobby-banner,
+  .pvp-command-bar {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .private-lobby-banner {
+    flex-direction: column;
+  }
+
+  .private-lobby-banner button,
+  .pvp-command-actions,
+  .pvp-command-actions > *,
+  .pvp-command-bar button {
+    width: 100%;
+  }
+
+  .private-player-slot {
+    grid-template-columns: 46px minmax(0, 1fr);
+  }
+
+  .private-player-avatar {
+    width: 46px;
+  }
+
+  .private-ready-state,
+  .private-player-slot > .pvp-spin {
+    grid-column: 2;
+    width: fit-content;
+  }
+
+  .pvp-queue-rules {
+    grid-template-columns: 1fr;
+  }
+
+  .pvp-search-state,
+  .pvp-accept-state,
+  .pvp-match-found,
+  .pvp-match-ready {
+    grid-template-columns: auto minmax(0, 1fr);
+    min-height: 0;
+    padding: 16px;
+  }
+
+  .pvp-search-radar {
+    width: 60px;
+  }
+
+  .pvp-countdown,
+  .pvp-search-state > button,
+  .pvp-accept-state > .pvp-command-actions,
+  .pvp-match-found > .button-link,
+  .pvp-match-ready > .button-link {
+    grid-column: 1 / -1;
+  }
+
+  .pvp-countdown {
+    border-top: 1px solid var(--app-border);
+    border-left: 0;
+    padding: 12px 0 0;
+  }
+
+  .pvp-search-state > button,
+  .pvp-match-found > .button-link,
+  .pvp-match-ready > .button-link {
+    width: 100%;
+  }
+
+  .ranked-standing-card {
+    grid-template-columns: 54px minmax(0, 1fr);
+  }
+
+  .ranked-emblem {
+    width: 54px;
+  }
+}

@@ -1,0 +1,450 @@
+/* Forge workflows */
+.forge-view-header {
+  align-items: end;
+}
+
+.forge-view-header .button-link,
+.forge-credit-balance,
+.forge-recent-section .text-link,
+.socket-ring-station .text-link,
+.enchantment-lab .text-link {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.forge-credit-balance {
+  border: 1px solid rgb(245 190 71 / 25%);
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: #f3cf77;
+  background: rgb(245 190 71 / 7%);
+  font-size: 0.78rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.forge-overview {
+  display: grid;
+  grid-template-columns: minmax(210px, 0.8fr) minmax(0, 2fr);
+  gap: 20px;
+  align-items: center;
+  border: 1px solid rgb(245 190 71 / 22%);
+  border-left: 3px solid #f3b83f;
+  padding: 18px 20px;
+  background: rgb(31 28 20 / 66%);
+}
+
+.forge-overview-title {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+}
+
+.forge-overview-title > span,
+.quality-station-icon,
+.enchantment-icon {
+  display: grid;
+  width: 44px;
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgb(245 190 71 / 28%);
+  border-radius: 8px;
+  color: #f3b83f;
+  background: rgb(245 190 71 / 8%);
+}
+
+.forge-overview-title div {
+  display: grid;
+  gap: 2px;
+}
+
+.forge-overview-title small,
+.forge-overview dt {
+  color: var(--app-muted);
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.forge-overview-title strong {
+  font-size: 1.05rem;
+}
+
+.forge-overview > dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.forge-overview > dl > div {
+  display: grid;
+  gap: 4px;
+  border-left: 1px solid var(--app-border);
+  padding: 3px 16px;
+}
+
+.forge-overview dd {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 900;
+}
+
+.detail-layout.forge-detail-layout {
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: 16px;
+}
+
+.forge-main-workspace {
+  min-width: 0;
+  gap: 20px;
+}
+
+.forge-craft-workspace,
+.socket-composer,
+.quality-workspace {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.5fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.recipe-catalogue,
+.craft-station,
+.socket-ring-station,
+.socket-gem-vault,
+.enchantment-lab,
+.quality-item-library,
+.quality-station {
+  min-width: 0;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 16px;
+  background: rgb(255 255 255 / 3%);
+}
+
+.forge-type-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid var(--app-border);
+  margin: 12px 0;
+  padding-bottom: 8px;
+}
+
+.forge-type-tabs button {
+  min-height: 30px;
+  border-color: transparent;
+  padding: 5px 8px;
+  color: var(--app-muted);
+  background: transparent;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.forge-type-tabs button.active {
+  color: #ffe0a0;
+  background: rgb(245 190 71 / 10%);
+}
+
+.recipe-list {
+  display: grid;
+  max-height: 560px;
+  gap: 6px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.recipe-list-item,
+.socket-vault-list button,
+.quality-item-list button,
+.enchantment-target-strip button,
+.forge-recent-grid button {
+  display: grid;
+  min-width: 0;
+  align-items: center;
+  border: 1px solid rgb(255 255 255 / 13%);
+  border-radius: 7px;
+  color: var(--app-text);
+  text-align: left;
+  background: rgb(255 255 255 / 3%);
+}
+
+.recipe-list-item {
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 9px;
+  min-height: 60px;
+  padding: 6px;
+}
+
+.recipe-list-item:hover,
+.recipe-list-item.active,
+.socket-vault-list button:hover,
+.socket-vault-list button.selected,
+.quality-item-list button:hover,
+.quality-item-list button.active,
+.enchantment-target-strip button:hover,
+.enchantment-target-strip button.selected,
+.forge-recent-grid button:hover,
+.forge-recent-grid button.selected {
+  border-color: rgb(245 190 71 / 48%);
+  background: rgb(245 190 71 / 7%);
+}
+
+.recipe-list-item .item-artwork {
+  width: 44px;
+}
+
+.recipe-list-item > span,
+.socket-vault-list button > span,
+.quality-item-list button > span,
+.enchantment-target-strip button > span,
+.forge-recent-grid button > span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.recipe-list-item strong,
+.recipe-list-item small,
+.socket-vault-list strong,
+.socket-vault-list small,
+.quality-item-list strong,
+.quality-item-list small,
+.enchantment-target-strip strong,
+.enchantment-target-strip small,
+.forge-recent-grid strong,
+.forge-recent-grid small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recipe-list-item small,
+.socket-vault-list small,
+.quality-item-list small,
+.enchantment-target-strip small,
+.forge-recent-grid small {
+  color: var(--app-muted);
+  font-size: 0.67rem;
+}
+
+.recipe-ready {
+  color: #5ee193;
+}
+
+.recipe-blocked {
+  color: #7d8c92;
+}
+
+.craft-station {
+  border-top: 3px solid #f3b83f;
+  background: rgb(31 28 20 / 46%);
+}
+
+.craft-station-heading,
+.craft-ingredients-heading,
+.quality-station-heading,
+.enchantment-lab-heading {
+  display: flex;
+  gap: 12px;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.craft-station-heading h2,
+.craft-ingredients-heading h3,
+.quality-station-heading h2,
+.enchantment-lab-heading h2 {
+  margin: 2px 0 0;
+}
+
+.craft-blueprint {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  border-block: 1px solid var(--app-border);
+  margin-top: 16px;
+  padding: 18px 0;
+}
+
+.craft-output-art,
+.socket-ring-art,
+.quality-item-art {
+  display: grid;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 15%);
+  border-radius: 8px;
+  padding: 8px;
+  background: rgb(0 0 0 / 18%);
+}
+
+.craft-output-art .item-artwork {
+  width: 132px;
+}
+
+.craft-output-art > span {
+  color: var(--app-muted);
+  font-size: 0.64rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.craft-output-data {
+  display: grid;
+  gap: 16px;
+}
+
+.forge-object-type {
+  display: inline-flex;
+  width: fit-content;
+  gap: 7px;
+  align-items: center;
+  color: #f3cf77;
+  font-weight: 800;
+}
+
+.craft-output-data dl,
+.quality-selected-item dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.craft-output-data dl > div,
+.quality-selected-item dl > div {
+  display: grid;
+  gap: 3px;
+  border-left: 1px solid var(--app-border);
+  padding-left: 12px;
+}
+
+.craft-output-data dt,
+.quality-selected-item dt {
+  color: var(--app-muted);
+  font-size: 0.63rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.craft-output-data dd,
+.quality-selected-item dd {
+  margin: 0;
+  font-weight: 900;
+}
+
+.craft-ingredients-heading {
+  align-items: center;
+  margin-top: 18px;
+}
+
+.forge-readiness {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  color: #f0a2a6;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.forge-readiness.ready {
+  color: #5ee193;
+}
+
+.craft-ingredient-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.craft-ingredient-grid article {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: center;
+  border: 1px solid rgb(240 105 111 / 28%);
+  border-radius: 7px;
+  padding: 7px;
+  background: rgb(240 105 111 / 5%);
+}
+
+.craft-ingredient-grid article.ready {
+  border-color: rgb(94 225 147 / 26%);
+  background: rgb(94 225 147 / 5%);
+}
+
+.craft-ingredient-grid .item-artwork {
+  width: 38px;
+}
+
+.craft-ingredient-grid article > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.craft-ingredient-grid strong,
+.craft-ingredient-grid small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.craft-ingredient-grid small {
+  color: var(--app-muted);
+  font-size: 0.62rem;
+}
+
+.craft-ingredient-grid article > svg {
+  color: #f0696f;
+}
+
+.craft-ingredient-grid article.ready > svg {
+  color: #5ee193;
+}
+
+.craft-primary-action,
+.socket-primary-action {
+  display: flex;
+  width: 100%;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.forge-recent-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.forge-recent-grid button {
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 9px;
+  padding: 7px;
+}
+
+.forge-recent-grid .item-artwork {
+  width: 44px;
+}
+
+.forge-empty-state {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border: 1px dashed rgb(255 255 255 / 17%);
+  border-radius: 8px;
+  margin-top: 12px;
+  padding: 16px;
+  color: var(--app-muted);
+  background: rgb(255 255 255 / 2%);
+}
+
+.forge-empty-state p {
+  margin: 0;
+}

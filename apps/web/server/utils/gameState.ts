@@ -231,6 +231,23 @@ type RankedSeasonRewardViewSource = {
   rewardGrant: RewardGrantViewSource;
 };
 
+type BattleHistoryRecordSource = {
+  id: string;
+  mode: string;
+  status: string;
+  result: string;
+  seed: string;
+  rulesVersion: string;
+  contentVersion: string;
+  setupJson: string;
+  actionLogJson: string;
+  finalStateChecksum: string | null;
+  turnCount: number | null;
+  createdAt: Date;
+  winnerPlayerId: string | null;
+  rewardGrants: readonly RewardGrantViewSource[];
+};
+
 type BattleOutcome = "win" | "draw" | "loss";
 
 const developmentStartingCredits = 1_000_000;
@@ -725,29 +742,7 @@ export async function getBattleHistoryState() {
       level: levelFromExperience(player.experience),
     },
     seasonRewards: seasonRewards.map(toRankedSeasonRewardView),
-    records: records.map((record) => {
-      const reward = record.rewardGrants[0] ?? null;
-      const state = rebuildBattleState(record.setupJson, record.actionLogJson);
-
-      return {
-        id: record.id,
-        mode: record.mode,
-        status: record.status,
-        outcome: isPvpMode(record.mode)
-          ? privateBattleOutcome(record, currentPlayerId())
-          : (record.result as BattleOutcome),
-        seed: record.seed,
-        rulesVersion: record.rulesVersion,
-        contentVersion: record.contentVersion,
-        actionCount: jsonArrayLength(record.actionLogJson),
-        turnCount: record.turnCount ?? 0,
-        finalStateChecksum: record.finalStateChecksum,
-        replayAvailable: Boolean(record.finalStateChecksum),
-        createdAt: record.createdAt.toISOString(),
-        reward: toBattleRewardView(reward),
-        summary: battleResultSummary(state),
-      };
-    }),
+    records: records.map(toBattleHistoryRecordView),
   };
 }
 
@@ -4951,6 +4946,37 @@ function liveBattleOutcome(state: BattleState): BattleOutcome | "pending" {
     return "draw";
   }
   return state.result.winnerId === currentPlayerId() ? "win" : "loss";
+}
+
+function toBattleHistoryRecordView(record: BattleHistoryRecordSource) {
+  const reward = record.rewardGrants[0] ?? null;
+  let summary: ReturnType<typeof battleResultSummary> = null;
+  let replayAvailable = Boolean(record.finalStateChecksum);
+
+  try {
+    summary = battleResultSummary(rebuildBattleState(record.setupJson, record.actionLogJson));
+  } catch {
+    replayAvailable = false;
+  }
+
+  return {
+    id: record.id,
+    mode: record.mode,
+    status: record.status,
+    outcome: isPvpMode(record.mode)
+      ? privateBattleOutcome(record, currentPlayerId())
+      : (record.result as BattleOutcome),
+    seed: record.seed,
+    rulesVersion: record.rulesVersion,
+    contentVersion: record.contentVersion,
+    actionCount: jsonArrayLength(record.actionLogJson),
+    turnCount: record.turnCount ?? 0,
+    finalStateChecksum: record.finalStateChecksum,
+    replayAvailable,
+    createdAt: record.createdAt.toISOString(),
+    reward: toBattleRewardView(reward),
+    summary,
+  };
 }
 
 function privateBattleOutcome(

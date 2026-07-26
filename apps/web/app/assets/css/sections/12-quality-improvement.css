@@ -1,0 +1,352 @@
+/* Quality improvement */
+.quality-workspace {
+  grid-template-columns: minmax(260px, 0.75fr) minmax(0, 1.25fr);
+}
+
+.quality-item-library {
+  max-height: 720px;
+  overflow: hidden;
+}
+
+.quality-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.quality-filters label {
+  display: grid;
+  gap: 5px;
+}
+
+.quality-item-list {
+  display: grid;
+  max-height: 600px;
+  gap: 6px;
+  overflow-y: auto;
+  margin-top: 10px;
+  padding: 2px;
+}
+
+.quality-item-list button {
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 6px;
+}
+
+.quality-item-list .item-artwork {
+  width: 44px;
+}
+
+.quality-item-list button.maximum {
+  opacity: 0.62;
+}
+
+.quality-list-value {
+  align-items: end;
+  text-align: right;
+}
+
+.quality-list-value strong {
+  color: #f3b83f;
+  font-size: 1rem;
+}
+
+.quality-station {
+  border-top: 3px solid #f3b83f;
+  background: rgb(31 28 20 / 46%);
+}
+
+.quality-station-heading {
+  justify-content: start;
+}
+
+.quality-station-heading > div:last-child {
+  min-width: 0;
+  flex: 1;
+}
+
+.quality-selected-item {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  border-block: 1px solid var(--app-border);
+  margin-top: 16px;
+  padding: 16px 0;
+}
+
+.quality-item-art .item-artwork {
+  width: 104px;
+}
+
+.quality-selected-item > div:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 13px;
+}
+
+.quality-selected-item h3 {
+  margin: 2px 0 0;
+}
+
+.quality-progress-block {
+  display: grid;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.quality-progress-block > div:first-child,
+.quality-next-marker,
+.quality-comparison-heading,
+.quality-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.quality-progress-block > div:first-child span,
+.quality-next-marker span {
+  color: var(--app-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.quality-progress-block progress {
+  width: 100%;
+  height: 9px;
+  accent-color: #f3b83f;
+}
+
+.quality-next-marker {
+  justify-content: end;
+  gap: 6px;
+  color: #5ee193;
+}
+
+.quality-comparison {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  margin-top: 16px;
+  overflow: hidden;
+}
+
+.quality-comparison-heading {
+  padding: 10px 12px;
+  background: rgb(255 255 255 / 4%);
+  font-weight: 900;
+}
+
+.quality-comparison-heading small {
+  color: var(--app-muted);
+  font-weight: 500;
+}
+
+.quality-comparison-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px auto 52px 48px;
+  gap: 8px;
+  align-items: center;
+  border-top: 1px solid var(--app-border);
+  padding: 9px 12px;
+}
+
+.quality-comparison-row > strong {
+  text-align: right;
+}
+
+.quality-comparison-row > svg {
+  color: var(--app-muted);
+}
+
+.quality-gain {
+  color: #5ee193;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-align: right;
+}
+
+.quality-action-bar {
+  border-top: 1px solid var(--app-border);
+  margin-top: 16px;
+  padding-top: 15px;
+}
+
+.quality-action-bar > div {
+  display: grid;
+  gap: 3px;
+}
+
+.quality-action-bar small {
+  color: var(--app-muted);
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.quality-action-bar strong {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  color: #f3cf77;
+  font-size: 1.1rem;
+}
+
+.quality-status {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  margin: 10px 0 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.quality-status.maximum {
+  color: #5ee193;
+}
+
+.quality-status.blocked {
+  color: #f0a2a6;
+}
+
+@media (max-width: 1080px) {
+  .forge-craft-workspace,
+  .socket-composer,
+  .quality-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe-list,
+  .quality-item-list {
+    max-height: 360px;
+  }
+
+  .enchantment-target-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .forge-view-header {
+    align-items: start;
+  }
+
+  .forge-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .forge-overview > dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 0;
+  }
+
+  .forge-overview > dl > div:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .forge-process-steps {
+    overflow-x: auto;
+  }
+
+  .forge-process-steps > span {
+    white-space: nowrap;
+  }
+
+  .craft-ingredient-grid,
+  .socket-slot-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .socket-capacity-row {
+    grid-template-columns: 1fr;
+  }
+
+  .socket-capacity-action {
+    justify-content: space-between;
+  }
+
+  .socket-capacity-action small {
+    max-width: none;
+    text-align: left;
+  }
+
+  .enchantment-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .enchantment-link-icon {
+    min-height: 20px;
+    transform: rotate(90deg);
+  }
+
+  .forge-recent-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .forge-overview,
+  .recipe-catalogue,
+  .craft-station,
+  .socket-ring-station,
+  .socket-gem-vault,
+  .enchantment-lab,
+  .quality-item-library,
+  .quality-station {
+    padding: 13px;
+  }
+
+  .craft-blueprint,
+  .socket-selected-ring,
+  .quality-selected-item {
+    grid-template-columns: 82px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .craft-output-art .item-artwork,
+  .socket-ring-art .item-artwork,
+  .quality-item-art .item-artwork {
+    width: 68px;
+  }
+
+  .craft-output-data dl,
+  .quality-selected-item dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 0;
+  }
+
+  .craft-output-data dl > div:nth-child(3),
+  .quality-selected-item dl > div:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .craft-ingredients-heading,
+  .enchantment-lab-heading {
+    align-items: start;
+    flex-wrap: wrap;
+  }
+
+  .enchantment-lab-heading .text-link {
+    width: 100%;
+  }
+
+  .enchantment-target-strip,
+  .quality-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .quality-comparison-row {
+    grid-template-columns: minmax(0, 1fr) 40px auto 40px;
+  }
+
+  .quality-gain {
+    grid-column: 2 / -1;
+  }
+
+  .quality-comparison-heading small {
+    display: none;
+  }
+}

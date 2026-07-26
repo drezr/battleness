@@ -1,0 +1,217 @@
+/* Medium-density inventory cards with restrained rarity treatment. */
+.app-content .item-grid {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.app-content .card-grid {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.app-content .item-card {
+  border-left-width: 3px;
+  background: var(--app-surface);
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    transform 140ms ease;
+}
+
+.app-content .item-card:hover {
+  background: var(--app-raised);
+  transform: translateY(-1px);
+}
+
+.app-content .item-card.selected {
+  background: rgb(37 215 242 / 8%);
+}
+
+.app-content .item-card .summary-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.app-content .item-card code {
+  display: none;
+}
+
+.app-content .filter-bar {
+  border-bottom: 1px solid var(--app-border);
+  margin-bottom: 16px;
+  padding: 0 0 14px;
+  background: transparent;
+}
+
+.app-content select,
+.app-content input {
+  border-color: var(--app-border-strong);
+  background: #0d1a21;
+}
+
+@media (max-width: 1080px) {
+  :root {
+    --sidebar-width: 76px;
+  }
+
+  .shell-brand {
+    justify-content: center;
+    padding-inline: 10px;
+  }
+
+  .shell-brand > span,
+  .sidebar-nav a span,
+  .sidebar-account > span:not(.player-avatar),
+  .sidebar-account .icon-button {
+    display: none;
+  }
+
+  .sidebar-nav a {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding-inline: 8px;
+  }
+
+  .sidebar-account {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .home-command-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .home-metrics > div {
+    min-height: 105px;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    display: block;
+    padding-bottom: 62px;
+  }
+
+  .app-sidebar {
+    display: none;
+  }
+
+  .app-topbar {
+    min-height: 56px;
+    padding-inline: 12px;
+  }
+
+  .topbar-resource span {
+    display: none;
+  }
+
+  .topbar-resource {
+    grid-template-columns: auto auto;
+    min-height: 44px;
+    padding-inline: 7px;
+  }
+
+  .mobile-nav {
+    position: fixed;
+    z-index: 30;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    min-height: 62px;
+    border-top: 1px solid var(--app-border-strong);
+    padding: 5px 3px max(5px, env(safe-area-inset-bottom));
+    background: rgb(10 21 28 / 98%);
+    box-shadow: 0 -8px 28px rgb(0 0 0 / 28%);
+  }
+
+  .mobile-nav a {
+    display: grid;
+    min-width: 0;
+    gap: 2px;
+    place-items: center;
+    border-radius: 5px;
+    padding: 5px 1px;
+    color: #8298a1;
+    font-size: 0.58rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .mobile-nav a.active {
+    color: #c9f8ff;
+    background: var(--app-cyan-soft);
+  }
+
+  .app-content .shell {
+    width: calc(100% - 24px);
+    padding-block: 18px calc(80px + env(safe-area-inset-bottom));
+  }
+
+  .home-shell {
+    gap: 22px;
+  }
+
+  .home-header {
+    grid-template-columns: 1fr;
+  }
+
+  .home-wordmark {
+    display: none;
+  }
+
+  .battle-command-card {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .battle-command-copy {
+    padding: 22px;
+  }
+
+  .battle-emblem {
+    display: none;
+  }
+
+  .home-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .destination-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .collection-strip {
+    grid-template-columns: repeat(4, minmax(190px, 1fr));
+    overflow-x: auto;
+    padding-bottom: 5px;
+  }
+
+  .section-heading-row {
+    align-items: center;
+  }
+
+  .item-detail-panel.item-detail-empty {
+    display: none;
+  }
+}
+
+@media (max-width: 430px) {
+  .topbar-context span,
+  .topbar-profile {
+    display: none;
+  }
+
+  .battle-command-copy .control-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .home-metrics > div {
+    min-height: 104px;
+  }
+}

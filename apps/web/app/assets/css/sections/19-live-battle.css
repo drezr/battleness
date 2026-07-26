@@ -1,0 +1,1412 @@
+/* Full-screen live battle iteration */
+.app-shell.combat-shell {
+  display: block;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #050b10;
+}
+
+.combat-shell .app-workspace,
+.combat-shell .app-content {
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.combat-shell .app-content .live-battle-page {
+  width: 100%;
+  max-width: none;
+}
+
+.live-battle-page {
+  --live-page-padding: 6px;
+  --live-header-height: 65px;
+  --live-energy-height: 28px;
+  --live-ring-frame-ratio: 1.22454;
+  --live-ring-width: clamp(122px, calc((100vw - 36px) / 10), 190px);
+  --live-ring-title-height: 20px;
+  --live-ring-stats-height: 28px;
+  --live-ring-footer-height: 34px;
+  --live-ring-height: calc(var(--live-ring-width) * var(--live-ring-frame-ratio));
+  --live-ring-energy-size: calc(var(--live-ring-width) * 0.218);
+  --live-socket-size: calc(var(--live-ring-width) * 0.16);
+  --live-gem-size: calc(var(--live-ring-width) * 0.12);
+  --live-monster-width: clamp(132px, 8.8vw, 176px);
+  --live-monster-height: calc(var(--live-monster-width) * 1.2);
+  --live-hero-height: min(
+    172px,
+    max(
+      86px,
+      calc(
+        (
+            100dvh - var(--live-header-height) - var(--live-energy-height) -
+              var(--live-energy-height) - var(--live-ring-height) - 133px
+          ) /
+          2
+      )
+    )
+  );
+  display: grid;
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  min-height: 0;
+  grid-template-rows: var(--live-header-height) minmax(0, 1fr);
+  gap: 4px;
+  overflow: hidden;
+  padding: var(--live-page-padding);
+  color: var(--app-text);
+  background:
+    linear-gradient(180deg, rgb(5 13 19 / 28%), rgb(4 8 12 / 76%)),
+    url("/assets/backgrounds/live-battle-elemental-arena.jpg") center center / cover no-repeat,
+    #050b10;
+}
+
+.live-loading-panel {
+  width: min(620px, calc(100vw - 32px));
+  margin: 20vh auto 0;
+}
+
+.live-combat-toolbar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  height: var(--live-header-height);
+  min-height: 0;
+  gap: clamp(8px, 1.4vw, 14px);
+  align-items: center;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.live-combat-toolbar img {
+  width: clamp(76px, 6.6vw, 104px);
+  max-height: calc(var(--live-header-height) - 4px);
+  height: auto;
+}
+
+.live-combat-status {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  justify-items: center;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.live-combat-status span,
+.live-combat-status small {
+  color: #b7cad2;
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.live-combat-status strong {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: clamp(0.86rem, 1.5vw, 1.08rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.live-combat-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: end;
+}
+
+.live-toolbar-button {
+  width: 36px;
+  min-height: 36px;
+  border-color: rgb(216 237 244 / 42%);
+  color: #e6f9ff;
+  background: rgb(6 13 18 / 72%);
+}
+
+.live-arena {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: var(--live-energy-height) minmax(0, 1fr) auto var(--live-energy-height);
+  overflow: hidden;
+  border: 1px solid rgb(189 225 236 / 22%);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgb(17 58 85 / 24%), transparent 45%, rgb(111 32 22 / 18%)),
+    rgb(7 18 25 / 54%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 4%);
+}
+
+.live-energy-rail {
+  min-height: 0;
+  height: var(--live-energy-height);
+  padding: 2px 8px;
+}
+
+.live-energy-rail > span {
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.live-energy-slots {
+  grid-template-columns: repeat(8, minmax(10px, 1fr));
+}
+
+.live-energy-slots i {
+  height: 10px;
+  transform: skewX(-18deg);
+}
+
+.live-battle-board {
+  display: grid;
+  grid-template-columns: clamp(142px, 13vw, 184px) minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+  border-block: 1px solid rgb(189 225 236 / 18%);
+}
+
+.live-hero-column {
+  display: grid;
+  grid-template-rows: 1fr auto 1fr;
+  gap: 8px;
+  border-right: 1px solid rgb(189 225 236 / 18%);
+  padding: 10px;
+  background: rgb(0 0 0 / 16%);
+}
+
+.live-field-stack {
+  display: grid;
+  grid-template-rows: minmax(130px, 1fr) auto auto minmax(130px, 1fr);
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+}
+
+.live-arena .live-hero {
+  min-height: 0;
+  align-content: space-between;
+  gap: 8px;
+  padding: 10px;
+}
+
+.live-card-heading strong {
+  overflow-wrap: anywhere;
+  font-size: clamp(0.82rem, 1.2vw, 1rem);
+}
+
+.live-turn-console {
+  display: grid;
+  gap: 6px;
+  justify-items: stretch;
+}
+
+.live-turn-counter {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  color: #d8edf4;
+  font-size: 0.82rem;
+}
+
+.live-end-turn-button {
+  min-height: 44px;
+  border-color: rgb(37 215 242 / 62%);
+  color: #061217;
+  background: var(--app-cyan);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.live-concede-button {
+  justify-self: center;
+  border-color: rgb(255 98 125 / 38%);
+  color: #ffd5dc;
+  background: rgb(255 98 125 / 10%);
+}
+
+.live-arena .live-monster-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(118px, 210px));
+  gap: clamp(8px, 3vw, 42px);
+  align-items: center;
+  justify-content: space-around;
+}
+
+.opponent-monsters {
+  align-self: start;
+}
+
+.viewer-monsters {
+  align-self: start;
+}
+
+.live-arena .live-monster,
+.live-arena .empty-slot {
+  min-height: clamp(132px, 17vh, 190px);
+  padding: 8px;
+}
+
+.live-artwork-wrap {
+  min-height: 48px;
+}
+
+.live-artwork-wrap .item-artwork {
+  width: clamp(48px, 5.6vw, 70px);
+}
+
+.live-arena .live-monster > strong {
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.live-inline-stats {
+  justify-content: center;
+  gap: 5px 10px;
+}
+
+.live-arena-divider {
+  margin-inline: -10px;
+  padding: 4px 10px;
+}
+
+.live-opponent-reveals {
+  display: grid;
+  gap: 6px;
+  border-top: 0;
+  padding: 6px 8px;
+  background: rgb(19 43 53 / 66%);
+}
+
+.live-reveal-strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+.live-reveal-chip {
+  display: grid;
+  grid-template-columns: 28px minmax(70px, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  min-width: 170px;
+  border-radius: 6px;
+  padding: 5px 7px;
+  background: rgb(255 255 255 / 5%);
+}
+
+.live-reveal-chip .item-artwork {
+  width: 28px;
+}
+
+.live-reveal-chip strong {
+  overflow: hidden;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.live-reveal-chip small {
+  color: var(--app-muted);
+  font-size: 0.68rem;
+}
+
+.live-ring-dock {
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  gap: 6px;
+  padding: 8px;
+}
+
+.live-arena .live-ring {
+  min-width: 0;
+  min-height: 132px;
+  gap: 4px;
+  padding: 6px;
+  font-size: 0.72rem;
+}
+
+.live-arena .live-ring > strong {
+  display: -webkit-box;
+  min-height: 28px;
+  overflow: hidden;
+  text-align: center;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.live-arena .live-ring .live-artwork-wrap {
+  min-height: 44px;
+}
+
+.live-arena .live-ring .item-artwork {
+  width: 44px;
+}
+
+.live-arena .live-ring .pill {
+  padding: 2px 5px;
+  font-size: 0.58rem;
+}
+
+.live-arena .live-ring .live-inline-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px;
+}
+
+.live-arena .live-ring .live-inline-stats > div {
+  display: grid;
+  justify-items: center;
+  gap: 0;
+}
+
+.live-arena .live-ring .live-inline-stats dt {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.56rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.live-arena .live-ring .live-inline-stats dd {
+  font-size: 0.76rem;
+}
+
+.live-arena .live-gem-row {
+  min-height: 24px;
+  gap: 3px;
+  padding-top: 5px;
+}
+
+.live-gem-row .item-artwork {
+  width: 21px;
+  border-radius: 5px;
+}
+
+.live-developer-modal-backdrop {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 24px;
+  background: rgb(2 8 12 / 78%);
+  backdrop-filter: blur(4px);
+}
+
+.live-developer-modal {
+  display: grid;
+  width: min(860px, 100%);
+  max-height: calc(100vh - 48px);
+  gap: 14px;
+  overflow-y: auto;
+  border-color: var(--app-border-strong);
+  background: var(--app-surface);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 48%);
+}
+
+.live-developer-modal .live-resolution-feed,
+.live-developer-modal .live-diagnostics {
+  margin: 0;
+}
+
+.live-developer-modal .live-diagnostics {
+  border-color: var(--app-border);
+  background: var(--app-raised);
+}
+
+@media (max-width: 900px) {
+  .live-battle-board {
+    grid-template-columns: 128px minmax(0, 1fr);
+  }
+
+  .live-arena .live-monster-grid {
+    grid-template-columns: repeat(3, minmax(104px, 1fr));
+    gap: 8px;
+    overflow-x: visible;
+  }
+}
+
+@media (max-width: 640px) {
+  .live-battle-page {
+    padding: 8px;
+  }
+
+  .live-combat-toolbar {
+    grid-template-columns: auto 1fr;
+  }
+
+  .live-combat-toolbar img {
+    width: 72px;
+  }
+
+  .live-combat-status {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .live-combat-actions {
+    grid-column: 1 / -1;
+    justify-content: space-between;
+  }
+
+  .live-battle-board {
+    grid-template-columns: 1fr;
+  }
+
+  .live-hero-column {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto auto;
+    border-right: 0;
+    border-bottom: 1px solid rgb(189 225 236 / 18%);
+  }
+
+  .live-turn-console {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .live-field-stack {
+    grid-template-rows: auto auto auto auto;
+  }
+
+  .live-arena .live-monster-grid {
+    grid-template-columns: repeat(3, 132px);
+    justify-content: start;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .live-arena .live-monster,
+  .live-arena .empty-slot {
+    min-height: 136px;
+  }
+
+  .live-ring-dock {
+    grid-template-columns: none;
+    grid-auto-columns: 112px;
+    grid-auto-flow: column;
+    justify-content: start;
+  }
+
+  .live-energy-rail {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .live-energy-rail > strong {
+    grid-column: auto;
+  }
+}
+
+/* Live battle card presentation */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.live-arena .live-monster,
+.live-arena .live-ring {
+  --live-rarity-color: #f2f5f7;
+  --live-rarity-glow: rgb(242 245 247 / 18%);
+  position: relative;
+  overflow: visible;
+  border: 2px solid var(--live-rarity-color);
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 12%), transparent 14% 82%, rgb(0 0 0 / 38%)),
+    linear-gradient(180deg, rgb(15 39 56 / 94%), rgb(3 12 19 / 98%));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--live-rarity-color) 42%, transparent),
+    0 0 16px var(--live-rarity-glow),
+    0 12px 28px rgb(0 0 0 / 28%);
+}
+
+.live-arena .live-monster::before,
+.live-arena .live-ring::before {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  border-radius: 5px;
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, #fff 40%, var(--live-rarity-color)),
+    inset 0 0 14px color-mix(in srgb, var(--live-rarity-color) 34%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+  content: "";
+}
+
+.live-arena
+  :is(.live-ring, .live-monster).source-available:not(.source-selected):not(
+    .target-selected
+  ):hover::before,
+.live-arena
+  :is(.live-ring, .live-monster).target-available:not(.source-selected):not(
+    .target-selected
+  ):hover::before,
+.live-arena
+  :is(.live-ring, .live-monster).source-available:not(.source-selected):not(
+    .target-selected
+  ):focus-visible::before,
+.live-arena
+  :is(.live-ring, .live-monster).target-available:not(.source-selected):not(
+    .target-selected
+  ):focus-visible::before {
+  opacity: 1;
+}
+
+.live-arena .live-monster.rarity-border-normal,
+.live-arena .live-ring.rarity-border-normal,
+.live-arena .live-monster.rarity-border-common,
+.live-arena .live-ring.rarity-border-common {
+  --live-rarity-color: #f2f5f7;
+  --live-rarity-glow: rgb(242 245 247 / 14%);
+}
+
+.live-arena .live-monster.rarity-border-refined,
+.live-arena .live-ring.rarity-border-refined {
+  --live-rarity-color: #16a7ff;
+  --live-rarity-glow: rgb(22 167 255 / 28%);
+}
+
+.live-arena .live-monster.rarity-border-rare,
+.live-arena .live-ring.rarity-border-rare {
+  --live-rarity-color: #ff7b22;
+  --live-rarity-glow: rgb(255 123 34 / 30%);
+}
+
+.live-arena .live-monster.rarity-border-epic,
+.live-arena .live-ring.rarity-border-epic {
+  --live-rarity-color: #b100e8;
+  --live-rarity-glow: rgb(177 0 232 / 34%);
+}
+
+.live-card-titlebar,
+.live-ring-titlebar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  min-height: 24px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 5px 5px 3px 3px;
+  padding: 3px 6px;
+  background: linear-gradient(180deg, rgb(0 0 0 / 68%), rgb(0 0 0 / 36%));
+}
+
+.live-card-titlebar strong,
+.live-ring-titlebar strong {
+  overflow: hidden;
+  color: #f5fbff;
+  font-size: clamp(0.68rem, 1vw, 0.86rem);
+  font-weight: 950;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 70%);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.live-element-token {
+  max-width: 66px;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 44%);
+  border-radius: 999px;
+  padding: 2px 6px;
+  color: #061016;
+  font-size: 0.58rem;
+  font-weight: 950;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.live-card-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 4px;
+  background:
+    radial-gradient(circle at 50% 35%, rgb(255 255 255 / 10%), transparent 44%),
+    linear-gradient(145deg, rgb(18 80 117 / 28%), rgb(0 0 0 / 54%));
+}
+
+.live-card-art .item-artwork {
+  width: 100%;
+  max-width: none;
+  filter: drop-shadow(0 10px 18px rgb(0 0 0 / 42%));
+}
+
+.live-monster-art {
+  min-height: 0;
+  aspect-ratio: 1.05;
+}
+
+.live-monster-art .item-artwork {
+  height: 100%;
+  object-fit: cover;
+}
+
+.live-ring-art {
+  min-height: 58px;
+  aspect-ratio: 1.55;
+}
+
+.live-ring-art .item-artwork {
+  height: 100%;
+  object-fit: contain;
+  padding: 5px;
+}
+
+.live-card-status-row {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  left: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  justify-content: center;
+}
+
+.live-card-status-row .pill {
+  padding: 2px 5px;
+  font-size: 0.54rem;
+  line-height: 1;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 38%);
+}
+
+.live-card-stats {
+  display: grid;
+  margin: 0;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 5px;
+  background: rgb(0 0 0 / 58%);
+}
+
+.live-card-stats > div {
+  min-width: 0;
+}
+
+.live-card-stats dd,
+.live-ring-energy-cost dd {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  color: #f8fcff;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.live-card-stats svg,
+.live-ring-energy-cost svg {
+  flex: 0 0 auto;
+  color: #dff7ff;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 50%));
+}
+
+.live-card-stats .live-cooldown-ready {
+  color: var(--app-green);
+}
+
+.live-card-stats span,
+.live-ring-energy-cost span {
+  min-width: 0;
+}
+
+.live-monster-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.live-monster-stats > div + div,
+.live-ring-stats > div + div {
+  border-left: 1px solid rgb(255 255 255 / 16%);
+}
+
+.live-monster-stats dd {
+  min-height: 30px;
+  font-size: clamp(0.82rem, 1.15vw, 1rem);
+}
+
+.live-monster-stats > div:nth-child(2) svg {
+  color: #ff6476;
+}
+
+.live-ring-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.live-ring-stats dd {
+  min-height: 27px;
+  font-size: 0.82rem;
+}
+
+.live-arena .live-monster {
+  display: grid;
+  width: min(100%, 188px);
+  min-height: 0;
+  aspect-ratio: 0.76;
+  align-content: stretch;
+  gap: 5px;
+  justify-self: center;
+  padding: 6px;
+}
+
+.live-arena .live-monster.empty-slot {
+  width: min(100%, 188px);
+  aspect-ratio: 0.76;
+  border-style: dashed;
+  background: rgb(255 255 255 / 4%);
+  opacity: 0.42;
+}
+
+.live-arena .live-ring {
+  display: grid;
+  min-width: 0;
+  min-height: 178px;
+  grid-template-rows: auto minmax(58px, 1fr) auto auto auto;
+  gap: 5px;
+  padding: 7px;
+}
+
+.live-ring-footer {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 7px;
+  align-items: end;
+  min-height: 42px;
+}
+
+.live-ring-energy-cost {
+  display: block;
+  margin: 0;
+}
+
+.live-ring-energy-cost dd {
+  width: 42px;
+  aspect-ratio: 1;
+  border: 2px solid #17b9ff;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 45% 32%, rgb(157 235 255 / 34%), transparent 38%),
+    linear-gradient(180deg, #083a5f, #051a29);
+  color: #f5fdff;
+  font-size: 1rem;
+  box-shadow:
+    inset 0 0 0 2px rgb(0 0 0 / 38%),
+    0 0 14px rgb(23 185 255 / 34%);
+}
+
+.live-ring-energy-cost svg {
+  width: 14px;
+  color: #78e8ff;
+}
+
+.live-socket-track {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 31px));
+  gap: 5px;
+  justify-content: end;
+  align-items: center;
+  min-width: 0;
+}
+
+.live-socket {
+  display: grid;
+  width: 31px;
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  border: 2px solid rgb(0 0 0 / 78%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 42% 35%, rgb(255 255 255 / 14%), transparent 36%), #121820;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 18%),
+    0 3px 9px rgb(0 0 0 / 35%);
+}
+
+.live-socket.filled {
+  background: #071119;
+}
+
+.live-socket.locked {
+  border-color: rgb(0 0 0 / 52%);
+  background: #8d9294;
+  opacity: 0.72;
+}
+
+.live-socket .item-artwork {
+  width: 92%;
+  height: 92%;
+  object-fit: contain;
+}
+
+.live-arena .live-ring > .muted,
+.live-arena .live-monster > .muted {
+  display: block;
+  overflow: hidden;
+  color: #ffbfca;
+  font-size: 0.6rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.live-arena .live-ring.source-available,
+.live-arena .live-monster.source-available {
+  cursor: pointer;
+}
+
+.live-arena .live-monster.source-selected,
+.live-arena .live-monster.target-selected,
+.live-arena .live-ring.source-selected,
+.live-arena .live-ring.target-selected {
+  outline: 0;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--live-rarity-color) 42%, transparent),
+    inset 0 0 16px rgb(72 220 133 / 18%),
+    0 0 16px var(--live-rarity-glow),
+    0 12px 28px rgb(0 0 0 / 28%);
+}
+
+.live-arena .live-monster.source-selected::after,
+.live-arena .live-monster.target-selected::after,
+.live-arena .live-ring.source-selected::after,
+.live-arena .live-ring.target-selected::after {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  border: 2px solid rgb(72 220 133 / 90%);
+  border-radius: 5px;
+  box-shadow: inset 0 0 10px rgb(72 220 133 / 18%);
+  pointer-events: none;
+  content: "";
+}
+
+.live-arena .live-ring.resolution-source,
+.live-arena .live-monster.resolution-source {
+  animation: live-card-source-pulse 0.7s ease-out;
+}
+
+@keyframes live-card-source-pulse {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+
+  35% {
+    transform: translateY(-4px) scale(1.03);
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 900px) {
+  .live-arena .live-monster {
+    width: min(100%, 160px);
+  }
+
+  .live-ring-dock {
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .live-arena .live-monster,
+  .live-arena .live-monster.empty-slot {
+    width: 136px;
+  }
+
+  .live-ring-dock {
+    grid-auto-columns: 126px;
+  }
+
+  .live-arena .live-ring {
+    min-height: 178px;
+  }
+
+  .live-element-token {
+    max-width: 54px;
+    padding-inline: 5px;
+  }
+}
+
+/* Live battle sizing pass verified in the in-app browser */
+.live-battle-board {
+  height: auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.live-hero-column {
+  grid-template-rows: auto auto auto;
+  align-content: space-between;
+  gap: 4px;
+  padding: 6px;
+}
+
+.live-arena .live-hero {
+  height: var(--live-hero-height);
+  min-height: var(--live-hero-height);
+  max-height: var(--live-hero-height);
+  gap: 4px;
+  padding: 6px;
+}
+
+.live-arena .live-hero .live-card-heading {
+  gap: 1px;
+}
+
+.live-arena .live-hero .live-card-heading strong {
+  font-size: 0.82rem;
+  line-height: 1.05;
+}
+
+.live-arena .live-hero .eyebrow {
+  font-size: 0.58rem;
+}
+
+.live-arena .live-hero .live-health-line {
+  gap: 5px;
+}
+
+.live-arena .live-hero .live-health-line strong {
+  font-size: 0.76rem;
+}
+
+.live-arena .live-hero .live-inline-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.live-arena .live-hero .live-inline-stats > div {
+  display: flex;
+  gap: 4px;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.live-arena .live-hero .live-inline-stats dt,
+.live-arena .live-hero .live-inline-stats dd {
+  font-size: 0.62rem;
+  line-height: 1;
+}
+
+.live-field-stack {
+  grid-template-rows: minmax(0, 1fr) auto auto minmax(0, 1fr);
+  gap: 4px;
+  overflow: hidden;
+  padding: 6px;
+}
+
+.live-field-stack:not(:has(.live-opponent-reveals)) {
+  grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.live-arena .live-monster-grid {
+  grid-template-columns: repeat(3, minmax(0, var(--live-monster-width)));
+  gap: clamp(4px, 2vw, 28px);
+  align-content: center;
+  align-items: center;
+  align-self: center;
+  overflow: hidden;
+}
+
+.opponent-monsters,
+.viewer-monsters {
+  align-self: center;
+}
+
+.live-arena .live-monster,
+.live-arena .live-monster.empty-slot {
+  width: min(100%, var(--live-monster-width));
+  height: var(--live-monster-height);
+  min-height: 0;
+  aspect-ratio: auto;
+  gap: 2px;
+  padding: 2px;
+}
+
+.live-monster-art {
+  aspect-ratio: auto;
+  min-height: 0;
+}
+
+.live-monster-stats dd {
+  min-height: 30px;
+  font-size: 0.88rem;
+}
+
+.live-ring-dock {
+  grid-template-columns: repeat(auto-fill, var(--live-ring-width));
+  gap: 2px;
+  justify-content: start;
+  align-items: start;
+  min-height: 0;
+  max-height: calc(var(--live-ring-height) + 4px);
+  overflow: hidden;
+  padding: 2px;
+}
+
+.live-arena .live-ring.rarity-border-normal,
+.live-arena .live-ring.rarity-border-common {
+  --live-ring-frame-url: url("/assets/cards/ring-frame-common.png");
+}
+
+.live-arena .live-ring.rarity-border-refined {
+  --live-ring-frame-url: url("/assets/cards/ring-frame-refined.png");
+}
+
+.live-arena .live-ring.rarity-border-rare {
+  --live-ring-frame-url: url("/assets/cards/ring-frame-rare.png");
+}
+
+.live-arena .live-ring.rarity-border-epic {
+  --live-ring-frame-url: url("/assets/cards/ring-frame-epic.png");
+}
+
+.live-arena .live-ring {
+  --live-ring-frame-url: url("/assets/cards/ring-frame-common.png");
+  width: var(--live-ring-width);
+  height: var(--live-ring-height);
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--live-ring-frame-url) center center / 100% 100% no-repeat;
+  box-shadow:
+    0 0 14px var(--live-rarity-glow),
+    0 12px 28px rgb(0 0 0 / 28%);
+  overflow: visible;
+  padding: 0;
+}
+
+.live-arena
+  .live-ring
+  > :is(.live-ring-titlebar, .live-ring-art, .live-ring-stats, .live-ring-footer) {
+  position: absolute;
+  z-index: 1;
+}
+
+.live-ring-titlebar {
+  grid-template-columns: minmax(0, 1fr) max-content;
+  top: 4%;
+  right: 5.8%;
+  left: 5.8%;
+  height: 9.7%;
+  min-height: 0;
+  border: 0;
+  padding: 0 2.6%;
+  background: transparent;
+}
+
+.live-ring-titlebar strong {
+  min-width: 0;
+  font-size: clamp(0.58rem, calc(var(--live-ring-width) * 0.052), 0.78rem);
+  line-height: 1;
+}
+
+.live-ring-titlebar .live-element-token {
+  justify-self: end;
+  max-width: none;
+  padding: 1px 4px;
+  font-size: clamp(0.4rem, calc(var(--live-ring-width) * 0.032), 0.52rem);
+}
+
+.live-arena .live-monster .live-card-titlebar {
+  padding: 2px;
+}
+
+.live-arena .live-monster .live-element-token {
+  padding: 2px;
+}
+
+.live-ring-art {
+  top: 14%;
+  right: 5.6%;
+  left: 5.6%;
+  min-height: 0;
+  height: 47.8%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.live-arena .live-ring .live-ring-art .item-artwork {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border: 0;
+  padding: 0;
+  background-color: transparent;
+  object-fit: cover;
+  transform: none;
+}
+
+.live-ring-stats {
+  top: 61.4%;
+  right: 5.2%;
+  left: 5.2%;
+  height: 17.8%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.live-ring-stats dd {
+  min-height: 100%;
+  justify-content: flex-start;
+  padding-left: 38%;
+  font-size: clamp(0.78rem, calc(var(--live-ring-width) * 0.085), 1.04rem);
+}
+
+.live-ring-stats > div:last-child dd {
+  padding-left: 42%;
+}
+
+.live-ring-stats dd:has(.live-cooldown-ready) {
+  justify-content: center;
+  padding-left: 0;
+}
+
+.live-ring-stats svg:not(.live-cooldown-ready) {
+  display: none;
+}
+
+.live-ring-stats .live-cooldown-ready {
+  width: calc(var(--live-ring-width) * 0.09);
+  height: calc(var(--live-ring-width) * 0.09);
+}
+
+.live-ring-footer {
+  right: 0;
+  bottom: 4.7%;
+  left: 0;
+  display: block;
+  height: 17.6%;
+  min-height: 0;
+}
+
+.live-ring-energy-cost {
+  position: absolute;
+  bottom: 0;
+  left: 0.2%;
+  width: var(--live-ring-energy-size);
+  height: var(--live-ring-energy-size);
+}
+
+.live-arena .live-ring .live-ring-energy-cost > div {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.live-ring-energy-cost dd {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: clamp(0.76rem, calc(var(--live-ring-width) * 0.07), 1.08rem);
+}
+
+.live-ring-energy-cost svg {
+  display: none;
+}
+
+.live-socket-track {
+  position: absolute;
+  right: 5.1%;
+  bottom: 4.4%;
+  left: 27.3%;
+  grid-template-columns: repeat(3, var(--live-socket-size));
+  gap: 0;
+  align-content: center;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.live-socket {
+  width: var(--live-socket-size);
+  position: relative;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.live-socket.locked::after {
+  position: absolute;
+  inset: 15%;
+  border-radius: 50%;
+  background: rgb(156 163 166 / 58%);
+  box-shadow: inset 0 1px 2px rgb(255 255 255 / 24%);
+  content: "";
+}
+
+.live-arena .live-ring .live-socket .item-artwork {
+  width: var(--live-gem-size);
+  height: var(--live-gem-size);
+  align-self: center;
+  justify-self: center;
+  position: relative;
+  z-index: 1;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  filter: drop-shadow(0 1px 3px rgb(0 0 0 / 75%));
+}
+
+.live-arena .live-ring.source-selected::after,
+.live-arena .live-ring.target-selected::after {
+  inset: 3.2%;
+  border-radius: 6%;
+}
+
+.live-arena .live-ring > .muted,
+.live-arena .live-monster > .muted {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .live-battle-page {
+    --live-page-padding: 4px;
+    --live-header-height: 52px;
+    --live-energy-height: 24px;
+    --live-ring-width: min(124px, calc((100vw - 40px) / 10));
+    --live-ring-title-height: 18px;
+    --live-ring-stats-height: 24px;
+    --live-ring-footer-height: 28px;
+    --live-ring-energy-size: calc(var(--live-ring-width) * 0.218);
+    --live-socket-size: calc(var(--live-ring-width) * 0.16);
+    --live-gem-size: calc(var(--live-ring-width) * 0.12);
+    --live-monster-width: clamp(104px, 14vw, 128px);
+    --live-hero-height: min(
+      140px,
+      max(
+        76px,
+        calc(
+          (
+              100dvh - var(--live-header-height) - var(--live-energy-height) -
+                var(--live-energy-height) - var(--live-ring-height) - 118px
+            ) /
+            2
+        )
+      )
+    );
+  }
+
+  .live-battle-board {
+    grid-template-columns: 116px minmax(0, 1fr);
+    height: auto;
+    min-height: 0;
+  }
+
+  .live-arena .live-monster,
+  .live-arena .live-monster.empty-slot {
+    width: min(100%, var(--live-monster-width));
+    height: var(--live-monster-height);
+  }
+
+  .live-ring-dock {
+    grid-template-columns: repeat(auto-fill, var(--live-ring-width));
+  }
+
+  .live-arena .live-ring {
+    width: var(--live-ring-width);
+  }
+}
+
+@media (max-width: 640px) {
+  .live-battle-page {
+    --live-page-padding: 3px;
+    --live-header-height: 46px;
+    --live-energy-height: 22px;
+    --live-ring-width: min(86px, calc((100vw - 34px) / 10));
+    --live-ring-title-height: 15px;
+    --live-ring-stats-height: 20px;
+    --live-ring-footer-height: 22px;
+    --live-ring-energy-size: calc(var(--live-ring-width) * 0.218);
+    --live-socket-size: calc(var(--live-ring-width) * 0.16);
+    --live-gem-size: calc(var(--live-ring-width) * 0.12);
+    --live-monster-width: clamp(78px, 15vw, 96px);
+    --live-hero-height: min(
+      136px,
+      max(
+        68px,
+        calc(
+          (
+              100dvh - var(--live-header-height) - var(--live-energy-height) -
+                var(--live-energy-height) - var(--live-ring-height) - 100px
+            ) /
+            2
+        )
+      )
+    );
+  }
+
+  .live-combat-toolbar {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .live-combat-actions {
+    grid-column: auto;
+    justify-content: end;
+  }
+
+  .live-battle-board {
+    grid-template-columns: 88px minmax(0, 1fr);
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .live-hero-column {
+    grid-template-columns: none;
+    grid-template-rows: auto auto auto;
+    border-right: 1px solid rgb(189 225 236 / 18%);
+    border-bottom: 0;
+    padding: 3px;
+  }
+
+  .live-turn-console {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .live-arena .live-hero {
+    height: var(--live-hero-height);
+    min-height: var(--live-hero-height);
+    max-height: var(--live-hero-height);
+    padding: 3px;
+  }
+
+  .live-ring-dock {
+    grid-template-columns: repeat(auto-fill, var(--live-ring-width));
+    grid-auto-columns: var(--live-ring-width);
+  }
+
+  .live-arena .live-ring {
+    width: var(--live-ring-width);
+    height: var(--live-ring-height);
+    min-height: 0;
+  }
+}

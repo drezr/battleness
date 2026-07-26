@@ -1,0 +1,929 @@
+/* Profile, progression, and account preferences */
+.profile-page,
+.progression-page,
+.profile-settings-page {
+  display: grid;
+  gap: 24px;
+}
+
+.profile-page > .section-nav,
+.progression-page > .section-nav,
+.profile-settings-page > .section-nav,
+.progression-page > .view-header,
+.profile-settings-page > .view-header {
+  margin-bottom: 0;
+}
+
+.profile-command-header {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--app-border);
+  padding: 8px 0 22px;
+}
+
+.profile-identity {
+  display: flex;
+  min-width: 0;
+  gap: 16px;
+  align-items: center;
+}
+
+.profile-avatar,
+.settings-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  width: 72px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid var(--app-cyan);
+  border-radius: 8px;
+  color: #07141b;
+  background: var(--app-cyan);
+  font-size: 1.35rem;
+  font-weight: 950;
+}
+
+.profile-identity > div {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.profile-identity h1 {
+  overflow: hidden;
+  margin: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-identity p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: center;
+  margin: 0;
+  color: var(--app-muted);
+}
+
+.profile-visibility {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  border-left: 1px solid var(--app-border);
+  padding-left: 9px;
+}
+
+.profile-header-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.profile-stat-strip,
+.progression-stat-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+}
+
+.profile-stat-strip > div {
+  display: flex;
+  min-width: 0;
+  gap: 11px;
+  align-items: center;
+  border-right: 1px solid var(--app-border);
+  padding: 14px 16px;
+}
+
+.profile-stat-strip > div:last-child,
+.progression-stat-strip > article:last-child {
+  border-right: 0;
+}
+
+.profile-stat-icon,
+.progression-stat-icon,
+.settings-section-icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 38px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 7px;
+  color: var(--app-cyan);
+  background: rgb(37 215 255 / 9%);
+}
+
+.profile-stat-icon.victories,
+.progression-stat-icon.quality {
+  color: var(--app-gold);
+  background: rgb(255 200 87 / 9%);
+}
+
+.profile-stat-icon.collection,
+.progression-stat-icon.items {
+  color: var(--app-green);
+  background: rgb(72 220 133 / 9%);
+}
+
+.profile-stat-strip > div > span:last-child,
+.progression-stat-strip article > div {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.profile-stat-strip small,
+.progression-stat-strip small,
+.progression-stat-strip article > div > span {
+  color: var(--app-muted);
+  font-size: 0.67rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.profile-stat-strip strong,
+.progression-stat-strip strong {
+  font-size: 1.22rem;
+}
+
+.profile-dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.75fr);
+  gap: 14px;
+}
+
+.profile-progress-panel,
+.profile-record-panel,
+.profile-activity-section,
+.progression-command-panel,
+.progression-collection-section {
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 18px;
+  background: var(--app-surface);
+}
+
+.profile-progress-panel,
+.profile-record-panel,
+.profile-activity-section,
+.progression-collection-section {
+  display: grid;
+  gap: 18px;
+}
+
+.profile-progress-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  border-top: 1px solid var(--app-border);
+  padding-top: 14px;
+}
+
+.profile-progress-metrics > div {
+  display: grid;
+  gap: 3px;
+  border-right: 1px solid var(--app-border);
+  padding: 0 12px;
+}
+
+.profile-progress-metrics > div:first-child {
+  padding-left: 0;
+}
+
+.profile-progress-metrics > div:last-child {
+  border-right: 0;
+}
+
+.profile-progress-metrics dt,
+.progression-item-bonus dt {
+  color: var(--app-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.profile-progress-metrics dd,
+.progression-item-bonus dd {
+  margin: 0;
+  font-weight: 900;
+}
+
+.profile-progress-metrics dd small {
+  margin-left: 3px;
+  color: var(--app-muted);
+}
+
+.profile-win-rate {
+  color: var(--app-green);
+  font-size: 1.55rem;
+}
+
+.profile-outcomes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.profile-outcomes > div {
+  display: grid;
+  gap: 3px;
+  border-top: 2px solid var(--app-border);
+  padding-top: 9px;
+}
+
+.profile-outcomes > .win {
+  border-color: var(--app-green);
+}
+
+.profile-outcomes > .draw {
+  border-color: var(--app-gold);
+}
+
+.profile-outcomes > .loss {
+  border-color: #ff7d8c;
+}
+
+.profile-outcomes span {
+  color: var(--app-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.profile-outcomes strong {
+  font-size: 1.25rem;
+}
+
+.profile-record-link {
+  justify-self: start;
+}
+
+.profile-activity-list {
+  display: grid;
+  gap: 6px;
+}
+
+.profile-activity-row {
+  display: grid;
+  grid-template-columns: 36px minmax(150px, 1fr) 80px 130px auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--app-border);
+  border-left: 3px solid var(--app-border);
+  border-radius: 7px;
+  padding: 10px 12px;
+  color: inherit;
+  background: var(--app-raised);
+  text-decoration: none;
+}
+
+.profile-activity-row.outcome-win {
+  border-left-color: var(--app-green);
+}
+
+.profile-activity-row.outcome-draw {
+  border-left-color: var(--app-gold);
+}
+
+.profile-activity-row.outcome-loss {
+  border-left-color: #ff7d8c;
+}
+
+.profile-activity-row:hover {
+  border-color: var(--app-cyan);
+}
+
+.profile-outcome-icon {
+  display: grid;
+  width: 34px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 5%);
+}
+
+.profile-activity-copy,
+.profile-activity-metric {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.profile-activity-copy small,
+.profile-activity-metric small,
+.profile-activity-row time {
+  color: var(--app-muted);
+  font-size: 0.72rem;
+}
+
+.profile-activity-row time {
+  text-align: right;
+}
+
+.profile-empty-activity {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 30px;
+  color: var(--app-muted);
+  text-align: center;
+}
+
+.progression-command-panel {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+.progression-rank-block {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  border: 1px solid var(--app-cyan);
+  border-radius: 7px;
+  background: rgb(37 215 255 / 7%);
+}
+
+.progression-rank-block > span,
+.progression-rank-block > small {
+  color: var(--app-muted);
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.progression-rank-block > strong {
+  color: var(--app-cyan);
+  font-size: 2.5rem;
+}
+
+.progression-command-copy {
+  display: grid;
+  gap: 18px;
+  padding: 6px 0;
+}
+
+.progression-health {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  color: #ff9aac;
+  font-weight: 900;
+}
+
+.progression-stat-strip > article {
+  display: flex;
+  min-width: 0;
+  gap: 10px;
+  align-items: center;
+  border-right: 1px solid var(--app-border);
+  padding: 14px;
+}
+
+.progression-stat-strip strong em {
+  color: var(--app-muted);
+  font-size: 0.7rem;
+  font-style: normal;
+}
+
+.progression-list-heading {
+  display: flex;
+  gap: 16px;
+  align-items: end;
+  justify-content: space-between;
+}
+
+.progression-list-heading > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.progression-type-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: flex-end;
+}
+
+.progression-type-filters button {
+  display: inline-flex;
+  min-height: 32px;
+  gap: 7px;
+  align-items: center;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  padding: 5px 9px;
+  color: var(--app-muted);
+  background: var(--app-raised);
+  font-size: 0.72rem;
+}
+
+.progression-type-filters button.active {
+  border-color: var(--app-cyan);
+  color: var(--app-text);
+  background: rgb(37 215 255 / 9%);
+}
+
+.progression-type-filters button span {
+  display: grid;
+  min-width: 19px;
+  height: 19px;
+  place-items: center;
+  border-radius: 5px;
+  color: var(--app-text);
+  background: rgb(255 255 255 / 7%);
+  font-size: 0.64rem;
+}
+
+.progression-page .progression-item-list {
+  gap: 7px;
+}
+
+.progression-page .progression-item-row {
+  grid-template-columns: 72px minmax(0, 1fr) 150px;
+  gap: 14px;
+  border: 1px solid var(--app-border);
+  border-left-width: 3px;
+  border-radius: 7px;
+  padding: 10px 12px;
+  background: var(--app-raised);
+}
+
+.progression-artwork-wrap {
+  position: relative;
+}
+
+.progression-page .progression-artwork-wrap .item-artwork {
+  width: 68px;
+}
+
+.progression-artwork-wrap .pill {
+  position: absolute;
+  right: -4px;
+  bottom: -3px;
+  font-size: 0.55rem;
+}
+
+.progression-item-copy {
+  display: grid;
+  min-width: 0;
+  gap: 9px;
+}
+
+.progression-item-copy .card-heading > div {
+  display: grid;
+  gap: 2px;
+}
+
+.progression-item-level {
+  color: var(--app-muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.progression-page .progression-item-bonus {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  justify-items: stretch;
+  margin: 0;
+}
+
+.progression-item-bonus > div {
+  display: grid;
+  place-content: center;
+  gap: 4px;
+  border-left: 1px solid var(--app-border);
+  padding-left: 12px;
+}
+
+.progression-empty {
+  padding: 28px;
+  color: var(--app-muted);
+  text-align: center;
+}
+
+.progression-formula-details {
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+}
+
+.progression-formula-details summary {
+  display: flex;
+  cursor: pointer;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  list-style: none;
+}
+
+.progression-formula-details summary > span {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.progression-formula-details summary > span:last-child {
+  color: var(--app-muted);
+  font-size: 0.72rem;
+}
+
+.progression-formula-details[open] summary svg:last-child {
+  transform: rotate(180deg);
+}
+
+.progression-formula-details > div {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--app-border);
+  padding: 14px 16px;
+}
+
+.progression-formula-details p {
+  margin: 0;
+  color: var(--app-muted);
+}
+
+.progression-formula-details code {
+  overflow-wrap: anywhere;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  padding: 10px;
+  color: #c9ffdb;
+  background: rgb(0 0 0 / 18%);
+}
+
+.settings-workspace {
+  display: grid;
+  grid-template-columns: minmax(220px, 270px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.settings-account-summary {
+  position: sticky;
+  top: 92px;
+  display: grid;
+  gap: 16px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 18px;
+  background: var(--app-surface);
+}
+
+.settings-account-summary > div {
+  display: grid;
+  gap: 3px;
+}
+
+.settings-account-summary h2,
+.settings-account-summary p {
+  margin: 0;
+}
+
+.settings-account-summary > div p {
+  color: var(--app-muted);
+}
+
+.settings-account-summary dl {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border-top: 1px solid var(--app-border);
+}
+
+.settings-account-summary dl > div {
+  display: grid;
+  gap: 3px;
+  border-bottom: 1px solid var(--app-border);
+  padding: 10px 0;
+}
+
+.settings-account-summary dt {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--app-muted);
+  font-size: 0.67rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.settings-account-summary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-weight: 800;
+}
+
+.settings-account-note {
+  display: flex;
+  gap: 7px;
+  align-items: flex-start;
+  color: var(--app-muted);
+  font-size: 0.7rem;
+}
+
+.settings-account-note svg {
+  flex: 0 0 auto;
+  color: var(--app-green);
+}
+
+.settings-preference-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-preference-section {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 14px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--app-surface);
+}
+
+.settings-section-icon {
+  width: 42px;
+}
+
+.settings-section-content {
+  display: grid;
+  min-width: 0;
+  gap: 16px;
+}
+
+.profile-settings-page .settings-section-heading {
+  grid-template-columns: minmax(200px, 0.45fr) minmax(0, 1fr);
+}
+
+.settings-mute-toggle {
+  border-bottom: 1px solid var(--app-border);
+  padding-bottom: 13px;
+}
+
+.profile-settings-page .settings-save-bar {
+  grid-column: 2;
+  bottom: 10px;
+}
+
+.profile-settings-page .settings-save-bar button {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .profile-dashboard-grid,
+  .settings-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-account-summary {
+    position: static;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .settings-account-summary dl,
+  .settings-account-note {
+    grid-column: 1 / -1;
+  }
+
+  .settings-account-summary dl {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .settings-account-summary dl > div {
+    border-right: 1px solid var(--app-border);
+    padding: 10px;
+  }
+
+  .settings-account-summary dl > div:last-child {
+    border-right: 0;
+  }
+
+  .profile-settings-page .settings-save-bar {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 700px) {
+  .profile-command-header,
+  .progression-list-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .profile-header-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-header-actions > * {
+    justify-content: center;
+  }
+
+  .profile-stat-strip,
+  .progression-stat-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-stat-strip > div:nth-child(2),
+  .progression-stat-strip > article:nth-child(2) {
+    border-right: 0;
+  }
+
+  .profile-stat-strip > div:nth-child(-n + 2),
+  .progression-stat-strip > article:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--app-border);
+  }
+
+  .progression-command-panel {
+    grid-template-columns: 90px minmax(0, 1fr);
+  }
+
+  .progression-type-filters {
+    justify-content: flex-start;
+  }
+
+  .profile-activity-row {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+  }
+
+  .profile-activity-metric,
+  .profile-activity-row time {
+    display: none;
+  }
+
+  .progression-page .progression-item-row {
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .progression-page .progression-artwork-wrap .item-artwork {
+    width: 54px;
+  }
+
+  .progression-page .progression-item-bonus {
+    grid-column: 2;
+  }
+
+  .progression-item-bonus > div:first-child {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .profile-settings-page .settings-section-heading,
+  .profile-settings-page .settings-field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 500px) {
+  .profile-avatar {
+    width: 58px;
+  }
+
+  .profile-identity h1 {
+    font-size: 1.55rem;
+  }
+
+  .profile-header-actions,
+  .profile-progress-metrics,
+  .settings-account-summary dl {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-progress-metrics > div,
+  .profile-progress-metrics > div:first-child {
+    border-right: 0;
+    border-bottom: 1px solid var(--app-border);
+    padding: 9px 0;
+  }
+
+  .profile-progress-metrics > div:last-child {
+    border-bottom: 0;
+  }
+
+  .profile-outcomes {
+    gap: 4px;
+  }
+
+  .progression-command-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .progression-rank-block {
+    grid-template-columns: auto auto auto;
+    gap: 9px;
+    padding: 10px;
+  }
+
+  .progression-rank-block > strong {
+    font-size: 1.7rem;
+  }
+
+  .progression-page .progression-item-row {
+    grid-template-columns: 1fr;
+  }
+
+  .progression-artwork-wrap {
+    width: 58px;
+  }
+
+  .progression-page .progression-item-bonus {
+    grid-column: 1;
+  }
+
+  .settings-account-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-account-summary dl,
+  .settings-account-note {
+    grid-column: 1;
+  }
+
+  .settings-account-summary dl > div {
+    border-right: 0;
+    padding: 10px 0;
+  }
+
+  .settings-preference-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .battle-hub-page :is(button, .button-link),
+  .campaign-page :is(button, .button-link),
+  .pvp-hub-page :is(button, .button-link),
+  .pvp-flow-page :is(button, .button-link),
+  .live-battle-page :is(button, .button-link) {
+    min-height: 44px;
+  }
+
+  .app-hub-page.forge-hub-page :is(button, .button-link, input, select),
+  .forge-page :is(button, .button-link, input, select),
+  .forge-craft-page :is(button, .button-link, input, select),
+  .forge-socket-page :is(button, .button-link, input, select),
+  .forge-quality-page :is(button, .button-link, input, select) {
+    min-height: 44px;
+  }
+
+  .app-hub-page.inventory-hub-page :is(button, .button-link, input, select),
+  .inventory-items-page :is(button, .button-link, input, select),
+  .inventory-materials-page :is(button, .button-link, input, select),
+  .equipment-page :is(button, .button-link, input, select),
+  .loadouts-page :is(button, .button-link, input, select) {
+    min-height: 44px;
+  }
+
+  .equipment-page .icon-button {
+    min-width: 44px;
+  }
+
+  .app-hub-page.market-hub-page :is(button, .button-link, input, select, summary),
+  .game-market-page :is(button, .button-link, input, select, summary),
+  .player-market-page :is(button, .button-link, input, select, summary),
+  .market-history-page :is(button, .button-link, input, select, summary) {
+    min-height: 44px;
+  }
+
+  .section-nav a,
+  .home-shell :is(button, .button-link, .text-link, input, select, summary),
+  .profile-page :is(button, .button-link, .text-link, input, select, summary),
+  .profile-history-page :is(button, .button-link, .text-link, input, select, summary),
+  .progression-page :is(button, .button-link, .text-link, input, select, summary),
+  .profile-settings-page
+    :is(button, .button-link, .text-link, input:not([type="checkbox"]), select, summary) {
+    min-height: 44px;
+  }
+
+  .section-nav a,
+  .home-shell .text-link,
+  .profile-page .text-link,
+  .profile-history-page .text-link,
+  .progression-page .text-link,
+  .profile-settings-page .text-link {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .profile-history-page .battle-history-new-match,
+  .profile-settings-page .settings-toggle-row,
+  .profile-settings-page input[type="range"] {
+    min-height: 44px;
+  }
+
+  .auth-page :is(button, .button-link, input, select) {
+    min-height: 44px;
+  }
+}

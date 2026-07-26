@@ -1,0 +1,289 @@
+/* Socket composition */
+.forge-process-steps {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border-bottom: 1px solid var(--app-border);
+  padding: 0 2px 14px;
+  color: var(--app-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.forge-process-steps > span {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.forge-process-steps strong {
+  display: grid;
+  width: 24px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid var(--app-border);
+  border-radius: 50%;
+}
+
+.forge-process-steps span.active,
+.forge-process-steps span.active strong {
+  border-color: rgb(37 215 242 / 38%);
+  color: var(--app-cyan);
+}
+
+.socket-composer {
+  grid-template-columns: minmax(0, 1.55fr) minmax(250px, 0.75fr);
+}
+
+.socket-ring-station {
+  border-top: 3px solid var(--app-cyan);
+  background: rgb(13 30 39 / 60%);
+}
+
+.forge-select-field {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.socket-selected-ring {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 15px;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.socket-ring-art .item-artwork {
+  width: 104px;
+}
+
+.socket-ring-copy {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+}
+
+.socket-ring-copy h3 {
+  margin: 2px 0 0;
+}
+
+.socket-ring-copy .text-link {
+  width: fit-content;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.socket-capacity-row {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) minmax(200px, auto);
+  gap: 14px;
+  align-items: center;
+  border-block: 1px solid var(--app-border);
+  margin-top: 16px;
+  padding: 13px 0;
+}
+
+.socket-capacity-row > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.socket-capacity-row > div:first-child strong {
+  font-size: 1.15rem;
+}
+
+.socket-capacity-track {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(22px, 1fr));
+  gap: 5px;
+}
+
+.socket-capacity-track span {
+  height: 7px;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 10%);
+}
+
+.socket-capacity-track span.active {
+  background: var(--app-cyan);
+}
+
+.socket-capacity-action {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  justify-content: end;
+}
+
+.socket-capacity-action small {
+  max-width: 170px;
+  color: var(--app-muted);
+  text-align: right;
+}
+
+.socket-capacity-action button,
+.enchantment-controls button,
+.quality-action-bar button {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.socket-slot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.socket-composer-slot {
+  position: relative;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  gap: 7px;
+  min-height: 66px;
+  align-items: center;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 7px;
+  padding: 7px;
+  background: rgb(255 255 255 / 3%);
+}
+
+.socket-composer-slot.empty {
+  grid-template-columns: auto minmax(0, 1fr);
+  border-style: dashed;
+  color: var(--app-muted);
+}
+
+.socket-composer-slot .item-artwork {
+  width: 42px;
+}
+
+.socket-composer-slot > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.socket-composer-slot strong,
+.socket-composer-slot small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.socket-composer-slot small {
+  color: var(--app-muted);
+  font-size: 0.6rem;
+}
+
+.socket-slot-index {
+  position: absolute;
+  z-index: 1;
+  top: 4px;
+  left: 4px;
+  display: grid;
+  width: 18px;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  color: #061116;
+  background: #dbe7ea;
+  font-size: 0.56rem;
+  font-weight: 900;
+}
+
+.socket-vault-list {
+  display: grid;
+  max-height: 474px;
+  gap: 6px;
+  overflow-y: auto;
+  margin-top: 12px;
+  padding: 2px;
+}
+
+.socket-vault-list button {
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 6px;
+}
+
+.socket-vault-list .item-artwork {
+  width: 40px;
+}
+
+.socket-vault-list button > svg {
+  color: #5ee193;
+}
+
+.enchantment-lab {
+  border-left: 3px solid #cf5ae4;
+}
+
+.enchantment-icon {
+  border-color: rgb(207 90 228 / 28%);
+  color: #e486f4;
+  background: rgb(207 90 228 / 8%);
+}
+
+.enchantment-lab-heading {
+  align-items: center;
+}
+
+.enchantment-lab-heading > div:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+
+.enchantment-lab-heading p,
+.quality-station-heading p {
+  margin: 4px 0 0;
+  color: var(--app-muted);
+  font-size: 0.8rem;
+}
+
+.enchantment-controls {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr) auto;
+  gap: 9px;
+  align-items: end;
+  border-top: 1px solid var(--app-border);
+  margin-top: 15px;
+  padding-top: 15px;
+}
+
+.enchantment-controls label {
+  display: grid;
+  gap: 6px;
+}
+
+.enchantment-link-icon {
+  display: grid;
+  min-height: 38px;
+  place-items: center;
+  color: #e486f4;
+}
+
+.enchantment-target-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.enchantment-target-strip button {
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 7px;
+  padding: 6px;
+}
+
+.enchantment-target-strip .item-artwork {
+  width: 38px;
+}
+
+.enchantment-target-strip button.unavailable {
+  opacity: 0.48;
+}
