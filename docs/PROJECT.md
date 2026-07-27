@@ -159,12 +159,26 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - Ring, gem, and monster frames identify rarity consistently: common uses light gray, refined uses blue, rare uses orange, and epic uses purple.
 - Live battle ring cards use rarity-specific frame image assets under `apps/web/public/assets/cards/`:
   `ring-frame-common.png`, `ring-frame-refined.png`, `ring-frame-rare.png`, and
-  `ring-frame-epic.png`.
+  `ring-frame-epic.png`. The artwork is rendered below the transparent frame layer, while localized
+  titles, elements, values, gems, and interaction feedback remain above it.
+- Live ring sockets use the separate `ring-socket.png` asset. Render exactly the owned ring's
+  `socketCount`: an existing empty socket remains visible, a socketed gem appears above its socket,
+  and nonexistent sockets do not produce locked or placeholder elements.
+- Compact gem artwork is circularly clipped, pixel-aligned when supported, and surrounded by its own
+  rarity-colored border.
+- Ring hover preserves the rarity frame and illuminates the complete transparent frame asset with a
+  short transition instead of drawing another outline. Selection also illuminates the frame without
+  replacing its rarity color and uses a slower two-second pulse that starts at maximum brightness.
+- Ready ring cooldowns display the localized green `battle.live.cooldownReady` label. An active
+  cooldown value or an unaffordable energy cost is orange; unavailable rings remain at full opacity.
 - Selection, targeting, and blocked-state indicators remain separate from rarity framing so interaction state does not replace item identity.
-- Hover should preserve the rarity frame and use a short shine transition instead of replacing the frame with another outline.
 - Ring, gem, and monster cards also display a localized elemental badge in the top-right corner: Electric uses yellow, Fire uses pink-red, and Ice uses light cyan.
 - Compact socketed gems use their elemental fill color while retaining rarity on the surrounding border.
 - Development-only battle diagnostics and last-resolution details should stay available through an explicit developer modal rather than being visible in the main combat layout.
+- Finished live battles replace the arena with a scroll-free outcome screen that prioritizes a large
+  result, compact reward totals, explicit exit and claim actions, and a reward layout with credits,
+  hero XP, and item XP above material artwork. Complete loadout snapshots and combat activity remain
+  available through an explicit Battle Info modal with its own internal scrolling.
 - The current Nuxt live battle background uses the public asset
   `apps/web/public/assets/backgrounds/live-battle-elemental-arena.jpg`, rendered as a covered
   full-screen arena backdrop with translucent combat overlays.
@@ -544,8 +558,10 @@ This section separates executable game rules from implementation decisions. It i
 - Decision: Use a dark-first tactical competitive interface. Desktop uses a persistent left sidebar and compact resource top bar; mobile uses a fixed bottom navigation bar. The home view acts as a command center rather than a marketing page.
 - Decision: Use medium-density item cards, a distinct display treatment for headings with a neutral sans-serif UI face, restrained rarity borders and glows, element badges with targeted color accents, and fast functional motion with reduced-motion support.
 - Decision: Use familiar Lucide icons for navigation and tools, text or icon-plus-text controls for explicit commands, the full BattleNess logo on the home view, and the compact BattleNess icon in the application shell.
+- Decision: The next visual iteration must make the Game App feel like a game rather than a conventional website or dashboard. Favor immersive game surfaces, stronger spatial hierarchy, and purpose-built game panels while reducing generic web cards, tables, and application chrome.
+- Decision: Establish and confirm the updated game-first visual language through the shared shell and a representative player workflow before rolling it out across every feature.
 - Reason: The Game App needs a recognizable player-facing hierarchy while preserving efficient access to battle, forge, inventory, market, and profile workflows on both mobile and desktop.
-- Tradeoffs: The shared shell and design tokens must be applied incrementally to established feature pages. The permanent Dev Lab keeps technical diagnostics that should not leak into the player-facing presentation.
+- Tradeoffs: Increased immersion must preserve legibility, accessibility, responsive behavior, localization, and efficient access to established features. The shared shell and design tokens must be applied incrementally to established feature pages. The permanent Dev Lab keeps technical diagnostics that should not leak into the player-facing presentation.
 
 #### Clean Rebuild
 

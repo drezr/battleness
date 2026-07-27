@@ -10,166 +10,6 @@
       </span>
     </header>
 
-    <section class="battle-summary-kpis">
-      <div>
-        <Clock3 :size="19" /><span
-          ><small>{{ t("stats.turns") }}</small
-          ><strong>{{ summary.turnCount }}</strong></span
-        >
-      </div>
-      <div>
-        <MousePointerClick :size="19" /><span
-          ><small>{{ t("stats.actions") }}</small
-          ><strong>{{ summary.actionCount }}</strong></span
-        >
-      </div>
-      <div>
-        <Flame :size="19" /><span
-          ><small>{{ t("stats.totalDamage") }}</small
-          ><strong>{{ totalDamage }}</strong></span
-        >
-      </div>
-      <div>
-        <Sparkles :size="19" /><span
-          ><small>{{ t("stats.itemXp") }}</small
-          ><strong>{{ totalItemExperience }}</strong></span
-        >
-      </div>
-    </section>
-
-    <section class="battle-contribution-section">
-      <div class="battle-summary-section-title">
-        <Users :size="18" />
-        <h3>{{ t("battle.summary.playerContribution") }}</h3>
-      </div>
-      <div class="battle-contribution-grid">
-        <article v-for="(player, index) in summary.players" :key="player.playerId">
-          <div class="battle-player-index">
-            {{ t("battle.summary.playerIndex", { index: index + 1 }) }}
-          </div>
-          <strong>{{ player.username }}</strong>
-          <dl>
-            <div>
-              <dt>{{ t("stats.totalDamage") }}</dt>
-              <dd>{{ player.damage }}</dd>
-            </div>
-            <div>
-              <dt>{{ t("stats.actions") }}</dt>
-              <dd>{{ player.actionCount }}</dd>
-            </div>
-          </dl>
-        </article>
-      </div>
-    </section>
-
-    <section class="battle-loadout-section">
-      <div class="battle-summary-section-title">
-        <Layers3 :size="18" />
-        <h3>{{ t("battle.summary.loadoutsTitle") }}</h3>
-      </div>
-      <p class="battle-loadout-note">{{ t("battle.summary.loadoutsDescription") }}</p>
-      <div class="battle-result-loadouts">
-        <section
-          v-for="(loadout, playerIndex) in visibleLoadouts"
-          :key="loadout.playerId"
-          class="battle-result-loadout"
-        >
-          <header>
-            <span class="battle-player-index">
-              {{ t("battle.summary.playerIndex", { index: playerIndex + 1 }) }}
-            </span>
-            <span>
-              <strong>{{ loadout.username }}</strong>
-              <small>{{ t("battle.summary.level", { level: loadout.level }) }}</small>
-            </span>
-            <strong>{{ t("battle.live.ringCount", { count: loadout.rings.length }) }}</strong>
-          </header>
-          <div class="battle-result-ring-grid">
-            <article
-              v-for="ring in loadout.rings"
-              :key="ring.id"
-              :class="['battle-result-ring', `rarity-border-${ring.rarity}`]"
-            >
-              <div class="battle-result-ring-heading">
-                <ItemArtwork :definition-id="ring.definitionId" kind="ring" />
-                <span>
-                  <strong>{{ contentText(`ring.${ring.definitionId}.name`, ring.label) }}</strong>
-                  <small>{{ t(`rarity.${ring.rarity}`) }}</small>
-                </span>
-                <span :class="['pill', `element-${ring.element}`]">
-                  {{ t(`element.${ring.element}`) }}
-                </span>
-              </div>
-              <dl class="battle-result-ring-stats">
-                <div>
-                  <dt>{{ t("stats.damage") }}</dt>
-                  <dd>{{ ring.damage }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t("stats.energy") }}</dt>
-                  <dd>{{ ring.energyCost }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t("stats.cooldown") }}</dt>
-                  <dd>{{ ring.cooldown }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t("stats.speed") }}</dt>
-                  <dd>{{ ring.speed }}</dd>
-                </div>
-              </dl>
-              <ul v-if="ring.gems.length" class="battle-result-gems">
-                <li v-for="gem in ring.gems" :key="gem.id">
-                  <ItemArtwork
-                    :definition-id="gem.definitionId"
-                    kind="gem"
-                    :title="contentText(`gem.${gem.definitionId}.name`, gem.label)"
-                  />
-                  <span>
-                    <strong>{{ contentText(`gem.${gem.definitionId}.name`, gem.label) }}</strong>
-                    <small>
-                      {{ t("battle.summary.gemStats", { damage: gem.damage }) }}
-                    </small>
-                  </span>
-                  <span v-if="gem.enchantment" class="battle-result-enchantment">
-                    <ItemArtwork
-                      :definition-id="gem.enchantment.definitionId"
-                      :kind="gem.enchantment.type"
-                      :title="gem.enchantment.label"
-                    />
-                    <small>{{ gem.enchantment.label }}</small>
-                  </span>
-                </li>
-              </ul>
-              <p v-else class="battle-result-no-gems">{{ t("battle.live.noGems") }}</p>
-            </article>
-          </div>
-        </section>
-      </div>
-    </section>
-
-    <section class="battle-activity-section">
-      <div class="battle-summary-section-title">
-        <Activity :size="18" />
-        <h3>{{ t("battle.summary.activityTitle") }}</h3>
-      </div>
-      <div class="battle-summary-activity-grid">
-        <section v-for="group in activityGroups" :key="group.label" class="battle-activity-group">
-          <h4>{{ group.label }}</h4>
-          <p v-if="group.entries.length === 0">{{ t("battle.summary.none") }}</p>
-          <ul v-else>
-            <li v-for="entry in group.entries" :key="`${entry.playerId}:${entry.id}`">
-              <span
-                ><strong>{{ entry.label }}</strong
-                ><small>{{ playerName(entry.playerId) }}</small></span
-              >
-              <strong>{{ t("common.multiplier", { count: entry.count }) }}</strong>
-            </li>
-          </ul>
-        </section>
-      </div>
-    </section>
-
     <section v-if="reward" class="battle-earned-section">
       <div class="battle-summary-section-title">
         <Gift :size="18" />
@@ -189,35 +29,275 @@
           >
         </div>
         <div>
-          <Package :size="18" /><span
-            ><small>{{ t("common.materials") }}</small
-            ><strong>+{{ totalMaterials }}</strong></span
-          >
-        </div>
-        <div>
           <Sparkles :size="18" /><span
             ><small>{{ t("stats.itemXp") }}</small
             ><strong>+{{ totalItemExperience }}</strong></span
           >
         </div>
       </div>
-      <div v-if="reward.materials.length || reward.items.length" class="battle-earned-details">
+      <div class="battle-earned-materials">
+        <div class="battle-earned-materials-title">
+          <Package :size="18" aria-hidden="true" />
+          <strong>{{ t("common.materials") }}</strong>
+        </div>
         <ul v-if="reward.materials.length">
           <li v-for="material in reward.materials" :key="material.materialId">
+            <ItemArtwork
+              :definition-id="material.materialId"
+              kind="material"
+              :title="contentText(`material.${material.materialId}.name`, material.label)"
+            />
             <span>{{ contentText(`material.${material.materialId}.name`, material.label) }}</span>
             <strong>+{{ material.quantity }}</strong>
           </li>
         </ul>
-        <ul v-if="reward.items.length">
-          <li v-for="item in reward.items" :key="item.inventoryItemId">
-            <span>{{ contentText(`${item.type}.${item.definitionId}.name`, item.label) }}</span>
-            <strong>{{
-              t("battle.live.experienceReward", { experience: item.experience })
-            }}</strong>
-          </li>
-        </ul>
+        <span v-else class="battle-earned-materials-empty">{{ t("battle.summary.none") }}</span>
       </div>
     </section>
+
+    <button
+      ref="battleInfoTrigger"
+      class="secondary-button battle-info-trigger"
+      type="button"
+      :aria-expanded="showBattleInfo"
+      aria-controls="battle-info-dialog"
+      @click="openBattleInfo"
+    >
+      <Info :size="18" aria-hidden="true" />
+      {{ t("battle.summary.battleInfo") }}
+    </button>
+
+    <Teleport to="body">
+      <div
+        v-if="showBattleInfo"
+        class="battle-info-backdrop"
+        role="presentation"
+        @click.self="closeBattleInfo"
+      >
+        <section
+          id="battle-info-dialog"
+          class="panel battle-info-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="battle-info-title"
+        >
+          <header class="battle-info-header">
+            <div>
+              <span class="eyebrow">{{ t("battle.summary.verifiedLog") }}</span>
+              <h2 id="battle-info-title">{{ t("battle.summary.battleInfo") }}</h2>
+            </div>
+            <button
+              ref="battleInfoClose"
+              class="icon-button"
+              type="button"
+              :aria-label="t('battle.summary.closeBattleInfo')"
+              :title="t('battle.summary.closeBattleInfo')"
+              @click="closeBattleInfo"
+            >
+              <X :size="19" aria-hidden="true" />
+            </button>
+          </header>
+
+          <section class="battle-summary-kpis">
+            <div>
+              <Clock3 :size="19" /><span
+                ><small>{{ t("stats.turns") }}</small
+                ><strong>{{ summary.turnCount }}</strong></span
+              >
+            </div>
+            <div>
+              <MousePointerClick :size="19" /><span
+                ><small>{{ t("stats.actions") }}</small
+                ><strong>{{ summary.actionCount }}</strong></span
+              >
+            </div>
+            <div>
+              <Flame :size="19" /><span
+                ><small>{{ t("stats.totalDamage") }}</small
+                ><strong>{{ totalDamage }}</strong></span
+              >
+            </div>
+            <div>
+              <Sparkles :size="19" /><span
+                ><small>{{ t("stats.itemXp") }}</small
+                ><strong>{{ totalItemExperience }}</strong></span
+              >
+            </div>
+          </section>
+
+          <section class="battle-contribution-section">
+            <div class="battle-summary-section-title">
+              <Users :size="18" />
+              <h3>{{ t("battle.summary.playerContribution") }}</h3>
+            </div>
+            <div class="battle-contribution-grid">
+              <article v-for="(player, index) in summary.players" :key="player.playerId">
+                <div class="battle-player-index">
+                  {{ t("battle.summary.playerIndex", { index: index + 1 }) }}
+                </div>
+                <strong>{{ player.username }}</strong>
+                <dl>
+                  <div>
+                    <dt>{{ t("stats.totalDamage") }}</dt>
+                    <dd>{{ player.damage }}</dd>
+                  </div>
+                  <div>
+                    <dt>{{ t("stats.actions") }}</dt>
+                    <dd>{{ player.actionCount }}</dd>
+                  </div>
+                </dl>
+              </article>
+            </div>
+          </section>
+
+          <section class="battle-loadout-section">
+            <div class="battle-summary-section-title">
+              <Layers3 :size="18" />
+              <h3>{{ t("battle.summary.loadoutsTitle") }}</h3>
+            </div>
+            <p class="battle-loadout-note">{{ t("battle.summary.loadoutsDescription") }}</p>
+            <div class="battle-result-loadouts">
+              <section
+                v-for="(loadout, playerIndex) in visibleLoadouts"
+                :key="loadout.playerId"
+                class="battle-result-loadout"
+              >
+                <header>
+                  <span class="battle-player-index">
+                    {{ t("battle.summary.playerIndex", { index: playerIndex + 1 }) }}
+                  </span>
+                  <span>
+                    <strong>{{ loadout.username }}</strong>
+                    <small>{{ t("battle.summary.level", { level: loadout.level }) }}</small>
+                  </span>
+                  <strong>{{ t("battle.live.ringCount", { count: loadout.rings.length }) }}</strong>
+                </header>
+                <div class="battle-result-ring-grid">
+                  <article
+                    v-for="ring in loadout.rings"
+                    :key="ring.id"
+                    :class="['battle-result-ring', `rarity-border-${ring.rarity}`]"
+                  >
+                    <div class="battle-result-ring-heading">
+                      <ItemArtwork :definition-id="ring.definitionId" kind="ring" />
+                      <span>
+                        <strong>{{
+                          contentText(`ring.${ring.definitionId}.name`, ring.label)
+                        }}</strong>
+                        <small>{{ t(`rarity.${ring.rarity}`) }}</small>
+                      </span>
+                      <span :class="['pill', `element-${ring.element}`]">
+                        {{ t(`element.${ring.element}`) }}
+                      </span>
+                    </div>
+                    <dl class="battle-result-ring-stats">
+                      <div>
+                        <dt>{{ t("stats.damage") }}</dt>
+                        <dd>{{ ring.damage }}</dd>
+                      </div>
+                      <div>
+                        <dt>{{ t("stats.energy") }}</dt>
+                        <dd>{{ ring.energyCost }}</dd>
+                      </div>
+                      <div>
+                        <dt>{{ t("stats.cooldown") }}</dt>
+                        <dd>{{ ring.cooldown }}</dd>
+                      </div>
+                      <div>
+                        <dt>{{ t("stats.speed") }}</dt>
+                        <dd>{{ ring.speed }}</dd>
+                      </div>
+                    </dl>
+                    <ul v-if="ring.gems.length" class="battle-result-gems">
+                      <li v-for="gem in ring.gems" :key="gem.id">
+                        <ItemArtwork
+                          :definition-id="gem.definitionId"
+                          kind="gem"
+                          :title="contentText(`gem.${gem.definitionId}.name`, gem.label)"
+                        />
+                        <span>
+                          <strong>{{
+                            contentText(`gem.${gem.definitionId}.name`, gem.label)
+                          }}</strong>
+                          <small>
+                            {{ t("battle.summary.gemStats", { damage: gem.damage }) }}
+                          </small>
+                        </span>
+                        <span v-if="gem.enchantment" class="battle-result-enchantment">
+                          <ItemArtwork
+                            :definition-id="gem.enchantment.definitionId"
+                            :kind="gem.enchantment.type"
+                            :title="gem.enchantment.label"
+                          />
+                          <small>{{ gem.enchantment.label }}</small>
+                        </span>
+                      </li>
+                    </ul>
+                    <p v-else class="battle-result-no-gems">{{ t("battle.live.noGems") }}</p>
+                  </article>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section class="battle-activity-section">
+            <div class="battle-summary-section-title">
+              <Activity :size="18" />
+              <h3>{{ t("battle.summary.activityTitle") }}</h3>
+            </div>
+            <div class="battle-summary-activity-grid">
+              <section
+                v-for="group in activityGroups"
+                :key="group.label"
+                class="battle-activity-group"
+              >
+                <h4>{{ group.label }}</h4>
+                <p v-if="group.entries.length === 0">{{ t("battle.summary.none") }}</p>
+                <ul v-else>
+                  <li v-for="entry in group.entries" :key="`${entry.playerId}:${entry.id}`">
+                    <span
+                      ><strong>{{ entry.label }}</strong
+                      ><small>{{ playerName(entry.playerId) }}</small></span
+                    >
+                    <strong>{{ t("common.multiplier", { count: entry.count }) }}</strong>
+                  </li>
+                </ul>
+              </section>
+            </div>
+          </section>
+
+          <section
+            v-if="reward && (reward.materials.length || reward.items.length)"
+            class="battle-reward-detail-section"
+          >
+            <div class="battle-summary-section-title">
+              <Gift :size="18" />
+              <h3>{{ t("battle.summary.rewardDetails") }}</h3>
+            </div>
+            <div class="battle-earned-details">
+              <ul v-if="reward.materials.length">
+                <li v-for="material in reward.materials" :key="material.materialId">
+                  <span>{{
+                    contentText(`material.${material.materialId}.name`, material.label)
+                  }}</span>
+                  <strong>+{{ material.quantity }}</strong>
+                </li>
+              </ul>
+              <ul v-if="reward.items.length">
+                <li v-for="item in reward.items" :key="item.inventoryItemId">
+                  <span>{{
+                    contentText(`${item.type}.${item.definitionId}.name`, item.label)
+                  }}</span>
+                  <strong>{{
+                    t("battle.live.experienceReward", { experience: item.experience })
+                  }}</strong>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+      </div>
+    </Teleport>
   </section>
 </template>
 
@@ -228,11 +308,13 @@ import {
   Coins,
   Flame,
   Gift,
+  Info,
   Layers3,
   MousePointerClick,
   Package,
   Sparkles,
   Users,
+  X,
   Zap,
 } from "@lucide/vue";
 import type {
@@ -249,19 +331,19 @@ const props = defineProps<{
 }>();
 const { t } = useI18n();
 const contentText = useContentText();
+const showBattleInfo = ref(false);
+const battleInfoTrigger = ref<HTMLButtonElement | null>(null);
+const battleInfoClose = ref<HTMLButtonElement | null>(null);
+let previousBodyOverflow = "";
 
 const visibleLoadouts = computed(() =>
   visibleBattleResultLoadouts(props.mode, props.summary.loadouts),
 );
-
 const totalDamage = computed(() =>
   props.summary.players.reduce((total, player) => total + player.damage, 0),
 );
 const totalItemExperience = computed(
   () => props.reward?.items.reduce((total, item) => total + item.experience, 0) ?? 0,
-);
-const totalMaterials = computed(
-  () => props.reward?.materials.reduce((total, item) => total + item.quantity, 0) ?? 0,
 );
 const activityGroups = computed<{ label: string; entries: BattleResultSummaryActivityView[] }[]>(
   () => [
@@ -279,4 +361,28 @@ function playerName(playerId: string): string {
 function rewardStatus(status: string): string {
   return t(`battle.rewardStatus.${status}`);
 }
+
+async function openBattleInfo(): Promise<void> {
+  previousBodyOverflow = document.body.style.overflow;
+  document.body.style.overflow = "hidden";
+  showBattleInfo.value = true;
+  await nextTick();
+  battleInfoClose.value?.focus();
+}
+
+function closeBattleInfo(): void {
+  showBattleInfo.value = false;
+  document.body.style.overflow = previousBodyOverflow;
+  nextTick(() => battleInfoTrigger.value?.focus());
+}
+
+function handleEscape(event: KeyboardEvent): void {
+  if (event.key === "Escape" && showBattleInfo.value) closeBattleInfo();
+}
+
+onMounted(() => window.addEventListener("keydown", handleEscape));
+onBeforeUnmount(() => {
+  window.removeEventListener("keydown", handleEscape);
+  if (showBattleInfo.value) document.body.style.overflow = previousBodyOverflow;
+});
 </script>

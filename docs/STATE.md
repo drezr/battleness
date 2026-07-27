@@ -4,6 +4,31 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- Finished live battles now replace the arena with a responsive, scroll-free result surface. The
+  outcome is displayed prominently; exit and claim actions remain immediately available; credits,
+  hero XP, and item XP form the first reward row; and material rewards use their real artwork below.
+  Complete Battle Loadouts plus Combat Activity move into an internally scrollable Battle Info modal.
+  The same summary component keeps detailed historical result data accessible without crowding its
+  default view.
+- The Nuxt live battle ring presentation now composes artwork below rarity-specific transparent frame
+  assets and renders titles, values, gems, and interaction feedback above them. Ring sockets use the
+  standalone `apps/web/public/assets/cards/ring-socket.png` asset and render exactly
+  `socketCount` slots, so existing empty sockets remain visible while nonexistent sockets create no
+  placeholder.
+- Live ring gems are circularly clipped, pixel-aligned for sharper atlas downscaling, and carry a
+  common/refined/rare/epic border. Hover illuminates the complete frame PNG without a CSS outline;
+  selection removes the old green inset and runs a two-second rarity-colored pulse that begins at
+  maximum brightness.
+- Live rings remain at full opacity when unavailable. Insufficient energy colors the energy cost
+  orange, active cooldown colors the cooldown value orange, and cooldown zero displays the existing
+  localized green `battle.live.cooldownReady` text (`Ready`/`Prêt`) instead of a check icon.
+- The Game App stylesheet entry point is now split into ordered domain files under
+  `apps/web/app/assets/css/sections/`. `main.css` contains only ordered imports so the legacy cascade
+  remains stable while battle, Forge, market, profile, inventory, PvP, and shared styles can be
+  maintained independently.
+- Battle history now tolerates finished records created by older rules or stale target identifiers.
+  Such records remain visible with `summary: null` and `replayAvailable: false` instead of causing
+  `/api/battle/history` and Battle readiness to fail.
 - Staging deployment can now be run by the operator from Windows with
   `ops/deploy-staging.ps1`. It verifies a clean `main` checkout, exact `origin/main` identity, the
   GitHub Actions `checks` and `postgresql` jobs, current health, a fresh checksummed database backup,
@@ -16,20 +41,9 @@ This file records modifications made to the project during agent-assisted work.
   The arena places both hero panels and turn actions in the left combat column, keeps monsters in the
   central battlefield, makes the player's ring dock substantially more compact, and moves the last
   resolution feed plus battle diagnostics behind a development-only modal.
-- Live battle ring and monster cards now use a larger trading-card presentation inspired by the
-  provided mockups: rarity-colored frames, title bars with element badges, large artwork areas,
-  icon-based combat stats, ring energy-cost medallions, and three socket indicators that distinguish
-  socketed gems, empty unlocked sockets, and locked sockets. Ring combat snapshots now carry
-  `socketCount` as descriptive display data.
-- Live battle ring cards now use dedicated rarity-specific frame PNG assets from
-  `apps/web/public/assets/cards/` as their card backgrounds, while monster cards retain their CSS
-  frame treatment for now.
-- The live battle card interaction model now keeps rarity frames visible across default, hover, and
-  selected states. Hover uses a short shine transition, selection adds a separate green inset
-  indicator, and clicking the selected ring or monster again clears the prepared source.
-- Live battle cards now show ready cooldowns with a green check-style indicator, and ring damage
-  displays the resolved ring-plus-gem damage instead of only the base ring value. Ring and monster
-  cooldowns decrement only on their controller's own turn.
+- Live battle ring damage displays the resolved ring-plus-gem value, ring and monster cooldowns
+  decrement only on their controller's own turn, and clicking an already selected ring or monster
+  clears the prepared source.
 - The Nuxt live battle arena now uses `apps/web/public/assets/backgrounds/live-battle-elemental-arena.jpg`
   as its full-screen background, with translucent overlays for the battlefield and ring dock.
 - Monster summons now use monotonic per-player/per-definition instance numbers for the battle, so a
@@ -39,6 +53,10 @@ This file records modifications made to the project during agent-assisted work.
   a separate agent context. Phase 14 remains incomplete; its remaining staging acceptance,
   monitoring, load/soak, security, production-promotion, single-instance, backup-target, and external
   notification work is consolidated in `docs/TODO.md` for later resumption.
+- The live battle ergonomics and finished-result iteration is complete. The next requested product
+  focus is a game-wide visual transformation because the current player app still feels too much
+  like a website or dashboard. The next iteration should establish a cohesive game-first language
+  through the shared shell and a representative workflow before applying it incrementally.
 - Phase 14 deployment foundation has started. The initial production direction is OVH VPS hosting on
   Debian stable with Nginx, one Game App instance, and a separate self-managed PostgreSQL server
   reached by public IP with firewall restrictions. `staging.battleness.com` is the first public
@@ -282,6 +300,30 @@ This file records modifications made to the project during agent-assisted work.
 - Added a centralized project TODO in `docs/TODO.md` covering Game App persistence, inventory, forge, battle integration, campaign, rewards, market, profile, authentication, PvP, player market, presentation, production, and open design questions.
 
 ## Change Log
+
+### 2026-07-27
+
+- Recorded the next UI handoff: move from the completed live battle pass to a game-wide immersion
+  iteration that reduces website and dashboard conventions while preserving existing behavior,
+  accessibility, responsiveness, and localization. Phase 14 remains explicitly paused.
+- Simplified the live post-battle experience around a prominent outcome, compact reward totals, and
+  the existing idempotent claim action. Moved contribution metrics, immutable loadout snapshots,
+  combat activity, and detailed reward lines into an accessible Battle Info modal.
+- Added an explicit finished-screen exit action and reorganized earned rewards into a three-column
+  credits/hero-XP/item-XP row followed by material rewards with their content artwork. Added the
+  missing localized development-mode label exposed by the result verification.
+- Added short-landscape and small-mobile result layouts that remain inside the fixed `100vw` by
+  `100dvh` combat surface without document overflow.
+- Split the former monolithic Game App stylesheet into an ordered `main.css` import entry point and
+  domain files under `apps/web/app/assets/css/sections/`, preserving the existing cascade.
+- Completed the current live ring-card asset pass: artwork below transparent rarity frames, separate
+  conditional socket assets, circular rarity-bordered gems, localized readiness text, orange
+  energy/cooldown warnings, and frame-based hover and selected pulse feedback without replacement
+  outlines.
+- Made battle history resilient to obsolete finished journals so unreplayable records no longer
+  break Battle readiness or history loading.
+- Updated the project, TODO, current-state, and handoff documentation for the next agent while
+  keeping Phase 14 explicitly paused.
 
 ### 2026-07-26
 

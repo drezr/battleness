@@ -782,6 +782,131 @@
   gap: 18px;
 }
 
+.battle-earned-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.battle-earned-materials {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--app-surface);
+}
+
+.battle-earned-materials-title {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--app-muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.battle-earned-materials-title svg {
+  color: var(--app-cyan);
+}
+
+.battle-earned-materials ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.battle-earned-materials li {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  border-radius: 6px;
+  padding: 5px 8px;
+  background: var(--app-raised);
+  font-size: 0.72rem;
+}
+
+.battle-earned-materials .item-artwork {
+  width: 34px;
+}
+
+.battle-earned-materials li span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.battle-earned-materials-empty {
+  color: var(--app-muted);
+  font-size: 0.72rem;
+}
+
+.battle-info-trigger {
+  display: flex;
+  width: fit-content;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.battle-info-backdrop {
+  position: fixed;
+  z-index: 1300;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 20px;
+  background: rgb(2 8 12 / 82%);
+  backdrop-filter: blur(5px);
+}
+
+.battle-info-dialog {
+  display: grid;
+  width: min(1080px, 100%);
+  max-height: calc(100dvh - 40px);
+  gap: 18px;
+  overflow-y: auto;
+  border-color: var(--app-border-strong);
+  background: var(--app-surface);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 52%);
+}
+
+.battle-info-header {
+  position: sticky;
+  z-index: 2;
+  top: -18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--app-border);
+  padding: 4px 0 12px;
+  background: var(--app-surface);
+}
+
+.battle-info-header h2 {
+  margin-top: 3px;
+  font-size: 1.2rem;
+}
+
+.battle-info-dialog
+  :is(.battle-contribution-section, .battle-loadout-section, .battle-activity-section) {
+  border-top: 1px solid var(--app-border);
+}
+
+.battle-reward-detail-section {
+  display: grid;
+  gap: 11px;
+  border-top: 1px solid var(--app-border);
+  padding-top: 16px;
+}
+
 .battle-record-technical {
   margin: 0;
   border: 1px solid var(--app-border);
@@ -1012,5 +1137,43 @@
 
   .battle-record-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .battle-earned-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .battle-earned-grid > div:nth-child(2) {
+    border-right: 1px solid var(--app-border);
+  }
+
+  .battle-earned-grid > div:nth-child(-n + 2) {
+    border-bottom: 0;
+  }
+
+  .battle-earned-grid > div:last-child {
+    border-right: 0;
+  }
+
+  .battle-earned-materials {
+    grid-template-columns: 1fr;
+  }
+
+  .battle-earned-materials ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .battle-info-backdrop {
+    padding: 8px;
+  }
+
+  .battle-info-dialog {
+    max-height: calc(100dvh - 16px);
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .battle-info-header {
+    top: -14px;
   }
 }

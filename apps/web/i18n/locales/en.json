@@ -381,6 +381,8 @@
     "summary": {
       "verifiedLog": "Verified Combat Log",
       "title": "Combat Summary",
+      "battleInfo": "Battle Info",
+      "closeBattleInfo": "Close battle info",
       "playerContribution": "Player Contribution",
       "playerIndex": "P{index}",
       "level": "Level {level}",
@@ -389,6 +391,7 @@
       "gemStats": "{damage} damage",
       "activityTitle": "Combat Activity",
       "earnedRewards": "Earned Rewards",
+      "rewardDetails": "Reward Details",
       "none": "None",
       "rewardStatus": "Rewards {status}",
       "damageValue": "{count} damage",
@@ -409,6 +412,7 @@
     },
     "mode": {
       "training": "Training",
+      "development": "Development",
       "campaign": "Campaign",
       "pvp": "PvP",
       "private_pvp": "Private PvP",

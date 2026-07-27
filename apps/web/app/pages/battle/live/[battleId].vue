@@ -40,7 +40,11 @@
         </div>
       </header>
 
-      <section class="live-arena" :aria-label="t('battle.live.arena')">
+      <section
+        v-if="battle.status !== 'finished'"
+        class="live-arena"
+        :aria-label="t('battle.live.arena')"
+      >
         <div class="live-energy-rail opponent-energy">
           <span>{{ battle.opponent.username }} {{ t("stats.energy") }}</span>
           <div class="live-energy-slots" aria-hidden="true">
@@ -123,7 +127,7 @@
               <button
                 type="button"
                 class="icon-button danger-action live-concede-button"
-                :disabled="battle.status === 'finished' || submitting"
+                :disabled="submitting"
                 :aria-label="t('battle.live.concede')"
                 :title="t('battle.live.concede')"
                 @click="concede"
@@ -600,68 +604,49 @@
         </div>
       </Teleport>
 
-      <BattleResultSummary
+      <section
         v-if="battle.status === 'finished' && battle.summary"
-        :mode="battle.mode"
-        :summary="battle.summary"
-        :reward="battle.reward"
-      />
-
-      <section v-if="battle.status === 'finished' && battle.reward" class="panel reward-preview">
-        <div class="card-heading">
-          <div>
-            <span class="eyebrow">{{ t("battle.live.settlement") }}</span>
-            <h2>{{ resultLabel }}</h2>
-          </div>
-          <span
-            :class="['pill', battle.reward.status === 'claimed' ? 'ready-note' : 'muted-pill']"
-            >{{ battle.reward.status }}</span
-          >
+        :class="['live-finished-screen', `outcome-${resultOutcome}`]"
+      >
+        <div class="live-finished-outcome">
+          <Trophy v-if="resultOutcome === 'win'" :size="48" aria-hidden="true" />
+          <Scale v-else-if="resultOutcome === 'draw'" :size="48" aria-hidden="true" />
+          <ShieldX v-else :size="48" aria-hidden="true" />
+          <span class="eyebrow">{{ t(`battle.mode.${battle.mode}`) }}</span>
+          <h1>{{ resultLabel }}</h1>
         </div>
-        <dl class="summary-grid">
-          <div class="stat">
-            <dt>{{ t("common.credits") }}</dt>
-            <dd>+{{ battle.reward.credits }}</dd>
-          </div>
-          <div class="stat">
-            <dt>{{ t("stats.heroXp") }}</dt>
-            <dd>+{{ battle.reward.heroExperience }}</dd>
-          </div>
-          <div class="stat">
-            <dt>{{ t("common.materials") }}</dt>
-            <dd>{{ totalRewardMaterials }}</dd>
-          </div>
-          <div class="stat">
-            <dt>{{ t("stats.itemXp") }}</dt>
-            <dd>{{ totalRewardItemExperience }}</dd>
-          </div>
-        </dl>
-        <ul v-if="battle.reward.materials.length > 0" class="clean-list reward-detail-list">
-          <li v-for="material in battle.reward.materials" :key="material.materialId">
-            <span>{{ contentText(`material.${material.materialId}.name`, material.label) }}</span
-            ><strong>+{{ material.quantity }}</strong>
-          </li>
-        </ul>
-        <ul v-if="battle.reward.items.length > 0" class="clean-list reward-detail-list">
-          <li v-for="item in battle.reward.items" :key="item.inventoryItemId">
-            <span>{{ contentText(`${item.type}.${item.definitionId}.name`, item.label) }}</span
-            ><strong>{{
-              t("battle.live.experienceReward", { experience: item.experience })
-            }}</strong>
-          </li>
-        </ul>
-        <div class="control-row">
+
+        <BattleResultSummary
+          :mode="battle.mode"
+          :summary="battle.summary"
+          :reward="battle.reward"
+        />
+
+        <p v-if="!battle.reward" class="live-finished-no-reward">
+          {{ t("battle.history.noReward") }}
+        </p>
+
+        <div class="live-finished-actions">
+          <NuxtLink class="button-link secondary-button" to="/battle">
+            <LogOut :size="18" aria-hidden="true" />
+            {{ t("battle.live.leave") }}
+          </NuxtLink>
           <NuxtLink class="button-link secondary-button" :to="`/battle/result/${battle.id}`">{{
             t("battle.live.resultDetails")
           }}</NuxtLink>
           <button
-            v-if="battle.reward.status === 'unclaimed'"
+            v-if="battle.reward?.status === 'unclaimed'"
             type="button"
             :disabled="claimingReward"
             @click="claimReward"
           >
+            <Gift :size="18" aria-hidden="true" />
             {{ t(claimingReward ? "battle.live.claiming" : "battle.live.claimRewards") }}
           </button>
+          <span v-else-if="battle.reward" class="live-finished-claimed">
+            <CheckCircle2 :size="18" aria-hidden="true" />
+            {{ t("battle.result.rewardSecured") }}
+          </span>
         </div>
       </section>
     </template>
@@ -669,7 +654,21 @@
 </template>
 
 <script setup lang="ts">
-import { Bug, CheckCircle2, Flag, Heart, LogOut, Sword, Timer, X, Zap } from "@lucide/vue";
+import {
+  Bug,
+  CheckCircle2,
+  Flag,
+  Gift,
+  Heart,
+  LogOut,
+  Scale,
+  ShieldX,
+  Sword,
+  Timer,
+  Trophy,
+  X,
+  Zap,
+} from "@lucide/vue";
 import type {
   LiveBattleActionCommand,
   LiveBattleActionResponse,
@@ -776,13 +775,11 @@ const resultLabel = computed(() => {
     result.winnerId === battle.value?.viewer.id ? "battle.live.victory" : "battle.live.defeat",
   );
 });
-const totalRewardMaterials = computed(
-  () =>
-    battle.value?.reward?.materials.reduce((total, material) => total + material.quantity, 0) ?? 0,
-);
-const totalRewardItemExperience = computed(
-  () => battle.value?.reward?.items.reduce((total, item) => total + item.experience, 0) ?? 0,
-);
+const resultOutcome = computed<"win" | "draw" | "loss">(() => {
+  const result = battle.value?.result;
+  if (!result || result.type === "draw") return "draw";
+  return result.winnerId === battle.value?.viewer.id ? "win" : "loss";
+});
 const activePlayerName = computed(() => {
   if (!battle.value?.activePlayerId) return t("battle.live.pending");
   return battle.value.activePlayerId === battle.value.viewer.id

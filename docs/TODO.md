@@ -4,10 +4,11 @@ This is the centralized working TODO for BattleNess. It focuses on what remains 
 
 ## Current Focus
 
-The product focus is temporarily moving from Phase 14 production work to a new ergonomics and UI
-iteration handled in a separate agent context. Phase 14 is paused, not complete or cancelled. Its
-remaining acceptance, hardening, monitoring, and production-promotion work is consolidated in the
-resume checklist at the end of the Phase 14 section so it can be resumed after the UI work.
+The live battle ergonomics and result-screen iteration is complete. The next product focus is a
+game-wide visual iteration that makes the player app feel like a game rather than a conventional
+website or dashboard. Phase 14 is paused, not complete or cancelled. Its remaining acceptance,
+hardening, monitoring, and production-promotion work is consolidated in the resume checklist at the
+end of the Phase 14 section so it can be resumed after the UI work.
 
 ## Phase 1 - Game App Data Foundation
 
@@ -175,6 +176,15 @@ resume checklist at the end of the Phase 14 section so it can be resumed after t
 - [x] Improve target selection ergonomics with direct source-card selection followed by immediate execution on a legal target card, with client-visible Taunt restrictions.
 - [x] Add restrained CSS feedback after the action/state model is stable: source and target pulses, aggregated damage numbers, status labels, and reduced-motion support.
 - [x] Preserve accessibility and readable combat state with semantic controls, meters, localized labels, and collapsible technical diagnostics.
+- [x] Rebuild the live battle as a scroll-free full-viewport combat surface with compact heroes,
+      centered monsters, a bottom ring dock, hidden application chrome, and development diagnostics
+      behind an explicit modal.
+- [x] Integrate layered rarity frame assets, conditional socket assets, rarity-framed gems, localized
+      cooldown readiness, resource warnings, and frame-based hover and selection feedback for live
+      ring cards.
+- [x] Simplify the finished live battle into a scroll-free result and reward screen, with loadouts
+      and combat activity moved behind an internally scrollable Battle Info modal, an explicit exit
+      action, and material reward artwork separated from the primary XP and credit totals.
 
 ## Phase 13 - Player App Visual Redesign
 
@@ -197,6 +207,23 @@ resume checklist at the end of the Phase 14 section so it can be resumed after t
 - [x] Audit Market Hub, Game Market, Player Market, and private Market History across desktop and mobile layouts, including touch targets, expandable panels, filters, pagination, selection state, contextual listing actions, overflow, and runtime localization warnings.
 - [x] Audit Home, Profile Overview, Profile History, Progression, Settings, authentication, and the global application shell across desktop and mobile layouts, including touch targets, navigation state, preference controls, reduced motion, sign-out/sign-in restoration, overflow, and runtime localization warnings.
 - [x] Perform a final accessibility, responsive layout, reduced-motion, and localization visual audit.
+
+## Game-Wide UI Immersion Iteration
+
+- [ ] Audit the current application shell, home view, section hubs, and shared components in the
+      browser to identify the strongest website and dashboard patterns.
+- [ ] Define and confirm a cohesive game-first visual language for navigation, typography, surfaces,
+      hierarchy, imagery, feedback, motion, and content density before a broad rollout.
+- [ ] Prove the direction through the shared application shell and one representative player
+      workflow, then extract the reusable tokens and components needed by the remaining views.
+- [ ] Apply the confirmed language incrementally to Battle outside the live arena, Forge, Inventory,
+      Market, Profile, Settings, and authentication without changing their business behavior.
+- [ ] Preserve mobile-first responsiveness, keyboard and screen-reader access, visible focus,
+      reduced-motion support, localization, and the separation between player UI and Dev Lab
+      diagnostics.
+- [ ] Browser-verify each affected slice at representative desktop, mobile portrait, and short
+      landscape viewports, including overflow, touch targets, asset deformation, overlap, and runtime
+      warnings.
 
 ## Phase 14 - Production And Operations
 

@@ -53,10 +53,14 @@ separate permanent Dev Lab prototype.
 
 ## Immediate Handoff
 
-- The user intentionally paused Phase 14 production work to run a live battle ergonomics and UI
-  iteration. The first priority screen was the Nuxt live battle view, and the implemented iteration
-  includes that redesign plus focused combat-engine fixes. Continue from the user's next requested
-  battle UX or gameplay issue instead of restarting the screen-selection question.
+- The live battle ergonomics and finished-result iteration is complete. The user's next priority is
+  the overall Game App UI: it currently feels too much like a website or dashboard and should become
+  a more immersive, cohesive game interface.
+- Begin by auditing the global shell, home view, section hubs, and shared presentation patterns in
+  the browser. Establish and confirm the updated game-first visual language through the shell and one
+  representative workflow before applying it broadly. Preserve all existing feature behavior and do
+  not redo the completed live battle result work unless a shared-system change requires a compatible
+  adjustment.
 - Do not treat Phase 14 as complete. `docs/TODO.md` contains a consolidated Phase 14 resume checklist
   covering the live-refresh visual confirmation, complete ranked staging smoke, production
   monitoring, load/soak testing, security review, production OAuth and promotion, the single-instance
@@ -67,6 +71,10 @@ separate permanent Dev Lab prototype.
 
 ## Current Project State
 
+- The previous dark tactical player-app redesign and responsive audit are complete, but the user has
+  identified a remaining product-level problem: the shared shell and feature surfaces still read as
+  a web application. `docs/PROJECT.md` and `docs/TODO.md` now define the next game-first immersion
+  iteration and its incremental rollout constraints.
 - The Nuxt server assigns or preserves a safe `x-request-id`, emits structured JSON for request and ranked-maintenance failures, and keeps a bounded 100-record in-memory development buffer. Authenticated development diagnostics are available through `GET` and `DELETE /api/dev/diagnostics`; they are disabled by the handler in production. See `docs/OBSERVABILITY.md` for the data policy and production follow-up.
 - Phase 14 deployment direction is now OVH VPS hosting with Debian stable, Nginx, one initial Game
   App instance, and a separate self-managed PostgreSQL server reached over public IP with firewall
@@ -122,11 +130,22 @@ separate permanent Dev Lab prototype.
   left column, centers monsters in their field slots, and uses a compact bottom dock for the viewer's
   rings. The prepared-action label, last-resolution panel, and battle-diagnostics panel are no
   longer part of the main combat surface; developer diagnostics are opened from an explicit modal.
-- Live battle ring and monster cards now use the trading-card direction from the user's mockups:
-  rarity-colored outer frames, separate hover shine, separate green selected inset, element badges,
-  large artwork, icon stats, ring energy medallions, and socket indicators. Selecting the already
-  selected ring or monster deselects it. Ring damage display includes socketed gem damage, and ready
-  cooldowns use a green check-style indicator.
+- Live ring cards use transparent rarity-specific frame PNGs layered above their artwork. The
+  separate `ring-socket.png` asset appears below each real socketed position; the UI renders exactly
+  `socketCount` sockets and no locked/nonexistent placeholders. Gems are circularly clipped,
+  sharpened for atlas downscaling, and bordered by their own rarity color.
+- Ring hover illuminates the complete frame asset without another outline. Ring selection has no
+  green inset; it runs a two-second rarity-colored pulse that starts at maximum brightness. Clicking
+  an already selected ring or monster deselects it. Ring damage includes socketed gem damage.
+- Rings stay fully opaque when unavailable. An unaffordable energy cost or active cooldown value is
+  orange. Cooldown zero uses the existing localized green `battle.live.cooldownReady` text
+  (`READY`/`PRÊT`) instead of a check icon.
+- `apps/web/app/assets/css/main.css` is now a small ordered import entry point. Domain styles live
+  under `apps/web/app/assets/css/sections/`; preserve import order because it maintains the existing
+  cascade, especially the final full-screen live battle overrides.
+- Battle history conversion now catches obsolete, unreplayable finished records. Those records stay
+  visible with no summary and replay disabled, preventing one stale journal from breaking
+  `/api/battle/history` and the `/battle` readiness screen.
 - CI-validated commit `772eb554dab55cc83ccadd10ed5e9d7a20f2f2aa` is deployed to staging as
   immutable release `20260722T205342Z-772eb554`. There were no pending migrations. Local/public
   health checks and an authenticated Chrome live-battle smoke passed; the new arena image returned
@@ -507,7 +526,15 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
   bottom.
 - Monster cards clearly expose skill, damage, health, cooldown, element, rarity, and artwork.
 - Ring cards clearly expose total ring-plus-gem damage, cooldown readiness, energy cost, socketed
-  gems, empty sockets, locked sockets, element, rarity, and artwork.
+  gems, real empty sockets, element, rarity, and artwork. Nonexistent sockets do not render.
+- Ring artwork sits below the transparent rarity frame. Hover illuminates the complete frame;
+  selection pulses that frame without replacing rarity identity or adding a green outline.
+- Ready cooldowns use localized green text. Active cooldown values and unaffordable energy costs use
+  orange text while the complete card remains fully opaque.
+- Finished live battles replace the arena with a scroll-free result surface: the outcome is large,
+  exit and claim actions are immediate, credits/hero XP/item XP form the primary reward row, and
+  material rewards render their artwork below. An accessible internally scrollable Battle Info modal
+  contains player contribution, complete Battle Loadouts, Combat Activity, and reward detail.
 - The live battle page should remain a focused combat surface without global navigation, visible
   diagnostics, or page scroll. Future animation work should make same-action destruction and summon
   sequences visually distinct.

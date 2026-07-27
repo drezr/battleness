@@ -381,6 +381,8 @@
     "summary": {
       "verifiedLog": "Journal de combat vérifié",
       "title": "Résumé du combat",
+      "battleInfo": "Infos du combat",
+      "closeBattleInfo": "Fermer les infos du combat",
       "playerContribution": "Contribution des joueurs",
       "playerIndex": "J{index}",
       "level": "Niveau {level}",
@@ -389,6 +391,7 @@
       "gemStats": "{damage} dégâts",
       "activityTitle": "Activité du combat",
       "earnedRewards": "Récompenses obtenues",
+      "rewardDetails": "Détails des récompenses",
       "none": "Aucune",
       "rewardStatus": "Récompenses : {status}",
       "damageValue": "{count} dégâts",
@@ -409,6 +412,7 @@
     },
     "mode": {
       "training": "Entraînement",
+      "development": "Développement",
       "campaign": "Campagne",
       "pvp": "JcJ",
       "private_pvp": "JcJ privé",
