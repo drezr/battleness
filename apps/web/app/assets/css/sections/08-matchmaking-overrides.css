@@ -13,6 +13,321 @@
   background: rgb(72 220 133 / 10%);
 }
 
+.ranked-leaderboard-panel {
+  overflow: hidden;
+  border-color: rgb(255 188 77 / 22%);
+  background: linear-gradient(135deg, rgb(42 29 10 / 80%), transparent 34%), rgb(5 18 24 / 94%);
+  box-shadow:
+    0 20px 44px rgb(0 0 0 / 28%),
+    inset 0 1px 0 rgb(255 255 255 / 6%);
+}
+
+.ranked-leaderboard-title {
+  min-height: 60px;
+}
+
+.ranked-leaderboard-header {
+  color: #d9c79e;
+}
+
+.ranked-leaderboard-list {
+  gap: 6px;
+}
+
+.ranked-leaderboard-list > li {
+  min-height: 58px;
+  border: 1px solid rgb(119 179 190 / 13%);
+  border-left: 3px solid transparent;
+  border-radius: 7px;
+  background: rgb(5 22 29 / 90%);
+  transition:
+    border-color var(--app-motion-control) ease,
+    background var(--app-motion-control) ease,
+    transform var(--app-motion-control) ease;
+}
+
+.ranked-leaderboard-list > li:hover {
+  border-color: rgb(45 211 237 / 28%);
+  background: rgb(6 31 40 / 94%);
+  transform: translateX(2px);
+}
+
+.ranked-leaderboard-list > li:nth-child(1) {
+  border-left-color: var(--app-gold);
+}
+
+.ranked-leaderboard-list > li:nth-child(2) {
+  border-left-color: #b9c9cf;
+}
+
+.ranked-leaderboard-list > li:nth-child(3) {
+  border-left-color: #bf7b4c;
+}
+
+.ranked-leaderboard-list > li.current {
+  border-color: rgb(72 220 133 / 32%);
+  border-left-color: var(--app-green);
+  background: linear-gradient(90deg, rgb(72 220 133 / 14%), rgb(5 25 31 / 92%));
+}
+
+.ranked-player-profile-link {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  width: fit-content;
+  color: #eff8fa;
+}
+
+.ranked-player-profile-link::after {
+  margin-left: auto;
+  color: var(--app-cyan);
+  content: "↗";
+  font-size: 0.85rem;
+  opacity: 0.72;
+}
+
+.ranked-player-profile-link:hover {
+  color: var(--app-cyan);
+  text-decoration: none;
+}
+
+.public-pvp-profile-page {
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100dvh - 92px);
+  gap: 18px;
+  padding-bottom: 40px;
+  background:
+    linear-gradient(180deg, rgb(3 9 14 / 54%) 0, rgb(4 11 16 / 88%) 520px, #050b0f 900px),
+    url("/assets/backgrounds/live-battle-elemental-arena.jpg") center top / cover no-repeat;
+}
+
+.public-pvp-profile-page::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    radial-gradient(circle at 62% 20%, rgb(255 188 77 / 10%), transparent 26%),
+    linear-gradient(90deg, rgb(3 16 24 / 78%), transparent 58%, rgb(24 13 4 / 54%));
+  content: "";
+  pointer-events: none;
+}
+
+.public-pvp-profile-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.public-pvp-profile-page > .section-nav {
+  border-color: rgb(255 188 77 / 16%);
+  background: rgb(4 14 20 / 72%);
+  backdrop-filter: blur(12px);
+}
+
+.public-pvp-profile-page > .panel {
+  min-height: 160px;
+  align-items: center;
+  border-color: rgb(255 188 77 / 24%);
+  background: rgb(6 20 27 / 90%);
+  box-shadow: 0 20px 44px rgb(0 0 0 / 28%);
+  backdrop-filter: blur(13px);
+}
+
+.public-pvp-profile-hero {
+  position: relative;
+  grid-template-columns: 92px minmax(0, 1fr) auto auto;
+  min-height: 250px;
+  overflow: hidden;
+  border: 1px solid rgb(255 188 77 / 34%);
+  border-radius: var(--app-corner-md);
+  padding: 28px;
+  background:
+    linear-gradient(90deg, rgb(5 23 31 / 98%) 0 44%, rgb(23 17 9 / 62%) 75%, rgb(11 10 8 / 78%)),
+    url("/assets/backgrounds/live-battle-elemental-arena.jpg") 70% center / cover;
+  box-shadow:
+    0 24px 52px rgb(0 0 0 / 38%),
+    inset 0 1px 0 rgb(255 255 255 / 8%);
+  text-shadow: 0 3px 18px rgb(0 0 0 / 86%);
+}
+
+.public-pvp-profile-hero::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--app-cyan), var(--app-gold));
+  box-shadow: 0 0 18px rgb(255 188 77 / 48%);
+  content: "";
+}
+
+.public-pvp-profile-avatar {
+  width: 92px;
+  border-color: rgb(255 188 77 / 38%);
+  border-radius: 50%;
+  color: var(--app-gold);
+  background: radial-gradient(circle, rgb(255 188 77 / 16%), transparent 68%), rgb(7 20 26 / 88%);
+  box-shadow:
+    inset 0 0 28px rgb(255 188 77 / 13%),
+    0 0 34px rgb(255 188 77 / 10%);
+}
+
+.public-pvp-profile-hero h1 {
+  margin-top: 4px;
+  font-size: clamp(2.25rem, 4vw, 3.6rem);
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+
+.public-pvp-profile-hero p {
+  max-width: 560px;
+  margin-top: 9px;
+  color: #c5d2d6;
+  font-size: 0.82rem;
+}
+
+.public-pvp-profile-hero > .pill {
+  border-color: rgb(72 220 133 / 34%);
+  color: var(--app-green);
+  background: rgb(5 32 27 / 82%);
+}
+
+.public-pvp-profile-hero > .button-link {
+  min-height: 46px;
+  border-color: rgb(255 188 77 / 28%);
+  background: rgb(12 18 20 / 78%);
+  backdrop-filter: blur(10px);
+}
+
+.public-pvp-season-line {
+  min-height: 54px;
+  border: 1px solid rgb(255 188 77 / 22%);
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, rgb(39 28 10 / 90%), rgb(5 25 32 / 90%));
+  box-shadow: 0 16px 36px rgb(0 0 0 / 25%);
+  backdrop-filter: blur(12px);
+}
+
+.public-pvp-season-line svg,
+.public-pvp-season-line strong {
+  color: var(--app-gold);
+}
+
+.public-pvp-rank-panel {
+  position: relative;
+  grid-template-columns: 86px minmax(0, 1fr) minmax(230px, auto);
+  min-height: 250px;
+  overflow: hidden;
+  border: 1px solid rgb(255 188 77 / 34%);
+  border-radius: var(--app-corner-md);
+  padding: 28px;
+  background:
+    radial-gradient(circle at 80px 50%, rgb(255 188 77 / 18%), transparent 190px),
+    linear-gradient(135deg, rgb(44 30 9 / 95%), rgb(7 22 28 / 94%));
+  box-shadow:
+    0 22px 48px rgb(0 0 0 / 34%),
+    inset 0 1px 0 rgb(255 255 255 / 7%);
+}
+
+.public-pvp-rank-panel::after {
+  position: absolute;
+  width: 270px;
+  aspect-ratio: 1;
+  border: 1px solid rgb(255 188 77 / 9%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, transparent 33%, rgb(255 188 77 / 6%) 34% 35%, transparent 36%),
+    repeating-conic-gradient(from 0deg, rgb(255 188 77 / 7%) 0 1deg, transparent 1deg 30deg);
+  content: "";
+  pointer-events: none;
+  top: -112px;
+  right: -68px;
+}
+
+.public-pvp-rank-mark {
+  z-index: 1;
+  width: 86px;
+  border-color: rgb(255 188 77 / 38%);
+  border-radius: 50%;
+  color: var(--app-gold);
+  background: rgb(29 22 9 / 74%);
+  box-shadow:
+    inset 0 0 26px rgb(255 188 77 / 15%),
+    0 0 30px rgb(255 188 77 / 9%);
+}
+
+.public-pvp-rank-panel > div {
+  position: relative;
+  z-index: 1;
+}
+
+.public-pvp-rank-panel h2 {
+  font-size: clamp(1.75rem, 3vw, 2.6rem);
+  line-height: 1.05;
+}
+
+.public-pvp-rank-panel p {
+  color: #d6c9a7;
+  font-size: 0.82rem;
+}
+
+.public-pvp-peak {
+  min-height: 92px;
+  align-content: center;
+  border-color: rgb(255 188 77 / 22%);
+  padding-left: 24px;
+}
+
+.public-pvp-peak span,
+.public-pvp-peak small {
+  color: #baaf91;
+}
+
+.public-pvp-peak strong {
+  color: #fff2cf;
+  font-size: 1.12rem;
+}
+
+.public-pvp-record-grid {
+  gap: 12px;
+}
+
+.public-pvp-record-grid article {
+  min-height: 116px;
+  border-color: rgb(75 191 210 / 22%);
+  border-radius: var(--app-corner-md);
+  padding: 18px;
+  background: linear-gradient(145deg, rgb(5 30 39 / 94%), rgb(5 17 23 / 95%));
+  box-shadow:
+    0 18px 40px rgb(0 0 0 / 28%),
+    inset 0 1px 0 rgb(255 255 255 / 6%);
+}
+
+.public-pvp-record-grid article.wins {
+  border-color: rgb(72 220 133 / 24%);
+  background: linear-gradient(145deg, rgb(5 35 28 / 94%), rgb(5 17 23 / 95%));
+}
+
+.public-pvp-record-grid article.losses {
+  border-color: rgb(244 92 111 / 22%);
+  background: linear-gradient(145deg, rgb(38 14 20 / 92%), rgb(5 17 23 / 95%));
+}
+
+.public-pvp-record-grid strong {
+  font-size: 1.8rem;
+}
+
+.public-pvp-privacy-note {
+  width: fit-content;
+  min-height: 44px;
+  border: 1px solid rgb(125 174 184 / 16%);
+  border-radius: 999px;
+  padding: 8px 13px;
+  background: rgb(4 16 22 / 80%);
+  backdrop-filter: blur(10px);
+}
+
 @media (max-width: 760px) {
   .pvp-command-actions {
     align-items: stretch;
@@ -21,5 +336,102 @@
 
   .pvp-command-actions > * {
     width: 100%;
+  }
+
+  .public-pvp-profile-page {
+    min-height: calc(100dvh - 64px);
+    padding-bottom: 28px;
+    background:
+      linear-gradient(180deg, rgb(3 9 14 / 52%) 0, rgb(4 11 16 / 91%) 430px, #050b0f 760px),
+      url("/assets/backgrounds/live-battle-elemental-arena.jpg") center top / auto 720px no-repeat;
+  }
+
+  .public-pvp-profile-hero {
+    grid-template-columns: 64px minmax(0, 1fr);
+    min-height: 260px;
+    padding: 20px;
+    background:
+      linear-gradient(0deg, rgb(5 18 24 / 98%) 0 54%, rgb(10 13 15 / 52%) 100%),
+      url("/assets/backgrounds/live-battle-elemental-arena.jpg") 68% center / cover;
+  }
+
+  .public-pvp-profile-avatar {
+    width: 64px;
+  }
+
+  .public-pvp-profile-hero h1 {
+    font-size: clamp(1.9rem, 10vw, 2.65rem);
+  }
+
+  .public-pvp-profile-hero > .pill,
+  .public-pvp-profile-hero > .button-link {
+    grid-column: 1 / -1;
+  }
+
+  .public-pvp-profile-hero > .button-link {
+    width: 100%;
+  }
+
+  .public-pvp-rank-panel {
+    grid-template-columns: 64px minmax(0, 1fr);
+    min-height: 0;
+    padding: 20px;
+  }
+
+  .public-pvp-rank-mark {
+    width: 64px;
+  }
+
+  .public-pvp-peak {
+    grid-column: 1 / -1;
+    min-height: 0;
+    border-top: 1px solid rgb(255 188 77 / 20%);
+    border-left: 0;
+    padding-top: 15px;
+    padding-left: 0;
+  }
+
+  .public-pvp-record-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .public-pvp-record-grid article {
+    min-height: 88px;
+  }
+
+  .public-pvp-privacy-note {
+    width: 100%;
+    border-radius: 8px;
+  }
+
+  .ranked-player-profile-link {
+    width: 100%;
+  }
+}
+
+@media (max-height: 520px) and (min-width: 761px) {
+  .public-pvp-profile-page .section-nav a,
+  .public-pvp-profile-page .button-link {
+    min-height: 44px;
+  }
+
+  .public-pvp-profile-hero {
+    min-height: 190px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .public-pvp-rank-panel {
+    min-height: 210px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ranked-leaderboard-list > li {
+    transition: none;
+  }
+
+  .ranked-leaderboard-list > li:hover {
+    transform: none;
   }
 }

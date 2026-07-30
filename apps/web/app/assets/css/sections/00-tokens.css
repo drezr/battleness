@@ -1,6 +1,6 @@
 :root {
-  color: #f7fbff;
-  background: #263c4c;
+  color: #f4f8f9;
+  background: #05090d;
   font-family:
     Inter,
     ui-sans-serif,
@@ -9,4 +9,34 @@
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+  --font-display: Georgia, "Times New Roman", ui-serif, serif;
+  --app-void: #05090d;
+  --app-bg: #081016;
+  --app-bg-deep: #04080c;
+  --app-surface: rgb(13 26 34 / 92%);
+  --app-surface-solid: #0d1a22;
+  --app-raised: #142832;
+  --app-panel-highlight: rgb(194 231 239 / 7%);
+  --app-border: rgb(162 203 214 / 17%);
+  --app-border-strong: rgb(173 220 232 / 34%);
+  --app-border-accent: rgb(48 211 237 / 58%);
+  --app-text: #f4f8f9;
+  --app-muted: #9caeb5;
+  --app-cyan: #30d3ed;
+  --app-cyan-bright: #8ceaf7;
+  --app-cyan-soft: rgb(48 211 237 / 11%);
+  --app-green: #52db8a;
+  --app-gold: #e9b85e;
+  --app-ember: #ef8c55;
+  --app-red: #ff7183;
+  --app-focus: #a7eff8;
+  --app-shadow-depth: 0 22px 60px rgb(0 0 0 / 32%);
+  --app-shadow-inset: inset 0 1px 0 var(--app-panel-highlight);
+  --app-content-width: 1340px;
+  --app-space-page: clamp(14px, 2.5vw, 34px);
+  --app-corner-sm: 4px;
+  --app-corner-md: 7px;
+  --app-motion-fast: 140ms;
+  --app-motion-scene: 240ms;
+  --sidebar-width: 216px;
 }

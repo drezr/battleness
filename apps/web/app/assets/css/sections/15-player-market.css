@@ -1,13 +1,32 @@
 /* Player market */
 .player-market-overview {
+  position: relative;
+  overflow: hidden;
   display: grid;
   grid-template-columns: minmax(220px, 1fr) minmax(0, 1.6fr);
   gap: 18px;
   align-items: center;
-  border: 1px solid rgb(37 215 242 / 20%);
-  border-left: 3px solid var(--app-cyan);
-  padding: 16px 18px;
-  background: rgb(13 30 39 / 64%);
+  border: 1px solid rgb(245 190 71 / 23%);
+  border-radius: 10px;
+  padding: 18px 20px;
+  background: linear-gradient(90deg, rgb(42 31 15 / 90%), rgb(11 24 29 / 88%));
+  box-shadow: 0 20px 46px rgb(0 0 0 / 31%);
+  backdrop-filter: blur(14px);
+}
+
+.player-market-overview::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, transparent, #f3b83f, transparent);
+  content: "";
+}
+
+.player-market-page .player-market-overview-icon,
+.player-market-page .player-market-seller-icon {
+  border-color: rgb(245 190 71 / 30%);
+  color: #f3cf77;
+  background: rgb(245 190 71 / 9%);
 }
 
 .player-market-overview > div,
@@ -64,9 +83,11 @@
 
 .player-market-seller {
   border: 1px solid var(--app-border);
-  border-radius: 8px;
+  border-radius: 10px;
   margin-top: 14px;
-  background: rgb(255 255 255 / 3%);
+  background: linear-gradient(90deg, rgb(29 24 15 / 92%), rgb(6 18 23 / 94%));
+  box-shadow: 0 16px 36px rgb(0 0 0 / 26%);
+  backdrop-filter: blur(12px);
 }
 
 .player-market-seller > summary {
@@ -129,6 +150,8 @@
 
 .player-market-search {
   margin-top: 14px;
+  border-color: rgb(245 190 71 / 17%);
+  background: linear-gradient(180deg, rgb(25 23 17 / 92%), rgb(5 16 21 / 97%));
 }
 
 .player-market-primary-filters {
@@ -177,9 +200,10 @@
   min-width: 0;
   align-items: center;
   border: 1px solid rgb(255 255 255 / 14%);
-  border-radius: 8px;
+  border-radius: 5px 5px 12px 12px;
   padding: 11px;
-  background: rgb(255 255 255 / 3%);
+  background: linear-gradient(135deg, rgb(31 27 19 / 94%), rgb(6 17 22 / 98%));
+  box-shadow: 0 16px 34px rgb(0 0 0 / 28%);
 }
 
 .player-listing-grid > article.own {

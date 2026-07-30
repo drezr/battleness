@@ -324,6 +324,135 @@
   gap: 14px;
 }
 
+.inventory-hub-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: calc(100dvh - 92px);
+  border: 1px solid rgb(98 211 225 / 14%);
+  border-radius: 12px;
+  padding: 20px;
+  background:
+    linear-gradient(180deg, rgb(3 10 15 / 52%) 0, rgb(3 9 13 / 83%) 440px, #050b0f 780px),
+    url("/assets/backgrounds/inventory-vault.png") center top / cover no-repeat;
+  box-shadow: inset 0 0 90px rgb(0 0 0 / 42%);
+}
+
+.inventory-hub-page::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgb(2 8 12 / 60%), transparent 24%, transparent 76%, rgb(2 8 12 / 60%)),
+    radial-gradient(
+      circle at 50% 24%,
+      transparent 0,
+      rgb(4 11 15 / 18%) 36%,
+      rgb(4 11 15 / 80%) 76%
+    );
+  content: "";
+  pointer-events: none;
+}
+
+.inventory-hub-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.inventory-hub-page .section-nav {
+  border-color: rgb(135 224 235 / 15%);
+  background: rgb(4 14 20 / 68%);
+  backdrop-filter: blur(12px);
+}
+
+.inventory-hub-page .app-hub-header {
+  min-height: 166px;
+  padding: 24px 18px;
+  text-shadow: 0 2px 18px rgb(0 0 0 / 82%);
+}
+
+.inventory-hub-page .app-hub-header h1 {
+  font-size: clamp(2.1rem, 4vw, 3.5rem);
+  letter-spacing: -0.025em;
+}
+
+.inventory-hub-page .app-hub-header .muted {
+  max-width: 640px;
+  color: #c2d1d5;
+}
+
+.inventory-hub-page .hub-resource-link {
+  border-color: rgb(101 218 232 / 24%);
+  background: rgb(5 21 28 / 82%);
+  box-shadow: 0 18px 36px rgb(0 0 0 / 30%);
+  backdrop-filter: blur(14px);
+}
+
+.inventory-hub-page .hub-stat-strip {
+  border-color: rgb(107 213 227 / 20%);
+  background: linear-gradient(90deg, rgb(7 27 36 / 94%), rgb(5 18 25 / 88%));
+  box-shadow: 0 18px 42px rgb(0 0 0 / 26%);
+  backdrop-filter: blur(14px);
+}
+
+.inventory-hub-page .inventory-hub-collection,
+.inventory-hub-page .inventory-readiness-panel {
+  border-color: rgb(103 211 225 / 18%);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgb(8 28 37 / 92%), rgb(5 16 22 / 96%));
+  box-shadow: 0 24px 54px rgb(0 0 0 / 34%);
+  backdrop-filter: blur(14px);
+}
+
+.inventory-hub-page .inventory-hub-collection {
+  position: relative;
+  overflow: hidden;
+}
+
+.inventory-hub-page .inventory-hub-collection::before {
+  position: absolute;
+  top: 0;
+  right: 18%;
+  left: 18%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--app-cyan), transparent);
+  box-shadow: 0 0 18px rgb(37 215 242 / 48%);
+  content: "";
+}
+
+.inventory-hub-page .inventory-category-grid > a {
+  min-height: 84px;
+  border-color: rgb(118 208 220 / 16%);
+  border-radius: 5px 5px 11px 11px;
+  background: linear-gradient(135deg, rgb(18 46 56 / 92%), rgb(6 19 25 / 96%));
+  box-shadow: 0 12px 24px rgb(0 0 0 / 24%);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.inventory-hub-page .inventory-category-grid > a:hover {
+  background: linear-gradient(135deg, rgb(23 57 68 / 95%), rgb(7 23 30 / 98%));
+  transform: translateY(-2px);
+}
+
+.inventory-hub-page .inventory-readiness-panel {
+  border-top-color: rgb(82 225 151 / 28%);
+}
+
+.inventory-hub-page .inventory-active-loadout {
+  background:
+    radial-gradient(circle at 12% 50%, rgb(37 215 242 / 10%), transparent 26%), rgb(7 24 31 / 86%);
+}
+
+.inventory-hub-page .hub-quick-links > a {
+  border-color: rgb(110 209 222 / 16%);
+  background: rgb(5 19 26 / 90%);
+  box-shadow: 0 14px 30px rgb(0 0 0 / 24%);
+  backdrop-filter: blur(12px);
+}
+
 .inventory-hub-collection,
 .inventory-readiness-panel,
 .market-hub-activity {
@@ -509,18 +638,122 @@
   gap: 12px;
 }
 
+.market-hub-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: calc(100dvh - 92px);
+  border: 1px solid rgb(111 204 217 / 14%);
+  border-radius: 12px;
+  padding: 20px;
+  background:
+    linear-gradient(180deg, rgb(3 9 13 / 42%) 0, rgb(3 9 13 / 75%) 440px, #050b0f 820px),
+    url("/assets/backgrounds/market-hall.png") center top / cover no-repeat;
+  box-shadow: inset 0 0 100px rgb(0 0 0 / 38%);
+}
+
+.market-hub-page::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgb(3 12 17 / 54%),
+      transparent 34%,
+      transparent 66%,
+      rgb(18 12 5 / 52%)
+    ),
+    radial-gradient(circle at 50% 24%, transparent 0, rgb(3 9 13 / 10%) 38%, rgb(3 9 13 / 78%) 80%);
+  content: "";
+  pointer-events: none;
+}
+
+.market-hub-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.market-hub-page .section-nav {
+  border-color: rgb(135 224 235 / 14%);
+  background: rgb(4 14 20 / 68%);
+  backdrop-filter: blur(12px);
+}
+
+.market-hub-page .app-hub-header {
+  min-height: 166px;
+  padding: 24px 18px;
+  text-shadow: 0 2px 18px rgb(0 0 0 / 82%);
+}
+
+.market-hub-page .app-hub-header h1 {
+  font-size: clamp(2.1rem, 4vw, 3.5rem);
+  letter-spacing: -0.025em;
+}
+
+.market-hub-page .app-hub-header .muted {
+  max-width: 640px;
+  color: #c2d1d5;
+}
+
+.market-hub-page .hub-balance-panel,
+.market-hub-page .hub-stat-strip {
+  border-color: rgb(125 211 222 / 18%);
+  background: rgb(5 20 27 / 86%);
+  box-shadow: 0 18px 40px rgb(0 0 0 / 28%);
+  backdrop-filter: blur(14px);
+}
+
 .market-hub-destination {
   position: relative;
   display: grid;
   grid-template-rows: auto auto auto minmax(60px, 1fr) auto auto;
   gap: 9px;
   overflow: hidden;
-  border: 1px solid var(--app-border);
-  border-radius: 8px;
-  padding: 20px;
+  min-height: 360px;
+  border: 1px solid rgb(122 208 219 / 18%);
+  border-radius: 7px 7px 14px 14px;
+  padding: 24px;
   color: inherit;
-  background: var(--app-surface);
+  box-shadow: 0 24px 54px rgb(0 0 0 / 35%);
+  text-shadow: 0 2px 12px rgb(0 0 0 / 75%);
   text-decoration: none;
+  backdrop-filter: blur(6px);
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease;
+}
+
+.market-hub-destination.game-economy {
+  background:
+    linear-gradient(135deg, rgb(5 30 40 / 72%), rgb(3 15 21 / 92%)),
+    url("/assets/backgrounds/market-hall.png") left center / 185% auto;
+}
+
+.market-hub-destination.player-economy {
+  border-color: rgb(245 190 71 / 20%);
+  background:
+    linear-gradient(225deg, rgb(45 29 10 / 64%), rgb(13 14 14 / 92%)),
+    url("/assets/backgrounds/market-hall.png") right center / 185% auto;
+}
+
+.market-hub-destination:hover {
+  transform: translateY(-3px);
+}
+
+.market-hub-destination.game-economy:hover {
+  border-color: rgb(68 217 238 / 48%);
+  box-shadow:
+    0 28px 62px rgb(0 0 0 / 42%),
+    0 0 30px rgb(37 215 242 / 7%);
+}
+
+.market-hub-destination.player-economy:hover {
+  border-color: rgb(245 190 71 / 48%);
+  box-shadow:
+    0 28px 62px rgb(0 0 0 / 42%),
+    0 0 30px rgb(245 190 71 / 7%);
 }
 
 .market-hub-destination.game-economy::before {
@@ -528,12 +761,29 @@
 }
 
 .market-hub-destination.player-economy::before {
-  background: var(--app-cyan);
+  background: #f3b83f;
 }
 
 .game-economy .market-destination-icon {
   color: var(--app-gold);
   background: rgb(255 209 102 / 9%);
+}
+
+.player-economy .market-destination-icon {
+  color: #f3cf77;
+  background: rgb(245 190 71 / 10%);
+}
+
+.market-hub-page .market-hub-activity {
+  border-color: rgb(112 200 212 / 16%);
+  background: linear-gradient(90deg, rgb(5 23 30 / 94%), rgb(20 18 13 / 92%));
+  box-shadow: 0 18px 42px rgb(0 0 0 / 28%);
+  backdrop-filter: blur(14px);
+}
+
+.market-hub-page .market-hub-activity .text-link {
+  min-height: 44px;
+  align-items: center;
 }
 
 .market-hub-destination ul {
@@ -620,6 +870,208 @@
   gap: 2px;
 }
 
+/* Forge command workshop */
+.forge-hub-page {
+  position: relative;
+  isolation: isolate;
+  gap: 18px;
+  overflow: hidden;
+  border: 1px solid rgb(219 165 82 / 16%);
+  border-radius: var(--app-corner-scene);
+  padding: 18px;
+  background:
+    linear-gradient(180deg, rgb(4 9 13 / 62%), rgb(4 9 13 / 92%) 74%),
+    url("/assets/backgrounds/forge-workshop.png") center 44% / cover;
+  box-shadow:
+    var(--app-shadow-depth),
+    inset 0 1px 0 rgb(255 224 169 / 9%);
+}
+
+.forge-hub-page::before,
+.forge-hub-page::after {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+}
+
+.forge-hub-page::before {
+  inset: 0;
+  background:
+    radial-gradient(circle at 70% 46%, rgb(235 126 48 / 11%), transparent 28rem),
+    radial-gradient(circle at 24% 43%, rgb(46 190 225 / 8%), transparent 25rem);
+}
+
+.forge-hub-page::after {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 42%;
+  background: linear-gradient(180deg, transparent, rgb(2 6 9 / 82%));
+}
+
+.forge-hub-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.forge-hub-page .section-nav {
+  width: fit-content;
+  border: 1px solid rgb(212 169 100 / 18%);
+  border-radius: var(--app-corner-control);
+  padding: 4px;
+  background: rgb(3 10 14 / 72%);
+  box-shadow: var(--app-shadow-inset);
+  backdrop-filter: blur(10px);
+}
+
+.forge-hub-page .section-nav a {
+  min-height: 44px;
+  border-bottom: 0;
+  border-radius: calc(var(--app-corner-control) - 2px);
+  padding-inline: 15px;
+}
+
+.forge-hub-page .section-nav a.active {
+  color: #ffe1a5;
+  background: linear-gradient(180deg, rgb(245 184 63 / 16%), rgb(245 184 63 / 5%));
+  box-shadow: inset 0 -2px 0 #f3b83f;
+}
+
+.forge-hub-page .app-hub-header {
+  min-height: 126px;
+  align-items: end;
+  padding: 8px 4px 2px;
+}
+
+.forge-hub-page .app-hub-header h1 {
+  color: #fff2d4;
+  text-shadow: 0 3px 24px rgb(0 0 0 / 72%);
+}
+
+.forge-hub-page .app-hub-header .muted {
+  max-width: 680px;
+  color: #b9c2c3;
+}
+
+.forge-hub-page .hub-resource-link {
+  border-color: rgb(242 187 87 / 28%);
+  background: rgb(8 14 17 / 78%);
+  box-shadow:
+    0 12px 30px rgb(0 0 0 / 25%),
+    var(--app-shadow-inset);
+  backdrop-filter: blur(10px);
+}
+
+.forge-hub-page .hub-resource-link > svg:first-child {
+  color: #f1bd5a;
+  background: rgb(241 189 90 / 10%);
+}
+
+.forge-hub-page .hub-stat-strip {
+  border-color: rgb(221 177 106 / 18%);
+  background: rgb(4 12 16 / 78%);
+  box-shadow: var(--app-shadow-inset);
+  backdrop-filter: blur(12px);
+}
+
+.forge-hub-page .hub-stat-strip > a {
+  min-height: 68px;
+  border-color: rgb(221 177 106 / 14%);
+  padding-block: 10px;
+}
+
+.forge-hub-page .hub-stat-strip em {
+  font-size: 0.58rem;
+}
+
+.forge-workflow-grid {
+  gap: 14px;
+}
+
+.forge-hub-page .hub-workflow-card {
+  min-height: 338px;
+  grid-template-rows: auto auto auto auto minmax(58px, 1fr) auto auto;
+  border-color: rgb(var(--forge-accent, 245 184 63) / 25%);
+  border-radius: var(--app-corner-panel);
+  padding: 20px;
+  background:
+    linear-gradient(180deg, rgb(var(--forge-accent, 245 184 63) / 8%), transparent 38%),
+    linear-gradient(0deg, rgb(4 11 14 / 98%) 0 47%, rgb(4 11 14 / 53%) 77%),
+    url("/assets/backgrounds/forge-workshop.png") var(--forge-position, center) / cover;
+  box-shadow:
+    0 18px 42px rgb(0 0 0 / 33%),
+    inset 0 1px 0 rgb(255 255 255 / 8%);
+}
+
+.forge-hub-page .hub-workflow-card:nth-child(1) {
+  --forge-accent: 245 184 63;
+  --forge-position: 59% center;
+}
+
+.forge-hub-page .hub-workflow-card:nth-child(2) {
+  --forge-accent: 63 194 230;
+  --forge-position: 30% center;
+}
+
+.forge-hub-page .hub-workflow-card:nth-child(3) {
+  --forge-accent: 91 215 144;
+  --forge-position: 78% center;
+}
+
+.forge-hub-page .hub-workflow-card::before {
+  height: 2px;
+  background: rgb(var(--forge-accent) / 72%);
+  box-shadow: 0 0 18px rgb(var(--forge-accent) / 28%);
+}
+
+.forge-hub-page .hub-workflow-card:hover,
+.forge-hub-page .hub-workflow-card:focus-visible {
+  border-color: rgb(var(--forge-accent) / 60%);
+  background:
+    linear-gradient(180deg, rgb(var(--forge-accent) / 13%), transparent 42%),
+    linear-gradient(0deg, rgb(4 11 14 / 98%) 0 47%, rgb(4 11 14 / 43%) 77%),
+    url("/assets/backgrounds/forge-workshop.png") var(--forge-position) / cover;
+}
+
+.forge-hub-page .hub-workflow-icon {
+  width: 64px;
+  border: 1px solid rgb(var(--forge-accent) / 22%);
+  color: rgb(var(--forge-accent));
+  background: rgb(3 9 12 / 62%);
+  box-shadow: 0 0 28px rgb(var(--forge-accent) / 10%);
+}
+
+.forge-hub-page .hub-workflow-card h2 {
+  color: #fff2d4;
+  font-size: clamp(1.45rem, 2vw, 1.9rem);
+}
+
+.forge-hub-page .hub-workflow-card p {
+  max-width: 34ch;
+  color: #b6c0c0;
+}
+
+.forge-hub-page .hub-workflow-card dl,
+.forge-hub-page .hub-workflow-action {
+  border-color: rgb(var(--forge-accent) / 17%);
+}
+
+.forge-hub-page .hub-workflow-action {
+  color: rgb(var(--forge-accent));
+}
+
+.forge-hub-page .hub-guidance-bar {
+  border-color: rgb(226 180 104 / 20%);
+  background: rgb(5 12 15 / 86%);
+  box-shadow: var(--app-shadow-inset);
+  backdrop-filter: blur(10px);
+}
+
+.forge-hub-page .hub-guidance-bar .button-link {
+  min-height: 44px;
+}
+
 @media (max-width: 900px) {
   .hub-stat-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -641,6 +1093,10 @@
     grid-template-rows: auto;
   }
 
+  .forge-hub-page .hub-workflow-card {
+    min-height: 280px;
+  }
+
   .inventory-hub-layout {
     grid-template-columns: 1fr;
   }
@@ -649,6 +1105,54 @@
 @media (max-width: 700px) {
   .app-hub-header {
     grid-template-columns: 1fr;
+  }
+
+  .forge-hub-page {
+    border-inline: 0;
+    border-radius: 0;
+    margin-inline: -16px;
+    padding: 16px;
+    background:
+      linear-gradient(180deg, rgb(4 9 13 / 68%), rgb(4 9 13 / 96%) 62%),
+      url("/assets/backgrounds/forge-workshop.png") 57% top / auto 720px no-repeat;
+  }
+
+  .inventory-hub-page {
+    border-inline: 0;
+    border-radius: 0;
+    margin-inline: -16px;
+    padding: 16px;
+    background:
+      linear-gradient(180deg, rgb(3 10 15 / 58%), rgb(3 9 13 / 95%) 470px),
+      url("/assets/backgrounds/inventory-vault.png") 50% top / auto 720px no-repeat;
+  }
+
+  .market-hub-page {
+    border-inline: 0;
+    border-radius: 0;
+    margin-inline: -16px;
+    padding: 16px;
+    background:
+      linear-gradient(180deg, rgb(3 9 13 / 52%), rgb(3 9 13 / 95%) 500px),
+      url("/assets/backgrounds/market-hall.png") center top / auto 720px no-repeat;
+  }
+
+  .market-hub-page .app-hub-header {
+    min-height: 124px;
+    padding-inline: 0;
+  }
+
+  .market-hub-destination {
+    min-height: 300px;
+  }
+
+  .inventory-hub-page .app-hub-header {
+    min-height: 124px;
+    padding-inline: 0;
+  }
+
+  .forge-hub-page .app-hub-header {
+    min-height: 104px;
   }
 
   .hub-resource-link,
@@ -672,6 +1176,16 @@
 }
 
 @media (max-width: 500px) {
+  .forge-hub-page .section-nav {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .forge-hub-page .section-nav a {
+    flex: 1 0 auto;
+    justify-content: center;
+  }
+
   .hub-stat-strip {
     grid-template-columns: 1fr;
   }
@@ -696,5 +1210,13 @@
 
   .market-hub-transaction-list article > span:nth-child(3) {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .forge-hub-page .hub-workflow-card,
+  .inventory-hub-page .inventory-category-grid > a,
+  .market-hub-destination {
+    transition: none;
   }
 }

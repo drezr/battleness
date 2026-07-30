@@ -34,7 +34,7 @@ button,
 }
 
 :where(a, button, input, select, summary, [role="button"]):focus-visible {
-  outline: 2px solid #8eeafa;
+  outline: 2px solid var(--app-focus);
   outline-offset: 2px;
 }
 

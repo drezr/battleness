@@ -4,6 +4,57 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- The game-wide immersion iteration now has its first implementation foundation. Shared visual tokens
+  own the dark commandery palette, display typography, depth, focus color, spacing, corners, and
+  motion timing; the desktop sidebar, resource bar, route navigation, mobile navigation, and
+  responsive shell use that vocabulary without changing page behavior. Shell breakpoints were moved
+  out of the Inventory stylesheet and back into the shell domain.
+- Home and Battle Hub now form the representative game-first workflow. Home stages the player,
+  campaign entry, resource intelligence, destinations, and collection within an environmental
+  command scene. Battle Hub stages Campaign, PvP, and Training as distinct battle destinations while
+  retaining readiness, performance, rewards, loadout, history, and development actions.
+- Forge Hub and Craft now use the first feature-specific game-first environment. A reusable dark
+  workshop backdrop separates Forge from the commandery and arena, the hub presents Craft, Socket,
+  and Quality as physical stations, and Craft stages the selected blueprint as the focal object while
+  retaining its catalogue, filters, material requirements, readiness, action, and production log.
+- The complete Forge workflow now shares that workshop language. Socket presents ring selection,
+  capacity, gem composition, and enchantment binding as a staged three-phase bench. Quality presents
+  the selected item, current-to-next quality trajectory, resolved stat comparison, cost, and action
+  as one refinement chamber. Existing mutation rules and API behavior are unchanged.
+- Inventory now uses a shared secured-vault environment across its Hub, Items, Materials, Equipment,
+  and Loadouts. The hub stages collection and battle readiness as armory stations, collection views
+  present owned assets as an artifact gallery, and equipment and loadouts use a preparation platform
+  without changing filters, inspection, persistence, or loadout behavior.
+- Market now uses a shared underground trading hall across its Hub, Game Market, Player Market, and
+  private history. The fixed economy uses cool cyan exchange counters, while player listings and the
+  private ledger use warmer bazaar and settlement surfaces. Existing prices, filters, escrow,
+  transaction mutations, pagination, and confirmation behavior are unchanged.
+- Profile now uses a shared ceremonial chronicle hall across Overview, Progression, History, and
+  Settings. Identity and combat record form a commander dossier, hero and item growth form an
+  ascension path, match history reads as a combat archive, and preferences remain a personal console.
+  Existing profile data, progression math, reward claims, and preference persistence are unchanged.
+- Campaign now reuses the elemental arena environment as an operations map. The opponent sequence is
+  staged as a connected path, the selected opponent owns the encounter scene, and progression,
+  readiness, rewards, known loadout intelligence, and battle entry remain visible without changing
+  campaign state, prerequisites, rewards, or battle creation.
+- PvP now uses the elemental arena environment as a competitive antechamber across its Hub, Casual,
+  Ranked, and Private routes. Mode selection is staged as three battlefield destinations, Casual
+  centers its search console, Ranked separates ceremonial standing from competitive entry, and
+  Private frames hosting and joining as opposing sides. Existing queues, ratings, lobby state,
+  realtime invalidations, polling fallback, and battle entry behavior are unchanged.
+- Public PvP profiles now continue Ranked's ceremonial arena language as focused competitive
+  dossiers. Identity, active season, current and peak standing, and public record form one readable
+  hierarchy, while leaderboard rows make eligible profile links explicit. Private and unknown
+  profiles keep the same indistinguishable unavailable state, and no inventory, equipment, loadout,
+  progression, API, or persistence behavior changed.
+- Authentication now presents the BattleNess wordmark and configured session providers as a
+  full-screen commandery gateway. Google OAuth, development accounts, redirect errors, automatic
+  onboarding, and session restoration keep their existing behavior; the change is presentation-only.
+- The game-wide immersion rollout and its final cross-route browser audit are complete. Shared mobile
+  and short-landscape rules guarantee 44-pixel interaction targets, compact sidebar and mobile
+  resource links retain localized accessible names when visible labels collapse, and audio range
+  controls expose explicit localized names. The permanent Dev Lab and full-screen live battle remain
+  separate from the shared Game App shell.
 - Finished live battles now replace the arena with a responsive, scroll-free result surface. The
   outcome is displayed prominently; exit and claim actions remain immediately available; credits,
   hero XP, and item XP form the first reward row; and material rewards use their real artwork below.
@@ -301,8 +352,105 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Change Log
 
+### 2026-07-31
+
+- Restaged `/login` as a responsive full-screen commandery gateway using the existing BattleNess
+  wordmark and profile environment. Browser-verified development sign-out and sign-in restoration,
+  OAuth error presentation, visible keyboard focus, and desktop, mobile portrait, and
+  short-landscape layouts without changing authentication or onboarding behavior.
+- Completed a measured browser audit of all 26 static player-facing routes at 1440x900, 390x844, and
+  844x390. Confirmed no page-level horizontal overflow or distorted images and no unexpected runtime
+  warnings. Added shared 44-pixel touch targets for compact actions, fixed icon-only sidebar and
+  collapsed resource-link names, and added localized accessible names to the three audio sliders.
+- Restaged public PvP profiles as competitive arena dossiers using the existing elemental arena
+  asset. Strengthened the identity scene, active-season banner, current and peak rank chamber,
+  win/loss record, and privacy note without changing templates, public fields, API behavior, or
+  profile-visibility rules.
+- Strengthened ranked leaderboard rows and eligible player links with competitive placement accents,
+  explicit interaction affordance, current-player treatment, visible focus, and reduced-motion
+  support. Browser-verified the public profile, unavailable profile, and ranked connection at
+  desktop, mobile portrait, and short-landscape viewports with no page-level horizontal overflow or
+  sub-44-pixel controls.
+
+### 2026-07-30
+
+- Reworked the complete PvP slice as a competitive arena antechamber using the existing elemental
+  arena asset. Added distinct violet private, cyan casual, and gold ranked identities; staged the hub
+  as battlefield selection; and strengthened queue, standing, loadout, leaderboard, host, and join
+  surfaces without changing templates, APIs, matchmaking, ratings, lobbies, live battle, results, or
+  localized copy.
+- Browser-verified PvP Hub, Casual, Ranked, and Private at desktop, mobile portrait, and
+  short-landscape viewports without entering a queue or mutating a lobby. Confirmed no page-level
+  horizontal overflow, 44-pixel touch targets, keyboard-focus support through the shared focus
+  system, reduced-motion coverage, and stable idle-state rendering.
+- Reworked Campaign as an elemental operations map using the existing arena asset. Added a stronger
+  campaign path, staged opponent encounter, differentiated readiness and reward surfaces, known
+  loadout intelligence, and a focused battle-entry dock without changing the campaign template,
+  API, prerequisites, rewards, battle creation, live battle, results, or localized copy.
+- Browser-verified Campaign at desktop, mobile portrait, and short-landscape viewports. Confirmed
+  opponent selection, locked-state prevention, known-loadout expansion, visible keyboard focus,
+  44-pixel mobile controls, intentional path scrolling, no page-level horizontal overflow, and no
+  runtime warnings.
+- Added the reusable `profile-chronicle-hall.png` environment asset and applied it across Profile
+  Overview, Progression, History, and Settings. Reframed identity, combat record, collection growth,
+  archive entries, and preference surfaces as one commander dossier without changing templates,
+  APIs, progression formulas, reward behavior, settings mutations, routes, or localized copy.
+- Browser-verified the complete Profile slice at desktop, mobile portrait, and short-landscape
+  viewports. Confirmed no page-level horizontal overflow, 44-pixel mobile interaction rows, visible
+  keyboard focus, functional progression and history filters, expandable formula details, reversible
+  unsaved appearance controls, and no runtime warnings.
+- Added the reusable `market-hall.png` environment asset and applied it across the complete Market
+  slice. Split the hub into visibly distinct official and player exchanges, restaged the fixed-stock
+  catalogue and transaction desk, and gave player listings and history a warmer bazaar identity
+  without changing templates, APIs, economy rules, mutations, routes, or localized copy.
+- Browser-verified Market Hub, Game Market, Player Market, and Market History at desktop, mobile
+  portrait, and short-landscape viewports. Confirmed no page-level horizontal overflow, 44-pixel
+  mobile controls, visible keyboard focus, functional resource selection and mode switching,
+  expandable seller controls, and no runtime warnings.
+- Added the reusable `inventory-vault.png` environment asset and applied it to Inventory Hub, Items,
+  Materials, Equipment, and Loadouts. Reworked collection cards as artifact displays and staged
+  equipment slots and current loadouts on battle-preparation platforms without changing templates,
+  APIs, item data, mutations, routes, or localized copy.
+- Browser-verified the complete Inventory slice at desktop, mobile portrait, and short-landscape
+  viewports. Confirmed no page-level horizontal overflow, 44-pixel mobile controls, visible keyboard
+  focus, functional collection filters and item inspection, stable responsive staging, and no
+  runtime warnings.
+- Extended the Forge workshop presentation to Socket and Quality. Added staged workflow navigation,
+  focal item treatments, composition slots, a distinct enchantment chamber, refinement progress,
+  clearer stat comparison, and 44-pixel workflow controls without changing Forge templates, APIs, or
+  business rules.
+- Browser-verified Socket and Quality at desktop, mobile portrait, and short-landscape viewports.
+  Confirmed responsive single-column composition, no page-level horizontal overflow, functional
+  Quality filters, visible keyboard focus, stable artwork proportions, and no console warnings.
+- Added the reusable `forge-workshop.png` environment asset and applied it to Forge Hub and Craft.
+  Reworked their surfaces, hierarchy, station identity, blueprint focus, material presentation, and
+  touch targets without changing Forge APIs, state, routes, item data, or localized copy.
+- Browser-verified Forge Hub and Craft at desktop, mobile portrait, and short-landscape viewports.
+  Confirmed no horizontal overflow, functional recipe filtering, visible keyboard focus, minimum
+  44-pixel primary controls, stable image fitting, and no console warnings.
+- Rebuilt Home and Battle Hub as the representative game-first workflow, reusing the existing
+  elemental arena asset as an environmental backdrop and preserving every route, API response,
+  localized label, readiness rule, training action, loadout interaction, and development control.
+- Reorganized Home around one command scene and reduced the visual weight of its resource metrics.
+  Reorganized Battle Hub around three differentiated mode destinations, a compact intelligence
+  ribbon, and an integrated active-loadout dock.
+- Browser-verified the Home-to-Battle navigation, visible keyboard focus, 44-pixel primary controls,
+  image fitting, console state, and horizontal overflow at desktop, mobile portrait, and short
+  landscape viewports.
+- Established the first game-first UI foundation through centralized visual tokens and a deeper
+  commandery-style shared shell. Updated desktop, compact-sidebar, mobile, and short-landscape
+  navigation presentation without changing routes, player data, localization, or live battle.
+- Moved shell and Home responsive rules from the Inventory card stylesheet into the shell domain,
+  preserving the ordered CSS entry point and existing breakpoint behavior.
+- Browser-verified Home and Battle Hub at desktop, mobile portrait, and short-landscape viewports
+  with no horizontal overflow or console warnings and with 44-pixel mobile shell targets.
+
 ### 2026-07-27
 
+- Added a 16-view simplified Game App mockup reference set under `mockups/`, derived from the
+  exploratory desktop concepts. The set covers Home, Battle, Campaign, PvP, Forge, Inventory,
+  Equipment, Loadouts, and Market while reducing dashboard repetition and ornamental density in
+  favor of staged, game-first spaces.
 - Recorded the next UI handoff: move from the completed live battle pass to a game-wide immersion
   iteration that reduces website and dashboard conventions while preserving existing behavior,
   accessibility, responsiveness, and localization. Phase 14 remains explicitly paused.

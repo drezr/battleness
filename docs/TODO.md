@@ -210,18 +210,27 @@ end of the Phase 14 section so it can be resumed after the UI work.
 
 ## Game-Wide UI Immersion Iteration
 
-- [ ] Audit the current application shell, home view, section hubs, and shared components in the
+- [x] Audit the current application shell, home view, section hubs, and shared components in the
       browser to identify the strongest website and dashboard patterns.
-- [ ] Define and confirm a cohesive game-first visual language for navigation, typography, surfaces,
+- [x] Define and confirm a cohesive game-first visual language for navigation, typography, surfaces,
       hierarchy, imagery, feedback, motion, and content density before a broad rollout.
-- [ ] Prove the direction through the shared application shell and one representative player
+- [x] Prove the direction through the shared application shell and one representative player
       workflow, then extract the reusable tokens and components needed by the remaining views.
-- [ ] Apply the confirmed language incrementally to Battle outside the live arena, Forge, Inventory,
+- [x] Apply the confirmed language incrementally to Battle outside the live arena, Forge, Inventory,
       Market, Profile, Settings, and authentication without changing their business behavior.
-- [ ] Preserve mobile-first responsiveness, keyboard and screen-reader access, visible focus,
+  - [x] Apply the Forge workshop language to the Forge Hub and Craft workflow.
+  - [x] Extend the Forge workshop language to Socket and Quality after validating the first slice.
+  - [x] Apply the Inventory vault language to the Hub, Items, Materials, Equipment, and Loadouts.
+  - [x] Apply the Market hall language to the Hub, Game Market, Player Market, and Market History.
+  - [x] Apply the Profile chronicle language to Overview, Progression, History, and Settings.
+  - [x] Apply the elemental operations language to Campaign without changing live battle or results.
+  - [x] Apply the competitive arena language to the PvP Hub, Casual, Ranked, and Private.
+  - [x] Extend the ranked arena language to public PvP profiles and leaderboard identity links.
+  - [x] Apply the commandery gateway language to authentication without changing session providers.
+- [x] Preserve mobile-first responsiveness, keyboard and screen-reader access, visible focus,
       reduced-motion support, localization, and the separation between player UI and Dev Lab
       diagnostics.
-- [ ] Browser-verify each affected slice at representative desktop, mobile portrait, and short
+- [x] Browser-verify each affected slice at representative desktop, mobile portrait, and short
       landscape viewports, including overflow, touch targets, asset deformation, overlap, and runtime
       warnings.
 

@@ -1,0 +1,244 @@
+/* Authentication gateway */
+.auth-page {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
+  padding: clamp(18px, 4vw, 56px);
+  background:
+    radial-gradient(circle at 23% 44%, rgb(45 211 237 / 13%), transparent 28%),
+    linear-gradient(90deg, rgb(2 13 20 / 82%), rgb(4 10 15 / 55%) 46%, rgb(18 10 5 / 76%)),
+    url("/assets/backgrounds/profile-chronicle-hall.png") center / cover no-repeat;
+}
+
+.auth-page::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgb(2 8 12 / 36%), transparent 28%, rgb(2 8 12 / 66%)),
+    radial-gradient(circle at 50% 50%, transparent 0 26%, rgb(2 8 12 / 62%) 78%);
+  content: "";
+  pointer-events: none;
+}
+
+.auth-panel {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(300px, 1.15fr) minmax(320px, 0.85fr);
+  grid-template-rows: auto auto 1fr;
+  width: min(1120px, 100%);
+  min-height: min(680px, calc(100dvh - clamp(36px, 8vw, 112px)));
+  gap: 24px 54px;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid rgb(130 220 234 / 30%);
+  border-radius: var(--app-corner-lg);
+  padding: clamp(30px, 5vw, 64px);
+  background:
+    linear-gradient(90deg, rgb(4 25 34 / 72%) 0 51%, rgb(5 15 21 / 94%) 58%), rgb(5 17 23 / 88%);
+  box-shadow:
+    0 40px 100px rgb(0 0 0 / 52%),
+    inset 0 1px 0 rgb(255 255 255 / 8%);
+  backdrop-filter: blur(16px);
+}
+
+.auth-panel::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--app-cyan), rgb(255 255 255 / 18%), var(--app-gold));
+  box-shadow: 0 0 22px rgb(45 211 237 / 40%);
+  content: "";
+}
+
+.auth-panel::after {
+  position: absolute;
+  width: min(46vw, 520px);
+  aspect-ratio: 1;
+  border: 1px solid rgb(45 211 237 / 10%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, transparent 34%, rgb(45 211 237 / 6%) 35% 36%, transparent 37%),
+    repeating-conic-gradient(from 0deg, rgb(45 211 237 / 6%) 0 1deg, transparent 1deg 30deg);
+  content: "";
+  pointer-events: none;
+  bottom: -250px;
+  left: -130px;
+}
+
+.auth-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-logo {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  width: min(420px, 88%);
+  max-width: none;
+  justify-self: center;
+  filter: drop-shadow(0 24px 32px rgb(0 0 0 / 52%)) drop-shadow(0 0 28px rgb(45 211 237 / 13%));
+}
+
+.auth-panel > div:nth-of-type(1) {
+  grid-column: 2;
+  align-self: end;
+}
+
+.auth-panel .eyebrow {
+  color: var(--app-gold);
+}
+
+.auth-panel h1 {
+  margin-top: 8px;
+  font-size: clamp(2.45rem, 4.5vw, 4.25rem);
+  letter-spacing: -0.035em;
+  line-height: 0.96;
+  text-shadow: 0 4px 22px rgb(0 0 0 / 82%);
+}
+
+.auth-panel > div:nth-of-type(1) p {
+  max-width: 430px;
+  margin-top: 14px;
+  color: #c6d4d8;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.auth-panel > .settings-error {
+  grid-column: 2;
+  margin: 0;
+}
+
+.auth-actions {
+  grid-column: 2;
+  align-self: start;
+  gap: 12px;
+}
+
+.auth-actions > button,
+.auth-actions > .button-link {
+  min-height: 54px;
+  border-radius: 8px;
+  font-weight: 850;
+}
+
+.auth-actions > button {
+  border-color: rgb(45 211 237 / 50%);
+  background: linear-gradient(135deg, rgb(28 153 179 / 88%), rgb(11 82 103 / 94%));
+  box-shadow: 0 12px 28px rgb(45 211 237 / 10%);
+}
+
+.auth-actions > button:last-of-type {
+  border-color: rgb(178 167 255 / 44%);
+  background: linear-gradient(135deg, rgb(102 87 180 / 88%), rgb(47 39 99 / 94%));
+  box-shadow: 0 12px 28px rgb(178 167 255 / 9%);
+}
+
+.google-auth-button {
+  border-color: rgb(255 255 255 / 68%);
+  color: #102027;
+  background: linear-gradient(135deg, #fff, #e7eef0);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 20%);
+}
+
+.auth-separator {
+  color: #9fb3ba;
+}
+
+.auth-separator::before,
+.auth-separator::after {
+  background: rgb(125 192 205 / 20%);
+}
+
+.auth-actions > .panel {
+  border-color: rgb(255 188 77 / 22%);
+  background: rgb(31 24 12 / 78%);
+}
+
+@media (max-width: 760px) {
+  .auth-page {
+    align-items: start;
+    min-height: 100dvh;
+    overflow: auto;
+    padding: 16px;
+    background:
+      linear-gradient(180deg, rgb(2 12 18 / 60%), rgb(3 10 15 / 90%)),
+      url("/assets/backgrounds/profile-chronicle-hall.png") center top / auto 760px no-repeat;
+  }
+
+  .auth-panel {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    min-height: calc(100dvh - 32px);
+    gap: 22px;
+    align-content: center;
+    padding: 26px 22px;
+    background: rgb(5 18 24 / 90%);
+  }
+
+  .auth-logo,
+  .auth-panel > div:nth-of-type(1),
+  .auth-panel > .settings-error,
+  .auth-actions {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .auth-logo {
+    width: min(230px, 72%);
+  }
+
+  .auth-panel > div:nth-of-type(1) {
+    align-self: auto;
+    text-align: center;
+  }
+
+  .auth-panel h1 {
+    font-size: clamp(2.2rem, 12vw, 3.2rem);
+  }
+
+  .auth-panel > div:nth-of-type(1) p {
+    margin-right: auto;
+    margin-left: auto;
+  }
+}
+
+@media (max-height: 520px) and (min-width: 761px) {
+  .auth-page {
+    overflow: auto;
+    padding: 16px;
+  }
+
+  .auth-panel {
+    grid-template-columns: minmax(230px, 0.9fr) minmax(320px, 1.1fr);
+    min-height: calc(100dvh - 32px);
+    gap: 14px 36px;
+    padding: 24px 36px;
+  }
+
+  .auth-logo {
+    width: min(300px, 82%);
+  }
+
+  .auth-panel h1 {
+    font-size: clamp(2.1rem, 5vw, 3rem);
+  }
+
+  .auth-panel > div:nth-of-type(1) p {
+    margin-top: 8px;
+  }
+
+  .auth-actions {
+    gap: 8px;
+  }
+
+  .auth-actions > button,
+  .auth-actions > .button-link {
+    min-height: 44px;
+  }
+}

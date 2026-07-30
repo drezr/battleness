@@ -39,109 +39,111 @@
     <p v-else-if="error" class="panel">{{ t("battle.hub.loadError") }}</p>
 
     <template v-else-if="loadouts">
-      <section
-        class="hub-stat-strip battle-hub-stats"
-        :aria-label="t('battle.hub.accountOverview')"
-      >
-        <NuxtLink to="/battle/campaign">
-          <span class="hub-stat-icon campaign"><Map :size="19" /></span>
-          <span>
-            <small>{{ t("navigation.campaign") }}</small>
-            <strong
-              >{{ campaign?.progress.completedCount ?? 0 }} /
-              {{ campaign?.progress.totalCount ?? 0 }}</strong
+      <section class="battle-hub-stage">
+        <section
+          class="hub-stat-strip battle-hub-stats"
+          :aria-label="t('battle.hub.accountOverview')"
+        >
+          <NuxtLink to="/battle/campaign">
+            <span class="hub-stat-icon campaign"><Map :size="19" /></span>
+            <span>
+              <small>{{ t("navigation.campaign") }}</small>
+              <strong
+                >{{ campaign?.progress.completedCount ?? 0 }} /
+                {{ campaign?.progress.totalCount ?? 0 }}</strong
+              >
+              <em>{{ t("battle.hub.opponentsDefeated") }}</em>
+            </span>
+          </NuxtLink>
+          <NuxtLink to="/battle/history">
+            <span class="hub-stat-icon history"><History :size="19" /></span>
+            <span>
+              <small>{{ t("battle.history.totalBattles") }}</small>
+              <strong>{{ history?.records.length ?? 0 }}</strong>
+              <em>{{ t("battle.hub.verifiedRecords") }}</em>
+            </span>
+          </NuxtLink>
+          <NuxtLink to="/battle/history">
+            <span class="hub-stat-icon victories"><Trophy :size="19" /></span>
+            <span>
+              <small>{{ t("battle.history.winRate") }}</small>
+              <strong>{{ winRate }}%</strong>
+              <em>{{ t("battle.hub.combatPerformance") }}</em>
+            </span>
+          </NuxtLink>
+          <NuxtLink :class="{ attention: unclaimedRewardCount > 0 }" to="/profile/history">
+            <span class="hub-stat-icon rewards"><Gift :size="19" /></span>
+            <span>
+              <small>{{ t("battle.history.pendingRewards") }}</small>
+              <strong>{{ unclaimedRewardCount }}</strong>
+              <em>{{ t("battle.hub.rewardClaims") }}</em>
+            </span>
+          </NuxtLink>
+        </section>
+
+        <section class="battle-mode-grid">
+          <article class="battle-mode-card campaign-mode">
+            <div class="battle-mode-icon"><Map :size="28" aria-hidden="true" /></div>
+            <div class="battle-mode-copy">
+              <span class="eyebrow">{{ t("battle.hub.soloMode") }}</span>
+              <h2>{{ t("navigation.campaign") }}</h2>
+              <p>{{ t("battle.hub.campaignDescription") }}</p>
+            </div>
+            <div class="battle-mode-meta">
+              <span><Swords :size="15" /> {{ t("battle.hub.campaignStatus") }}</span>
+            </div>
+            <NuxtLink
+              :class="['button-link', 'battle-mode-action', { disabled: !activeLoadout }]"
+              :aria-disabled="!activeLoadout"
+              :to="activeLoadout ? '/battle/campaign' : '/inventory/loadouts'"
             >
-            <em>{{ t("battle.hub.opponentsDefeated") }}</em>
-          </span>
-        </NuxtLink>
-        <NuxtLink to="/battle/history">
-          <span class="hub-stat-icon history"><History :size="19" /></span>
-          <span>
-            <small>{{ t("battle.history.totalBattles") }}</small>
-            <strong>{{ history?.records.length ?? 0 }}</strong>
-            <em>{{ t("battle.hub.verifiedRecords") }}</em>
-          </span>
-        </NuxtLink>
-        <NuxtLink to="/battle/history">
-          <span class="hub-stat-icon victories"><Trophy :size="19" /></span>
-          <span>
-            <small>{{ t("battle.history.winRate") }}</small>
-            <strong>{{ winRate }}%</strong>
-            <em>{{ t("battle.hub.combatPerformance") }}</em>
-          </span>
-        </NuxtLink>
-        <NuxtLink :class="{ attention: unclaimedRewardCount > 0 }" to="/profile/history">
-          <span class="hub-stat-icon rewards"><Gift :size="19" /></span>
-          <span>
-            <small>{{ t("battle.history.pendingRewards") }}</small>
-            <strong>{{ unclaimedRewardCount }}</strong>
-            <em>{{ t("battle.hub.rewardClaims") }}</em>
-          </span>
-        </NuxtLink>
-      </section>
+              {{ t(activeLoadout ? "battle.hub.openCampaign" : "battle.campaign.selectLoadout") }}
+              <ArrowRight :size="17" aria-hidden="true" />
+            </NuxtLink>
+          </article>
 
-      <section class="battle-mode-grid">
-        <article class="battle-mode-card campaign-mode">
-          <div class="battle-mode-icon"><Map :size="28" aria-hidden="true" /></div>
-          <div class="battle-mode-copy">
-            <span class="eyebrow">{{ t("battle.hub.soloMode") }}</span>
-            <h2>{{ t("navigation.campaign") }}</h2>
-            <p>{{ t("battle.hub.campaignDescription") }}</p>
-          </div>
-          <div class="battle-mode-meta">
-            <span><Swords :size="15" /> {{ t("battle.hub.campaignStatus") }}</span>
-          </div>
-          <NuxtLink
-            :class="['button-link', 'battle-mode-action', { disabled: !activeLoadout }]"
-            :aria-disabled="!activeLoadout"
-            :to="activeLoadout ? '/battle/campaign' : '/inventory/loadouts'"
-          >
-            {{ t(activeLoadout ? "battle.hub.openCampaign" : "battle.campaign.selectLoadout") }}
-            <ArrowRight :size="17" aria-hidden="true" />
-          </NuxtLink>
-        </article>
+          <article class="battle-mode-card pvp-mode">
+            <div class="battle-mode-icon"><Users :size="28" aria-hidden="true" /></div>
+            <div class="battle-mode-copy">
+              <span class="eyebrow">{{ t("battle.hub.competitiveMode") }}</span>
+              <h2>{{ t("navigation.pvp") }}</h2>
+              <p>{{ t("battle.hub.pvpDescription") }}</p>
+            </div>
+            <div class="battle-mode-meta">
+              <span><Radio :size="15" /> {{ t("battle.hub.pvpModesAvailable") }}</span>
+            </div>
+            <NuxtLink
+              :class="['button-link', 'battle-mode-action', { disabled: !activeLoadout }]"
+              :aria-disabled="!activeLoadout"
+              :to="activeLoadout ? '/battle/pvp' : '/inventory/loadouts'"
+            >
+              {{ t(activeLoadout ? "battle.hub.openPvp" : "battle.campaign.selectLoadout") }}
+              <ArrowRight :size="17" aria-hidden="true" />
+            </NuxtLink>
+          </article>
 
-        <article class="battle-mode-card pvp-mode">
-          <div class="battle-mode-icon"><Users :size="28" aria-hidden="true" /></div>
-          <div class="battle-mode-copy">
-            <span class="eyebrow">{{ t("battle.hub.competitiveMode") }}</span>
-            <h2>{{ t("navigation.pvp") }}</h2>
-            <p>{{ t("battle.hub.pvpDescription") }}</p>
-          </div>
-          <div class="battle-mode-meta">
-            <span><Radio :size="15" /> {{ t("battle.hub.pvpModesAvailable") }}</span>
-          </div>
-          <NuxtLink
-            :class="['button-link', 'battle-mode-action', { disabled: !activeLoadout }]"
-            :aria-disabled="!activeLoadout"
-            :to="activeLoadout ? '/battle/pvp' : '/inventory/loadouts'"
-          >
-            {{ t(activeLoadout ? "battle.hub.openPvp" : "battle.campaign.selectLoadout") }}
-            <ArrowRight :size="17" aria-hidden="true" />
-          </NuxtLink>
-        </article>
-
-        <article class="battle-mode-card training-mode">
-          <div class="battle-mode-icon"><Dumbbell :size="28" aria-hidden="true" /></div>
-          <div class="battle-mode-copy">
-            <span class="eyebrow">{{ t("battle.hub.practiceMode") }}</span>
-            <h2>{{ t("battle.hub.training") }}</h2>
-            <p>{{ t("battle.hub.trainingDescription") }}</p>
-          </div>
-          <div class="battle-mode-meta">
-            <span><Bot :size="15" /> {{ t("battle.hub.trainingOpponent") }}</span>
-          </div>
-          <button
-            class="battle-mode-action secondary-button"
-            :disabled="!activeLoadout || creatingBattle"
-            type="button"
-            @click="startTrainingBattle"
-          >
-            {{ t(creatingBattle ? "battle.campaign.starting" : "battle.hub.startTraining") }}
-            <ArrowRight :size="17" aria-hidden="true" />
-          </button>
-          <p v-if="battleFeedback" class="feedback">{{ battleFeedback }}</p>
-        </article>
+          <article class="battle-mode-card training-mode">
+            <div class="battle-mode-icon"><Dumbbell :size="28" aria-hidden="true" /></div>
+            <div class="battle-mode-copy">
+              <span class="eyebrow">{{ t("battle.hub.practiceMode") }}</span>
+              <h2>{{ t("battle.hub.training") }}</h2>
+              <p>{{ t("battle.hub.trainingDescription") }}</p>
+            </div>
+            <div class="battle-mode-meta">
+              <span><Bot :size="15" /> {{ t("battle.hub.trainingOpponent") }}</span>
+            </div>
+            <button
+              class="battle-mode-action secondary-button"
+              :disabled="!activeLoadout || creatingBattle"
+              type="button"
+              @click="startTrainingBattle"
+            >
+              {{ t(creatingBattle ? "battle.campaign.starting" : "battle.hub.startTraining") }}
+              <ArrowRight :size="17" aria-hidden="true" />
+            </button>
+            <p v-if="battleFeedback" class="feedback">{{ battleFeedback }}</p>
+          </article>
+        </section>
       </section>
 
       <section class="battle-loadout-section">

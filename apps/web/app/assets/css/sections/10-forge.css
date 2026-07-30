@@ -1,6 +1,111 @@
 /* Forge workflows */
+.forge-craft-page,
+.forge-socket-page,
+.forge-quality-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgb(219 165 82 / 15%);
+  border-radius: var(--app-corner-scene);
+  padding: 18px;
+  background:
+    linear-gradient(90deg, rgb(3 8 11 / 93%) 0%, rgb(4 10 13 / 69%) 47%, rgb(3 8 11 / 92%) 100%),
+    linear-gradient(0deg, rgb(3 8 11 / 94%) 0%, transparent 48%),
+    url("/assets/backgrounds/forge-workshop.png") center top / cover no-repeat;
+  box-shadow:
+    var(--app-shadow-depth),
+    inset 0 1px 0 rgb(255 224 169 / 8%);
+}
+
+.forge-craft-page::before,
+.forge-socket-page::before,
+.forge-quality-page::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    radial-gradient(circle at 62% 35%, rgb(237 133 48 / 10%), transparent 30rem),
+    linear-gradient(180deg, transparent 38rem, rgb(3 8 11 / 98%) 68rem);
+  pointer-events: none;
+  content: "";
+}
+
+.forge-craft-page > *,
+.forge-socket-page > *,
+.forge-quality-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.forge-craft-page .section-nav,
+.forge-socket-page .section-nav,
+.forge-quality-page .section-nav {
+  width: fit-content;
+  border: 1px solid rgb(212 169 100 / 18%);
+  border-radius: var(--app-corner-control);
+  margin-bottom: 18px;
+  padding: 4px;
+  background: rgb(3 10 14 / 76%);
+  box-shadow: var(--app-shadow-inset);
+  backdrop-filter: blur(10px);
+}
+
+.forge-craft-page .section-nav a,
+.forge-socket-page .section-nav a,
+.forge-quality-page .section-nav a {
+  min-height: 44px;
+  border-bottom: 0;
+  border-radius: calc(var(--app-corner-control) - 2px);
+  padding-inline: 15px;
+}
+
+.forge-craft-page .section-nav a.active,
+.forge-socket-page .section-nav a.active,
+.forge-quality-page .section-nav a.active {
+  color: #ffe1a5;
+  background: linear-gradient(180deg, rgb(245 184 63 / 16%), rgb(245 184 63 / 5%));
+  box-shadow: inset 0 -2px 0 #f3b83f;
+}
+
 .forge-view-header {
   align-items: end;
+}
+
+.forge-craft-page .forge-view-header,
+.forge-socket-page .forge-view-header,
+.forge-quality-page .forge-view-header {
+  min-height: 104px;
+  padding: 4px;
+}
+
+.forge-craft-page .forge-view-header h1,
+.forge-socket-page .forge-view-header h1,
+.forge-quality-page .forge-view-header h1 {
+  color: #fff2d4;
+  text-shadow: 0 3px 24px rgb(0 0 0 / 72%);
+}
+
+.forge-craft-page .forge-view-header .muted,
+.forge-socket-page .forge-view-header .muted,
+.forge-quality-page .forge-view-header .muted {
+  color: #bbc3c3;
+}
+
+.forge-craft-page .forge-view-header .button-link {
+  min-height: 44px;
+  border-color: rgb(241 189 90 / 28%);
+  background: rgb(6 13 16 / 78%);
+  box-shadow: var(--app-shadow-inset);
+  backdrop-filter: blur(10px);
+}
+
+.forge-socket-page .forge-credit-balance,
+.forge-quality-page .forge-credit-balance {
+  min-height: 44px;
+  border-color: rgb(241 189 90 / 28%);
+  background: rgb(6 13 16 / 78%);
+  box-shadow: var(--app-shadow-inset);
+  backdrop-filter: blur(10px);
 }
 
 .forge-view-header .button-link,
@@ -33,6 +138,16 @@
   border-left: 3px solid #f3b83f;
   padding: 18px 20px;
   background: rgb(31 28 20 / 66%);
+}
+
+.forge-craft-page .forge-overview {
+  border-color: rgb(245 190 71 / 25%);
+  border-left-width: 1px;
+  border-radius: var(--app-corner-panel);
+  padding-block: 13px;
+  background: rgb(6 13 16 / 82%);
+  box-shadow: var(--app-shadow-inset);
+  backdrop-filter: blur(12px);
 }
 
 .forge-overview-title {
@@ -110,6 +225,11 @@
   align-items: start;
 }
 
+.forge-craft-page .forge-craft-workspace {
+  grid-template-columns: minmax(270px, 0.68fr) minmax(0, 1.55fr);
+  gap: 16px;
+}
+
 .recipe-catalogue,
 .craft-station,
 .socket-ring-station,
@@ -124,6 +244,23 @@
   background: rgb(255 255 255 / 3%);
 }
 
+.forge-craft-page .recipe-catalogue,
+.forge-craft-page .craft-station,
+.forge-craft-page .forge-recent-section {
+  border-color: rgb(221 177 106 / 20%);
+  border-radius: var(--app-corner-panel);
+  background: rgb(4 11 14 / 86%);
+  box-shadow:
+    0 18px 42px rgb(0 0 0 / 26%),
+    var(--app-shadow-inset);
+  backdrop-filter: blur(14px);
+}
+
+.forge-craft-page .recipe-catalogue {
+  position: sticky;
+  top: 16px;
+}
+
 .forge-type-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -134,13 +271,18 @@
 }
 
 .forge-type-tabs button {
-  min-height: 30px;
+  min-height: 44px;
   border-color: transparent;
   padding: 5px 8px;
   color: var(--app-muted);
   background: transparent;
   font-size: 0.7rem;
   white-space: nowrap;
+}
+
+.forge-craft-page .forge-type-tabs button {
+  border-radius: var(--app-corner-control);
+  padding-inline: 11px;
 }
 
 .forge-type-tabs button.active {
@@ -174,8 +316,22 @@
 .recipe-list-item {
   grid-template-columns: 48px minmax(0, 1fr) auto;
   gap: 9px;
-  min-height: 60px;
+  min-height: 64px;
   padding: 6px;
+}
+
+.forge-craft-page .recipe-list-item {
+  border-color: rgb(210 219 217 / 12%);
+  border-radius: var(--app-corner-control);
+  background: rgb(11 20 23 / 78%);
+}
+
+.forge-craft-page .recipe-list-item.active {
+  border-color: rgb(245 190 71 / 72%);
+  background: linear-gradient(90deg, rgb(245 190 71 / 13%), transparent), rgb(11 20 23 / 88%);
+  box-shadow:
+    inset 3px 0 0 #f3b83f,
+    0 0 22px rgb(245 190 71 / 8%);
 }
 
 .recipe-list-item:hover,
@@ -243,6 +399,25 @@
   background: rgb(31 28 20 / 46%);
 }
 
+.forge-craft-page .craft-station {
+  min-height: 590px;
+  border-top-width: 1px;
+  padding: 22px;
+  background:
+    radial-gradient(circle at 50% 35%, rgb(245 184 63 / 10%), transparent 17rem),
+    linear-gradient(180deg, rgb(10 14 14 / 74%), rgb(4 10 13 / 92%));
+}
+
+.forge-craft-page .craft-station::before {
+  display: block;
+  width: 86px;
+  height: 2px;
+  margin: -22px auto 20px;
+  background: #f3b83f;
+  box-shadow: 0 0 22px rgb(243 184 63 / 42%);
+  content: "";
+}
+
 .craft-station-heading,
 .craft-ingredients-heading,
 .quality-station-heading,
@@ -260,6 +435,20 @@
   margin: 2px 0 0;
 }
 
+.forge-craft-page .craft-station-heading {
+  text-align: center;
+}
+
+.forge-craft-page .craft-station-heading > div {
+  flex: 1;
+  padding-left: 70px;
+}
+
+.forge-craft-page .craft-station-heading h2 {
+  color: #ffe09b;
+  font-size: clamp(1.5rem, 2.4vw, 2.2rem);
+}
+
 .craft-blueprint {
   display: grid;
   grid-template-columns: 150px minmax(0, 1fr);
@@ -268,6 +457,13 @@
   border-block: 1px solid var(--app-border);
   margin-top: 16px;
   padding: 18px 0;
+}
+
+.forge-craft-page .craft-blueprint {
+  grid-template-columns: minmax(190px, 0.82fr) minmax(220px, 1fr);
+  min-height: 244px;
+  border-color: rgb(245 190 71 / 16%);
+  padding-block: 24px;
 }
 
 .craft-output-art,
@@ -283,6 +479,27 @@
 
 .craft-output-art .item-artwork {
   width: 132px;
+}
+
+.forge-craft-page .craft-output-art {
+  position: relative;
+  width: min(100%, 218px);
+  justify-self: center;
+  border-color: rgb(245 190 71 / 22%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(245 184 63 / 14%), transparent 66%), rgb(2 7 9 / 45%);
+  box-shadow:
+    0 0 48px rgb(245 184 63 / 10%),
+    inset 0 0 34px rgb(0 0 0 / 35%);
+}
+
+.forge-craft-page .craft-output-art .item-artwork {
+  width: min(180px, 100%);
+}
+
+.forge-craft-page .craft-output-art > span {
+  margin-top: 4px;
+  color: #d9bd80;
 }
 
 .craft-output-art > span {
@@ -371,6 +588,16 @@
   background: rgb(240 105 111 / 5%);
 }
 
+.forge-craft-page .craft-ingredient-grid article {
+  min-height: 70px;
+  border-radius: var(--app-corner-control);
+  background: rgb(18 12 13 / 76%);
+}
+
+.forge-craft-page .craft-ingredient-grid article.ready {
+  background: rgb(8 24 17 / 74%);
+}
+
 .craft-ingredient-grid article.ready {
   border-color: rgb(94 225 147 / 26%);
   background: rgb(94 225 147 / 5%);
@@ -414,6 +641,31 @@
   align-items: center;
   justify-content: center;
   margin-top: 16px;
+}
+
+.forge-craft-page .craft-primary-action {
+  min-height: 52px;
+  border-color: rgb(245 190 71 / 48%);
+  color: #fff1cb;
+  background:
+    linear-gradient(180deg, rgb(245 184 63 / 22%), rgb(112 69 21 / 20%)), rgb(8 15 17 / 94%);
+  box-shadow:
+    0 12px 28px rgb(0 0 0 / 28%),
+    inset 0 1px 0 rgb(255 238 195 / 18%);
+  font-family: var(--app-font-display);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.forge-craft-page .craft-primary-action:hover:not(:disabled) {
+  border-color: #f3b83f;
+  background:
+    linear-gradient(180deg, rgb(245 184 63 / 31%), rgb(112 69 21 / 24%)), rgb(8 15 17 / 94%);
+}
+
+.forge-craft-page .forge-recent-section {
+  padding: 18px;
 }
 
 .forge-recent-grid {

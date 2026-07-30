@@ -186,6 +186,7 @@
                   min="0"
                   max="100"
                   step="1"
+                  :aria-label="t(volume.labelKey)"
                   :disabled="form.muted"
                 />
               </label>

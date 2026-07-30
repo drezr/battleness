@@ -4,63 +4,69 @@
     <p v-else-if="error" class="panel">{{ t("home.loadError") }}</p>
 
     <template v-else-if="state">
-      <header class="home-header">
-        <div>
-          <span class="eyebrow">{{ t("home.section") }}</span>
-          <h1>{{ t("home.welcome", { player: state.player.displayName }) }}</h1>
-          <p class="muted">{{ t("home.description") }}</p>
-        </div>
-        <img class="home-wordmark" src="/assets/brand/battleness-logo.png" :alt="t('app.brand')" />
-      </header>
+      <section class="home-command-scene">
+        <header class="home-header">
+          <div>
+            <span class="eyebrow">{{ t("home.section") }}</span>
+            <h1>{{ t("home.welcome", { player: state.player.displayName }) }}</h1>
+            <p class="muted">{{ t("home.description") }}</p>
+          </div>
+          <img
+            class="home-wordmark"
+            src="/assets/brand/battleness-logo.png"
+            :alt="t('app.brand')"
+          />
+        </header>
 
-      <section class="home-command-grid">
-        <article class="battle-command-card">
-          <div class="battle-command-copy">
-            <span class="mode-label"><Swords :size="16" /> {{ t("home.nextBattle") }}</span>
-            <h2>{{ t("home.campaignTitle") }}</h2>
-            <p>{{ t("home.campaignDescription") }}</p>
-            <div class="control-row">
-              <NuxtLink class="button-link primary-command" to="/battle/campaign">
-                <Play :size="17" fill="currentColor" aria-hidden="true" />
-                {{ t("home.enterCampaign") }}
-              </NuxtLink>
-              <NuxtLink class="button-link secondary-button" to="/battle/pvp">
-                <Users :size="17" aria-hidden="true" />
-                {{ t("navigation.pvp") }}
-              </NuxtLink>
+        <div class="home-command-grid">
+          <article class="battle-command-card">
+            <div class="battle-command-copy">
+              <span class="mode-label"><Swords :size="16" /> {{ t("home.nextBattle") }}</span>
+              <h2>{{ t("home.campaignTitle") }}</h2>
+              <p>{{ t("home.campaignDescription") }}</p>
+              <div class="control-row">
+                <NuxtLink class="button-link primary-command" to="/battle/campaign">
+                  <Play :size="17" fill="currentColor" aria-hidden="true" />
+                  {{ t("home.enterCampaign") }}
+                </NuxtLink>
+                <NuxtLink class="button-link secondary-button" to="/battle/pvp">
+                  <Users :size="17" aria-hidden="true" />
+                  {{ t("navigation.pvp") }}
+                </NuxtLink>
+              </div>
             </div>
-          </div>
-          <div class="battle-emblem" aria-hidden="true">
-            <Shield :size="78" stroke-width="1.2" />
-            <Swords :size="34" stroke-width="1.8" />
-          </div>
-        </article>
+            <div class="battle-emblem" aria-hidden="true">
+              <Shield :size="78" stroke-width="1.2" />
+              <Swords :size="34" stroke-width="1.8" />
+            </div>
+          </article>
 
-        <dl class="home-metrics">
-          <div>
-            <span class="metric-icon experience"><Zap :size="18" /></span>
-            <dt>{{ t("common.heroLevel") }}</dt>
-            <dd>{{ state.player.level }}</dd>
-          </div>
-          <div>
-            <span class="metric-icon credits"><Coins :size="18" /></span>
-            <dt>{{ t("common.credits") }}</dt>
-            <dd>{{ formattedCredits }}</dd>
-          </div>
-          <div>
-            <span class="metric-icon collection"><Backpack :size="18" /></span>
-            <dt>{{ t("common.items") }}</dt>
-            <dd>{{ state.inventory.length }}</dd>
-          </div>
-          <div>
-            <span class="metric-icon materials"><Boxes :size="18" /></span>
-            <dt>{{ t("common.materials") }}</dt>
-            <dd>{{ totalMaterialQuantity(state.materials) }}</dd>
-          </div>
-        </dl>
+          <dl class="home-metrics">
+            <div>
+              <span class="metric-icon experience"><Zap :size="18" /></span>
+              <dt>{{ t("common.heroLevel") }}</dt>
+              <dd>{{ state.player.level }}</dd>
+            </div>
+            <div>
+              <span class="metric-icon credits"><Coins :size="18" /></span>
+              <dt>{{ t("common.credits") }}</dt>
+              <dd>{{ formattedCredits }}</dd>
+            </div>
+            <div>
+              <span class="metric-icon collection"><Backpack :size="18" /></span>
+              <dt>{{ t("common.items") }}</dt>
+              <dd>{{ state.inventory.length }}</dd>
+            </div>
+            <div>
+              <span class="metric-icon materials"><Boxes :size="18" /></span>
+              <dt>{{ t("common.materials") }}</dt>
+              <dd>{{ totalMaterialQuantity(state.materials) }}</dd>
+            </div>
+          </dl>
+        </div>
       </section>
 
-      <section class="home-section">
+      <section class="home-section home-destinations">
         <div class="section-heading-row">
           <div>
             <span class="eyebrow">{{ t("home.quickActions") }}</span>

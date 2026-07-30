@@ -878,3 +878,542 @@
     width: 54px;
   }
 }
+
+/* Competitive arena presentation */
+.pvp-hub-page,
+.pvp-flow-page {
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100dvh - 92px);
+  padding-bottom: 40px;
+  background:
+    linear-gradient(180deg, rgb(2 9 14 / 48%) 0, rgb(3 10 15 / 86%) 430px, #050b0f 860px),
+    url("/assets/backgrounds/live-battle-elemental-arena.jpg") center top / cover no-repeat;
+}
+
+.pvp-hub-page::before,
+.pvp-flow-page::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgb(4 18 28 / 72%), transparent 44%, rgb(24 10 4 / 50%)),
+    radial-gradient(
+      circle at 50% 24%,
+      transparent 0 12%,
+      rgb(2 9 14 / 18%) 46%,
+      rgb(2 8 12 / 88%) 82%
+    );
+  content: "";
+  pointer-events: none;
+}
+
+.pvp-hub-page > *,
+.pvp-flow-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pvp-hub-page > .section-nav,
+.pvp-flow-page > .section-nav {
+  border-color: rgb(129 220 235 / 16%);
+  background: rgb(4 14 20 / 72%);
+  backdrop-filter: blur(12px);
+}
+
+.pvp-hub-page > .view-header,
+.pvp-flow-page > .view-header {
+  min-height: 164px;
+  align-items: center;
+  padding: 24px clamp(0px, 2vw, 28px);
+  text-shadow: 0 3px 18px rgb(0 0 0 / 85%);
+}
+
+.pvp-hub-page > .view-header h1,
+.pvp-flow-page > .view-header h1 {
+  font-size: clamp(2.1rem, 4vw, 3.5rem);
+  letter-spacing: -0.025em;
+}
+
+.pvp-hub-page > .view-header .muted,
+.pvp-flow-page > .view-header .muted {
+  max-width: 680px;
+  color: #c2d1d5;
+}
+
+.pvp-readiness-link {
+  border-color: rgb(78 224 148 / 30%);
+  background: rgb(5 28 26 / 82%);
+  box-shadow: 0 16px 34px rgb(0 0 0 / 30%);
+  backdrop-filter: blur(13px);
+}
+
+.pvp-mode-grid {
+  gap: 16px;
+}
+
+.pvp-mode-tile {
+  --pvp-rgb: 49 211 237;
+  grid-template-rows: auto minmax(170px, 1fr) auto auto;
+  min-height: 420px;
+  gap: 16px;
+  border-color: rgb(var(--pvp-rgb) / 46%);
+  border-radius: var(--app-corner-md);
+  padding: 22px;
+  background:
+    linear-gradient(180deg, rgb(var(--pvp-rgb) / 10%), transparent 34%),
+    linear-gradient(0deg, rgb(4 12 17 / 98%) 0 42%, rgb(4 12 17 / 40%) 76%),
+    url("/assets/backgrounds/live-battle-elemental-arena.jpg") var(--pvp-position, center) / cover;
+  box-shadow:
+    0 20px 46px rgb(0 0 0 / 32%),
+    inset 0 1px 0 rgb(255 255 255 / 9%);
+  transition:
+    border-color var(--app-motion-scene) ease,
+    box-shadow var(--app-motion-scene) ease,
+    transform var(--app-motion-scene) ease;
+}
+
+.pvp-mode-tile:hover,
+.pvp-mode-tile:focus-within {
+  border-color: rgb(var(--pvp-rgb) / 78%);
+  box-shadow:
+    0 26px 56px rgb(0 0 0 / 42%),
+    0 0 28px rgb(var(--pvp-rgb) / 11%),
+    inset 0 1px 0 rgb(255 255 255 / 12%);
+  transform: translateY(-4px);
+}
+
+.private-mode-tile {
+  --pvp-rgb: 178 167 255;
+  --pvp-position: 18% center;
+}
+
+.casual-mode-tile {
+  --pvp-position: center;
+}
+
+.ranked-mode-tile {
+  --pvp-rgb: 255 180 75;
+  --pvp-position: 82% center;
+}
+
+.pvp-mode-tile::before {
+  height: 2px;
+  box-shadow: 0 0 15px rgb(var(--pvp-rgb) / 60%);
+}
+
+.pvp-mode-emblem {
+  width: 64px;
+  border: 1px solid rgb(var(--pvp-rgb) / 34%);
+  border-radius: 50%;
+  background: rgb(4 13 18 / 76%);
+  box-shadow:
+    inset 0 0 22px rgb(var(--pvp-rgb) / 15%),
+    0 10px 24px rgb(0 0 0 / 30%);
+}
+
+.pvp-mode-content {
+  align-content: end;
+  text-shadow: 0 3px 16px rgb(0 0 0 / 84%);
+}
+
+.pvp-mode-content h2 {
+  font-size: clamp(1.75rem, 2.5vw, 2.4rem);
+  line-height: 1;
+}
+
+.pvp-mode-content p {
+  color: #bfced3;
+}
+
+.pvp-feature-list {
+  border-color: rgb(var(--pvp-rgb) / 22%);
+}
+
+.pvp-mode-button {
+  min-height: 50px;
+  border-color: rgb(var(--pvp-rgb) / 55%);
+  background: linear-gradient(135deg, rgb(var(--pvp-rgb) / 24%), rgb(4 15 21 / 92%));
+}
+
+.pvp-system-strip {
+  border-color: rgb(101 193 209 / 20%);
+  background: linear-gradient(90deg, rgb(5 25 34 / 93%), rgb(18 18 20 / 90%));
+  box-shadow: 0 18px 42px rgb(0 0 0 / 28%);
+  backdrop-filter: blur(14px);
+}
+
+.pvp-live-status,
+.pvp-state-pill,
+.private-ready-state {
+  background: rgb(4 15 21 / 80%);
+  backdrop-filter: blur(10px);
+}
+
+.pvp-entry-grid {
+  gap: 18px;
+}
+
+.pvp-entry-card {
+  --entry-rgb: 45 211 237;
+  position: relative;
+  min-height: 300px;
+  align-content: end;
+  overflow: hidden;
+  border-color: rgb(var(--entry-rgb) / 42%);
+  border-radius: var(--app-corner-md);
+  padding: 26px;
+  background:
+    linear-gradient(180deg, rgb(var(--entry-rgb) / 11%), transparent 44%),
+    linear-gradient(0deg, rgb(4 12 18 / 98%) 0 48%, rgb(5 17 24 / 52%) 100%),
+    url("/assets/backgrounds/live-battle-elemental-arena.jpg") 24% center / cover;
+  box-shadow:
+    0 22px 48px rgb(0 0 0 / 34%),
+    inset 0 1px 0 rgb(255 255 255 / 8%);
+}
+
+.join-private-card {
+  --entry-rgb: 178 167 255;
+  background:
+    linear-gradient(180deg, rgb(var(--entry-rgb) / 11%), transparent 44%),
+    linear-gradient(0deg, rgb(10 9 24 / 98%) 0 48%, rgb(13 11 32 / 50%) 100%),
+    url("/assets/backgrounds/live-battle-elemental-arena.jpg") 76% center / cover;
+}
+
+.pvp-entry-card::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: rgb(var(--entry-rgb));
+  box-shadow: 0 0 18px rgb(var(--entry-rgb) / 54%);
+  content: "";
+}
+
+.pvp-entry-icon {
+  border: 1px solid rgb(var(--entry-rgb) / 30%);
+  border-radius: 50%;
+  color: rgb(var(--entry-rgb));
+  background: rgb(5 17 24 / 74%);
+  box-shadow: inset 0 0 18px rgb(var(--entry-rgb) / 13%);
+}
+
+.join-private-card .pvp-entry-icon {
+  color: rgb(var(--entry-rgb));
+  background: rgb(11 10 26 / 78%);
+}
+
+.pvp-entry-card > button {
+  min-height: 50px;
+  border-color: rgb(var(--entry-rgb) / 54%);
+  background: linear-gradient(90deg, rgb(var(--entry-rgb) / 27%), rgb(var(--entry-rgb) / 12%));
+}
+
+.pvp-code-field input {
+  border-color: rgb(var(--entry-rgb) / 28%);
+  background: rgb(3 12 18 / 88%);
+}
+
+.pvp-matchmaking-layout,
+.ranked-command-layout {
+  gap: 18px;
+}
+
+.pvp-queue-console,
+.ranked-standing-card,
+.pvp-loadout-card,
+.pvp-recent-card,
+.ranked-notice-card,
+.ranked-leaderboard-panel,
+.private-lobby-banner,
+.private-player-slot,
+.pvp-command-bar,
+.pvp-search-state,
+.pvp-accept-state,
+.pvp-match-found,
+.pvp-match-ready {
+  border-radius: var(--app-corner-md);
+  box-shadow:
+    0 20px 44px rgb(0 0 0 / 30%),
+    inset 0 1px 0 rgb(255 255 255 / 6%);
+  backdrop-filter: blur(13px);
+}
+
+.pvp-queue-console {
+  position: relative;
+  min-height: 320px;
+  align-content: end;
+  overflow: hidden;
+  border-color: rgb(45 211 237 / 34%);
+  padding: 28px;
+  background:
+    radial-gradient(circle at 48px 50px, rgb(45 211 237 / 18%), transparent 145px),
+    linear-gradient(155deg, rgb(5 32 43 / 95%), rgb(4 14 20 / 94%));
+}
+
+.pvp-queue-console::before {
+  position: absolute;
+  width: 240px;
+  aspect-ratio: 1;
+  border: 1px solid rgb(45 211 237 / 11%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, transparent 32%, rgb(45 211 237 / 6%) 33% 34%, transparent 35%),
+    repeating-conic-gradient(from 0deg, rgb(45 211 237 / 8%) 0 1deg, transparent 1deg 30deg);
+  content: "";
+  pointer-events: none;
+  top: -105px;
+  right: -50px;
+}
+
+.ranked-console {
+  border-color: rgb(255 188 77 / 38%);
+  background:
+    radial-gradient(circle at 48px 50px, rgb(255 188 77 / 18%), transparent 150px),
+    linear-gradient(155deg, rgb(43 29 9 / 96%), rgb(16 15 14 / 95%));
+}
+
+.ranked-console::before {
+  border-color: rgb(255 188 77 / 12%);
+  background:
+    radial-gradient(circle, transparent 32%, rgb(255 188 77 / 7%) 33% 34%, transparent 35%),
+    repeating-conic-gradient(from 0deg, rgb(255 188 77 / 9%) 0 1deg, transparent 1deg 30deg);
+}
+
+.pvp-console-icon {
+  z-index: 1;
+  width: 70px;
+  border: 1px solid rgb(45 211 237 / 34%);
+  border-radius: 50%;
+  background: rgb(3 18 25 / 84%);
+  box-shadow:
+    inset 0 0 22px rgb(45 211 237 / 14%),
+    0 0 28px rgb(45 211 237 / 9%);
+}
+
+.ranked-console .pvp-console-icon {
+  border-color: rgb(255 188 77 / 35%);
+  color: var(--app-gold);
+  box-shadow:
+    inset 0 0 22px rgb(255 188 77 / 14%),
+    0 0 28px rgb(255 188 77 / 9%);
+}
+
+.pvp-console-copy,
+.pvp-primary-command,
+.pvp-queue-rules,
+.ranked-console > .pvp-command-actions,
+.ranked-console > .settings-error,
+.ranked-console > .muted {
+  z-index: 1;
+}
+
+.pvp-console-copy h2 {
+  font-size: clamp(1.45rem, 2.3vw, 2rem);
+}
+
+.pvp-primary-command {
+  min-height: 54px;
+  box-shadow: 0 10px 28px rgb(45 211 237 / 15%);
+}
+
+.ranked-console .pvp-primary-command {
+  border-color: var(--app-gold);
+  color: #191104;
+  background: linear-gradient(135deg, #ffd26b, #e69a2e);
+  box-shadow: 0 10px 28px rgb(255 188 77 / 15%);
+}
+
+.pvp-queue-rules {
+  border-color: rgb(97 190 208 / 20%);
+  background: rgb(97 190 208 / 18%);
+}
+
+.pvp-queue-rules span {
+  background: rgb(4 20 27 / 88%);
+}
+
+.pvp-side-stack {
+  gap: 18px;
+}
+
+.pvp-loadout-card,
+.pvp-recent-card,
+.ranked-notice-card {
+  border-color: rgb(96 190 207 / 22%);
+  padding: 20px;
+  background: linear-gradient(145deg, rgb(7 28 36 / 93%), rgb(7 17 23 / 94%));
+}
+
+.ranked-standing-card {
+  min-height: 320px;
+  align-content: end;
+  border-color: rgb(255 188 77 / 38%);
+  padding: 26px;
+  background:
+    radial-gradient(circle at 62px 62px, rgb(255 188 77 / 20%), transparent 150px),
+    linear-gradient(155deg, rgb(43 29 9 / 96%), rgb(16 15 14 / 95%));
+}
+
+.ranked-emblem {
+  width: 76px;
+  border: 1px solid rgb(255 188 77 / 35%);
+  border-radius: 50%;
+  background: rgb(24 19 9 / 78%);
+  box-shadow:
+    inset 0 0 24px rgb(255 188 77 / 16%),
+    0 0 30px rgb(255 188 77 / 10%);
+}
+
+.ranked-standing-copy h2 {
+  font-size: clamp(1.35rem, 2vw, 1.85rem);
+}
+
+.ranked-standing-card .summary-grid > div {
+  border: 1px solid rgb(255 188 77 / 12%);
+  background: rgb(18 17 14 / 82%);
+}
+
+.ranked-leaderboard-panel {
+  border-color: rgb(255 188 77 / 20%);
+  background: linear-gradient(145deg, rgb(23 20 14 / 92%), rgb(7 16 21 / 94%));
+}
+
+.private-lobby-banner {
+  background: linear-gradient(110deg, rgb(23 19 53 / 93%), rgb(5 27 35 / 92%));
+}
+
+.private-player-slot,
+.pvp-command-bar {
+  background: rgb(5 20 27 / 91%);
+}
+
+.pvp-search-state,
+.pvp-accept-state,
+.pvp-match-found,
+.pvp-match-ready {
+  min-height: 250px;
+  background:
+    radial-gradient(circle at 90px 50%, rgb(45 211 237 / 12%), transparent 220px),
+    rgb(4 19 26 / 94%);
+}
+
+.pvp-accept-state {
+  background:
+    radial-gradient(circle at 90px 50%, rgb(255 188 77 / 13%), transparent 220px),
+    rgb(22 18 9 / 95%);
+}
+
+@media (max-width: 920px) {
+  .pvp-mode-tile {
+    min-height: 270px;
+    background-position: var(--pvp-position, center);
+  }
+
+  .pvp-mode-content {
+    align-content: center;
+  }
+
+  .ranked-standing-card,
+  .pvp-queue-console {
+    min-height: 260px;
+  }
+}
+
+@media (max-width: 760px) {
+  .pvp-hub-page,
+  .pvp-flow-page {
+    min-height: calc(100dvh - 64px);
+    padding-bottom: 28px;
+    background:
+      linear-gradient(180deg, rgb(2 9 14 / 52%) 0, rgb(3 10 15 / 90%) 360px, #050b0f 720px),
+      url("/assets/backgrounds/live-battle-elemental-arena.jpg") center top / auto 720px no-repeat;
+  }
+
+  .pvp-hub-page > .view-header,
+  .pvp-flow-page > .view-header {
+    min-height: 132px;
+    padding: 16px 0;
+  }
+
+  .pvp-hub-page > .view-header h1,
+  .pvp-flow-page > .view-header h1 {
+    font-size: clamp(1.85rem, 10vw, 2.65rem);
+  }
+
+  .pvp-mode-tile {
+    min-height: 330px;
+    padding: 18px;
+    background:
+      linear-gradient(180deg, rgb(var(--pvp-rgb) / 9%), transparent 32%),
+      linear-gradient(0deg, rgb(4 12 17 / 98%) 0 58%, rgb(4 12 17 / 42%) 100%),
+      url("/assets/backgrounds/live-battle-elemental-arena.jpg") var(--pvp-position, center) / cover;
+  }
+
+  .pvp-mode-emblem {
+    width: 52px;
+  }
+
+  .pvp-mode-content {
+    align-content: end;
+  }
+
+  .pvp-mode-content h2 {
+    font-size: 1.7rem;
+  }
+
+  .pvp-entry-card {
+    min-height: 270px;
+    padding: 20px;
+  }
+
+  .pvp-queue-console,
+  .ranked-standing-card {
+    min-height: 0;
+    padding: 20px;
+  }
+
+  .pvp-console-icon,
+  .ranked-emblem {
+    width: 58px;
+  }
+
+  .pvp-search-state,
+  .pvp-accept-state,
+  .pvp-match-found,
+  .pvp-match-ready {
+    min-height: 0;
+  }
+}
+
+@media (max-height: 520px) and (min-width: 761px) {
+  .pvp-hub-page > .view-header,
+  .pvp-flow-page > .view-header {
+    min-height: 132px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+
+  .pvp-hub-page > .view-header h1,
+  .pvp-flow-page > .view-header h1 {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+  }
+
+  .pvp-hub-page .section-nav a,
+  .pvp-flow-page .section-nav a,
+  .pvp-flow-page :is(button, .button-link) {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pvp-mode-tile {
+    transition: none;
+  }
+
+  .pvp-mode-tile:hover,
+  .pvp-mode-tile:focus-within {
+    transform: none;
+  }
+}

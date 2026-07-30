@@ -212,11 +212,200 @@
   color: #f0a2a6;
 }
 
+/* Game-first quality workshop */
+.forge-quality-page .quality-workspace {
+  grid-template-columns: minmax(270px, 0.65fr) minmax(0, 1.55fr);
+  gap: 16px;
+}
+
+.forge-quality-page .quality-item-library,
+.forge-quality-page .quality-station {
+  border-color: rgb(229 177 91 / 20%);
+  border-radius: var(--app-corner-panel);
+  background: rgb(4 12 16 / 87%);
+  box-shadow:
+    0 18px 42px rgb(0 0 0 / 28%),
+    var(--app-shadow-inset);
+  backdrop-filter: blur(14px);
+}
+
+.forge-quality-page .quality-item-library {
+  position: sticky;
+  top: 16px;
+  padding: 18px;
+  background: linear-gradient(180deg, rgb(245 184 63 / 5%), transparent 35%), rgb(4 12 16 / 88%);
+}
+
+.forge-quality-page .quality-filters select {
+  min-height: 44px;
+  border-color: rgb(229 177 91 / 18%);
+  background: rgb(5 14 17 / 88%);
+}
+
+.forge-quality-page .quality-item-list button {
+  min-height: 62px;
+  border-radius: var(--app-corner-control);
+  background: rgb(8 18 21 / 84%);
+}
+
+.forge-quality-page .quality-item-list button.active {
+  border-color: rgb(245 190 71 / 68%);
+  background: linear-gradient(90deg, rgb(245 190 71 / 13%), transparent), rgb(8 18 21 / 90%);
+  box-shadow:
+    inset 3px 0 0 #f3b83f,
+    0 0 24px rgb(245 190 71 / 8%);
+}
+
+.forge-quality-page .quality-station {
+  position: relative;
+  min-height: 600px;
+  overflow: hidden;
+  border-top-width: 1px;
+  padding: 22px;
+  background:
+    radial-gradient(circle at 32% 32%, rgb(245 184 63 / 12%), transparent 20rem),
+    linear-gradient(180deg, rgb(17 16 12 / 78%), rgb(4 10 13 / 95%));
+}
+
+.forge-quality-page .quality-station::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 96px;
+  height: 2px;
+  background: #f3b83f;
+  box-shadow: 0 0 24px rgb(243 184 63 / 46%);
+  content: "";
+  transform: translateX(-50%);
+}
+
+.forge-quality-page .quality-station-heading {
+  padding-bottom: 16px;
+}
+
+.forge-quality-page .quality-station-icon {
+  width: 52px;
+  box-shadow: 0 0 26px rgb(245 184 63 / 12%);
+}
+
+.forge-quality-page .quality-station-heading h2 {
+  color: #fff0cc;
+}
+
+.forge-quality-page .quality-selected-item {
+  grid-template-columns: minmax(170px, 0.58fr) minmax(0, 1fr);
+  min-height: 230px;
+  gap: 24px;
+  border-color: rgb(230 180 96 / 16%);
+  padding-block: 22px;
+}
+
+.forge-quality-page .quality-item-art {
+  width: min(100%, 205px);
+  justify-self: center;
+  border-color: rgb(245 190 71 / 22%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(245 184 63 / 15%), transparent 67%), rgb(2 8 10 / 48%);
+  box-shadow:
+    0 0 50px rgb(245 184 63 / 11%),
+    inset 0 0 35px rgb(0 0 0 / 38%);
+}
+
+.forge-quality-page .quality-item-art .item-artwork {
+  width: min(170px, 100%);
+}
+
+.forge-quality-page .quality-selected-item h3 {
+  color: #ffe0a0;
+  font-size: clamp(1.4rem, 2vw, 1.9rem);
+}
+
+.forge-quality-page .quality-selected-item dl {
+  border-block: 1px solid rgb(229 177 91 / 14%);
+  padding-block: 13px;
+}
+
+.forge-quality-page .quality-progress-block {
+  gap: 10px;
+  border: 1px solid rgb(229 177 91 / 16%);
+  border-radius: var(--app-corner-control);
+  padding: 14px;
+  background: rgb(6 13 15 / 72%);
+}
+
+.forge-quality-page .quality-progress-block progress {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 7%);
+  box-shadow: inset 0 1px 4px rgb(0 0 0 / 54%);
+}
+
+.forge-quality-page .quality-next-marker {
+  color: #9bea76;
+}
+
+.forge-quality-page .quality-comparison {
+  border-color: rgb(229 177 91 / 17%);
+  border-radius: var(--app-corner-control);
+  background: rgb(5 12 15 / 68%);
+}
+
+.forge-quality-page .quality-comparison-heading {
+  min-height: 48px;
+  background: linear-gradient(90deg, rgb(245 184 63 / 8%), transparent), rgb(255 255 255 / 2%);
+}
+
+.forge-quality-page .quality-comparison-row {
+  min-height: 46px;
+  border-color: rgb(229 177 91 / 12%);
+}
+
+.forge-quality-page .quality-comparison-row strong.positive,
+.forge-quality-page .quality-gain {
+  color: #9bea76;
+  text-shadow: 0 0 12px rgb(155 234 118 / 16%);
+}
+
+.forge-quality-page .quality-action-bar {
+  border-color: rgb(229 177 91 / 18%);
+  padding-top: 18px;
+}
+
+.forge-quality-page .quality-action-bar button {
+  min-height: 52px;
+  min-width: 190px;
+  border-color: rgb(245 190 71 / 48%);
+  color: #fff1cb;
+  background:
+    linear-gradient(180deg, rgb(245 184 63 / 22%), rgb(112 69 21 / 20%)), rgb(8 15 17 / 94%);
+  box-shadow:
+    0 12px 28px rgb(0 0 0 / 28%),
+    inset 0 1px 0 rgb(255 238 195 / 18%);
+  font-family: var(--app-font-display);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.forge-quality-page .quality-action-bar button:hover:not(:disabled) {
+  border-color: #f3b83f;
+  background:
+    linear-gradient(180deg, rgb(245 184 63 / 31%), rgb(112 69 21 / 24%)), rgb(8 15 17 / 94%);
+}
+
 @media (max-width: 1080px) {
-  .forge-craft-workspace,
+  .forge-craft-page .forge-craft-workspace,
   .socket-composer,
-  .quality-workspace {
+  .forge-quality-page .quality-workspace {
     grid-template-columns: 1fr;
+  }
+
+  .forge-craft-page .recipe-catalogue {
+    position: static;
+  }
+
+  .forge-quality-page .quality-item-library {
+    position: static;
   }
 
   .recipe-list,
@@ -230,6 +419,38 @@
 }
 
 @media (max-width: 760px) {
+  .forge-craft-page,
+  .forge-socket-page,
+  .forge-quality-page {
+    border-inline: 0;
+    border-radius: 0;
+    margin-inline: -16px;
+    padding: 16px;
+    background:
+      linear-gradient(180deg, rgb(3 8 11 / 80%), rgb(3 8 11 / 97%) 48%),
+      url("/assets/backgrounds/forge-workshop.png") 57% top / auto 700px no-repeat;
+  }
+
+  .forge-craft-page .section-nav,
+  .forge-socket-page .section-nav,
+  .forge-quality-page .section-nav {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .forge-craft-page .section-nav a,
+  .forge-socket-page .section-nav a,
+  .forge-quality-page .section-nav a {
+    flex: 1 0 auto;
+    justify-content: center;
+  }
+
+  .forge-craft-page .forge-view-header,
+  .forge-socket-page .forge-view-header,
+  .forge-quality-page .forge-view-header {
+    min-height: 92px;
+  }
+
   .forge-view-header {
     align-items: start;
   }
@@ -304,6 +525,60 @@
   .quality-selected-item {
     grid-template-columns: 82px minmax(0, 1fr);
     gap: 10px;
+  }
+
+  .forge-craft-page .craft-station {
+    min-height: 0;
+    padding: 15px;
+  }
+
+  .forge-craft-page .craft-station::before {
+    margin: -15px auto 16px;
+  }
+
+  .forge-craft-page .craft-station-heading > div {
+    padding-left: 0;
+    text-align: left;
+  }
+
+  .forge-craft-page .craft-blueprint {
+    grid-template-columns: 96px minmax(0, 1fr);
+    min-height: 0;
+    padding-block: 18px;
+  }
+
+  .forge-craft-page .craft-output-art {
+    width: 92px;
+  }
+
+  .forge-quality-page .quality-station {
+    min-height: 0;
+    padding: 15px;
+  }
+
+  .forge-quality-page .quality-selected-item {
+    grid-template-columns: 96px minmax(0, 1fr);
+    min-height: 0;
+    gap: 12px;
+  }
+
+  .forge-quality-page .quality-item-art {
+    width: 92px;
+  }
+
+  .forge-quality-page .quality-item-art .item-artwork {
+    width: 76px;
+  }
+
+  .forge-quality-page .quality-action-bar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .forge-quality-page .quality-action-bar button {
+    width: 100%;
+    min-width: 0;
   }
 
   .craft-output-art .item-artwork,

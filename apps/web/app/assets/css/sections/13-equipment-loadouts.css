@@ -13,14 +13,26 @@
 }
 
 .equipment-overview {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(210px, 0.8fr) minmax(0, 2fr);
   gap: 20px;
   align-items: center;
-  border: 1px solid rgb(37 215 242 / 22%);
-  border-left: 3px solid var(--app-cyan);
-  padding: 18px 20px;
-  background: rgb(14 31 40 / 74%);
+  overflow: hidden;
+  border: 1px solid rgb(98 216 231 / 26%);
+  border-radius: 10px;
+  padding: 20px 22px;
+  background: linear-gradient(90deg, rgb(12 40 50 / 95%), rgb(6 22 30 / 84%)), rgb(14 31 40 / 74%);
+  box-shadow: 0 22px 48px rgb(0 0 0 / 30%);
+  backdrop-filter: blur(14px);
+}
+
+.equipment-overview::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, transparent, var(--app-cyan), transparent);
+  content: "";
 }
 
 .equipment-overview-title,
@@ -105,11 +117,34 @@
   min-width: 0;
 }
 
+.equipment-section {
+  border: 1px solid rgb(112 208 221 / 18%);
+  border-radius: 12px;
+  padding: 18px;
+  background: linear-gradient(180deg, rgb(8 25 33 / 92%), rgb(5 15 21 / 96%));
+  box-shadow: 0 22px 52px rgb(0 0 0 / 32%);
+  backdrop-filter: blur(14px);
+}
+
 .equipment-slot-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 12px;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 28px;
+  border: 1px solid rgb(88 211 228 / 14%);
+  border-radius: 50% / 16%;
+  background:
+    radial-gradient(circle at 50% 50%, rgb(38 215 242 / 10%), transparent 36%),
+    repeating-radial-gradient(
+      circle at 50% 50%,
+      transparent 0 52px,
+      rgb(90 212 228 / 8%) 53px 54px
+    ),
+    rgb(2 10 15 / 68%);
+  box-shadow:
+    inset 0 0 70px rgb(0 0 0 / 70%),
+    0 24px 50px rgb(0 0 0 / 28%);
 }
 
 .equipment-slot {
@@ -120,9 +155,10 @@
   min-height: 82px;
   align-items: center;
   border: 1px solid rgb(255 255 255 / 14%);
-  border-radius: 8px;
+  border-radius: 8px 8px 14px 14px;
   padding: 8px 8px 8px 14px;
-  background: rgb(255 255 255 / 4%);
+  background: linear-gradient(135deg, rgb(20 48 58 / 92%), rgb(7 20 27 / 96%));
+  box-shadow: 0 12px 24px rgb(0 0 0 / 24%);
 }
 
 .equipment-slot.empty {
@@ -130,7 +166,7 @@
   min-height: 64px;
   border-style: dashed;
   color: var(--app-muted);
-  background: rgb(255 255 255 / 2%);
+  background: rgb(5 18 24 / 72%);
 }
 
 .equipment-slot.selected,
@@ -249,9 +285,10 @@
   gap: 12px;
   align-items: center;
   border: 1px solid rgb(255 255 255 / 14%);
-  border-radius: 8px;
+  border-radius: 5px 5px 11px 11px;
   padding: 10px;
-  background: rgb(255 255 255 / 4%);
+  background: linear-gradient(145deg, rgb(16 39 48 / 94%), rgb(6 18 24 / 98%));
+  box-shadow: 0 14px 28px rgb(0 0 0 / 24%);
 }
 
 .equipment-arsenal-card.equipped {
@@ -353,11 +390,27 @@
 }
 
 .loadout-builder {
-  border: 1px solid rgb(37 215 242 / 22%);
-  border-top: 3px solid var(--app-cyan);
-  border-radius: 8px;
-  padding: 18px;
-  background: rgb(14 31 40 / 72%);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgb(79 210 228 / 30%);
+  border-radius: 12px;
+  padding: 22px;
+  background:
+    radial-gradient(circle at 50% 42%, rgb(37 215 242 / 10%), transparent 36%),
+    linear-gradient(180deg, rgb(11 36 46 / 94%), rgb(5 17 23 / 97%));
+  box-shadow: 0 24px 56px rgb(0 0 0 / 36%);
+  backdrop-filter: blur(14px);
+}
+
+.loadout-builder::before {
+  position: absolute;
+  top: 0;
+  right: 15%;
+  left: 15%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--app-cyan), transparent);
+  box-shadow: 0 0 20px rgb(37 215 242 / 55%);
+  content: "";
 }
 
 .loadout-builder-heading {
@@ -384,6 +437,16 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   margin-top: 18px;
+  padding: 20px;
+  border: 1px solid rgb(91 211 227 / 13%);
+  border-radius: 50% / 18%;
+  background:
+    repeating-radial-gradient(
+      circle at 50% 50%,
+      transparent 0 45px,
+      rgb(87 215 231 / 7%) 46px 47px
+    ),
+    rgb(2 11 16 / 56%);
 }
 
 .loadout-dock-ring {
@@ -394,11 +457,12 @@
   min-height: 66px;
   align-items: center;
   border: 1px solid rgb(255 255 255 / 14%);
-  border-radius: 8px;
+  border-radius: 7px 7px 13px 13px;
   padding: 7px;
   color: var(--app-text);
   text-align: left;
-  background: rgb(255 255 255 / 4%);
+  background: linear-gradient(135deg, rgb(18 45 55 / 94%), rgb(6 18 24 / 98%));
+  box-shadow: 0 12px 24px rgb(0 0 0 / 24%);
 }
 
 .loadout-dock-ring:hover,
@@ -448,9 +512,10 @@
   min-width: 0;
   gap: 14px;
   border: 1px solid var(--app-border);
-  border-radius: 8px;
+  border-radius: 5px 5px 12px 12px;
   padding: 14px;
-  background: rgb(255 255 255 / 4%);
+  background: linear-gradient(145deg, rgb(15 37 46 / 94%), rgb(5 16 22 / 98%));
+  box-shadow: 0 16px 34px rgb(0 0 0 / 26%);
 }
 
 .loadout-config-card.active {
@@ -578,6 +643,8 @@
   .equipment-slot-grid,
   .loadout-ring-dock {
     grid-template-columns: 1fr;
+    border-radius: 14px;
+    padding: 14px;
   }
 
   .equipment-kpis,
@@ -608,6 +675,10 @@
   .equipment-overview,
   .loadout-builder {
     padding: 14px;
+  }
+
+  .equipment-section {
+    padding: 12px;
   }
 
   .equipment-slot {

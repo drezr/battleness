@@ -15,6 +15,7 @@
           :key="item.to"
           :class="{ active: isActive(item.to) }"
           :to="item.to"
+          :aria-label="t(item.labelKey)"
           :aria-current="isActive(item.to) ? 'page' : undefined"
         >
           <component :is="item.icon" :size="19" stroke-width="1.9" aria-hidden="true" />
@@ -47,12 +48,20 @@
           <strong>{{ currentSectionLabel }}</strong>
         </div>
         <div class="topbar-resources" :aria-label="t('accessibility.playerSummary')">
-          <NuxtLink class="topbar-resource" to="/profile/progression">
+          <NuxtLink
+            class="topbar-resource"
+            to="/profile/progression"
+            :aria-label="t('shell.levelValue', { level: playerLevel })"
+          >
             <Zap :size="17" aria-hidden="true" />
             <span>{{ t("common.level") }}</span>
             <strong>{{ playerLevel }}</strong>
           </NuxtLink>
-          <NuxtLink class="topbar-resource credits" to="/market/game">
+          <NuxtLink
+            class="topbar-resource credits"
+            to="/market/game"
+            :aria-label="`${t('common.credits')} ${formattedCredits}`"
+          >
             <Coins :size="17" aria-hidden="true" />
             <span>{{ t("common.credits") }}</span>
             <strong>{{ formattedCredits }}</strong>
@@ -79,6 +88,7 @@
         :key="item.to"
         :class="{ active: isActive(item.to) }"
         :to="item.to"
+        :aria-label="t(item.labelKey)"
         :aria-current="isActive(item.to) ? 'page' : undefined"
       >
         <component :is="item.icon" :size="19" stroke-width="2" aria-hidden="true" />

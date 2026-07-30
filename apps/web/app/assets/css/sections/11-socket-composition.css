@@ -287,3 +287,301 @@
 .enchantment-target-strip button.unavailable {
   opacity: 0.48;
 }
+
+/* Game-first socket workshop */
+.forge-socket-page .forge-process-steps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid rgb(82 199 228 / 22%);
+  border-radius: var(--app-corner-control);
+  padding: 0;
+  background: rgb(3 11 15 / 82%);
+  box-shadow:
+    0 14px 30px rgb(0 0 0 / 22%),
+    var(--app-shadow-inset);
+  backdrop-filter: blur(12px);
+}
+
+.forge-socket-page .forge-process-steps > span {
+  min-height: 48px;
+  justify-content: center;
+  padding: 8px 14px;
+  color: #8f9da0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.forge-socket-page .forge-process-steps > svg {
+  color: rgb(125 204 220 / 35%);
+}
+
+.forge-socket-page .forge-process-steps strong {
+  width: 28px;
+  border-color: rgb(143 184 194 / 28%);
+  color: #a8b8bb;
+  background: rgb(255 255 255 / 3%);
+}
+
+.forge-socket-page .forge-process-steps span.active {
+  color: #aaf2ff;
+  background:
+    linear-gradient(90deg, rgb(38 189 222 / 17%), rgb(38 189 222 / 5%)), rgb(4 17 22 / 82%);
+  box-shadow:
+    inset 0 -2px 0 var(--app-cyan),
+    0 0 30px rgb(37 215 242 / 7%);
+}
+
+.forge-socket-page .detail-layout.forge-detail-layout {
+  margin-top: 18px;
+}
+
+.forge-socket-page .socket-composer {
+  grid-template-columns: minmax(0, 1.55fr) minmax(270px, 0.65fr);
+  gap: 16px;
+}
+
+.forge-socket-page .socket-ring-station,
+.forge-socket-page .socket-gem-vault,
+.forge-socket-page .enchantment-lab {
+  border-color: rgb(89 194 219 / 20%);
+  border-radius: var(--app-corner-panel);
+  background: rgb(4 12 16 / 86%);
+  box-shadow:
+    0 18px 42px rgb(0 0 0 / 28%),
+    var(--app-shadow-inset);
+  backdrop-filter: blur(14px);
+}
+
+.forge-socket-page .socket-ring-station {
+  position: relative;
+  min-height: 520px;
+  overflow: hidden;
+  border-top-width: 1px;
+  padding: 20px;
+  background:
+    radial-gradient(circle at 35% 41%, rgb(37 215 242 / 11%), transparent 18rem),
+    linear-gradient(180deg, rgb(5 20 26 / 78%), rgb(3 10 14 / 94%));
+}
+
+.forge-socket-page .socket-ring-station::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 90px;
+  height: 2px;
+  background: var(--app-cyan);
+  box-shadow: 0 0 24px rgb(37 215 242 / 46%);
+  content: "";
+  transform: translateX(-50%);
+}
+
+.forge-socket-page .forge-select-field {
+  max-width: 620px;
+}
+
+.forge-socket-page .forge-select-field select {
+  min-height: 44px;
+  border-color: rgb(103 197 217 / 23%);
+  background: rgb(4 13 17 / 88%);
+}
+
+.forge-socket-page .socket-selected-ring {
+  grid-template-columns: minmax(150px, 0.55fr) minmax(0, 1fr);
+  min-height: 220px;
+  gap: 22px;
+  border-block: 1px solid rgb(92 190 212 / 15%);
+  padding-block: 20px;
+}
+
+.forge-socket-page .socket-ring-art {
+  width: min(100%, 190px);
+  justify-self: center;
+  border-color: rgb(81 206 234 / 23%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(37 215 242 / 13%), transparent 67%), rgb(2 8 11 / 48%);
+  box-shadow:
+    0 0 48px rgb(37 215 242 / 10%),
+    inset 0 0 34px rgb(0 0 0 / 38%);
+}
+
+.forge-socket-page .socket-ring-art .item-artwork {
+  width: min(162px, 100%);
+}
+
+.forge-socket-page .socket-ring-copy h3 {
+  color: #e7fbff;
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+}
+
+.forge-socket-page .socket-capacity-row {
+  border-color: rgb(91 194 218 / 18%);
+  padding-block: 16px;
+}
+
+.forge-socket-page .socket-capacity-track span {
+  height: 9px;
+  background: rgb(151 191 199 / 10%);
+}
+
+.forge-socket-page .socket-capacity-track span.active {
+  background: linear-gradient(90deg, #1ca8c7, #63e7fb);
+  box-shadow: 0 0 12px rgb(37 215 242 / 28%);
+}
+
+.forge-socket-page .socket-capacity-action button,
+.forge-socket-page .socket-primary-action,
+.forge-socket-page .enchantment-controls button {
+  min-height: 44px;
+}
+
+.forge-socket-page .text-link {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+}
+
+.forge-socket-page .socket-slot-grid {
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.forge-socket-page .socket-composer-slot {
+  min-height: 84px;
+  border-color: rgb(113 199 217 / 18%);
+  border-radius: var(--app-corner-control);
+  background:
+    radial-gradient(circle at 26px 50%, rgb(37 215 242 / 8%), transparent 42px), rgb(5 16 20 / 82%);
+}
+
+.forge-socket-page .socket-composer-slot.empty {
+  border-color: rgb(117 186 200 / 22%);
+  background: rgb(4 13 17 / 58%);
+}
+
+.forge-socket-page .socket-slot-index {
+  color: #d9fbff;
+  background: #0b5261;
+  box-shadow: 0 0 10px rgb(37 215 242 / 24%);
+}
+
+.forge-socket-page .socket-gem-vault {
+  align-self: stretch;
+  padding: 18px;
+  background: linear-gradient(180deg, rgb(37 215 242 / 5%), transparent 34%), rgb(4 12 16 / 88%);
+}
+
+.forge-socket-page .socket-vault-list button {
+  min-height: 60px;
+  border-radius: var(--app-corner-control);
+  background: rgb(8 18 22 / 84%);
+}
+
+.forge-socket-page .socket-vault-list button.selected {
+  border-color: rgb(37 215 242 / 68%);
+  background: linear-gradient(90deg, rgb(37 215 242 / 12%), transparent), rgb(8 18 22 / 88%);
+  box-shadow: inset 3px 0 0 var(--app-cyan);
+}
+
+.forge-socket-page .socket-primary-action {
+  min-height: 50px;
+  border-color: rgb(37 215 242 / 42%);
+  color: #d9fbff;
+  background:
+    linear-gradient(180deg, rgb(37 215 242 / 18%), rgb(12 93 111 / 13%)), rgb(5 15 19 / 94%);
+  font-family: var(--app-font-display);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.forge-socket-page .enchantment-lab {
+  position: relative;
+  overflow: hidden;
+  border-left-width: 1px;
+  padding: 20px;
+  background:
+    radial-gradient(circle at 14% 0%, rgb(207 90 228 / 11%), transparent 22rem), rgb(8 10 17 / 90%);
+}
+
+.forge-socket-page .enchantment-lab::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  background: linear-gradient(180deg, #e486f4, transparent 72%);
+  box-shadow: 0 0 20px rgb(207 90 228 / 36%);
+  content: "";
+}
+
+.forge-socket-page .enchantment-icon {
+  width: 52px;
+  box-shadow: 0 0 26px rgb(207 90 228 / 11%);
+}
+
+.forge-socket-page .enchantment-controls {
+  border-color: rgb(207 90 228 / 17%);
+  padding-top: 18px;
+}
+
+.forge-socket-page .enchantment-controls select {
+  min-height: 44px;
+  border-color: rgb(207 90 228 / 20%);
+  background: rgb(8 10 17 / 86%);
+}
+
+.forge-socket-page .enchantment-target-strip button {
+  min-height: 58px;
+  border-radius: var(--app-corner-control);
+  background: rgb(13 12 22 / 82%);
+}
+
+@media (max-width: 1080px) {
+  .forge-socket-page .socket-composer {
+    grid-template-columns: 1fr;
+  }
+
+  .forge-socket-page .socket-ring-station {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .forge-socket-page .forge-process-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .forge-socket-page .forge-process-steps > svg {
+    display: none;
+  }
+
+  .forge-socket-page .forge-process-steps > span {
+    min-height: 44px;
+    justify-content: start;
+    gap: 5px;
+    padding-inline: 7px;
+    font-size: 0.58rem;
+    line-height: 1.15;
+    white-space: normal;
+  }
+
+  .forge-socket-page .forge-process-steps strong {
+    width: 23px;
+    flex: 0 0 auto;
+  }
+
+  .forge-socket-page .socket-selected-ring {
+    grid-template-columns: 104px minmax(0, 1fr);
+    min-height: 0;
+    gap: 12px;
+  }
+
+  .forge-socket-page .socket-ring-art {
+    width: 100px;
+  }
+
+  .forge-socket-page .socket-ring-art .item-artwork {
+    width: 82px;
+  }
+}

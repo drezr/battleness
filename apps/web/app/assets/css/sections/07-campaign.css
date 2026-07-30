@@ -1,13 +1,78 @@
 /* Campaign */
+.campaign-page {
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100dvh - 92px);
+  padding-bottom: 40px;
+  background:
+    linear-gradient(180deg, rgb(3 9 13 / 46%) 0, rgb(3 9 13 / 82%) 390px, #050b0f 820px),
+    url("/assets/backgrounds/live-battle-elemental-arena.jpg") center top / cover no-repeat;
+}
+
+.campaign-page::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgb(3 17 26 / 62%),
+      transparent 42%,
+      transparent 62%,
+      rgb(23 10 4 / 58%)
+    ),
+    radial-gradient(circle at 54% 24%, transparent 0, rgb(3 9 13 / 12%) 34%, rgb(3 9 13 / 84%) 78%);
+  content: "";
+  pointer-events: none;
+}
+
+.campaign-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.campaign-page .section-nav {
+  border-color: rgb(135 224 235 / 14%);
+  background: rgb(4 14 20 / 70%);
+  backdrop-filter: blur(12px);
+}
+
+.campaign-page .campaign-header {
+  min-height: 166px;
+  align-items: center;
+  padding: 24px clamp(0px, 2vw, 28px);
+  text-shadow: 0 2px 18px rgb(0 0 0 / 82%);
+}
+
+.campaign-page .campaign-header h1 {
+  font-size: clamp(2.1rem, 4vw, 3.5rem);
+  letter-spacing: -0.025em;
+}
+
+.campaign-page .campaign-header .muted {
+  max-width: 640px;
+  color: #c2d1d5;
+}
+
+.campaign-page .battle-readiness {
+  border-color: rgb(94 225 147 / 32%);
+  background: rgb(6 27 24 / 82%);
+  box-shadow: 0 18px 38px rgb(0 0 0 / 30%);
+  backdrop-filter: blur(13px);
+}
+
 .campaign-progress-strip {
   display: grid;
   grid-template-columns: minmax(220px, auto) minmax(160px, 1fr) auto;
   gap: 18px;
   align-items: center;
-  border: 1px solid var(--app-border);
-  border-radius: 8px;
-  padding: 13px 15px;
-  background: var(--app-surface);
+  overflow: hidden;
+  border: 1px solid rgb(111 205 218 / 20%);
+  border-radius: 10px;
+  padding: 15px 17px;
+  background: linear-gradient(90deg, rgb(7 30 40 / 94%), rgb(27 20 13 / 90%));
+  box-shadow: 0 20px 44px rgb(0 0 0 / 30%);
+  backdrop-filter: blur(14px);
 }
 
 .campaign-progress-copy {
@@ -44,13 +109,16 @@
   height: 8px;
   overflow: hidden;
   border-radius: 4px;
-  background: rgb(255 255 255 / 7%);
+  border: 1px solid rgb(118 212 224 / 14%);
+  background: rgb(1 8 12 / 62%);
+  box-shadow: inset 0 2px 5px rgb(0 0 0 / 45%);
 }
 
 .campaign-progress-bar i {
   display: block;
   height: 100%;
-  background: var(--app-green);
+  background: linear-gradient(90deg, var(--app-cyan), var(--app-green));
+  box-shadow: 0 0 14px rgb(72 220 133 / 48%);
 }
 
 .campaign-progress-strip > dl {
@@ -73,18 +141,27 @@
 
 .campaign-workspace {
   display: grid;
-  grid-template-columns: minmax(245px, 0.3fr) minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: minmax(255px, 0.32fr) minmax(0, 1fr);
+  gap: 16px;
   align-items: start;
 }
 
 .campaign-path {
+  position: sticky;
+  top: 84px;
   display: grid;
   gap: 13px;
-  border: 1px solid var(--app-border);
-  border-radius: 8px;
-  padding: 14px;
-  background: var(--app-surface);
+  overflow: hidden;
+  border: 1px solid rgb(82 199 220 / 25%);
+  border-radius: 12px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 40% 35%, rgb(37 215 242 / 11%), transparent 34%),
+    linear-gradient(180deg, rgb(5 32 44 / 92%), rgb(4 15 22 / 97%));
+  box-shadow:
+    0 24px 52px rgb(0 0 0 / 36%),
+    inset 0 1px rgb(161 230 238 / 5%);
+  backdrop-filter: blur(12px);
 }
 
 .campaign-path-heading {
@@ -98,7 +175,7 @@
 
 .campaign-path-list {
   display: grid;
-  gap: 0;
+  gap: 4px;
   scrollbar-width: none;
 }
 
@@ -111,30 +188,33 @@
   display: grid;
   grid-template-columns: 38px minmax(0, 1fr) auto;
   width: 100%;
-  min-height: 70px;
+  min-height: 86px;
   gap: 9px;
   align-items: center;
   justify-content: stretch;
   border: 0;
   border-radius: 0;
-  padding: 8px 7px;
+  padding: 10px 8px;
   text-align: left;
   background: transparent;
 }
 
 .campaign-path-node + .campaign-path-node::before {
   position: absolute;
-  top: -9px;
-  left: 25px;
+  top: -12px;
+  left: 27px;
   width: 2px;
-  height: 18px;
-  background: var(--app-border-strong);
+  height: 24px;
+  background: linear-gradient(180deg, var(--app-cyan), rgb(37 215 242 / 18%));
+  box-shadow: 0 0 8px rgb(37 215 242 / 22%);
   content: "";
 }
 
 .campaign-path-node.selected {
-  border-radius: 6px;
-  background: var(--app-cyan-soft);
+  border: 1px solid rgb(65 218 239 / 38%);
+  border-radius: 7px 7px 12px 12px;
+  background: linear-gradient(90deg, rgb(37 215 242 / 14%), rgb(37 215 242 / 4%));
+  box-shadow: 0 10px 24px rgb(0 0 0 / 22%);
 }
 
 .campaign-path-node.campaign-opponent-locked {
@@ -143,12 +223,15 @@
 
 .campaign-node-order {
   display: grid;
-  width: 38px;
+  width: 42px;
   aspect-ratio: 1;
   place-items: center;
   border: 1px solid currentcolor;
   border-radius: 50%;
-  background: #10212a;
+  background: radial-gradient(circle, rgb(27 65 78 / 96%), rgb(5 20 28 / 98%));
+  box-shadow:
+    0 0 0 4px rgb(4 21 29 / 88%),
+    0 0 18px rgb(37 215 242 / 15%);
 }
 
 .campaign-node-status {
@@ -172,13 +255,30 @@
 }
 
 .campaign-encounter {
+  position: relative;
   display: grid;
   min-width: 0;
   gap: 18px;
-  border: 1px solid var(--app-border);
-  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgb(240 128 69 / 22%);
+  border-radius: 12px;
   padding: clamp(16px, 2.2vw, 26px);
-  background: #0e1a21;
+  background:
+    radial-gradient(circle at 86% 14%, rgb(255 99 43 / 11%), transparent 32%),
+    linear-gradient(135deg, rgb(7 24 32 / 94%), rgb(25 15 10 / 96%));
+  box-shadow: 0 28px 60px rgb(0 0 0 / 40%);
+  backdrop-filter: blur(12px);
+}
+
+.campaign-encounter::before {
+  position: absolute;
+  top: 0;
+  right: 12%;
+  left: 12%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ff8c4a, transparent);
+  box-shadow: 0 0 22px rgb(255 112 57 / 48%);
+  content: "";
 }
 
 .campaign-encounter-hero {
@@ -196,8 +296,12 @@
   aspect-ratio: 1;
   place-items: center;
   border: 1px solid currentcolor;
-  border-radius: 8px;
-  background: #12252e;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(53 38 28 / 88%), rgb(8 20 25 / 98%));
+  box-shadow:
+    0 0 0 5px rgb(10 24 30 / 82%),
+    0 0 0 6px currentcolor,
+    0 16px 32px rgb(0 0 0 / 38%);
 }
 
 .campaign-encounter-title {
@@ -233,7 +337,9 @@
 }
 
 .campaign-threat-level > strong {
-  font-size: 2rem;
+  color: #ff9860;
+  font-size: 2.35rem;
+  text-shadow: 0 0 20px rgb(255 113 56 / 28%);
 }
 
 .campaign-readiness-grid {
@@ -247,10 +353,11 @@
   grid-template-columns: 34px minmax(0, 1fr);
   gap: 9px;
   align-items: center;
-  border: 1px solid var(--app-border);
-  border-radius: 7px;
+  border: 1px solid rgb(112 196 207 / 16%);
+  border-radius: 5px 5px 10px 10px;
   padding: 11px;
-  background: var(--app-surface);
+  background: linear-gradient(145deg, rgb(13 34 41 / 92%), rgb(7 18 23 / 96%));
+  box-shadow: 0 12px 26px rgb(0 0 0 / 24%);
 }
 
 .campaign-readiness-card > span {
@@ -302,8 +409,12 @@
 }
 
 .campaign-encounter .campaign-reward-card {
+  border-color: rgb(255 203 92 / 25%);
   border-top: 2px solid var(--app-gold);
-  background: var(--app-surface);
+  background:
+    radial-gradient(circle at 12% 12%, rgb(255 203 92 / 8%), transparent 32%),
+    linear-gradient(145deg, rgb(28 26 18 / 94%), rgb(8 17 20 / 98%));
+  box-shadow: 0 14px 30px rgb(0 0 0 / 26%);
 }
 
 .campaign-encounter .campaign-reward-card h3 {
@@ -312,8 +423,10 @@
 }
 
 .campaign-intel {
-  border-top: 1px solid var(--app-border);
-  padding-top: 13px;
+  border: 1px solid rgb(96 201 216 / 16%);
+  border-radius: 9px;
+  padding: 13px 15px;
+  background: rgb(5 20 27 / 78%);
 }
 
 .campaign-intel summary {
@@ -352,7 +465,7 @@
   border-left-width: 3px;
   border-radius: 6px;
   padding: 8px;
-  background: var(--app-surface);
+  background: linear-gradient(145deg, rgb(15 38 47 / 94%), rgb(5 17 23 / 98%));
 }
 
 .campaign-intel-ring .item-artwork {
@@ -376,8 +489,10 @@
   gap: 14px;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid var(--app-border);
-  padding-top: 15px;
+  border: 1px solid rgb(239 132 72 / 18%);
+  border-radius: 9px;
+  padding: 12px 14px;
+  background: linear-gradient(90deg, rgb(6 21 27 / 90%), rgb(34 20 12 / 92%));
 }
 
 .campaign-encounter-actions > div {
@@ -398,6 +513,21 @@
   min-width: 190px;
   min-height: 44px;
   font-weight: 900;
+}
+
+.campaign-encounter-actions button {
+  border-color: rgb(255 142 75 / 55%);
+  color: #fff4ec;
+  background: linear-gradient(180deg, #b84d21, #733016);
+  box-shadow:
+    0 0 0 1px rgb(255 171 103 / 18%),
+    0 12px 28px rgb(0 0 0 / 34%),
+    0 0 22px rgb(255 105 43 / 14%);
+}
+
+.campaign-encounter-actions button:hover:not(:disabled) {
+  border-color: #ffb073;
+  background: linear-gradient(180deg, #d05b28, #873819);
 }
 
 @media (max-width: 1040px) {
@@ -425,12 +555,30 @@
     overflow-x: auto;
   }
 
+  .campaign-path {
+    position: static;
+  }
+
   .campaign-path-node + .campaign-path-node::before {
     display: none;
   }
 }
 
 @media (max-width: 760px) {
+  .campaign-page {
+    border-inline: 0;
+    margin-inline: -16px;
+    padding: 16px;
+    background:
+      linear-gradient(180deg, rgb(3 9 13 / 52%), rgb(3 9 13 / 96%) 500px),
+      url("/assets/backgrounds/live-battle-elemental-arena.jpg") center top / auto 720px no-repeat;
+  }
+
+  .campaign-page .campaign-header {
+    min-height: 128px;
+    padding-inline: 0;
+  }
+
   .battle-hub-header,
   .campaign-header,
   .battle-mode-grid,
@@ -484,17 +632,26 @@
   }
 
   .campaign-path {
-    margin-inline: -12px;
-    border-right: 0;
-    border-left: 0;
-    border-radius: 0;
+    margin-inline: 0;
+    border-radius: 10px;
+  }
+
+  .campaign-path-list {
+    grid-template-columns: repeat(3, minmax(232px, 1fr));
+  }
+
+  .campaign-path-node {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .campaign-node-status {
+    grid-column: 2;
+    width: fit-content;
   }
 
   .campaign-encounter {
-    margin-inline: -12px;
-    border-right: 0;
-    border-left: 0;
-    border-radius: 0;
+    margin-inline: 0;
+    border-radius: 10px;
   }
 
   .campaign-encounter-hero {
@@ -524,5 +681,15 @@
   .campaign-encounter-actions button,
   .campaign-encounter-actions .button-link {
     width: 100%;
+  }
+
+  .campaign-intel summary {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .campaign-path-node {
+    transition: none;
   }
 }

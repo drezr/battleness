@@ -53,14 +53,14 @@ separate permanent Dev Lab prototype.
 
 ## Immediate Handoff
 
-- The live battle ergonomics and finished-result iteration is complete. The user's next priority is
-  the overall Game App UI: it currently feels too much like a website or dashboard and should become
-  a more immersive, cohesive game interface.
-- Begin by auditing the global shell, home view, section hubs, and shared presentation patterns in
-  the browser. Establish and confirm the updated game-first visual language through the shell and one
-  representative workflow before applying it broadly. Preserve all existing feature behavior and do
-  not redo the completed live battle result work unless a shared-system change requires a compatible
-  adjustment.
+- The game-wide Game App immersion iteration is complete. The shared shell, Home, Battle workflows
+  outside the live arena, Forge, Inventory, Market, Profile, public competitive profiles, Settings,
+  and authentication now use the confirmed game-first environmental language. The live battle and
+  result work remain unchanged except for compatible shared accessibility rules.
+- The completed UI rollout was browser-audited across all 26 static player-facing routes at desktop,
+  mobile portrait, and short-landscape viewports. Preserve the environmental identities, 44-pixel
+  compact interaction targets, localized accessible shell names, and explicit audio-slider labels in
+  future work.
 - Do not treat Phase 14 as complete. `docs/TODO.md` contains a consolidated Phase 14 resume checklist
   covering the live-refresh visual confirmation, complete ranked staging smoke, production
   monitoring, load/soak testing, security review, production OAuth and promotion, the single-instance
@@ -71,10 +71,10 @@ separate permanent Dev Lab prototype.
 
 ## Current Project State
 
-- The previous dark tactical player-app redesign and responsive audit are complete, but the user has
-  identified a remaining product-level problem: the shared shell and feature surfaces still read as
-  a web application. `docs/PROJECT.md` and `docs/TODO.md` now define the next game-first immersion
-  iteration and its incremental rollout constraints.
+- The dark tactical Game App redesign and the subsequent game-first immersion rollout are complete.
+  Major workflows now use restrained environmental identities and purpose-built game surfaces while
+  preserving their existing data and behavior. `docs/PROJECT.md` records the visual decisions and
+  the Game-Wide UI Immersion Iteration checklist in `docs/TODO.md` is complete.
 - The Nuxt server assigns or preserves a safe `x-request-id`, emits structured JSON for request and ranked-maintenance failures, and keeps a bounded 100-record in-memory development buffer. Authenticated development diagnostics are available through `GET` and `DELETE /api/dev/diagnostics`; they are disabled by the handler in production. See `docs/OBSERVABILITY.md` for the data policy and production follow-up.
 - Phase 14 deployment direction is now OVH VPS hosting with Debian stable, Nginx, one initial Game
   App instance, and a separate self-managed PostgreSQL server reached over public IP with firewall

@@ -2,7 +2,7 @@
 .battle-hub-page,
 .campaign-page {
   display: grid;
-  gap: 24px;
+  gap: 26px;
 }
 
 .battle-hub-page > .section-nav,
@@ -24,14 +24,18 @@
   gap: 9px;
   align-items: center;
   border: 1px solid var(--app-border);
-  border-radius: 7px;
-  padding: 9px 11px;
-  background: var(--app-surface);
+  border-radius: var(--app-corner-sm);
+  padding: 10px 12px;
+  background: linear-gradient(110deg, rgb(255 255 255 / 4%), transparent), rgb(8 20 26 / 92%);
+  box-shadow: var(--app-shadow-inset);
   text-decoration: none;
 }
 
 .battle-readiness.ready {
-  border-color: rgb(72 220 133 / 34%);
+  border-color: rgb(72 220 133 / 45%);
+  box-shadow:
+    var(--app-shadow-inset),
+    0 0 20px rgb(72 220 133 / 8%);
 }
 
 .battle-readiness.blocked {
@@ -70,23 +74,93 @@
   font-size: 0.78rem;
 }
 
+.battle-hub-stage {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  overflow: hidden;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--app-corner-md);
+  padding: 18px;
+  background:
+    linear-gradient(180deg, rgb(4 11 16 / 58%), rgb(4 10 15 / 93%)),
+    radial-gradient(circle at 50% 30%, transparent, rgb(3 8 12 / 42%) 62%),
+    url("/assets/backgrounds/live-battle-elemental-arena.jpg") center / cover;
+  box-shadow:
+    var(--app-shadow-depth),
+    inset 0 1px 0 rgb(186 229 238 / 10%);
+}
+
+.battle-hub-stage::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--app-cyan), transparent 48%, var(--app-ember));
+  content: "";
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.battle-hub-stage > * {
+  position: relative;
+  z-index: 1;
+}
+
+.battle-hub-stage .battle-hub-stats {
+  border-color: rgb(166 215 225 / 23%);
+  background: rgb(4 13 18 / 78%);
+  box-shadow: var(--app-shadow-inset);
+  backdrop-filter: blur(10px);
+}
+
+.battle-hub-stage .battle-hub-stats > a {
+  padding-block: 11px;
+}
+
+.battle-hub-stage .battle-hub-stats em {
+  font-size: 0.58rem;
+}
+
 .battle-mode-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .battle-mode-card {
+  --mode-rgb: 48 211 237;
   position: relative;
   display: grid;
-  grid-template-rows: auto minmax(118px, 1fr) auto auto;
+  grid-template-rows: auto minmax(150px, 1fr) auto auto;
+  min-height: 410px;
   min-width: 0;
-  gap: 13px;
+  gap: 15px;
   overflow: hidden;
-  border: 1px solid var(--app-border);
-  border-radius: 8px;
-  padding: 18px;
-  background: var(--app-surface);
+  border: 1px solid rgb(var(--mode-rgb) / 48%);
+  border-radius: var(--app-corner-md);
+  padding: 22px;
+  background:
+    linear-gradient(180deg, rgb(var(--mode-rgb) / 8%), transparent 34%),
+    linear-gradient(0deg, rgb(4 12 17 / 98%) 0 38%, rgb(4 12 17 / 44%) 72%),
+    url("/assets/backgrounds/live-battle-elemental-arena.jpg") var(--mode-position, center) / cover;
+  box-shadow:
+    0 18px 42px rgb(0 0 0 / 28%),
+    inset 0 1px 0 rgb(255 255 255 / 9%);
+  transition:
+    border-color var(--app-motion-scene) ease,
+    transform var(--app-motion-scene) ease,
+    box-shadow var(--app-motion-scene) ease;
+}
+
+.battle-mode-card:hover {
+  border-color: rgb(var(--mode-rgb) / 78%);
+  box-shadow:
+    0 24px 52px rgb(0 0 0 / 38%),
+    0 0 24px rgb(var(--mode-rgb) / 10%),
+    inset 0 1px 0 rgb(255 255 255 / 12%);
+  transform: translateY(-4px);
 }
 
 .battle-mode-card::before {
@@ -94,56 +168,68 @@
   top: 0;
   right: 0;
   left: 0;
-  height: 3px;
+  height: 2px;
   background: var(--mode-accent, var(--app-cyan));
+  box-shadow: 0 0 15px rgb(var(--mode-rgb) / 55%);
   content: "";
 }
 
 .campaign-mode {
   --mode-accent: #ff9d68;
+  --mode-rgb: 239 140 85;
+  --mode-position: 18% center;
 }
 
 .pvp-mode {
   --mode-accent: var(--app-cyan);
+  --mode-position: center;
 }
 
 .training-mode {
   --mode-accent: var(--app-green);
+  --mode-rgb: 82 219 138;
+  --mode-position: 82% center;
 }
 
 .battle-mode-icon {
   display: grid;
-  width: 46px;
+  width: 62px;
   aspect-ratio: 1;
   place-items: center;
-  border-radius: 7px;
+  border: 1px solid rgb(var(--mode-rgb) / 30%);
+  border-radius: var(--app-corner-md);
   color: var(--mode-accent);
-  background: color-mix(in srgb, var(--mode-accent) 10%, transparent);
+  background: rgb(4 13 18 / 78%);
+  box-shadow:
+    inset 0 0 18px rgb(var(--mode-rgb) / 11%),
+    0 8px 22px rgb(0 0 0 / 24%);
 }
 
 .battle-mode-copy {
   display: grid;
-  align-content: start;
-  gap: 7px;
+  align-content: end;
+  gap: 9px;
+  text-shadow: 0 3px 16px rgb(0 0 0 / 80%);
 }
 
 .battle-mode-copy h2 {
   margin: 0;
-  font-size: 1.32rem;
+  font-size: clamp(1.75rem, 2.5vw, 2.45rem);
+  line-height: 1;
 }
 
 .battle-mode-copy p,
 .battle-empty-loadout p,
 .battle-development-tools p {
   margin: 0;
-  color: var(--app-muted);
+  color: #b8c8ce;
   font-size: 0.82rem;
   line-height: 1.5;
 }
 
 .battle-mode-meta {
   min-height: 38px;
-  border-top: 1px solid var(--app-border);
+  border-top: 1px solid rgb(var(--mode-rgb) / 20%);
   padding-top: 10px;
 }
 
@@ -158,8 +244,10 @@
 .battle-mode-action {
   display: flex;
   width: 100%;
+  min-height: 46px;
   gap: 8px;
   justify-content: space-between;
+  border-radius: var(--app-corner-sm);
   font-weight: 850;
 }
 
@@ -178,8 +266,11 @@
 .battle-loadout-section {
   display: grid;
   gap: 14px;
-  border-top: 1px solid var(--app-border);
-  padding-top: 20px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-corner-md);
+  padding: 18px;
+  background: linear-gradient(110deg, rgb(48 211 237 / 5%), transparent 42%), rgb(6 16 22 / 88%);
+  box-shadow: var(--app-shadow-inset);
 }
 
 .battle-empty-loadout {
@@ -204,8 +295,9 @@
   grid-template-columns: minmax(250px, 0.8fr) minmax(0, 1.2fr);
   gap: 14px;
   border: 1px solid var(--app-border);
-  border-radius: 8px;
-  background: var(--app-surface);
+  border-radius: var(--app-corner-sm);
+  background: rgb(8 20 27 / 86%);
+  box-shadow: var(--app-shadow-inset);
 }
 
 .loadout-identity {
@@ -290,7 +382,8 @@
   border-left-width: 3px;
   padding: 9px;
   text-align: left;
-  background: var(--app-surface);
+  border-radius: var(--app-corner-sm);
+  background: linear-gradient(145deg, rgb(255 255 255 / 3%), transparent), rgb(7 17 23 / 92%);
 }
 
 .battle-ring-tile.selected {
@@ -346,9 +439,10 @@
   gap: 11px;
   align-items: center;
   border: 1px solid var(--app-border);
-  border-radius: 8px;
+  border-radius: var(--app-corner-md);
   padding: 13px;
-  background: var(--app-surface);
+  background: linear-gradient(100deg, var(--app-cyan-soft), transparent 38%), var(--app-surface);
+  box-shadow: var(--app-shadow-inset);
   text-decoration: none;
 }
 
@@ -382,4 +476,59 @@
 
 .battle-development-tools .control-row {
   margin-top: 10px;
+}
+
+@media (max-width: 1040px) {
+  .battle-hub-stage {
+    padding: 14px;
+  }
+
+  .battle-mode-card {
+    min-height: 340px;
+  }
+}
+
+@media (max-width: 760px) {
+  .battle-hub-stage {
+    gap: 12px;
+    padding: 12px;
+    background:
+      linear-gradient(180deg, rgb(4 11 16 / 64%), rgb(4 10 15 / 96%)),
+      url("/assets/backgrounds/live-battle-elemental-arena.jpg") center / cover;
+  }
+
+  .battle-hub-stage .battle-hub-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .battle-hub-stage .battle-hub-stats > a {
+    border-right: 1px solid var(--app-border);
+    border-bottom: 1px solid var(--app-border);
+    padding: 10px;
+  }
+
+  .battle-hub-stage .battle-hub-stats > a:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .battle-hub-stage .battle-hub-stats > a:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+
+  .battle-hub-stage .battle-hub-stats em {
+    display: none;
+  }
+
+  .battle-mode-card {
+    min-height: 310px;
+    padding: 18px;
+  }
+
+  .battle-mode-copy h2 {
+    font-size: 2rem;
+  }
+
+  .battle-loadout-section {
+    padding: 14px;
+  }
 }

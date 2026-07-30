@@ -560,6 +560,25 @@ This section separates executable game rules from implementation decisions. It i
 - Decision: Use familiar Lucide icons for navigation and tools, text or icon-plus-text controls for explicit commands, the full BattleNess logo on the home view, and the compact BattleNess icon in the application shell.
 - Decision: The next visual iteration must make the Game App feel like a game rather than a conventional website or dashboard. Favor immersive game surfaces, stronger spatial hierarchy, and purpose-built game panels while reducing generic web cards, tables, and application chrome.
 - Decision: Establish and confirm the updated game-first visual language through the shared shell and a representative player workflow before rolling it out across every feature.
+- Decision: Give major player workflows a restrained environmental identity where it supports
+  orientation. Forge uses a dedicated dark workshop backdrop with amber furnace light and cyan
+  crystal accents. Inventory uses a secured vault and armory backdrop with a collection gallery and
+  battle-preparation platform. Market uses one shared trading hall with a cool, orderly fixed-game
+  exchange and a warmer player bazaar. Profile uses a ceremonial chronicle hall where identity,
+  combat history, progression, and personal preferences read as one commander dossier. Real
+  localized controls and item artwork remain separate from these backgrounds.
+- Decision: Battle workflows outside the live arena should reuse the elemental arena identity where
+  possible. Campaign presents its opponent sequence as an operation path leading into a staged
+  encounter. PvP uses the same environment as a competitive antechamber, with violet direct
+  challenges, cyan casual matchmaking, and gold ranked competition as distinct mode identities.
+  Public competitive profiles continue the ranked identity as arena dossiers, with season standing,
+  peak rank, and record treated as the only focal information. Leaderboard identities visibly lead
+  to those dossiers without weakening the established privacy boundary. The established live-battle
+  and result presentations remain unchanged.
+- Decision: Authentication uses a full-screen commandery gateway rather than an application card.
+  The BattleNess wordmark is the primary entry landmark, while configured OAuth and local
+  development providers remain the only available session actions. Authentication presentation must
+  not imply additional onboarding, account-merging, or provider behavior.
 - Reason: The Game App needs a recognizable player-facing hierarchy while preserving efficient access to battle, forge, inventory, market, and profile workflows on both mobile and desktop.
 - Tradeoffs: Increased immersion must preserve legibility, accessibility, responsive behavior, localization, and efficient access to established features. The shared shell and design tokens must be applied incrementally to established feature pages. The permanent Dev Lab keeps technical diagnostics that should not leak into the player-facing presentation.
 
