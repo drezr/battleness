@@ -1,21 +1,18 @@
 <template>
   <main class="shell inventory-items-page">
-    <nav class="section-nav" :aria-label="t('accessibility.inventoryNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.inventory"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-      >
-        {{ $t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
     <header class="view-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("inventory.section") }}</span>
-        <h1>{{ t("inventory.items.title") }}</h1>
-        <p class="muted">{{ t("inventory.items.description") }}</p>
+        <SectionBackLink
+          to="/inventory"
+          :label="t('navigation.backToHub', { section: t('navigation.inventory') })"
+        />
+        <div class="view-title-heading">
+          <h1>{{ t("inventory.items.title") }}</h1>
+          <ViewHelpButton
+            :title="t('inventory.items.title')"
+            :description="t('inventory.items.description')"
+          />
+        </div>
       </div>
     </header>
 
@@ -134,9 +131,6 @@
 
 <script setup lang="ts">
 import type { PlayerState } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
-const route = useRoute();
 const { t } = useI18n();
 const contentText = useContentText();
 const { data: state, error, pending } = await useFetch<PlayerState>("/api/player");

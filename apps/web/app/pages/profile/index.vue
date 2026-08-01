@@ -1,16 +1,5 @@
 <template>
   <main class="shell profile-page">
-    <nav class="section-nav" :aria-label="t('accessibility.profileNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.profile"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-      >
-        {{ t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
     <p v-if="pending" class="panel">{{ t("profile.overview.loading") }}</p>
     <p v-else-if="error || !player || !settings || !history || !campaign" class="panel">
       {{ t("profile.overview.loadError") }}
@@ -23,8 +12,13 @@
             {{ profileInitials }}
           </span>
           <div>
-            <span class="eyebrow">{{ t("profile.overview.playerIdentity") }}</span>
-            <h1>{{ player.player.displayName }}</h1>
+            <div class="view-title-heading">
+              <h1>{{ player.player.displayName }}</h1>
+              <ViewHelpButton
+                :title="player.player.displayName"
+                :description="t('profile.overview.description')"
+              />
+            </div>
             <p>
               <span>@{{ settings.profile.username }}</span>
               <span class="profile-visibility">
@@ -79,7 +73,7 @@
       </section>
 
       <section class="profile-dashboard-grid">
-        <article class="profile-progress-panel">
+        <article class="profile-progress-panel hub-info-panel">
           <div class="section-heading-row">
             <div>
               <span class="eyebrow">{{ t("profile.overview.progression") }}</span>
@@ -109,7 +103,7 @@
           </dl>
         </article>
 
-        <article class="profile-record-panel">
+        <article class="profile-record-panel hub-info-panel">
           <div class="section-heading-row">
             <div>
               <span class="eyebrow">{{ t("profile.overview.combatRecord") }}</span>
@@ -137,7 +131,7 @@
         </article>
       </section>
 
-      <section class="profile-activity-section">
+      <section class="profile-activity-section hub-info-panel">
         <div class="section-heading-row">
           <div>
             <span class="eyebrow">{{ t("profile.overview.activity") }}</span>
@@ -205,9 +199,6 @@ import type {
   PlayerState,
   ProfileSettingsState,
 } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
-const route = useRoute();
 const { locale, t } = useI18n();
 const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 const [playerRequest, settingsRequest, historyRequest, campaignRequest] = await Promise.all([

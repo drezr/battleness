@@ -1,21 +1,11 @@
 <template>
   <main class="shell app-hub-page forge-hub-page">
-    <nav class="section-nav" :aria-label="t('accessibility.forgeNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.forge"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-      >
-        {{ t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
     <header class="view-header app-hub-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("forge.section") }}</span>
-        <h1>{{ t("forge.hub.title") }}</h1>
-        <p class="muted">{{ t("forge.hub.description") }}</p>
+        <div class="view-title-heading">
+          <h1>{{ t("forge.hub.title") }}</h1>
+          <ViewHelpButton :title="t('forge.hub.title')" :description="t('forge.hub.description')" />
+        </div>
       </div>
       <NuxtLink class="hub-resource-link" to="/inventory/materials">
         <PackageOpen :size="20" />
@@ -31,6 +21,74 @@
     <p v-else-if="error || !state" class="panel">{{ t("forge.hub.loadError") }}</p>
 
     <template v-else>
+      <section class="hub-workflow-grid forge-workflow-grid">
+        <NuxtLink class="hub-workflow-card hub-link-card primary" to="/forge/craft">
+          <span class="hub-workflow-number">01</span>
+          <span class="hub-workflow-heading">
+            <span class="hub-workflow-icon"><Hammer :size="28" /></span>
+            <span>
+              <span class="eyebrow">{{ t("forge.hub.production") }}</span>
+              <h2>{{ t("forge.craft.title") }}</h2>
+            </span>
+          </span>
+          <p>{{ t("forge.craft.description") }}</p>
+          <dl>
+            <div>
+              <dt>{{ t("forge.craft.craftable") }}</dt>
+              <dd>{{ craftableCount }}</dd>
+            </div>
+            <div>
+              <dt>{{ t("forge.craft.materialUnits") }}</dt>
+              <dd>{{ materialUnits }}</dd>
+            </div>
+          </dl>
+        </NuxtLink>
+
+        <NuxtLink class="hub-workflow-card hub-link-card" to="/forge/socket">
+          <span class="hub-workflow-number">02</span>
+          <span class="hub-workflow-heading">
+            <span class="hub-workflow-icon"><Network :size="28" /></span>
+            <span>
+              <span class="eyebrow">{{ t("forge.hub.composition") }}</span>
+              <h2>{{ t("forge.socket.title") }}</h2>
+            </span>
+          </span>
+          <p>{{ t("forge.socket.description") }}</p>
+          <dl>
+            <div>
+              <dt>{{ t("common.rings") }}</dt>
+              <dd>{{ ringCount }}</dd>
+            </div>
+            <div>
+              <dt>{{ t("common.gems") }}</dt>
+              <dd>{{ gemCount }}</dd>
+            </div>
+          </dl>
+        </NuxtLink>
+
+        <NuxtLink class="hub-workflow-card hub-link-card" to="/forge/quality">
+          <span class="hub-workflow-number">03</span>
+          <span class="hub-workflow-heading">
+            <span class="hub-workflow-icon"><Sparkles :size="28" /></span>
+            <span>
+              <span class="eyebrow">{{ t("forge.hub.refinement") }}</span>
+              <h2>{{ t("forge.quality.title") }}</h2>
+            </span>
+          </span>
+          <p>{{ t("forge.quality.description") }}</p>
+          <dl>
+            <div>
+              <dt>{{ t("forge.hub.candidates") }}</dt>
+              <dd>{{ qualityCandidates }}</dd>
+            </div>
+            <div>
+              <dt>{{ t("progression.averageQuality") }}</dt>
+              <dd>{{ averageQuality }}</dd>
+            </div>
+          </dl>
+        </NuxtLink>
+      </section>
+
       <section class="hub-stat-strip" :aria-label="t('forge.hub.workshopOverview')">
         <NuxtLink to="/forge/craft">
           <span class="hub-stat-icon craft"><ScrollText :size="19" /></span>
@@ -66,72 +124,7 @@
         </NuxtLink>
       </section>
 
-      <section class="hub-workflow-grid forge-workflow-grid">
-        <NuxtLink class="hub-workflow-card primary" to="/forge/craft">
-          <span class="hub-workflow-number">01</span>
-          <span class="hub-workflow-icon"><Hammer :size="28" /></span>
-          <span class="eyebrow">{{ t("forge.hub.production") }}</span>
-          <h2>{{ t("forge.craft.title") }}</h2>
-          <p>{{ t("forge.craft.description") }}</p>
-          <dl>
-            <div>
-              <dt>{{ t("forge.craft.craftable") }}</dt>
-              <dd>{{ craftableCount }}</dd>
-            </div>
-            <div>
-              <dt>{{ t("forge.craft.materialUnits") }}</dt>
-              <dd>{{ materialUnits }}</dd>
-            </div>
-          </dl>
-          <span class="hub-workflow-action"
-            >{{ t("forge.hub.openStation") }} <ArrowRight :size="17"
-          /></span>
-        </NuxtLink>
-
-        <NuxtLink class="hub-workflow-card" to="/forge/socket">
-          <span class="hub-workflow-number">02</span>
-          <span class="hub-workflow-icon"><Network :size="28" /></span>
-          <span class="eyebrow">{{ t("forge.hub.composition") }}</span>
-          <h2>{{ t("forge.socket.title") }}</h2>
-          <p>{{ t("forge.socket.description") }}</p>
-          <dl>
-            <div>
-              <dt>{{ t("common.rings") }}</dt>
-              <dd>{{ ringCount }}</dd>
-            </div>
-            <div>
-              <dt>{{ t("common.gems") }}</dt>
-              <dd>{{ gemCount }}</dd>
-            </div>
-          </dl>
-          <span class="hub-workflow-action"
-            >{{ t("forge.hub.openStation") }} <ArrowRight :size="17"
-          /></span>
-        </NuxtLink>
-
-        <NuxtLink class="hub-workflow-card" to="/forge/quality">
-          <span class="hub-workflow-number">03</span>
-          <span class="hub-workflow-icon"><Sparkles :size="28" /></span>
-          <span class="eyebrow">{{ t("forge.hub.refinement") }}</span>
-          <h2>{{ t("forge.quality.title") }}</h2>
-          <p>{{ t("forge.quality.description") }}</p>
-          <dl>
-            <div>
-              <dt>{{ t("forge.hub.candidates") }}</dt>
-              <dd>{{ qualityCandidates }}</dd>
-            </div>
-            <div>
-              <dt>{{ t("progression.averageQuality") }}</dt>
-              <dd>{{ averageQuality }}</dd>
-            </div>
-          </dl>
-          <span class="hub-workflow-action"
-            >{{ t("forge.hub.openStation") }} <ArrowRight :size="17"
-          /></span>
-        </NuxtLink>
-      </section>
-
-      <section class="hub-guidance-bar">
+      <section class="hub-guidance-bar hub-info-panel">
         <span class="hub-guidance-icon"><Lightbulb :size="20" /></span>
         <span
           ><strong>{{ t("forge.hub.recommendedNext") }}</strong
@@ -160,9 +153,6 @@ import {
 } from "@lucide/vue";
 import type { PlayerState } from "~/utils/playerState";
 import { inventoryCountByType, totalMaterialQuantity } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
-const route = useRoute();
 const { locale, t } = useI18n();
 const {
   data: state,

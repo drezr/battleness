@@ -133,14 +133,16 @@
   --mode-rgb: 48 211 237;
   position: relative;
   display: grid;
-  grid-template-rows: auto minmax(150px, 1fr) auto auto;
-  min-height: 410px;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
   min-width: 0;
   gap: 15px;
   overflow: hidden;
   border: 1px solid rgb(var(--mode-rgb) / 48%);
   border-radius: var(--app-corner-md);
   padding: 22px;
+  color: inherit;
+  appearance: none;
   background:
     linear-gradient(180deg, rgb(var(--mode-rgb) / 8%), transparent 34%),
     linear-gradient(0deg, rgb(4 12 17 / 98%) 0 38%, rgb(4 12 17 / 44%) 72%),
@@ -148,10 +150,28 @@
   box-shadow:
     0 18px 42px rgb(0 0 0 / 28%),
     inset 0 1px 0 rgb(255 255 255 / 9%);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
   transition:
     border-color var(--app-motion-scene) ease,
     transform var(--app-motion-scene) ease,
     box-shadow var(--app-motion-scene) ease;
+}
+
+.battle-mode-card:focus-visible {
+  outline: 2px solid var(--mode-accent, var(--app-cyan));
+  outline-offset: 3px;
+}
+
+.battle-mode-card:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.battle-mode-card:disabled:hover {
+  transform: none;
 }
 
 .battle-mode-card:hover {
@@ -207,9 +227,20 @@
 
 .battle-mode-copy {
   display: grid;
-  align-content: end;
-  gap: 9px;
+  grid-template-columns: 62px minmax(0, 1fr);
+  gap: 12px;
+  align-content: start;
+  align-items: center;
   text-shadow: 0 3px 16px rgb(0 0 0 / 80%);
+}
+
+.battle-mode-copy > div:nth-child(2) {
+  display: grid;
+  gap: 7px;
+}
+
+.battle-mode-copy > p {
+  grid-column: 1 / -1;
 }
 
 .battle-mode-copy h2 {
@@ -239,28 +270,6 @@
   align-items: center;
   color: #b8cbd2;
   font-size: 0.72rem;
-}
-
-.battle-mode-action {
-  display: flex;
-  width: 100%;
-  min-height: 46px;
-  gap: 8px;
-  justify-content: space-between;
-  border-radius: var(--app-corner-sm);
-  font-weight: 850;
-}
-
-.campaign-mode .battle-mode-action {
-  border-color: #ff9d68;
-  color: #130b07;
-  background: #ff9d68;
-}
-
-.pvp-mode .battle-mode-action {
-  border-color: var(--app-cyan);
-  color: #061217;
-  background: var(--app-cyan);
 }
 
 .battle-loadout-section {
@@ -482,10 +491,6 @@
   .battle-hub-stage {
     padding: 14px;
   }
-
-  .battle-mode-card {
-    min-height: 340px;
-  }
 }
 
 @media (max-width: 760px) {
@@ -520,7 +525,6 @@
   }
 
   .battle-mode-card {
-    min-height: 310px;
     padding: 18px;
   }
 

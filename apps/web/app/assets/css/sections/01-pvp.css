@@ -176,22 +176,6 @@
   color: var(--pvp-accent);
 }
 
-.pvp-mode-button {
-  display: flex;
-  width: 100%;
-  gap: 8px;
-  justify-content: space-between;
-  border-color: color-mix(in srgb, var(--pvp-accent) 55%, transparent);
-  background: color-mix(in srgb, var(--pvp-accent) 13%, var(--app-raised));
-  font-weight: 850;
-}
-
-.pvp-mode-button.primary {
-  border-color: var(--app-cyan);
-  color: #061217;
-  background: var(--app-cyan);
-}
-
 .pvp-system-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -732,10 +716,6 @@
     padding: 0 0 0 16px;
   }
 
-  .pvp-mode-button {
-    grid-column: 2;
-  }
-
   .ranked-console,
   .ranked-search-state,
   .pvp-accept-state,
@@ -775,10 +755,6 @@
     border-top: 1px solid var(--app-border);
     border-left: 0;
     padding: 12px 0 0;
-  }
-
-  .pvp-mode-button {
-    grid-column: 1 / -1;
   }
 
   .pvp-system-strip {
@@ -954,8 +930,8 @@
 
 .pvp-mode-tile {
   --pvp-rgb: 49 211 237;
-  grid-template-rows: auto minmax(170px, 1fr) auto auto;
-  min-height: 420px;
+  grid-template-rows: auto auto auto;
+  min-height: 0;
   gap: 16px;
   border-color: rgb(var(--pvp-rgb) / 46%);
   border-radius: var(--app-corner-md);
@@ -971,16 +947,23 @@
     border-color var(--app-motion-scene) ease,
     box-shadow var(--app-motion-scene) ease,
     transform var(--app-motion-scene) ease;
+  color: inherit;
+  text-decoration: none;
 }
 
 .pvp-mode-tile:hover,
-.pvp-mode-tile:focus-within {
+.pvp-mode-tile:focus-visible {
   border-color: rgb(var(--pvp-rgb) / 78%);
   box-shadow:
     0 26px 56px rgb(0 0 0 / 42%),
     0 0 28px rgb(var(--pvp-rgb) / 11%),
     inset 0 1px 0 rgb(255 255 255 / 12%);
   transform: translateY(-4px);
+}
+
+.pvp-mode-tile:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 3px;
 }
 
 .private-mode-tile {
@@ -1028,12 +1011,6 @@
 
 .pvp-feature-list {
   border-color: rgb(var(--pvp-rgb) / 22%);
-}
-
-.pvp-mode-button {
-  min-height: 50px;
-  border-color: rgb(var(--pvp-rgb) / 55%);
-  background: linear-gradient(135deg, rgb(var(--pvp-rgb) / 24%), rgb(4 15 21 / 92%));
 }
 
 .pvp-system-strip {
@@ -1307,7 +1284,7 @@
 
 @media (max-width: 920px) {
   .pvp-mode-tile {
-    min-height: 270px;
+    min-height: 0;
     background-position: var(--pvp-position, center);
   }
 
@@ -1343,8 +1320,9 @@
   }
 
   .pvp-mode-tile {
-    min-height: 330px;
-    padding: 18px;
+    min-height: 0;
+    gap: 12px;
+    padding: 16px;
     background:
       linear-gradient(180deg, rgb(var(--pvp-rgb) / 9%), transparent 32%),
       linear-gradient(0deg, rgb(4 12 17 / 98%) 0 58%, rgb(4 12 17 / 42%) 100%),
@@ -1413,7 +1391,7 @@
   }
 
   .pvp-mode-tile:hover,
-  .pvp-mode-tile:focus-within {
+  .pvp-mode-tile:focus-visible {
     transform: none;
   }
 }

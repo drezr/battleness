@@ -1,10 +1,10 @@
 <template>
   <main class="shell public-pvp-profile-page">
-    <nav class="section-nav" :aria-label="t('accessibility.pvpNavigation')">
-      <NuxtLink v-for="link in sectionLinks.pvp" :key="link.to" :to="link.to">
-        {{ t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
+    <SectionBackLink
+      v-if="pending || error || !state"
+      to="/battle/pvp"
+      :label="t('navigation.backToHub', { section: t('navigation.pvp') })"
+    />
 
     <p v-if="pending" class="panel">{{ t("publicPvpProfile.loading") }}</p>
     <p v-else-if="error || !state" class="panel">{{ t("publicPvpProfile.notFound") }}</p>
@@ -12,10 +12,18 @@
     <template v-else>
       <section class="public-pvp-profile-hero">
         <div class="public-pvp-profile-avatar"><UserRound :size="34" /></div>
-        <div>
-          <span class="eyebrow">{{ t("publicPvpProfile.section") }}</span>
-          <h1>{{ state.profile.displayName }}</h1>
-          <p>{{ t("publicPvpProfile.description") }}</p>
+        <div class="section-view-title">
+          <SectionBackLink
+            to="/battle/pvp"
+            :label="t('navigation.backToHub', { section: t('navigation.pvp') })"
+          />
+          <div class="view-title-heading">
+            <h1>{{ state.profile.displayName }}</h1>
+            <ViewHelpButton
+              :title="state.profile.displayName"
+              :description="t('publicPvpProfile.description')"
+            />
+          </div>
         </div>
         <span v-if="state.profile.isCurrentPlayer" class="pill">
           {{ t("publicPvpProfile.you") }}
@@ -120,8 +128,6 @@ import {
   UserRound,
 } from "@lucide/vue";
 import type { PublicPvpProfileState, PvpVisibleRank } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
 const route = useRoute();
 const { locale, t } = useI18n();
 const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();

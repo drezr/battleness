@@ -165,8 +165,8 @@
   position: relative;
   display: grid;
   min-width: 0;
-  grid-template-rows: auto auto auto auto minmax(58px, 1fr) auto auto;
-  gap: 8px;
+  grid-template-rows: auto minmax(58px, 1fr) auto;
+  gap: 12px;
   overflow: hidden;
   border: 1px solid var(--app-border);
   border-radius: 8px;
@@ -198,12 +198,40 @@
   background: var(--app-raised);
 }
 
+.hub-workflow-card:focus-visible,
+.market-hub-destination:focus-visible {
+  outline: 2px solid var(--app-cyan-bright);
+  outline-offset: 3px;
+}
+
 .hub-workflow-number {
-  justify-self: end;
+  position: absolute;
+  top: 18px;
+  right: 18px;
   color: var(--app-muted);
   font-family: ui-monospace, monospace;
   font-size: 0.68rem;
   font-weight: 800;
+}
+
+.hub-workflow-heading,
+.market-destination-heading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding-right: 30px;
+}
+
+.hub-workflow-heading > span:last-child,
+.market-destination-heading > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.market-destination-heading {
+  padding-right: 0;
 }
 
 .hub-workflow-icon,
@@ -274,17 +302,6 @@
 .hub-workflow-card dd {
   margin: 0;
   font-size: 1.1rem;
-  font-weight: 900;
-}
-
-.hub-workflow-action {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid var(--app-border);
-  padding-top: 12px;
-  color: var(--app-cyan);
   font-weight: 900;
 }
 
@@ -707,10 +724,10 @@
 .market-hub-destination {
   position: relative;
   display: grid;
-  grid-template-rows: auto auto auto minmax(60px, 1fr) auto auto;
-  gap: 9px;
+  grid-template-rows: auto minmax(54px, 1fr) auto;
+  gap: 12px;
   overflow: hidden;
-  min-height: 360px;
+  min-height: 0;
   border: 1px solid rgb(122 208 219 / 18%);
   border-radius: 7px 7px 14px 14px;
   padding: 24px;
@@ -990,8 +1007,8 @@
 }
 
 .forge-hub-page .hub-workflow-card {
-  min-height: 338px;
-  grid-template-rows: auto auto auto auto minmax(58px, 1fr) auto auto;
+  min-height: 0;
+  grid-template-rows: auto minmax(58px, 1fr) auto;
   border-color: rgb(var(--forge-accent, 245 184 63) / 25%);
   border-radius: var(--app-corner-panel);
   padding: 20px;
@@ -1035,7 +1052,7 @@
 }
 
 .forge-hub-page .hub-workflow-icon {
-  width: 64px;
+  width: 58px;
   border: 1px solid rgb(var(--forge-accent) / 22%);
   color: rgb(var(--forge-accent));
   background: rgb(3 9 12 / 62%);
@@ -1052,13 +1069,8 @@
   color: #b6c0c0;
 }
 
-.forge-hub-page .hub-workflow-card dl,
-.forge-hub-page .hub-workflow-action {
+.forge-hub-page .hub-workflow-card dl {
   border-color: rgb(var(--forge-accent) / 17%);
-}
-
-.forge-hub-page .hub-workflow-action {
-  color: rgb(var(--forge-accent));
 }
 
 .forge-hub-page .hub-guidance-bar {
@@ -1070,6 +1082,137 @@
 
 .forge-hub-page .hub-guidance-bar .button-link {
   min-height: 44px;
+}
+
+/* Shared hub surface language */
+.battle-mode-card {
+  --hub-link-rgb: var(--mode-rgb);
+  --hub-link-accent: var(--mode-accent);
+  --hub-link-image: url("/assets/backgrounds/live-battle-elemental-arena.jpg");
+  --hub-link-position: var(--mode-position, center);
+}
+
+.forge-hub-page .hub-workflow-card {
+  --hub-link-rgb: var(--forge-accent);
+  --hub-link-accent: rgb(var(--forge-accent));
+  --hub-link-image: url("/assets/backgrounds/forge-workshop.png");
+  --hub-link-position: var(--forge-position, center);
+}
+
+.market-hub-destination.game-economy {
+  --hub-link-rgb: 245 190 71;
+  --hub-link-accent: #f5be47;
+  --hub-link-image: url("/assets/backgrounds/market-hall.png");
+  --hub-link-position: left center;
+}
+
+.market-hub-destination.player-economy {
+  --hub-link-rgb: 245 190 71;
+  --hub-link-accent: #f3cf77;
+  --hub-link-image: url("/assets/backgrounds/market-hall.png");
+  --hub-link-position: right center;
+}
+
+.app-content .hub-link-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+  border: 1px solid rgb(var(--hub-link-rgb) / 48%);
+  border-radius: var(--app-corner-md);
+  padding: clamp(18px, 2vw, 22px);
+  color: inherit;
+  background:
+    linear-gradient(180deg, rgb(var(--hub-link-rgb) / 8%), transparent 34%),
+    linear-gradient(0deg, rgb(4 12 17 / 98%) 0 38%, rgb(4 12 17 / 44%) 72%),
+    var(--hub-link-image) var(--hub-link-position) / cover;
+  box-shadow:
+    0 18px 42px rgb(0 0 0 / 28%),
+    inset 0 1px 0 rgb(255 255 255 / 9%);
+  text-shadow: 0 3px 16px rgb(0 0 0 / 80%);
+  text-decoration: none;
+  transition:
+    border-color var(--app-motion-scene) ease,
+    transform var(--app-motion-scene) ease,
+    box-shadow var(--app-motion-scene) ease;
+}
+
+.app-content .hub-link-card::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: var(--hub-link-accent);
+  box-shadow: 0 0 15px rgb(var(--hub-link-rgb) / 55%);
+  content: "";
+}
+
+.app-content .hub-link-card:hover {
+  border-color: rgb(var(--hub-link-rgb) / 78%);
+  background:
+    linear-gradient(180deg, rgb(var(--hub-link-rgb) / 13%), transparent 38%),
+    linear-gradient(0deg, rgb(4 12 17 / 98%) 0 38%, rgb(4 12 17 / 36%) 72%),
+    var(--hub-link-image) var(--hub-link-position) / cover;
+  box-shadow:
+    0 24px 52px rgb(0 0 0 / 38%),
+    0 0 24px rgb(var(--hub-link-rgb) / 10%),
+    inset 0 1px 0 rgb(255 255 255 / 12%);
+  transform: translateY(-4px);
+}
+
+.app-content .hub-link-card:focus-visible {
+  outline: 2px solid var(--hub-link-accent);
+  outline-offset: 3px;
+}
+
+.app-content .hub-link-card:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.app-content .hub-link-card:disabled:hover {
+  transform: none;
+}
+
+.app-content .hub-link-card :is(.battle-mode-icon, .hub-workflow-icon, .market-destination-icon) {
+  display: grid;
+  width: 62px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgb(var(--hub-link-rgb) / 30%);
+  border-radius: var(--app-corner-md);
+  color: var(--hub-link-accent);
+  background: rgb(4 13 18 / 78%);
+  box-shadow:
+    inset 0 0 18px rgb(var(--hub-link-rgb) / 11%),
+    0 8px 22px rgb(0 0 0 / 24%);
+}
+
+.app-content .hub-link-card h2 {
+  color: #f5f2e8;
+  font-size: clamp(1.55rem, 2.5vw, 2.25rem);
+  line-height: 1;
+}
+
+.app-content .hub-link-card p {
+  color: #b8c8ce;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.app-content .hub-info-panel {
+  border: 1px solid rgb(103 211 225 / 18%);
+  border-top-color: rgb(82 225 151 / 28%);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgb(8 28 37 / 92%), rgb(5 16 22 / 96%));
+  box-shadow:
+    0 24px 54px rgb(0 0 0 / 34%),
+    inset 0 1px 0 rgb(82 225 151 / 8%);
+  backdrop-filter: blur(14px);
+}
+
+.inventory-hub-collection.hub-info-panel::before {
+  display: none;
 }
 
 @media (max-width: 900px) {
@@ -1093,10 +1236,6 @@
     grid-template-rows: auto;
   }
 
-  .forge-hub-page .hub-workflow-card {
-    min-height: 280px;
-  }
-
   .inventory-hub-layout {
     grid-template-columns: 1fr;
   }
@@ -1110,7 +1249,7 @@
   .forge-hub-page {
     border-inline: 0;
     border-radius: 0;
-    margin-inline: -16px;
+    margin-inline: 0;
     padding: 16px;
     background:
       linear-gradient(180deg, rgb(4 9 13 / 68%), rgb(4 9 13 / 96%) 62%),
@@ -1120,7 +1259,7 @@
   .inventory-hub-page {
     border-inline: 0;
     border-radius: 0;
-    margin-inline: -16px;
+    margin-inline: 0;
     padding: 16px;
     background:
       linear-gradient(180deg, rgb(3 10 15 / 58%), rgb(3 9 13 / 95%) 470px),
@@ -1130,7 +1269,7 @@
   .market-hub-page {
     border-inline: 0;
     border-radius: 0;
-    margin-inline: -16px;
+    margin-inline: 0;
     padding: 16px;
     background:
       linear-gradient(180deg, rgb(3 9 13 / 52%), rgb(3 9 13 / 95%) 500px),
@@ -1140,10 +1279,6 @@
   .market-hub-page .app-hub-header {
     min-height: 124px;
     padding-inline: 0;
-  }
-
-  .market-hub-destination {
-    min-height: 300px;
   }
 
   .inventory-hub-page .app-hub-header {
@@ -1214,9 +1349,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .app-content .hub-link-card,
   .forge-hub-page .hub-workflow-card,
   .inventory-hub-page .inventory-category-grid > a,
   .market-hub-destination {
     transition: none;
+  }
+
+  .app-content .hub-link-card:hover {
+    transform: none;
   }
 }

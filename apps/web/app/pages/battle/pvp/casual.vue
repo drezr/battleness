@@ -1,21 +1,18 @@
 <template>
   <main class="shell pvp-flow-page casual-match-page">
-    <nav class="section-nav" :aria-label="t('accessibility.pvpNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.pvp"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-      >
-        {{ t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
     <header class="view-header pvp-view-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("navigation.pvp") }}</span>
-        <h1>{{ t("casualMatch.title") }}</h1>
-        <p class="muted">{{ t("casualMatch.description") }}</p>
+        <SectionBackLink
+          to="/battle/pvp"
+          :label="t('navigation.backToHub', { section: t('navigation.pvp') })"
+        />
+        <div class="view-title-heading">
+          <h1>{{ t("casualMatch.title") }}</h1>
+          <ViewHelpButton
+            :title="t('casualMatch.title')"
+            :description="t('casualMatch.description')"
+          />
+        </div>
       </div>
       <div class="view-status-stack">
         <span :class="['pvp-live-status', `realtime-${realtimeStatus}`]">
@@ -138,10 +135,8 @@ import {
 } from "@lucide/vue";
 import type { CasualMatchmakingState, PvpOpponentIdentity } from "~/utils/playerState";
 import { visiblePvpOpponent } from "~/utils/pvpPresentation";
-import { sectionLinks } from "~/utils/viewData";
 
 const { t } = useI18n();
-const route = useRoute();
 const mutating = ref(false);
 const errorMessage = ref("");
 const clock = ref(Date.now());

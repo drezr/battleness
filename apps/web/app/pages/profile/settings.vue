@@ -1,21 +1,15 @@
 <template>
   <main class="shell profile-settings-page">
-    <nav class="section-nav" :aria-label="t('accessibility.profileNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.profile"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-      >
-        {{ t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
     <header class="view-header settings-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("profile.section") }}</span>
-        <h1>{{ t("settings.title") }}</h1>
-        <p class="muted">{{ t("settings.description") }}</p>
+        <SectionBackLink
+          to="/profile"
+          :label="t('navigation.backToHub', { section: t('navigation.profile') })"
+        />
+        <div class="view-title-heading">
+          <h1>{{ t("settings.title") }}</h1>
+          <ViewHelpButton :title="t('settings.title')" :description="t('settings.description')" />
+        </div>
       </div>
     </header>
 
@@ -220,7 +214,6 @@ import {
   Volume2,
 } from "@lucide/vue";
 import type { ProfileSettingsState } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
 
 type SettingsForm = {
   displayName: string;
@@ -235,7 +228,6 @@ type SettingsForm = {
   effectsVolume: number;
 };
 
-const route = useRoute();
 const { locale, locales, setLocale, t } = useI18n();
 const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 const {

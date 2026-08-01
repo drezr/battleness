@@ -153,6 +153,7 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 ### Battle Layout Direction
 
 - The player-facing live battle screen follows the user's sketch direction through a responsive Nuxt DOM arena: heroes anchor the left combat column, three monster slots form each side of the field, the viewer's rings form a bottom dock, and energy rails frame the arena. Live battles hide the global sidebar, top bar, mobile navigation, route section navigation, and raw diagnostics by default so combat owns the full `100vw` by `100dvh` viewport without page scroll. Opponent rings remain hidden. Phaser remains an optional later layer for animation-heavy scene needs rather than a current dependency.
+- On narrow battle viewports, ring cards retain a readable minimum size and the bottom dock scrolls horizontally instead of shrinking every possible ring into one row. Mobile energy rails prioritize the full segmented meter and always keep the localized current/maximum value visible; the player labels remain available to assistive technology.
 - Monster cards should expose skill, damage, and health zones clearly.
 - Ring cards should expose total ring damage, including socketed gem damage, and energy/cost information, with socketed gems visible along the bottom of each ring.
 - Ready rings and monsters are selected directly from their cards, legal targets are then chosen on the board, and clicking the selected source again deselects it. The UI should not repeat the selected source name in a separate prepared-action label.
@@ -465,6 +466,10 @@ This section separates executable game rules from implementation decisions. It i
 
 ### Game Market
 
+- Selecting a material or eligible inventory item opens its buy, sell, or recipe-valued transaction
+  desk as a modal instead of requiring navigation to a separate page section. The modal locks and
+  inerts the background, confines keyboard focus, supports Escape and backdrop dismissal, restores
+  focus to the selected card, and keeps the existing transaction APIs and validation rules.
 - Official material buy prices are fixed by rarity at 10/25/60/150 credits for common, refined,
   rare, and epic materials.
 - Material buyback pays `max(1, floor(officialBuyPrice * 0.25))` credits per unit.
@@ -549,6 +554,10 @@ This section separates executable game rules from implementation decisions. It i
 
 - Status: decided.
 - Decision: The interface should be designed mobile first.
+- Decision: Player-facing shell views use one shared 16-pixel horizontal gutter at mobile widths.
+  Feature scenes may add internal panel padding, but route-level content must not independently
+  remove or duplicate the shell gutter. Focused full-screen surfaces such as live battle remain
+  outside this shell rule.
 - Reason: Mobile support is a primary target, not a later adaptation.
 - Tradeoffs: Mobile-first design forces tighter controls, readable combat state, and careful interaction design. Desktop layouts can expand from the mobile model, but dense desktop-only UI patterns should not drive the core experience.
 
@@ -558,8 +567,40 @@ This section separates executable game rules from implementation decisions. It i
 - Decision: Use a dark-first tactical competitive interface. Desktop uses a persistent left sidebar and compact resource top bar; mobile uses a fixed bottom navigation bar. The home view acts as a command center rather than a marketing page.
 - Decision: Use medium-density item cards, a distinct display treatment for headings with a neutral sans-serif UI face, restrained rarity borders and glows, element badges with targeted color accents, and fast functional motion with reduced-motion support.
 - Decision: Use familiar Lucide icons for navigation and tools, text or icon-plus-text controls for explicit commands, the full BattleNess logo on the home view, and the compact BattleNess icon in the application shell.
+- Decision: Standard player-view titles reuse the Forge Hub title treatment and the Battle Hub
+  vertical rhythm. Their short localized descriptions move into a shared question-mark help dialog
+  beside the title so page headers remain compact. Because the shell header already names the active
+  section, standard views omit the duplicate colored eyebrow above their main title. The dialog must inert the application, confine
+  keyboard focus, support Escape and backdrop dismissal, restore focus, and remain ready for richer
+  help copy or imagery later. Standard headers own no route-specific padding, border, minimum height,
+  or stretched grid row: they align to the shell content edge, size to their content, and leave 26
+  pixels before the next page block. The question-mark control keeps a 44-pixel interaction area but
+  uses a restrained 32-pixel circular visual. Home omits this control because its command-center
+  purpose is self-evident. Authentication, focused live combat, and combat outcomes keep their
+  specialized contextual hierarchy because they do not duplicate a standard shell section header.
 - Decision: The next visual iteration must make the Game App feel like a game rather than a conventional website or dashboard. Favor immersive game surfaces, stronger spatial hierarchy, and purpose-built game panels while reducing generic web cards, tables, and application chrome.
 - Decision: Establish and confirm the updated game-first visual language through the shared shell and a representative player workflow before rolling it out across every feature.
+- Decision: Section hubs use their staged destination cards as the only route-level navigation. Child
+  views replace horizontal section menus with one compact icon link inside the title block, avoiding
+  a separate navigation row while returning deterministically to their parent hub. Nested workflows
+  preserve their hierarchy, such as Battle Hub to PvP Hub to a matchmaking mode. The link never
+  depends on browser history, retains a localized accessible name, and keeps a 44-pixel interaction
+  target across desktop and mobile layouts. It uses a visible rounded cyan-accented surface with
+  restrained depth so the parent navigation remains easy to identify beside the title.
+- Decision: Hub destination cards place their icon beside the eyebrow and title, keep supporting copy
+  and useful metrics below, and use the complete card as the single interactive target. Separate
+  bottom calls to action are omitted when they only repeat the card destination. Data panels with
+  multiple meanings or actions remain non-clickable rather than receiving an ambiguous route.
+- Decision: When a hub combines primary destinations with recap statistics, destination cards come
+  first in both visual and document order. Battle places its mode cards before account performance;
+  Forge places its workshop stations before workshop statistics. This keeps the player's next
+  action ahead of supporting intelligence for pointer, keyboard, and assistive-technology users.
+- Decision: Hub destinations share the Battle mode-card surface language: an accented top edge,
+  environmental artwork, a dark lower information field, consistent corner geometry, and one
+  restrained hover/focus treatment. Feature-specific artwork and accent colors remain available for
+  orientation. Non-destination hub panels share the quieter Inventory Battle Readiness surface so
+  progression, activity, loadout, collection, and recommendation information reads consistently
+  without implying that the complete panel is interactive.
 - Decision: Give major player workflows a restrained environmental identity where it supports
   orientation. Forge uses a dedicated dark workshop backdrop with amber furnace light and cyan
   crystal accents. Inventory uses a secured vault and armory backdrop with a collection gallery and

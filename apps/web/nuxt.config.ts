@@ -1,5 +1,16 @@
 export default defineNuxtConfig({
   compatibilityDate: "2026-07-10",
+  app: {
+    head: {
+      link: [
+        {
+          rel: "icon",
+          type: "image/png",
+          href: "/assets/brand/battleness-favicon.png",
+        },
+      ],
+    },
+  },
   css: ["~/assets/css/main.css"],
   devtools: { enabled: false },
   modules: ["@nuxtjs/i18n"],

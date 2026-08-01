@@ -1,21 +1,18 @@
 <template>
   <main class="shell pvp-flow-page ranked-match-page">
-    <nav class="section-nav" :aria-label="t('accessibility.pvpNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.pvp"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-      >
-        {{ t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
     <header class="view-header pvp-view-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("navigation.pvp") }}</span>
-        <h1>{{ t("rankedMatch.title") }}</h1>
-        <p class="muted">{{ t("rankedMatch.description") }}</p>
+        <SectionBackLink
+          to="/battle/pvp"
+          :label="t('navigation.backToHub', { section: t('navigation.pvp') })"
+        />
+        <div class="view-title-heading">
+          <h1>{{ t("rankedMatch.title") }}</h1>
+          <ViewHelpButton
+            :title="t('rankedMatch.title')"
+            :description="t('rankedMatch.description')"
+          />
+        </div>
       </div>
       <div class="view-status-stack">
         <span :class="['pvp-live-status', `realtime-${realtimeStatus}`]">
@@ -357,11 +354,9 @@ import type {
   PvpOpponentIdentity,
 } from "~/utils/playerState";
 import { visiblePvpOpponent } from "~/utils/pvpPresentation";
-import { sectionLinks } from "~/utils/viewData";
 
 const { t, locale } = useI18n();
 const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
-const route = useRoute();
 const mutating = ref(false);
 const claimingRewardId = ref("");
 const errorMessage = ref("");

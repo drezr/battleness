@@ -20,7 +20,9 @@
     "battleCommands": "Commandes du combat",
     "emptyMonsterSlot": "Emplacement de monstre vide",
     "playerSummary": "Résumé du joueur",
-    "mainNavigation": "Navigation principale"
+    "mainNavigation": "Navigation principale",
+    "openViewHelp": "Ouvrir l’aide de {title}",
+    "closeViewHelp": "Fermer l’aide de {title}"
   },
   "navigation": {
     "home": "Accueil",
@@ -49,7 +51,8 @@
     "marketHistory": "Historique du marché",
     "overview": "Vue d’ensemble",
     "progression": "Progression",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "backToHub": "Retour au hub {section}"
   },
   "common": {
     "player": "Joueur",
@@ -59,6 +62,7 @@
     "hero": "Héros",
     "items": "Objets",
     "materials": "Matériaux",
+    "quantity": "Quantité",
     "campaign": "Campagne",
     "quality": "Qualité",
     "type": "Type",
@@ -723,6 +727,7 @@
       "buy": "Acheter",
       "sell": "Vendre",
       "transaction": "Transaction",
+      "closeTransaction": "Fermer la transaction",
       "buyMaterial": "Acheter un matériau",
       "sellMaterial": "Vendre un matériau",
       "materials": "Matériaux",
@@ -1018,6 +1023,7 @@
     "overview": {
       "loading": "Chargement du profil du joueur...",
       "loadError": "Impossible de charger le profil du joueur.",
+      "description": "Identité du joueur, ressources du compte et raccourcis.",
       "playerIdentity": "Identité du joueur",
       "editProfile": "Modifier le profil",
       "findBattle": "Trouver un combat",

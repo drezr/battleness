@@ -1,20 +1,18 @@
 <template>
   <main class="shell player-market-page">
-    <nav class="section-nav" :aria-label="t('accessibility.marketNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.market"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-        >{{ t(link.labelKey) }}</NuxtLink
-      >
-    </nav>
-
     <header class="view-header market-view-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("market.section") }}</span>
-        <h1>{{ t("market.players.title") }}</h1>
-        <p class="muted">{{ t("market.players.description") }}</p>
+        <SectionBackLink
+          to="/market"
+          :label="t('navigation.backToHub', { section: t('navigation.market') })"
+        />
+        <div class="view-title-heading">
+          <h1>{{ t("market.players.title") }}</h1>
+          <ViewHelpButton
+            :title="t('market.players.title')"
+            :description="t('market.players.description')"
+          />
+        </div>
       </div>
       <NuxtLink class="button-link secondary-button" to="/market/players/history"
         ><History :size="17" />{{ t("market.players.openHistory") }}<ArrowRight :size="16"
@@ -350,9 +348,6 @@ import {
   X,
 } from "@lucide/vue";
 import type { PlayerMarketBrowseState, PlayerMarketListingView } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
-const route = useRoute();
 const { t, locale } = useI18n();
 const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 const contentText = useContentText();

@@ -4,6 +4,78 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- The shared child-view return control now uses a clearly visible 44-pixel rounded surface, cyan
+  border and icon, restrained gradient, and compact depth treatment beside page titles. Hover,
+  focus, active, and reduced-motion behavior remain explicit, and the localized accessible label is
+  unchanged. Browser checks across Battle, PvP, Forge, Inventory, Market, and Profile at desktop,
+  portrait-mobile, and short-landscape sizes confirm alignment, navigation, and no overflow.
+- Standard Game App page titles no longer repeat the active section as a colored eyebrow beneath the
+  shell header. Home, the five player sections, their child routes, and public PvP profiles now lead
+  directly with the main title; contextual eyebrows inside cards remain unchanged. Child return
+  links, titles, and help controls share one aligned row. Authentication, live battle, and battle
+  outcomes retain their specialized context because they do not duplicate a standard shell header.
+  All 25 affected static routes were browser-checked on portrait mobile, with representative desktop
+  and short-landscape coverage and no horizontal overflow.
+- Battle Hub and Forge Hub now present their primary destinations before supporting recap data in
+  both visual and document order. Battle exposes Campaign, PvP, and Training before account combat
+  statistics; Forge exposes Craft, Socket, and Quality before workshop statistics. The existing
+  readiness and material-stock header links remain available, and no routes, data, or business
+  behavior changed. Browser checks at desktop, portrait mobile, and short landscape confirm the new
+  order without horizontal overflow.
+- The first three production item assets from `battleness-production-items-v1-asset-bible.json`
+  are generated as individual transparent native-resolution PNG files under
+  `apps/web/public/assets/items/rings/`: `ashenLoop.png`, `cinderKnot.png`, and `charBand.png`.
+  They follow the shared dark high-fantasy 3D direction and remain a review batch before the rest
+  of the production item collection is generated.
+- The PvP Hub's Private, Casual, and Ranked mode cards are now full-card links like the other hub
+  destinations. Their redundant footer buttons, reserved action row, and fixed 420/330/270-pixel
+  heights are removed; cards size from their content while retaining mode artwork, feature details,
+  visible focus, and reduced-motion behavior. Browser checks confirm valid non-nested link semantics,
+  working navigation, and compact 321-pixel desktop, 224-pixel portrait, and 175-pixel short-landscape
+  cards without overflow.
+- Standard player-view titles now share the Forge Hub typography and the Battle Hub's 26-pixel
+  title-to-content rhythm. Existing localized view descriptions are no longer permanently visible
+  in headers; a 44-pixel question-mark control beside each title opens them in a shared accessible
+  modal with background inerting, scroll locking, focus confinement, Escape/backdrop dismissal, and
+  trigger-focus restoration. Authentication, Profile, all section hubs, and their standard child
+  routes are covered; Home intentionally omits the control, while live battle and battle outcomes
+  retain their specialized combat hierarchy. The control keeps a 44-pixel interaction area while a
+  quieter 32-pixel circular treatment reduces its visual weight. All affected routes were
+  browser-verified at desktop, portrait-mobile, and short landscape widths without overflow.
+- Standard view-header geometry is now centralized as well. Legacy Forge, Inventory, Market, PvP,
+  and child-route page padding, borders, minimum heights, stretched grid rows, and first-content top
+  margins no longer shift otherwise identical titles. Across the 23 standard shell headers, desktop
+  title blocks now share the same origin and 68-pixel height, while desktop, portrait mobile, and
+  short landscape all preserve an exact 26-pixel gap before the next block without overflow.
+- The shared Game App shell now owns a 16-pixel horizontal gutter at mobile widths. Home, Battle Hub,
+  Battle History, and every PvP route no longer touch the viewport edge, while the existing Forge,
+  Inventory, Market, Profile, and Campaign spacing resolves to the same value instead of relying on
+  route-specific compensation. The focused live-battle layout remains separate. Browser checks
+  covered all 25 static player routes and a persisted result route at portrait-mobile width, plus
+  the full static route set at desktop and short-landscape widths, with no horizontal overflow.
+- Hub surfaces now have two explicit shared families. Battle, Forge, and Market destination cards
+  reuse the Battle mode-card geometry, depth, icon treatment, accented top edge, interaction, and
+  environmental staging while retaining their own artwork and accent colors. Non-linked collection,
+  readiness, loadout, recommendation, activity, progression, record, and history panels reuse the
+  quieter Inventory Battle Readiness surface without gaining ambiguous full-panel interaction.
+  Browser checks at desktop, portrait mobile, and short landscape widths confirm matching computed
+  styles, no horizontal overflow, and no console errors or warnings.
+- Hub destination cards are now more compact and direct. Forge, Market, and Battle align each mode
+  icon beside its title, remove the redundant bottom action, and make the complete surface the only
+  link or button. Battle Campaign and PvP are full-card links while Training remains a full-card
+  action. Inventory destination rows already followed this pattern; Profile's multi-purpose data
+  panels remain structurally unchanged. Cards no longer reserve a fixed minimum height or obsolete
+  grid rows below their content, so their footer contains only normal internal padding. Desktop and
+  mobile browser checks confirm shorter cards, valid non-nested interactive controls, full-card
+  activation, and no horizontal overflow.
+- Section-level navigation now follows one consistent game-first hierarchy. Battle, Forge,
+  Inventory, Market, and Profile hubs rely on their existing destination cards instead of repeating
+  a horizontal menu. Every child route exposes a shared icon-only parent-hub link inside its title
+  block, so navigation no longer consumes a separate vertical row. Nested PvP modes return to the
+  PvP Hub and the PvP Hub returns to the Battle Hub. The control uses an explicit route rather than
+  browser history, retains a localized accessible name, preserves visible focus and reduced-motion
+  behavior, and maintains a 44-pixel target without horizontal overflow at desktop,
+  portrait-mobile, or short landscape widths.
 - The game-wide immersion iteration now has its first implementation foundation. Shared visual tokens
   own the dark commandery palette, display typography, depth, focus color, spacing, corners, and
   motion timing; the desktop sidebar, resource bar, route navigation, mobile navigation, and
@@ -218,7 +290,7 @@ This file records modifications made to the project during agent-assisted work.
 - Gem-enchantment ownership is now explicit in the player experience: Inventory shows persisted socket and enchantment relationships read-only and hands relevant items to Forge > Socket through query-backed preselection. Forge supports independent gem and target selection, confirmed atomic replacement, free non-destructive removal, equipped-ring mutation outside combat, and unrestricted elemental combinations while preserving ownership, uniqueness, and market-escrow validation. API coverage verifies replacement, released targets, new ownership, and enriched inventory reads.
 - The Nuxt server now provides basic operational observability: safe request correlation through `x-request-id`, structured JSON request and ranked-maintenance failure records, battle and authenticated-player context without request secrets, a bounded process-local development buffer, and authenticated development-only inspection and clearing endpoints. The operating policy and production limitations are documented in `docs/OBSERVABILITY.md`.
 - GitHub Actions CI now enforces the Prettier baseline and builds the Nuxt Game App for production in addition to type checking, linting, tests, and the existing PostgreSQL migration, drift, and smoke checks.
-- Game Market, Player Market, and private market history now use the tactical player-facing design system without changing their transactional APIs. The fixed market presents material and crafted-item catalogues beside a contextual buy, sell, or recipe-valued buyback desk plus a compact activity log. The player market presents permanent-listing status, a collapsed escrow listing form, primary and advanced search filters, price-forward listing cards, and clear purchase or free-cancellation actions. History is a private ledger with direction, item metadata, settlement value, date, and role filtering. Idempotency, escrow, anonymous counterparties, permanent listings, and transaction privacy remain unchanged.
+- Game Market, Player Market, and private market history now use the tactical player-facing design system without changing their transactional APIs. The fixed market presents full-width material and crafted-item catalogues with a contextual buy, sell, or recipe-valued buyback modal plus a compact activity log. The player market presents permanent-listing status, a collapsed escrow listing form, primary and advanced search filters, price-forward listing cards, and clear purchase or free-cancellation actions. History is a private ledger with direction, item metadata, settlement value, date, and role filtering. Idempotency, escrow, anonymous counterparties, permanent listings, and transaction privacy remain unchanged.
 
 - Craft, Socket, and Quality now use the tactical player-facing design system without changing their persistence APIs or economy rules. Craft separates its filterable blueprint catalogue, selected output, three-material readiness, production action, and recent output log. Socket presents ring selection, capacity improvement, visible socket composition, available gems, and spell/monster enchantment binding as one staged workflow. Quality presents a filtered item library, quality progress, resolved before/after stat comparison, credit cost, and maximum or blocked states. Technical instance identifiers were removed from all three player-facing Forge routes.
 
@@ -352,8 +424,87 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Change Log
 
+### 2026-08-01
+
+- Restyled the shared child-view return link as a more visible rounded cyan-accented control while
+  retaining its 44-pixel interaction target, localized accessible name, focus outline, and
+  reduced-motion behavior. Browser-verified six representative route families across desktop,
+  portrait-mobile, and short-landscape layouts, including working Forge return navigation.
+- Removed the redundant colored section eyebrow above standard Game App page titles, including Home
+  and Profile identity, while preserving card-level labels and specialized authentication/combat
+  context. Simplified child-title grid geometry so the return control aligns with the title and help
+  trigger on one row. Browser-audited all 25 affected static routes on portrait mobile and
+  representative routes on desktop and short landscape without overflow.
+- Moved Battle Hub's account recap below Campaign, PvP, and Training, and Forge Hub's workshop recap
+  below Craft, Socket, and Quality. The templates use the same order visually and semantically so
+  navigation precedes secondary intelligence for keyboard and assistive-technology users. Verified
+  desktop, portrait-mobile, and short-landscape layouts with no horizontal overflow.
+- Generated the first review batch from the production item asset bible: transparent native 1254x1254
+  PNG renders for `ashenLoop`, `cinderKnot`, and `charBand` under the Game App ring asset directory.
+  Generation is intentionally paused after these first three assets for visual-direction approval.
+- Restyled the page-title help trigger as a restrained 32-pixel circle inside its existing 44-pixel
+  keyboard and touch target. Removed the unnecessary trigger from Home while leaving its title style
+  unchanged. Browser checks covered desktop and mobile Battle, Forge, Inventory, and Home geometry,
+  help counts, visual treatment, and overflow.
+- Converted all three PvP Hub mode destinations into full-card links and removed their duplicate
+  footer actions. Deleted the fixed-height and obsolete action-row geometry so Private, Casual, and
+  Ranked compact to their content across desktop and mobile. Browser-verified dimensions, semantics,
+  focus styling, Casual navigation, reduced motion, and overflow.
+- Removed the remaining route-specific geometry that displaced standard page titles despite their
+  shared typography. Standard shell headers now align content to the same edge, size intrinsically
+  instead of stretching into available desktop height, and clear the following block by exactly 26
+  pixels. Browser measurements covered all 23 standard headers at desktop, portrait-mobile, and
+  short-landscape dimensions with no alignment or overflow exceptions.
+- Unified standard page titles around the Forge Hub's 1.9rem ivory display treatment and the Battle
+  Hub's 26-pixel vertical rhythm. Replaced permanently visible view descriptions with a shared
+  question-mark help modal that reuses the existing localized copy and implements inert background,
+  scroll lock, keyboard focus confinement, Escape/backdrop dismissal, and focus restoration.
+  Browser-audited all 26 affected routes at desktop, portrait-mobile, and short-landscape widths.
+- Centralized the mobile horizontal page gutter in the shared Game App shell at 16 pixels. This
+  fixes edge-clinging content on Home, Battle Hub, Battle History, and PvP while preserving the
+  existing environmental framing and full-screen live-battle exception. Browser-audited all 25
+  static player routes plus one persisted battle result on mobile, and repeated the static route
+  audit on desktop and short landscape without overflow.
+- Introduced shared `hub-link-card` and `hub-info-panel` surface families across the five primary
+  hubs. Linked Battle, Forge, and Market destinations now match the Battle Hub card language while
+  preserving their environmental artwork; non-linked hub information now matches Inventory Battle
+  Readiness. Kept Inventory category rows as their existing compact links and Profile data panels as
+  non-links. Browser-verified desktop, portrait-mobile, and short-landscape rendering, computed
+  surface parity, overflow, reduced motion, and console output.
+- Compacted the Battle, Forge, and Market hub destination cards by aligning their icons beside the
+  title, removing redundant action rows, and making each complete card interactive. Preserved
+  Training as a disabled-aware full-card action and left Inventory's already compliant destination
+  rows plus Profile's multi-action data panels unchanged. Removed the remaining fixed card heights
+  and an obsolete mobile Battle grid override so no empty footer rows remain. Browser-verified mobile
+  and desktop card geometry, activation, interactive semantics, overflow, and console output.
+- Replaced horizontal route menus throughout Battle, Forge, Inventory, Market, and Profile with a
+  shared game-first navigation hierarchy. Primary hubs rely on their destination cards, child views
+  expose an icon-only return inside their title block, and nested PvP modes return through the PvP
+  Hub. Browser checks covered all 24 affected static routes at desktop and portrait widths plus
+  representative short landscape routes, with 44-pixel targets, deterministic return behavior, no
+  horizontal overflow, and no fresh-tab console errors or warnings.
+- Registered the approved transparent `battleness-favicon.png` BN monogram as the Nuxt Game App
+  favicon without changing the separate Dev Lab presentation. The original shield-backed brand icon
+  remains available as a separate asset.
+- Added the missing shared English/French quantity label used by recent transactions on the Market
+  Hub, removing the runtime localization warning without changing the transaction presentation.
+
 ### 2026-07-31
 
+- Replaced the Game Market's distant inline transaction desk with a teleported modal opened directly
+  from the selected material or crafted-item card. The catalogue now uses the full workspace width;
+  material buy/sell and item valuation retain their existing calculations, confirmations, APIs, and
+  mutations. The modal locks page scrolling, inerts the application background, confines keyboard
+  focus, supports close-button, backdrop, and Escape dismissal, restores focus to the triggering
+  card, and uses localized English/French close labels. Browser-verified material buy/sell and
+  blocked item valuation at mobile and desktop widths without runtime warnings.
+- Corrected the mobile Game App content frame so Forge, Inventory, Market, Profile, and the other
+  immersive full-bleed routes use the complete viewport width without the former right-side gap.
+  Reworked narrow live-battle sizing so rings remain readable in a horizontally scrollable dock and
+  both energy rails reserve most of their width for the segmented meter while keeping the
+  current/maximum value visible. Browser-verified all 17 Forge, Inventory, Market, and Profile routes
+  at the captured 409x677 viewport, plus live Battle at portrait, short-landscape, and desktop sizes,
+  with no page-level overflow or console warnings.
 - Restaged `/login` as a responsive full-screen commandery gateway using the existing BattleNess
   wordmark and profile environment. Browser-verified development sign-out and sign-in restoration,
   OAuth error presentation, visible keyboard focus, and desktop, mobile portrait, and

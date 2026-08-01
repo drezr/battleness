@@ -1,21 +1,18 @@
 <template>
   <main class="shell forge-quality-page">
-    <nav class="section-nav" :aria-label="t('accessibility.forgeNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.forge"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-      >
-        {{ $t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
     <header class="view-header forge-view-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("forge.section") }}</span>
-        <h1>{{ t("forge.quality.title") }}</h1>
-        <p class="muted">{{ t("forge.quality.description") }}</p>
+        <SectionBackLink
+          to="/forge"
+          :label="t('navigation.backToHub', { section: t('navigation.forge') })"
+        />
+        <div class="view-title-heading">
+          <h1>{{ t("forge.quality.title") }}</h1>
+          <ViewHelpButton
+            :title="t('forge.quality.title')"
+            :description="t('forge.quality.description')"
+          />
+        </div>
       </div>
       <span v-if="qualityState" class="forge-credit-balance"
         ><Coins :size="17" aria-hidden="true" />{{
@@ -223,9 +220,6 @@ import {
   Sparkles,
 } from "@lucide/vue";
 import type { QualityState } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
-const route = useRoute();
 const { t } = useI18n();
 const contentText = useContentText();
 const feedback = ref("");

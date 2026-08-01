@@ -184,7 +184,7 @@
 
 .game-market-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(290px, 0.42fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   align-items: start;
   margin-top: 14px;
@@ -302,6 +302,49 @@
   box-shadow:
     0 24px 50px rgb(0 0 0 / 36%),
     inset 0 2px var(--app-cyan);
+}
+
+.market-transaction-modal-backdrop {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 24px;
+  background: rgb(2 8 12 / 82%);
+  backdrop-filter: blur(5px);
+}
+
+.market-transaction-desk.market-transaction-modal {
+  position: relative;
+  top: auto;
+  width: min(470px, 100%);
+  max-height: calc(100dvh - 48px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-shadow:
+    0 30px 80px rgb(0 0 0 / 58%),
+    inset 0 2px var(--app-cyan);
+}
+
+.market-transaction-desk.market-transaction-modal.valuation-desk {
+  box-shadow:
+    0 30px 80px rgb(0 0 0 / 58%),
+    inset 0 2px #f3b83f;
+}
+
+.market-transaction-modal .market-desk-heading {
+  padding-right: 44px;
+}
+
+.market-transaction-modal-close {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  right: 12px;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .valuation-desk {
@@ -519,7 +562,7 @@
   .player-market-page,
   .market-history-page {
     border-inline: 0;
-    margin-inline: -16px;
+    margin-inline: 0;
     padding: 16px;
     background:
       linear-gradient(180deg, rgb(3 9 13 / 58%), rgb(3 9 13 / 96%) 460px),
@@ -531,6 +574,18 @@
   .market-history-page .market-view-header {
     min-height: 126px;
     padding-inline: 0;
+  }
+
+  .market-transaction-modal-backdrop {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .market-transaction-desk.market-transaction-modal {
+    width: 100%;
+    max-height: calc(100dvh - 24px);
+    border-radius: 12px;
+    padding: 16px;
   }
 }
 

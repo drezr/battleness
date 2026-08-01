@@ -1,21 +1,18 @@
 <template>
   <main class="shell campaign-page">
-    <nav class="section-nav" :aria-label="t('accessibility.battleNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.battle"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-      >
-        {{ $t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
     <header class="view-header campaign-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("battle.section") }}</span>
-        <h1>{{ t("battle.campaign.title") }}</h1>
-        <p class="muted">{{ t("battle.campaign.description") }}</p>
+        <SectionBackLink
+          to="/battle"
+          :label="t('navigation.backToHub', { section: t('navigation.battle') })"
+        />
+        <div class="view-title-heading">
+          <h1>{{ t("battle.campaign.title") }}</h1>
+          <ViewHelpButton
+            :title="t('battle.campaign.title')"
+            :description="t('battle.campaign.description')"
+          />
+        </div>
       </div>
       <NuxtLink
         :class="['battle-readiness', campaign?.player.activeLoadoutId ? 'ready' : 'blocked']"
@@ -258,9 +255,6 @@ import {
   Zap,
 } from "@lucide/vue";
 import type { CampaignState } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
-const route = useRoute();
 const { t } = useI18n();
 const contentText = useContentText();
 const { data: campaign, error, pending } = await useFetch<CampaignState>("/api/campaign");

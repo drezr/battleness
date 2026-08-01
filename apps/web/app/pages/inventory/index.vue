@@ -1,20 +1,14 @@
 <template>
   <main class="shell app-hub-page inventory-hub-page">
-    <nav class="section-nav" :aria-label="t('accessibility.inventoryNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.inventory"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-        >{{ t(link.labelKey) }}</NuxtLink
-      >
-    </nav>
-
     <header class="view-header app-hub-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("inventory.section") }}</span>
-        <h1>{{ t("inventory.hub.title") }}</h1>
-        <p class="muted">{{ t("inventory.hub.description") }}</p>
+        <div class="view-title-heading">
+          <h1>{{ t("inventory.hub.title") }}</h1>
+          <ViewHelpButton
+            :title="t('inventory.hub.title')"
+            :description="t('inventory.hub.description')"
+          />
+        </div>
       </div>
       <NuxtLink
         :class="['hub-resource-link', activeLoadout ? 'ready' : 'attention']"
@@ -71,7 +65,7 @@
       </section>
 
       <section class="inventory-hub-layout">
-        <div class="inventory-hub-collection">
+        <div class="inventory-hub-collection hub-info-panel">
           <div class="section-heading-row">
             <div>
               <span class="eyebrow">{{ t("inventory.hub.collection") }}</span>
@@ -95,7 +89,7 @@
           </div>
         </div>
 
-        <aside class="inventory-readiness-panel">
+        <aside class="inventory-readiness-panel hub-info-panel">
           <div class="section-heading-row">
             <div>
               <span class="eyebrow">{{ t("inventory.hub.readiness") }}</span>
@@ -181,9 +175,6 @@ import {
 } from "@lucide/vue";
 import type { EquipmentState, LoadoutState, PlayerState } from "~/utils/playerState";
 import { inventoryCountByType, totalMaterialQuantity } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
-const route = useRoute();
 const { t } = useI18n();
 const [playerRequest, equipmentRequest, loadoutRequest] = await Promise.all([
   useFetch<PlayerState>("/api/player", { key: "inventory-hub-player" }),

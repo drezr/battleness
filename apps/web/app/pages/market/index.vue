@@ -1,20 +1,14 @@
 <template>
   <main class="shell app-hub-page market-hub-page">
-    <nav class="section-nav" :aria-label="t('accessibility.marketNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.market"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-        >{{ t(link.labelKey) }}</NuxtLink
-      >
-    </nav>
-
     <header class="view-header app-hub-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("market.section") }}</span>
-        <h1>{{ t("market.hub.title") }}</h1>
-        <p class="muted">{{ t("market.hub.description") }}</p>
+        <div class="view-title-heading">
+          <h1>{{ t("market.hub.title") }}</h1>
+          <ViewHelpButton
+            :title="t('market.hub.title')"
+            :description="t('market.hub.description')"
+          />
+        </div>
       </div>
       <div v-if="gameMarket" class="hub-balance-panel">
         <span class="hub-balance-icon"><Coins :size="21" /></span>
@@ -69,38 +63,40 @@
       </section>
 
       <section class="market-hub-destinations">
-        <NuxtLink class="market-hub-destination game-economy" to="/market/game">
-          <span class="market-destination-icon"><Landmark :size="30" /></span>
-          <span class="eyebrow">{{ t("market.hub.systemExchange") }}</span>
-          <h2>{{ t("market.game.title") }}</h2>
+        <NuxtLink class="market-hub-destination hub-link-card game-economy" to="/market/game">
+          <span class="market-destination-heading">
+            <span class="market-destination-icon"><Landmark :size="30" /></span>
+            <span>
+              <span class="eyebrow">{{ t("market.hub.systemExchange") }}</span>
+              <h2>{{ t("market.game.title") }}</h2>
+            </span>
+          </span>
           <p>{{ t("market.game.description") }}</p>
           <ul>
             <li><Check :size="15" /> {{ t("market.hub.fixedPrices") }}</li>
             <li><Check :size="15" /> {{ t("market.hub.materialTrading") }}</li>
             <li><Check :size="15" /> {{ t("market.hub.recipeBuyback") }}</li>
           </ul>
-          <span class="hub-workflow-action"
-            >{{ t("market.hub.enterMarket") }} <ArrowRight :size="17"
-          /></span>
         </NuxtLink>
 
-        <NuxtLink class="market-hub-destination player-economy" to="/market/players">
-          <span class="market-destination-icon"><Users :size="30" /></span>
-          <span class="eyebrow">{{ t("market.hub.playerExchange") }}</span>
-          <h2>{{ t("market.players.title") }}</h2>
+        <NuxtLink class="market-hub-destination hub-link-card player-economy" to="/market/players">
+          <span class="market-destination-heading">
+            <span class="market-destination-icon"><Users :size="30" /></span>
+            <span>
+              <span class="eyebrow">{{ t("market.hub.playerExchange") }}</span>
+              <h2>{{ t("market.players.title") }}</h2>
+            </span>
+          </span>
           <p>{{ t("market.players.description") }}</p>
           <ul>
             <li><Check :size="15" /> {{ t("market.hub.permanentOffers") }}</li>
             <li><Check :size="15" /> {{ t("market.hub.anonymousSellers") }}</li>
             <li><Check :size="15" /> {{ t("market.hub.escrowProtection") }}</li>
           </ul>
-          <span class="hub-workflow-action"
-            >{{ t("market.hub.browseListings") }} <ArrowRight :size="17"
-          /></span>
         </NuxtLink>
       </section>
 
-      <section class="market-hub-activity">
+      <section class="market-hub-activity hub-info-panel">
         <div class="section-heading-row">
           <div>
             <span class="eyebrow">{{ t("market.hub.activity") }}</span>
@@ -160,9 +156,6 @@ import {
   Users,
 } from "@lucide/vue";
 import type { GameMarketState, PlayerMarketBrowseState } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
-const route = useRoute();
 const { locale, t } = useI18n();
 const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 const [gameRequest, playerRequest] = await Promise.all([

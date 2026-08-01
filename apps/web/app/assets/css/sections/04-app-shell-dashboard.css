@@ -330,6 +330,7 @@ body {
 
 .app-content .shell {
   width: min(var(--app-content-width), calc(100% - (2 * var(--app-space-page))));
+  padding-inline: 0;
   padding-block: 30px 48px;
 }
 
@@ -392,6 +393,265 @@ body {
   left: 0;
   background: var(--app-cyan);
   box-shadow: 0 0 10px rgb(48 211 237 / 52%);
+}
+
+.app-content .section-back-link {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  flex: 0 0 44px;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  border: 1px solid rgb(48 211 237 / 48%);
+  border-radius: 12px;
+  margin: 0;
+  padding: 0;
+  color: var(--app-cyan-bright);
+  background: linear-gradient(135deg, rgb(48 211 237 / 16%), transparent 58%), rgb(4 14 20 / 88%);
+  box-shadow:
+    var(--app-shadow-inset),
+    0 5px 18px rgb(0 0 0 / 24%),
+    0 0 14px rgb(48 211 237 / 8%);
+  text-decoration: none;
+  transition:
+    border-color var(--app-motion-fast) ease,
+    color var(--app-motion-fast) ease,
+    background-color var(--app-motion-fast) ease,
+    box-shadow var(--app-motion-fast) ease,
+    transform var(--app-motion-fast) ease;
+}
+
+.app-content .section-back-link svg {
+  filter: drop-shadow(0 0 5px rgb(48 211 237 / 30%));
+  stroke-width: 2.25;
+}
+
+.app-content .view-title:has(> .section-back-link),
+.app-content .section-view-title:has(> .section-back-link) {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  column-gap: 14px;
+  align-items: center;
+}
+
+.app-content .view-title > .section-back-link,
+.app-content .section-view-title > .section-back-link {
+  grid-row: 1;
+  grid-column: 1;
+}
+
+.app-content .shell:has(> .view-header) {
+  display: grid;
+  row-gap: 26px;
+  align-content: start;
+  border: 0;
+}
+
+.app-content .shell > .view-header {
+  min-height: 0;
+  align-items: center;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.app-content .shell > .view-header + * {
+  margin-top: 0;
+}
+
+.app-content .home-command-scene {
+  gap: 26px;
+}
+
+.app-content .profile-page {
+  gap: 26px;
+}
+
+.app-content .view-title,
+.app-content .section-view-title {
+  row-gap: 8px;
+}
+
+.view-title-heading {
+  display: flex;
+  min-width: 0;
+  gap: 10px;
+  align-items: center;
+}
+
+.app-content .shell .view-title-heading h1,
+.auth-page .view-title-heading h1 {
+  min-width: 0;
+  color: #fff2d4;
+  font-size: 1.9rem;
+  line-height: 1.15;
+  letter-spacing: 0;
+  text-shadow: 0 3px 24px rgb(0 0 0 / 72%);
+}
+
+.view-help-button {
+  position: relative;
+  display: inline-grid;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  color: #8fb9c1;
+  background: transparent;
+  box-shadow: none;
+  font-size: 0.78rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.view-help-button::before {
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgb(143 185 193 / 42%);
+  border-radius: 50%;
+  background: rgb(5 20 27 / 68%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
+  content: "";
+  transition:
+    border-color var(--app-motion-fast) ease,
+    background-color var(--app-motion-fast) ease,
+    box-shadow var(--app-motion-fast) ease;
+}
+
+.view-help-button span {
+  position: relative;
+  z-index: 1;
+}
+
+.view-help-button:hover {
+  color: var(--app-cyan-bright);
+}
+
+.view-help-button:hover::before {
+  border-color: rgb(48 211 237 / 68%);
+  background: rgb(8 29 37 / 84%);
+  box-shadow: 0 0 12px rgb(48 211 237 / 12%);
+}
+
+.view-help-button:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 1px;
+}
+
+.view-help-close {
+  display: inline-grid;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  place-items: center;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--app-corner-control);
+  padding: 0;
+  color: var(--app-cyan-bright);
+  background: rgb(4 14 20 / 78%);
+  box-shadow: var(--app-shadow-inset);
+  cursor: pointer;
+}
+
+.view-help-close:hover {
+  border-color: var(--app-cyan);
+  color: #fff;
+  background: rgb(11 32 41 / 94%);
+}
+
+.view-help-close:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 3px;
+}
+
+.view-help-backdrop {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(1 6 9 / 78%);
+  backdrop-filter: blur(8px);
+}
+
+.view-help-dialog {
+  width: min(480px, 100%);
+  max-height: min(560px, calc(100dvh - 32px));
+  overflow-y: auto;
+  border: 1px solid var(--app-border-strong);
+  border-top-color: var(--app-cyan);
+  border-radius: var(--app-corner-md);
+  padding: 20px;
+  color: var(--app-text);
+  background: linear-gradient(145deg, rgb(48 211 237 / 8%), transparent 42%), rgb(5 17 23 / 98%);
+  box-shadow: 0 28px 80px rgb(0 0 0 / 62%);
+}
+
+.view-help-dialog header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.view-help-dialog h2 {
+  margin: 0;
+  color: #fff2d4;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+}
+
+.view-help-dialog p {
+  margin: 0;
+  color: var(--app-muted);
+  line-height: 1.6;
+}
+
+.app-content .view-title:has(> .section-back-link) > :not(.section-back-link),
+.app-content .section-view-title:has(> .section-back-link) > :not(.section-back-link) {
+  grid-column: 2;
+}
+
+.app-content .section-back-link:hover {
+  border-color: var(--app-cyan-bright);
+  color: #fff;
+  background: linear-gradient(135deg, rgb(48 211 237 / 25%), transparent 62%), rgb(8 25 33 / 96%);
+  box-shadow:
+    var(--app-shadow-inset),
+    0 7px 20px rgb(0 0 0 / 30%),
+    0 0 18px rgb(48 211 237 / 18%);
+  transform: translateX(-2px) scale(1.03);
+}
+
+.app-content .section-back-link:active {
+  transform: translateX(-1px) scale(0.97);
+}
+
+.app-content .section-back-link:focus-visible {
+  outline: 2px solid var(--app-cyan-bright);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-content .section-back-link {
+    transition: none;
+  }
+
+  .app-content .section-back-link:hover {
+    transform: none;
+  }
+
+  .app-content .section-back-link:active {
+    transform: none;
+  }
 }
 
 .view-header {
@@ -975,7 +1235,8 @@ body {
   }
 
   .app-content .shell {
-    width: calc(100% - 24px);
+    width: 100%;
+    padding-inline: 16px;
     padding-block: 20px calc(80px + env(safe-area-inset-bottom));
   }
 

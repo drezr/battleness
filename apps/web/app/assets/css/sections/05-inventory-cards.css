@@ -157,7 +157,7 @@
   .equipment-page,
   .loadouts-page {
     border-inline: 0;
-    margin-inline: -16px;
+    margin-inline: 0;
     padding: 16px;
     background:
       linear-gradient(180deg, rgb(3 10 15 / 58%), rgb(3 9 13 / 95%) 430px),

@@ -1,21 +1,18 @@
 <template>
   <main class="shell forge-craft-page">
-    <nav class="section-nav" :aria-label="t('accessibility.forgeNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.forge"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-      >
-        {{ $t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
     <header class="view-header forge-view-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("forge.section") }}</span>
-        <h1>{{ t("forge.craft.title") }}</h1>
-        <p class="muted">{{ t("forge.craft.description") }}</p>
+        <SectionBackLink
+          to="/forge"
+          :label="t('navigation.backToHub', { section: t('navigation.forge') })"
+        />
+        <div class="view-title-heading">
+          <h1>{{ t("forge.craft.title") }}</h1>
+          <ViewHelpButton
+            :title="t('forge.craft.title')"
+            :description="t('forge.craft.description')"
+          />
+        </div>
       </div>
       <NuxtLink class="button-link secondary-button" to="/inventory/materials">
         <PackageOpen :size="17" aria-hidden="true" />
@@ -287,9 +284,6 @@ import {
   X,
 } from "@lucide/vue";
 import type { PlayerState } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
-const route = useRoute();
 const { t } = useI18n();
 const contentText = useContentText();
 const { data: state, error, pending, refresh } = await useFetch<PlayerState>("/api/player");

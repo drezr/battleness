@@ -1,21 +1,18 @@
 <template>
   <main class="shell battle-history-page profile-history-page">
-    <nav class="section-nav" :aria-label="t('accessibility.profileNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.profile"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-      >
-        {{ $t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
     <header class="view-header battle-history-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("profile.section") }}</span>
-        <h1>{{ t("profile.history.title") }}</h1>
-        <p class="muted">{{ t("profile.history.description") }}</p>
+        <SectionBackLink
+          to="/profile"
+          :label="t('navigation.backToHub', { section: t('navigation.profile') })"
+        />
+        <div class="view-title-heading">
+          <h1>{{ t("profile.history.title") }}</h1>
+          <ViewHelpButton
+            :title="t('profile.history.title')"
+            :description="t('profile.history.description')"
+          />
+        </div>
       </div>
       <NuxtLink class="battle-history-new-match" to="/battle">
         <Swords :size="18" /> {{ t("battle.history.newBattle") }} <ArrowRight :size="16" />
@@ -98,9 +95,6 @@
 <script setup lang="ts">
 import { ArrowRight, Gift, History, Swords, Trophy, Zap } from "@lucide/vue";
 import type { BattleHistoryRecordView, BattleHistoryState } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
-const route = useRoute();
 const { t } = useI18n();
 const { data: state, error, pending } = await useFetch<BattleHistoryState>("/api/battle/history");
 const claimingRewardId = ref("");

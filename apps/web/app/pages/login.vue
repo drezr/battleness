@@ -4,8 +4,10 @@
       <img class="auth-logo" src="/assets/brand/battleness-logo.png" :alt="t('app.brand')" />
       <div>
         <span class="eyebrow">{{ t("auth.account") }}</span>
-        <h1>{{ t("auth.title") }}</h1>
-        <p class="muted">{{ t("auth.description") }}</p>
+        <div class="view-title-heading">
+          <h1>{{ t("auth.title") }}</h1>
+          <ViewHelpButton :title="t('auth.title')" :description="t('auth.description')" />
+        </div>
       </div>
 
       <p v-if="displayedError" class="settings-error">{{ displayedError }}</p>

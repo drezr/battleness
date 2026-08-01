@@ -424,7 +424,7 @@
   .forge-quality-page {
     border-inline: 0;
     border-radius: 0;
-    margin-inline: -16px;
+    margin-inline: 0;
     padding: 16px;
     background:
       linear-gradient(180deg, rgb(3 8 11 / 80%), rgb(3 8 11 / 97%) 48%),

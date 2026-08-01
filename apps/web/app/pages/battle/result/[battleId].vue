@@ -1,10 +1,10 @@
 <template>
   <main class="shell battle-result-page">
-    <nav class="section-nav" :aria-label="t('accessibility.battleNavigation')">
-      <NuxtLink v-for="link in sectionLinks.battle" :key="link.to" :to="link.to">
-        {{ t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
+    <SectionBackLink
+      v-if="pending || error || !record"
+      to="/battle"
+      :label="t('navigation.backToHub', { section: t('navigation.battle') })"
+    />
 
     <p v-if="pending" class="panel">{{ t("battle.result.loading") }}</p>
     <p v-else-if="error || !record" class="panel">{{ t("battle.result.notFound") }}</p>
@@ -16,7 +16,11 @@
           <Scale v-else-if="record.outcome === 'draw'" :size="35" />
           <ShieldX v-else :size="35" />
         </div>
-        <div class="battle-result-title">
+        <div class="battle-result-title section-view-title">
+          <SectionBackLink
+            to="/battle"
+            :label="t('navigation.backToHub', { section: t('navigation.battle') })"
+          />
           <span class="eyebrow">{{ battleMode(record.mode) }}</span>
           <h1>{{ t(`battle.outcome.${record.outcome}`) }}</h1>
           <p>{{ formatDate(record.createdAt) }}</p>
@@ -138,8 +142,6 @@ import {
   Trophy,
 } from "@lucide/vue";
 import type { BattleHistoryState } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
 const route = useRoute();
 const { t, locale } = useI18n();
 const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();

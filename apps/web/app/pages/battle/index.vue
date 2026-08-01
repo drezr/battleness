@@ -1,21 +1,14 @@
 <template>
   <main class="shell battle-hub-page">
-    <nav class="section-nav" :aria-label="t('accessibility.battleNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.battle"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-      >
-        {{ $t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
     <header class="view-header battle-hub-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("battle.section") }}</span>
-        <h1>{{ t("battle.hub.title") }}</h1>
-        <p class="muted">{{ t("battle.hub.description") }}</p>
+        <div class="view-title-heading">
+          <h1>{{ t("battle.hub.title") }}</h1>
+          <ViewHelpButton
+            :title="t('battle.hub.title')"
+            :description="t('battle.hub.description')"
+          />
+        </div>
       </div>
       <NuxtLink
         :class="['battle-readiness', activeLoadout ? 'ready' : 'blocked']"
@@ -40,6 +33,69 @@
 
     <template v-else-if="loadouts">
       <section class="battle-hub-stage">
+        <section class="battle-mode-grid">
+          <NuxtLink
+            class="battle-mode-card hub-link-card campaign-mode"
+            :aria-label="
+              t(activeLoadout ? 'battle.hub.openCampaign' : 'battle.campaign.selectLoadout')
+            "
+            :to="activeLoadout ? '/battle/campaign' : '/inventory/loadouts'"
+          >
+            <div class="battle-mode-copy">
+              <div class="battle-mode-icon"><Map :size="28" aria-hidden="true" /></div>
+              <div>
+                <span class="eyebrow">{{ t("battle.hub.soloMode") }}</span>
+                <h2>{{ t("navigation.campaign") }}</h2>
+              </div>
+              <p>{{ t("battle.hub.campaignDescription") }}</p>
+            </div>
+            <div class="battle-mode-meta">
+              <span><Swords :size="15" /> {{ t("battle.hub.campaignStatus") }}</span>
+            </div>
+          </NuxtLink>
+
+          <NuxtLink
+            class="battle-mode-card hub-link-card pvp-mode"
+            :aria-label="t(activeLoadout ? 'battle.hub.openPvp' : 'battle.campaign.selectLoadout')"
+            :to="activeLoadout ? '/battle/pvp' : '/inventory/loadouts'"
+          >
+            <div class="battle-mode-copy">
+              <div class="battle-mode-icon"><Users :size="28" aria-hidden="true" /></div>
+              <div>
+                <span class="eyebrow">{{ t("battle.hub.competitiveMode") }}</span>
+                <h2>{{ t("navigation.pvp") }}</h2>
+              </div>
+              <p>{{ t("battle.hub.pvpDescription") }}</p>
+            </div>
+            <div class="battle-mode-meta">
+              <span><Radio :size="15" /> {{ t("battle.hub.pvpModesAvailable") }}</span>
+            </div>
+          </NuxtLink>
+
+          <button
+            class="battle-mode-card hub-link-card training-mode"
+            :aria-label="
+              t(creatingBattle ? 'battle.campaign.starting' : 'battle.hub.startTraining')
+            "
+            :disabled="!activeLoadout || creatingBattle"
+            type="button"
+            @click="startTrainingBattle"
+          >
+            <div class="battle-mode-copy">
+              <div class="battle-mode-icon"><Dumbbell :size="28" aria-hidden="true" /></div>
+              <div>
+                <span class="eyebrow">{{ t("battle.hub.practiceMode") }}</span>
+                <h2>{{ t("battle.hub.training") }}</h2>
+              </div>
+              <p>{{ t("battle.hub.trainingDescription") }}</p>
+            </div>
+            <div class="battle-mode-meta">
+              <span><Bot :size="15" /> {{ t("battle.hub.trainingOpponent") }}</span>
+            </div>
+          </button>
+        </section>
+        <p v-if="battleFeedback" class="feedback">{{ battleFeedback }}</p>
+
         <section
           class="hub-stat-strip battle-hub-stats"
           :aria-label="t('battle.hub.accountOverview')"
@@ -80,73 +136,9 @@
             </span>
           </NuxtLink>
         </section>
-
-        <section class="battle-mode-grid">
-          <article class="battle-mode-card campaign-mode">
-            <div class="battle-mode-icon"><Map :size="28" aria-hidden="true" /></div>
-            <div class="battle-mode-copy">
-              <span class="eyebrow">{{ t("battle.hub.soloMode") }}</span>
-              <h2>{{ t("navigation.campaign") }}</h2>
-              <p>{{ t("battle.hub.campaignDescription") }}</p>
-            </div>
-            <div class="battle-mode-meta">
-              <span><Swords :size="15" /> {{ t("battle.hub.campaignStatus") }}</span>
-            </div>
-            <NuxtLink
-              :class="['button-link', 'battle-mode-action', { disabled: !activeLoadout }]"
-              :aria-disabled="!activeLoadout"
-              :to="activeLoadout ? '/battle/campaign' : '/inventory/loadouts'"
-            >
-              {{ t(activeLoadout ? "battle.hub.openCampaign" : "battle.campaign.selectLoadout") }}
-              <ArrowRight :size="17" aria-hidden="true" />
-            </NuxtLink>
-          </article>
-
-          <article class="battle-mode-card pvp-mode">
-            <div class="battle-mode-icon"><Users :size="28" aria-hidden="true" /></div>
-            <div class="battle-mode-copy">
-              <span class="eyebrow">{{ t("battle.hub.competitiveMode") }}</span>
-              <h2>{{ t("navigation.pvp") }}</h2>
-              <p>{{ t("battle.hub.pvpDescription") }}</p>
-            </div>
-            <div class="battle-mode-meta">
-              <span><Radio :size="15" /> {{ t("battle.hub.pvpModesAvailable") }}</span>
-            </div>
-            <NuxtLink
-              :class="['button-link', 'battle-mode-action', { disabled: !activeLoadout }]"
-              :aria-disabled="!activeLoadout"
-              :to="activeLoadout ? '/battle/pvp' : '/inventory/loadouts'"
-            >
-              {{ t(activeLoadout ? "battle.hub.openPvp" : "battle.campaign.selectLoadout") }}
-              <ArrowRight :size="17" aria-hidden="true" />
-            </NuxtLink>
-          </article>
-
-          <article class="battle-mode-card training-mode">
-            <div class="battle-mode-icon"><Dumbbell :size="28" aria-hidden="true" /></div>
-            <div class="battle-mode-copy">
-              <span class="eyebrow">{{ t("battle.hub.practiceMode") }}</span>
-              <h2>{{ t("battle.hub.training") }}</h2>
-              <p>{{ t("battle.hub.trainingDescription") }}</p>
-            </div>
-            <div class="battle-mode-meta">
-              <span><Bot :size="15" /> {{ t("battle.hub.trainingOpponent") }}</span>
-            </div>
-            <button
-              class="battle-mode-action secondary-button"
-              :disabled="!activeLoadout || creatingBattle"
-              type="button"
-              @click="startTrainingBattle"
-            >
-              {{ t(creatingBattle ? "battle.campaign.starting" : "battle.hub.startTraining") }}
-              <ArrowRight :size="17" aria-hidden="true" />
-            </button>
-            <p v-if="battleFeedback" class="feedback">{{ battleFeedback }}</p>
-          </article>
-        </section>
       </section>
 
-      <section class="battle-loadout-section">
+      <section class="battle-loadout-section hub-info-panel">
         <div class="section-heading-row">
           <div>
             <span class="eyebrow">{{ t("battle.hub.combatSetup") }}</span>
@@ -295,9 +287,6 @@ import {
   Users,
 } from "@lucide/vue";
 import type { BattleHistoryState, CampaignState, LoadoutState } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
-const route = useRoute();
 const { t } = useI18n();
 const [loadoutRequest, campaignRequest, historyRequest] = await Promise.all([
   useFetch<LoadoutState>("/api/inventory/loadouts"),

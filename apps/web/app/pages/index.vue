@@ -7,9 +7,9 @@
       <section class="home-command-scene">
         <header class="home-header">
           <div>
-            <span class="eyebrow">{{ t("home.section") }}</span>
-            <h1>{{ t("home.welcome", { player: state.player.displayName }) }}</h1>
-            <p class="muted">{{ t("home.description") }}</p>
+            <div class="view-title-heading">
+              <h1>{{ t("home.welcome", { player: state.player.displayName }) }}</h1>
+            </div>
           </div>
           <img
             class="home-wordmark"

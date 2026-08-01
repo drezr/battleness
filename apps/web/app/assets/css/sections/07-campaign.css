@@ -567,7 +567,7 @@
 @media (max-width: 760px) {
   .campaign-page {
     border-inline: 0;
-    margin-inline: -16px;
+    margin-inline: 0;
     padding: 16px;
     background:
       linear-gradient(180deg, rgb(3 9 13 / 52%), rgb(3 9 13 / 96%) 500px),
@@ -596,10 +596,6 @@
 
   .training-mode {
     grid-column: auto;
-  }
-
-  .battle-mode-card {
-    grid-template-rows: auto auto auto auto;
   }
 
   .battle-empty-loadout {

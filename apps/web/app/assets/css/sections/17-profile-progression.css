@@ -865,7 +865,7 @@
   .progression-page,
   .profile-settings-page {
     border-inline: 0;
-    margin-inline: -16px;
+    margin-inline: 0;
     padding: 16px;
     background:
       linear-gradient(180deg, rgb(3 9 13 / 55%), rgb(3 9 13 / 96%) 470px),

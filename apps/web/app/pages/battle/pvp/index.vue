@@ -1,21 +1,15 @@
 <template>
   <main class="shell pvp-hub-page">
-    <nav class="section-nav" :aria-label="t('accessibility.pvpNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.pvp"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-      >
-        {{ t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
     <header class="view-header pvp-view-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("pvpHub.eyebrow") }}</span>
-        <h1>{{ t("pvpHub.title") }}</h1>
-        <p class="muted">{{ t("pvpHub.description") }}</p>
+        <SectionBackLink
+          to="/battle"
+          :label="t('navigation.backToHub', { section: t('navigation.battle') })"
+        />
+        <div class="view-title-heading">
+          <h1>{{ t("pvpHub.title") }}</h1>
+          <ViewHelpButton :title="t('pvpHub.title')" :description="t('pvpHub.description')" />
+        </div>
       </div>
       <NuxtLink class="pvp-readiness-link" to="/inventory/loadouts">
         <ShieldCheck :size="18" />
@@ -28,7 +22,7 @@
     </header>
 
     <section class="pvp-mode-grid" :aria-label="t('pvpHub.modeSelection')">
-      <article class="pvp-mode-tile private-mode-tile">
+      <NuxtLink class="pvp-mode-tile private-mode-tile" to="/battle/pvp/private">
         <div class="pvp-mode-emblem"><KeyRound :size="26" /></div>
         <div class="pvp-mode-content">
           <span class="eyebrow">{{ t("pvpHub.private.kicker") }}</span>
@@ -40,12 +34,9 @@
           <li><Link2 :size="15" /> {{ t("pvpHub.private.access") }}</li>
           <li><Shield :size="15" /> {{ t("pvpHub.private.impact") }}</li>
         </ul>
-        <NuxtLink class="button-link pvp-mode-button" to="/battle/pvp/private">
-          {{ t("pvpHub.private.action") }} <ArrowRight :size="17" />
-        </NuxtLink>
-      </article>
+      </NuxtLink>
 
-      <article class="pvp-mode-tile casual-mode-tile">
+      <NuxtLink class="pvp-mode-tile casual-mode-tile" to="/battle/pvp/casual">
         <div class="pvp-mode-emblem"><Swords :size="26" /></div>
         <div class="pvp-mode-content">
           <span class="eyebrow">{{ t("pvpHub.casual.kicker") }}</span>
@@ -57,12 +48,9 @@
           <li><Radio :size="15" /> {{ t("pvpHub.casual.access") }}</li>
           <li><Shield :size="15" /> {{ t("pvpHub.casual.impact") }}</li>
         </ul>
-        <NuxtLink class="button-link pvp-mode-button primary" to="/battle/pvp/casual">
-          {{ t("pvpHub.casual.action") }} <ArrowRight :size="17" />
-        </NuxtLink>
-      </article>
+      </NuxtLink>
 
-      <article class="pvp-mode-tile ranked-mode-tile">
+      <NuxtLink class="pvp-mode-tile ranked-mode-tile" to="/battle/pvp/ranked">
         <div class="pvp-mode-emblem"><Trophy :size="26" /></div>
         <div class="pvp-mode-content">
           <span class="eyebrow">{{ t("pvpHub.ranked.kicker") }}</span>
@@ -74,10 +62,7 @@
           <li><Gauge :size="15" /> {{ t("pvpHub.ranked.access") }}</li>
           <li><TrendingUp :size="15" /> {{ t("pvpHub.ranked.impact") }}</li>
         </ul>
-        <NuxtLink class="button-link pvp-mode-button" to="/battle/pvp/ranked">
-          {{ t("pvpHub.ranked.action") }} <ArrowRight :size="17" />
-        </NuxtLink>
-      </article>
+      </NuxtLink>
     </section>
 
     <section class="pvp-system-strip">
@@ -96,7 +81,6 @@
 
 <script setup lang="ts">
 import {
-  ArrowRight,
   ChevronRight,
   Gauge,
   KeyRound,
@@ -114,8 +98,6 @@ import {
   Users,
   Wifi,
 } from "@lucide/vue";
-import { sectionLinks } from "~/utils/viewData";
 
 const { t } = useI18n();
-const route = useRoute();
 </script>

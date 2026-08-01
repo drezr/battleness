@@ -1,21 +1,18 @@
 <template>
   <main class="shell progression-page">
-    <nav class="section-nav" :aria-label="t('accessibility.profileNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.profile"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-      >
-        {{ $t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
     <header class="view-header progression-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("profile.section") }}</span>
-        <h1>{{ t("progression.title") }}</h1>
-        <p class="muted">{{ t("progression.description") }}</p>
+        <SectionBackLink
+          to="/profile"
+          :label="t('navigation.backToHub', { section: t('navigation.profile') })"
+        />
+        <div class="view-title-heading">
+          <h1>{{ t("progression.title") }}</h1>
+          <ViewHelpButton
+            :title="t('progression.title')"
+            :description="t('progression.description')"
+          />
+        </div>
       </div>
       <NuxtLink class="button-link secondary-button" to="/inventory/items">
         <Backpack :size="17" aria-hidden="true" />
@@ -193,9 +190,6 @@ import {
   TrendingUp,
 } from "@lucide/vue";
 import type { CampaignState, PlayerState } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
-const route = useRoute();
 const { t } = useI18n();
 const contentText = useContentText();
 const typeFilter = ref("all");

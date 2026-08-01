@@ -1,21 +1,18 @@
 <template>
   <main class="shell game-market-page">
-    <nav class="section-nav" :aria-label="t('accessibility.marketNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.market"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-      >
-        {{ $t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
     <header class="view-header market-view-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("market.section") }}</span>
-        <h1>{{ t("market.game.title") }}</h1>
-        <p class="muted">{{ t("market.game.description") }}</p>
+        <SectionBackLink
+          to="/market"
+          :label="t('navigation.backToHub', { section: t('navigation.market') })"
+        />
+        <div class="view-title-heading">
+          <h1>{{ t("market.game.title") }}</h1>
+          <ViewHelpButton
+            :title="t('market.game.title')"
+            :description="t('market.game.description')"
+          />
+        </div>
       </div>
       <span v-if="state" class="market-credit-balance"
         ><Coins :size="17" aria-hidden="true" />{{
@@ -97,7 +94,7 @@
                 ]"
                 type="button"
                 :aria-pressed="selectedMaterial?.id === material.id"
-                @click="selectMaterial(material.id)"
+                @click="selectMaterial(material.id, $event)"
               >
                 <ItemArtwork :definition-id="material.id" kind="material" />
                 <span class="game-market-card-copy">
@@ -128,117 +125,142 @@
             </div>
           </div>
 
-          <aside class="market-transaction-desk">
-            <div class="market-desk-heading">
-              <span class="market-desk-icon"><ArrowLeftRight :size="22" /></span>
-              <div>
-                <span class="eyebrow">{{ t("market.game.transaction") }}</span>
-                <h2>
-                  {{
-                    t(
-                      marketAction === "buy"
-                        ? "market.game.buyMaterial"
-                        : "market.game.sellMaterial",
-                    )
-                  }}
-                </h2>
-              </div>
-            </div>
+          <Teleport to="body">
             <div
-              class="market-action-tabs"
-              role="group"
-              :aria-label="t('accessibility.marketAction')"
+              v-if="isTransactionModalOpen"
+              class="market-transaction-modal-backdrop"
+              role="presentation"
+              @click.self="closeTransactionModal"
             >
-              <button
-                :class="{ active: marketAction === 'buy' }"
-                type="button"
-                :aria-pressed="marketAction === 'buy'"
-                @click="selectMarketAction('buy')"
+              <aside
+                ref="transactionDialog"
+                class="market-transaction-desk market-transaction-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="game-market-material-transaction-title"
+                tabindex="-1"
               >
-                <ShoppingCart :size="16" />{{ t("market.game.buy") }}
-              </button>
-              <button
-                :class="{ active: marketAction === 'sell' }"
-                type="button"
-                :aria-pressed="marketAction === 'sell'"
-                @click="selectMarketAction('sell')"
-              >
-                <Banknote :size="16" />{{ t("market.game.sell") }}
-              </button>
-            </div>
+                <button
+                  class="icon-button market-transaction-modal-close"
+                  type="button"
+                  :aria-label="t('market.game.closeTransaction')"
+                  :title="t('market.game.closeTransaction')"
+                  @click="closeTransactionModal"
+                >
+                  <X :size="20" aria-hidden="true" />
+                </button>
+                <div class="market-desk-heading">
+                  <span class="market-desk-icon"><ArrowLeftRight :size="22" /></span>
+                  <div>
+                    <span class="eyebrow">{{ t("market.game.transaction") }}</span>
+                    <h2 id="game-market-material-transaction-title">
+                      {{
+                        t(
+                          marketAction === "buy"
+                            ? "market.game.buyMaterial"
+                            : "market.game.sellMaterial",
+                        )
+                      }}
+                    </h2>
+                  </div>
+                </div>
+                <div
+                  class="market-action-tabs"
+                  role="group"
+                  :aria-label="t('accessibility.marketAction')"
+                >
+                  <button
+                    :class="{ active: marketAction === 'buy' }"
+                    type="button"
+                    :aria-pressed="marketAction === 'buy'"
+                    @click="selectMarketAction('buy')"
+                  >
+                    <ShoppingCart :size="16" />{{ t("market.game.buy") }}
+                  </button>
+                  <button
+                    :class="{ active: marketAction === 'sell' }"
+                    type="button"
+                    :aria-pressed="marketAction === 'sell'"
+                    @click="selectMarketAction('sell')"
+                  >
+                    <Banknote :size="16" />{{ t("market.game.sell") }}
+                  </button>
+                </div>
 
-            <div v-if="!selectedMaterial" class="market-desk-empty">
-              <CircleDashed :size="28" />
-              <p>{{ t("market.game.selectMaterial") }}</p>
-            </div>
-            <template v-else>
-              <div class="market-selected-resource">
-                <ItemArtwork :definition-id="selectedMaterial.id" kind="material" />
-                <div>
-                  <span class="eyebrow">{{ t("market.game.selectedResource") }}</span>
-                  <h3>{{ materialName(selectedMaterial.id, selectedMaterial.label) }}</h3>
-                  <small>{{ t("market.game.each", { price: transactionUnitPrice }) }}</small>
+                <div v-if="!selectedMaterial" class="market-desk-empty">
+                  <CircleDashed :size="28" />
+                  <p>{{ t("market.game.selectMaterial") }}</p>
                 </div>
-              </div>
-              <label class="market-quantity-field"
-                ><span class="field-label">{{ t("itemDetail.quantity") }}</span
-                ><input
-                  v-model.number="transactionQuantity"
-                  min="1"
-                  :max="quantityLimit"
-                  step="1"
-                  type="number"
-              /></label>
-              <dl class="market-transaction-preview">
-                <div>
-                  <dt>
-                    {{
-                      t(
-                        marketAction === "buy"
-                          ? "market.game.totalCost"
-                          : "market.game.creditsEarned",
-                      )
+                <template v-else>
+                  <div class="market-selected-resource">
+                    <ItemArtwork :definition-id="selectedMaterial.id" kind="material" />
+                    <div>
+                      <span class="eyebrow">{{ t("market.game.selectedResource") }}</span>
+                      <h3>{{ materialName(selectedMaterial.id, selectedMaterial.label) }}</h3>
+                      <small>{{ t("market.game.each", { price: transactionUnitPrice }) }}</small>
+                    </div>
+                  </div>
+                  <label class="market-quantity-field"
+                    ><span class="field-label">{{ t("itemDetail.quantity") }}</span
+                    ><input
+                      v-model.number="transactionQuantity"
+                      min="1"
+                      :max="quantityLimit"
+                      step="1"
+                      type="number"
+                  /></label>
+                  <dl class="market-transaction-preview">
+                    <div>
+                      <dt>
+                        {{
+                          t(
+                            marketAction === "buy"
+                              ? "market.game.totalCost"
+                              : "market.game.creditsEarned",
+                          )
+                        }}
+                      </dt>
+                      <dd>{{ transactionTotal }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ t("market.game.creditsAfter") }}</dt>
+                      <dd :class="{ positive: canTransact }">{{ creditsAfterTransaction }}</dd>
+                    </div>
+                    <div v-if="marketAction === 'sell'">
+                      <dt>{{ t("market.game.stockAfter") }}</dt>
+                      <dd>{{ stockAfterTransaction }}</dd>
+                    </div>
+                  </dl>
+                  <button
+                    class="market-primary-action"
+                    :disabled="processing || !canTransact"
+                    type="button"
+                    @click="submitMarketTransaction"
+                  >
+                    <ShoppingCart v-if="marketAction === 'buy'" :size="17" /><Banknote
+                      v-else
+                      :size="17"
+                    />{{
+                      processing
+                        ? t("market.game.processing")
+                        : t(marketAction === "buy" ? "market.game.buy" : "market.game.sell")
                     }}
-                  </dt>
-                  <dd>{{ transactionTotal }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t("market.game.creditsAfter") }}</dt>
-                  <dd :class="{ positive: canTransact }">{{ creditsAfterTransaction }}</dd>
-                </div>
-                <div v-if="marketAction === 'sell'">
-                  <dt>{{ t("market.game.stockAfter") }}</dt>
-                  <dd>{{ stockAfterTransaction }}</dd>
-                </div>
-              </dl>
-              <button
-                class="market-primary-action"
-                :disabled="processing || !canTransact"
-                type="button"
-                @click="submitMarketTransaction"
-              >
-                <ShoppingCart v-if="marketAction === 'buy'" :size="17" /><Banknote
-                  v-else
-                  :size="17"
-                />{{
-                  processing
-                    ? t("market.game.processing")
-                    : t(marketAction === "buy" ? "market.game.buy" : "market.game.sell")
-                }}
-              </button>
-              <small
-                v-if="validQuantity && marketAction === 'buy' && !canAfford"
-                class="negative"
-                >{{ t("forge.notEnoughCredits") }}</small
-              >
-              <small
-                v-if="validQuantity && marketAction === 'sell' && !hasEnoughStock"
-                class="negative"
-                >{{ t("market.game.notEnoughStock") }}</small
-              >
-            </template>
-            <p v-if="feedback" class="feedback">{{ feedback }}</p>
-          </aside>
+                  </button>
+                  <small
+                    v-if="validQuantity && marketAction === 'buy' && !canAfford"
+                    class="negative"
+                    >{{ t("forge.notEnoughCredits") }}</small
+                  >
+                  <small
+                    v-if="validQuantity && marketAction === 'sell' && !hasEnoughStock"
+                    class="negative"
+                    >{{ t("market.game.notEnoughStock") }}</small
+                  >
+                </template>
+                <p v-if="feedback" class="feedback" role="status">{{ feedback }}</p>
+              </aside>
+            </div>
+          </Teleport>
         </section>
       </template>
 
@@ -291,7 +313,7 @@
                 ]"
                 type="button"
                 :aria-pressed="selectedItem?.id === item.id"
-                @click="selectItem(item.id)"
+                @click="selectItem(item.id, $event)"
               >
                 <ItemArtwork :definition-id="item.definitionId" :kind="item.type" />
                 <span class="game-market-card-copy">
@@ -322,79 +344,109 @@
             </div>
           </div>
 
-          <aside class="market-transaction-desk valuation-desk">
-            <div class="market-desk-heading">
-              <span class="market-desk-icon"><ReceiptText :size="22" /></span>
-              <div>
-                <span class="eyebrow">{{ t("market.game.valuation") }}</span>
-                <h2>{{ t("market.game.sellItem") }}</h2>
-              </div>
-            </div>
-            <div v-if="!selectedItem" class="market-desk-empty">
-              <CircleDashed :size="28" />
-              <p>{{ t("market.game.selectItem") }}</p>
-            </div>
-            <template v-else>
-              <div class="market-selected-resource">
-                <ItemArtwork :definition-id="selectedItem.definitionId" :kind="selectedItem.type" />
-                <div>
-                  <span class="eyebrow">{{ t(`itemType.${selectedItem.type}`) }}</span>
-                  <h3>
-                    {{ itemName(selectedItem.type, selectedItem.definitionId, selectedItem.label) }}
-                  </h3>
-                  <span :class="['pill', `element-${selectedItem.element}`]">{{
-                    t(`element.${selectedItem.element}`)
-                  }}</span>
-                </div>
-              </div>
-              <div class="market-recipe-valuation">
-                <div class="market-valuation-heading">
-                  <span>{{ t("market.game.recipeValue") }}</span
-                  ><strong>{{ selectedItem.recipeValue ?? "-" }}</strong>
-                </div>
-                <div
-                  v-for="ingredient in selectedItem.ingredients"
-                  :key="ingredient.materialId"
-                  class="market-valuation-row"
-                >
-                  <span
-                    >{{ materialName(ingredient.materialId, ingredient.label) }}
-                    <small>× {{ ingredient.quantity }}</small></span
-                  ><strong>{{ ingredient.unitPrice * ingredient.quantity }}</strong>
-                </div>
-                <div class="market-buyback-line">
-                  <span>{{ t("market.game.buybackRate") }}</span
-                  ><strong>25%</strong>
-                </div>
-              </div>
-              <dl class="market-transaction-preview">
-                <div>
-                  <dt>{{ t("market.game.creditsEarned") }}</dt>
-                  <dd class="positive">{{ selectedItem.sellPrice ?? "-" }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t("market.game.creditsAfter") }}</dt>
-                  <dd class="positive">{{ creditsAfterItemSale }}</dd>
-                </div>
-              </dl>
-              <p v-if="selectedItem.blockedReason" class="market-blocked-reason">
-                <ShieldAlert :size="17" />{{
-                  t(`market.game.blocked.${selectedItem.blockedReason}`)
-                }}
-              </p>
-              <button
-                class="market-primary-action"
-                :disabled="processing || !selectedItem.canSell"
-                type="button"
-                @click="submitItemSale"
+          <Teleport to="body">
+            <div
+              v-if="isTransactionModalOpen"
+              class="market-transaction-modal-backdrop"
+              role="presentation"
+              @click.self="closeTransactionModal"
+            >
+              <aside
+                ref="transactionDialog"
+                class="market-transaction-desk market-transaction-modal valuation-desk"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="game-market-item-transaction-title"
+                tabindex="-1"
               >
-                <Banknote :size="17" />{{
-                  processing ? t("market.game.processing") : t("market.game.sellItem")
-                }}
-              </button>
-            </template>
-            <p v-if="itemFeedback" class="feedback">{{ itemFeedback }}</p>
-          </aside>
+                <button
+                  class="icon-button market-transaction-modal-close"
+                  type="button"
+                  :aria-label="t('market.game.closeTransaction')"
+                  :title="t('market.game.closeTransaction')"
+                  @click="closeTransactionModal"
+                >
+                  <X :size="20" aria-hidden="true" />
+                </button>
+                <div class="market-desk-heading">
+                  <span class="market-desk-icon"><ReceiptText :size="22" /></span>
+                  <div>
+                    <span class="eyebrow">{{ t("market.game.valuation") }}</span>
+                    <h2 id="game-market-item-transaction-title">{{ t("market.game.sellItem") }}</h2>
+                  </div>
+                </div>
+                <div v-if="!selectedItem" class="market-desk-empty">
+                  <CircleDashed :size="28" />
+                  <p>{{ t("market.game.selectItem") }}</p>
+                </div>
+                <template v-else>
+                  <div class="market-selected-resource">
+                    <ItemArtwork
+                      :definition-id="selectedItem.definitionId"
+                      :kind="selectedItem.type"
+                    />
+                    <div>
+                      <span class="eyebrow">{{ t(`itemType.${selectedItem.type}`) }}</span>
+                      <h3>
+                        {{
+                          itemName(selectedItem.type, selectedItem.definitionId, selectedItem.label)
+                        }}
+                      </h3>
+                      <span :class="['pill', `element-${selectedItem.element}`]">{{
+                        t(`element.${selectedItem.element}`)
+                      }}</span>
+                    </div>
+                  </div>
+                  <div class="market-recipe-valuation">
+                    <div class="market-valuation-heading">
+                      <span>{{ t("market.game.recipeValue") }}</span
+                      ><strong>{{ selectedItem.recipeValue ?? "-" }}</strong>
+                    </div>
+                    <div
+                      v-for="ingredient in selectedItem.ingredients"
+                      :key="ingredient.materialId"
+                      class="market-valuation-row"
+                    >
+                      <span
+                        >{{ materialName(ingredient.materialId, ingredient.label) }}
+                        <small>× {{ ingredient.quantity }}</small></span
+                      ><strong>{{ ingredient.unitPrice * ingredient.quantity }}</strong>
+                    </div>
+                    <div class="market-buyback-line">
+                      <span>{{ t("market.game.buybackRate") }}</span
+                      ><strong>25%</strong>
+                    </div>
+                  </div>
+                  <dl class="market-transaction-preview">
+                    <div>
+                      <dt>{{ t("market.game.creditsEarned") }}</dt>
+                      <dd class="positive">{{ selectedItem.sellPrice ?? "-" }}</dd>
+                    </div>
+                    <div>
+                      <dt>{{ t("market.game.creditsAfter") }}</dt>
+                      <dd class="positive">{{ creditsAfterItemSale }}</dd>
+                    </div>
+                  </dl>
+                  <p v-if="selectedItem.blockedReason" class="market-blocked-reason">
+                    <ShieldAlert :size="17" />{{
+                      t(`market.game.blocked.${selectedItem.blockedReason}`)
+                    }}
+                  </p>
+                  <button
+                    class="market-primary-action"
+                    :disabled="processing || !selectedItem.canSell"
+                    type="button"
+                    @click="submitItemSale"
+                  >
+                    <Banknote :size="17" />{{
+                      processing ? t("market.game.processing") : t("market.game.sellItem")
+                    }}
+                  </button>
+                </template>
+                <p v-if="itemFeedback" class="feedback" role="status">{{ itemFeedback }}</p>
+              </aside>
+            </div>
+          </Teleport>
         </section>
       </template>
 
@@ -454,11 +506,9 @@ import {
   ShoppingCart,
   SlidersHorizontal,
   Users,
+  X,
 } from "@lucide/vue";
 import type { GameMarketState, GameMarketTransactionView } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
-const route = useRoute();
 const { t, locale } = useI18n();
 const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 const contentText = useContentText();
@@ -475,6 +525,12 @@ const transactionQuantity = ref(1);
 const processing = ref(false);
 const feedback = ref("");
 const itemFeedback = ref("");
+const isTransactionModalOpen = ref(false);
+const transactionDialog = ref<HTMLElement | null>(null);
+let transactionTrigger: HTMLElement | null = null;
+let marketBackground: HTMLElement | null = null;
+let marketBackgroundWasInert = false;
+let previousBodyOverflow = "";
 
 function materialName(id: string, fallback: string): string {
   return contentText(`material.${id}.name`, fallback);
@@ -552,20 +608,85 @@ watchEffect(() => {
   if (selectedItemId.value && !filteredItems.value.some((item) => item.id === selectedItemId.value))
     selectedItemId.value = "";
 });
-function selectMaterial(materialId: string): void {
+function selectMaterial(materialId: string, event: MouseEvent): void {
   selectedMaterialId.value = materialId;
   transactionQuantity.value = 1;
   feedback.value = "";
+  void openTransactionModal(event.currentTarget);
 }
-function selectItem(itemId: string): void {
+function selectItem(itemId: string, event: MouseEvent): void {
   selectedItemId.value = itemId;
   itemFeedback.value = "";
+  void openTransactionModal(event.currentTarget);
 }
 function selectMarketAction(action: "buy" | "sell"): void {
   marketAction.value = action;
   transactionQuantity.value = 1;
   feedback.value = "";
 }
+
+async function openTransactionModal(trigger: EventTarget | null): Promise<void> {
+  transactionTrigger = trigger instanceof HTMLElement ? trigger : null;
+  previousBodyOverflow = document.body.style.overflow;
+  document.body.style.overflow = "hidden";
+  marketBackground = document.querySelector<HTMLElement>(".app-shell");
+  marketBackgroundWasInert = marketBackground?.inert ?? false;
+  if (marketBackground) marketBackground.inert = true;
+  isTransactionModalOpen.value = true;
+  await nextTick();
+  transactionDialog.value?.focus();
+}
+
+function closeTransactionModal(): void {
+  if (!isTransactionModalOpen.value) return;
+  isTransactionModalOpen.value = false;
+  document.body.style.overflow = previousBodyOverflow;
+  if (marketBackground) marketBackground.inert = marketBackgroundWasInert;
+  marketBackground = null;
+  const trigger = transactionTrigger;
+  transactionTrigger = null;
+  nextTick(() => trigger?.focus());
+}
+
+function handleTransactionModalKeydown(event: KeyboardEvent): void {
+  if (!isTransactionModalOpen.value) return;
+  if (event.key === "Escape") {
+    closeTransactionModal();
+    return;
+  }
+  if (event.key !== "Tab" || !transactionDialog.value) return;
+  const focusable = Array.from(
+    transactionDialog.value.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ),
+  ).filter((element) => !element.hidden && element.getClientRects().length > 0);
+  if (focusable.length === 0) {
+    event.preventDefault();
+    transactionDialog.value.focus();
+    return;
+  }
+  const first = focusable[0];
+  const last = focusable.at(-1);
+  if (!event.shiftKey && document.activeElement === transactionDialog.value) {
+    event.preventDefault();
+    first?.focus();
+  } else if (
+    event.shiftKey &&
+    (document.activeElement === first || document.activeElement === transactionDialog.value)
+  ) {
+    event.preventDefault();
+    last?.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first?.focus();
+  }
+}
+
+onMounted(() => window.addEventListener("keydown", handleTransactionModalKeydown));
+onBeforeUnmount(() => {
+  window.removeEventListener("keydown", handleTransactionModalKeydown);
+  if (isTransactionModalOpen.value) closeTransactionModal();
+});
 
 async function submitMarketTransaction(): Promise<void> {
   if (!selectedMaterial.value || !canTransact.value) return;

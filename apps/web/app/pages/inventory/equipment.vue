@@ -1,21 +1,18 @@
 <template>
   <main class="shell equipment-page">
-    <nav class="section-nav" :aria-label="t('accessibility.inventoryNavigation')">
-      <NuxtLink
-        v-for="link in sectionLinks.inventory"
-        :key="link.to"
-        :class="{ active: route.path === link.to }"
-        :to="link.to"
-      >
-        {{ $t(link.labelKey) }}
-      </NuxtLink>
-    </nav>
-
     <header class="view-header equipment-header">
       <div class="view-title">
-        <span class="eyebrow">{{ t("inventory.section") }}</span>
-        <h1>{{ t("inventory.equipment.title") }}</h1>
-        <p class="muted">{{ t("inventory.equipment.description") }}</p>
+        <SectionBackLink
+          to="/inventory"
+          :label="t('navigation.backToHub', { section: t('navigation.inventory') })"
+        />
+        <div class="view-title-heading">
+          <h1>{{ t("inventory.equipment.title") }}</h1>
+          <ViewHelpButton
+            :title="t('inventory.equipment.title')"
+            :description="t('inventory.equipment.description')"
+          />
+        </div>
       </div>
       <NuxtLink class="button-link secondary-button" to="/inventory/loadouts">
         <Layers3 :size="17" aria-hidden="true" />
@@ -322,9 +319,6 @@ import {
   Zap,
 } from "@lucide/vue";
 import type { EquipmentRingView, EquipmentState } from "~/utils/playerState";
-import { sectionLinks } from "~/utils/viewData";
-
-const route = useRoute();
 const { t } = useI18n();
 const contentText = useContentText();
 const feedback = ref("");

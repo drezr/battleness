@@ -1573,7 +1573,7 @@
     --live-page-padding: 4px;
     --live-header-height: 52px;
     --live-energy-height: 24px;
-    --live-ring-width: min(124px, calc((100vw - 40px) / 10));
+    --live-ring-width: clamp(92px, 14vw, 124px);
     --live-ring-title-height: 18px;
     --live-ring-stats-height: 24px;
     --live-ring-footer-height: 28px;
@@ -1621,8 +1621,8 @@
   .live-battle-page {
     --live-page-padding: 3px;
     --live-header-height: 46px;
-    --live-energy-height: 22px;
-    --live-ring-width: min(86px, calc((100vw - 34px) / 10));
+    --live-energy-height: 26px;
+    --live-ring-width: clamp(96px, 28vw, 112px);
     --live-ring-title-height: 15px;
     --live-ring-stats-height: 20px;
     --live-ring-footer-height: 22px;
@@ -1682,13 +1682,53 @@
   }
 
   .live-ring-dock {
-    grid-template-columns: repeat(auto-fill, var(--live-ring-width));
+    grid-template-columns: none;
     grid-auto-columns: var(--live-ring-width);
+    grid-auto-flow: column;
+    max-height: calc(var(--live-ring-height) + 4px);
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
   }
 
   .live-arena .live-ring {
     width: var(--live-ring-width);
     height: var(--live-ring-height);
     min-height: 0;
+  }
+
+  .live-energy-rail {
+    position: relative;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 7px;
+    padding-inline: 8px;
+  }
+
+  .live-energy-rail > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+  }
+
+  .live-energy-slots {
+    grid-template-columns: repeat(8, minmax(12px, 1fr));
+    gap: 4px;
+  }
+
+  .live-energy-slots i {
+    height: 12px;
+  }
+
+  .live-energy-rail > strong {
+    display: block;
+    min-width: 30px;
+    font-size: 0.72rem;
+    line-height: 1;
+    text-align: right;
   }
 }

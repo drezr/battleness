@@ -227,6 +227,26 @@ end of the Phase 14 section so it can be resumed after the UI work.
   - [x] Apply the competitive arena language to the PvP Hub, Casual, Ranked, and Private.
   - [x] Extend the ranked arena language to public PvP profiles and leaderboard identity links.
   - [x] Apply the commandery gateway language to authentication without changing session providers.
+- [x] Replace the inconsistent horizontal section menus with hub-card navigation and deterministic
+      parent-hub links on child views, including the nested Battle and PvP hierarchy.
+- [x] Compact hub destination cards with icon-and-title headings, full-card interaction, and no
+      redundant destination action row.
+- [x] Extend full-card hub interaction to Private, Casual, and Ranked PvP destinations and remove
+      their redundant footer actions and fixed heights.
+- [x] Unify linked hub destinations around the Battle mode-card surface and non-linked hub panels
+      around the Inventory Battle Readiness surface while preserving feature-specific artwork.
+- [x] Centralize the mobile Game App shell gutter and browser-verify consistent horizontal spacing
+      across every static player route plus a representative dynamic result view.
+- [x] Unify standard page-title typography with Forge Hub, title spacing with Battle Hub, and move
+      existing view descriptions into a shared accessible help dialog.
+- [x] Refine the title-help control into a subtle circular treatment while preserving its touch area,
+      and remove the unnecessary Home help entry.
+- [x] Remove redundant colored section eyebrows from standard Game App page titles and align child
+      return controls with the resulting single title row.
+- [x] Refine the shared child-view return control with a clearer rounded, cyan-accented treatment and
+      consistent hover, focus, active, and reduced-motion states.
+- [x] Prioritize Battle and Forge destination cards ahead of their recap statistics in visual and
+      document order.
 - [x] Preserve mobile-first responsiveness, keyboard and screen-reader access, visible focus,
       reduced-motion support, localization, and the separation between player UI and Dev Lab
       diagnostics.
