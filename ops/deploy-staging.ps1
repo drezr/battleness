@@ -151,8 +151,11 @@ function Invoke-RemoteScript {
     [AllowNull()][string]$SudoPassword = $null
   )
 
+  # PowerShell here-strings use CRLF on Windows. Normalize the decoded payload too;
+  # stripping CR only from the SSH wrapper does not alter the Base64-encoded script.
+  $normalizedScript = $Script.Replace("`r`n", "`n").Replace("`r", "`n")
   $scriptBase64 = [Convert]::ToBase64String(
-    [System.Text.Encoding]::UTF8.GetBytes($Script)
+    [System.Text.Encoding]::UTF8.GetBytes($normalizedScript)
   )
 
   if ([string]::IsNullOrEmpty($SudoPassword)) {
