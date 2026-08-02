@@ -17,6 +17,7 @@ export type SpellDefinition = {
   nameKey: string;
   element: ElementType;
   rarity: Rarity;
+  baseSpeed?: number;
   baseEnergyPenalty: number;
   baseCooldownPenalty: number;
   effects: SpellEffect[];
@@ -31,6 +32,8 @@ export type MonsterDefinition = {
   baseDamage: number;
   baseCooldown: number;
   baseSpeed: number;
+  baseEnergyPenalty?: number;
+  baseCooldownPenalty?: number;
   skill?: MonsterSkill;
 };
 
@@ -80,6 +83,7 @@ export type GemCombatInstance = {
   damage: number;
   energyPenalty: number;
   cooldownPenalty: number;
+  speed: number;
   enchantment?: GemEnchantment;
 };
 

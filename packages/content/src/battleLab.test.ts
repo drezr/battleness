@@ -16,7 +16,7 @@ const config: BattleLabConfig = {
       level: 3,
       rings: [
         {
-          definitionId: "sparkBand",
+          definitionId: "staticLoop",
           level: 2,
           quality: 60,
           gems: [
@@ -41,7 +41,7 @@ const config: BattleLabConfig = {
       level: 4,
       rings: [
         {
-          definitionId: "frostSeal",
+          definitionId: "rimeLoop",
           level: 3,
           quality: 70,
           gems: [
@@ -68,7 +68,7 @@ describe("Battle Lab setup", () => {
     const setup = createBattleSetupFromLab(config);
 
     expect(setup.players[0].level).toBe(3);
-    expect(setup.players[0].rings[0]?.definitionId).toBe("sparkBand");
+    expect(setup.players[0].rings[0]?.definitionId).toBe("staticLoop");
     expect(setup.players[0].rings[0]?.gems[0]?.enchantment).toMatchObject({
       type: "spell",
       spellId: "spark",

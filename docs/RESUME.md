@@ -53,6 +53,18 @@ separate permanent Dev Lab prototype.
 
 ## Immediate Handoff
 
+- `production-items-v1` replaces the test ring/gem/monster collection with 54 rings, 54 gems, and
+  69 monsters from the asset bible while retaining the six test spells. The three TexturePacker
+  atlases and metadata are active in both apps, including trimmed and rotated frames; the old
+  `prototype-6` definitions and grid atlases are archived under explicit legacy paths.
+- Production penalties sum decimal contributions across gems and enchantments before flooring once;
+  speed now flows from rings, gems, monsters, and spells (the retained spells currently have zero
+  speed). All 183 active objects have stable three-unit recipes, with repeated materials aggregated
+  and unique recipe multisets for rings, gems, and monsters.
+- Dev Lab local persistence is v2 and explicitly clears incompatible v1 data. Account onboarding is
+  v2 with `ashenLoop`, `emberShard`, and `firebolt`. Before deploying the content cutover to staging,
+  take and verify a database backup, then follow the guarded staging gameplay reset procedure in
+  `docs/DEPLOYMENT.md`; the reset script has not been run remotely.
 - Child-view return links now appear as visible 44-pixel rounded cyan-accented controls beside page
   titles, with restrained gradient and depth plus explicit hover, focus, active, and reduced-motion
   behavior. Their routes and localized accessible labels are unchanged. Battle, PvP, Forge,
@@ -122,11 +134,13 @@ separate permanent Dev Lab prototype.
   future work.
 - Do not treat Phase 14 as complete. `docs/TODO.md` contains a consolidated Phase 14 resume checklist
   covering the live-refresh visual confirmation, complete ranked staging smoke, production
-  monitoring, load/soak testing, security review, production OAuth and promotion, the single-instance
-  constraint, and the two intentionally deferred backup/notification items.
+  monitoring, external backup notifications, load/soak testing, security review, production OAuth
+  and promotion, and the single-instance constraint. The second off-pair encrypted backup
+  destination is complete; Phase 14 remains active.
 - Preserve the deployed staging environment and existing production-operational decisions while
-  making UI changes. Do not change infrastructure, production DNS, OAuth, or database state unless
-  the user explicitly returns to those tasks.
+  completing the now-active Phase 14 work. Infrastructure, backup, monitoring, OAuth, and database
+  changes are authorized within the documented runbooks and release-safety rules; production DNS
+  cutover still requires explicit coordination with the user.
 
 ## Current Project State
 
@@ -230,10 +244,11 @@ separate permanent Dev Lab prototype.
   encrypts the latest local backup and copies it to the app VPS under
   `/var/backups/battleness/postgresql-offhost` with 30-day retention. The private decryption key is
   outside the repo and off the servers at
-  `C:\Users\dumon\Desktop\battleness-postgresql-backup-private-key.pem`; the first encrypted copy and
-  decrypt/list verification passed on 2026-07-21. A second encrypted target outside the VPS pair is
-  intentionally pending: the user does not want to pay for storage right now and may later provide a
-  private high-availability home server, likely a Raspberry Pi.
+  `C:\Users\dumon\Desktop\bn\battleness-postgresql-backup-private-key.pem`; the first encrypted copy
+  and decrypt/list verification passed on 2026-07-21. A Raspberry Pi now pulls the same encrypted
+  backup independently from a forced read-only `rrsync` export on `bndb`, validates SHA-256
+  sidecars, and keeps 90 days under `/home/drezr/bn/postgresql`. Its first pull, decryption, and
+  isolated restore drill passed on 2026-08-02 with 33 public tables and 17 Prisma migrations.
 - `docs/OPERATIONS_RUNBOOK.md` defines the first manual Phase 14 release procedure: deploy only a
   CI-validated commit, take a verified pre-migration backup, build in an immutable release directory,
   classify and apply migrations, atomically switch `/opt/battleness/current`, run health and browser
@@ -249,8 +264,8 @@ separate permanent Dev Lab prototype.
   backup timers. Its watchdog verifies prior service results, a maximum backup age of 30 hours, both
   dumps, their checksum manifest, and the matching encrypted archive on the app VPS. Failures become
   failed systemd units with `CRITICAL backup_monitor` journal records. External heartbeat and
-  notification delivery are intentionally on standby at the user's request, so complete VPS failure
-  is not yet detected outside the VPS pair.
+  notification delivery remain pending Phase 14 work; the user chose not to add another external
+  service during the Raspberry Pi backup implementation.
 - A guarded PostgreSQL cleanup script and daily systemd timer run in apply mode for staging. The
   approved policy keeps expired or revoked sessions for seven days, removes expired OAuth attempts
   immediately, and keeps terminal queue, cancelled lobby, and inactive discipline state for 30 days.
@@ -423,7 +438,7 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - Ring and gem progression scales damage. Monster progression scales damage and health. Spell progression scales direct-damage effect amounts.
 - Hero maximum health is `30 + floor(30 * level / 50)`.
 - Hero level does not modify combat energy, which remains based on each player's turn count and capped at 8.
-- Hero speed is the sum of equipped rings' unscaled base speed values.
+- Hero speed is the sum of equipped rings, their socketed gems, and their monster or spell enchantments.
 - Energy costs, cooldowns, speed, energy penalties, and cooldown penalties do not scale for now.
 - Final ring energy cost and cooldown minimums remain 1.
 - Positive integer stat calculations use floor rounding unless a specific rule overrides it.
@@ -437,7 +452,7 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - `packages/content/src/balanceReport.ts` compares ring, gem, spell, and monster definitions across base (`level 1`, `quality 0`), mid (`level 10`, `quality 50`), and max (`level 50`, `quality 100`) progression profiles. It reports primary metrics and high outliers by item type and rarity, and the prototype setup screen renders the report for balancing review.
 - Owned monster and spell instances are explicit inventory records referenced by gem enchantments.
 - Resolved monster and spell definitions use battle-scoped instance IDs internally while combat events and summoned-monster IDs retain stable content IDs.
-- Content version `prototype-2` introduced the migrated fixture and resolved-definition format; `prototype-3` is the current content collection version.
+- Content version `production-items-v1` is current; the former prototype definitions are archived for technical reference only.
 - Focused unit and integration tests cover thresholds, caps, floor rounding, invalid inputs, resolved setup stats, and runtime use of resolved enchantments.
 
 ## Content Reference Validation
@@ -451,14 +466,11 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - `validateContent()` runs relational validation during prototype startup, before battle setup construction.
 - Solo campaign opponent and reward design remains deferred at the user's request.
 
-## Prototype Content Collection Proposal
+## Production Content Collection
 
-- `docs/CONTENT_COLLECTION_PROPOSAL.md` proposes a balanced engine-testing collection built around current mechanics.
-- It proposes 12 collectible rings, 12 collectible gems, 18 monsters, 6 direct-damage spells, and 70 materials.
-- It preserves all current reusable content, proposes a small number of adjustments to existing base values, and adds missing element/rarity coverage.
-- `trainingFlameBand` and `plainQuartz` are proposed as development-only fixture definitions.
-- The implemented collection deliberately limits spells to direct damage until the engine supports more effect types.
-- The collection is applied to executable JSON and both locale files as content version `prototype-3`.
+- `docs/battleness-production-items-v1-asset-bible.json` is the source for 54 rings, 54 gems, and 69 monsters. The active collection retains 6 direct-damage test spells and 70 materials.
+- `trainingFlameBand` and `plainQuartz` are no longer active. Historical definitions live only in the `legacy/prototype-6` archive.
+- The implemented collection deliberately retains test spells until production spell definitions and artwork are available.
 - `docs/MATERIAL_COLLECTION_PROPOSAL.md` replaces the initial 12-material list with a detailed 70-material model derived from the historical SQLite `mats` table.
 - The material model preserves ring, spell, gem, and monster crafting families, carries forward the four rarity price tiers, and provides a migration map for historical recipe IDs.
 - Chemical element metadata follows IUPAC naming, symbols, and atomic numbers; non-element materials remain real minerals, gemstones, biomaterials, industrial materials, or physical substances.
@@ -550,18 +562,18 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - Yellow selection outlines and red blocked-state indicators remain distinct from the rarity border.
 - Localized elemental badges appear in the top-right corner of ring, gem, and monster cards across those same views.
 - Socketed gem markers use elemental fill colors and rarity border colors simultaneously.
-- Generated item artwork atlases now cover every current ring, gem, monster, spell, and material definition. Stable ID mappings and startup coverage validation live in `apps/prototype/src/itemAssets.ts`.
+- TexturePacker atlases cover every active ring, gem, and monster; the existing grid atlases cover test spells and materials. Stable ID mappings and startup coverage validation live in `packages/content/src/itemAtlases.ts`.
 - The battle and setup interfaces render ring, gem, and monster atlas crops. Spell and material crops are mapped for future forge, inventory, and shop interfaces.
-- The setup screen now exposes all 120 mapped assets in a localized, collapsible development collection.
+- The setup screen exposes all 253 active definitions in a localized, collapsible development collection.
 - The setup screen now supports a Battle Lab mode for editing two loadouts and launching an unscripted battle.
 - Battle Lab configurations support 1 to 10 rings per player, up to 3 gems per ring, editable levels and qualities, and optional spell or monster enchantments.
 - `packages/content/src/battleLab.ts` resolves temporary editor instances through the same setup and progression path used by fixture-backed content. Loadout persistence is intentionally deferred.
 - Battle Lab loadouts support strict JSON import/export and named browser-local presets. These presets are development-only and do not replace future account persistence.
 - The editor includes resolved stat comparisons and diagnostic warnings for efficiency differences of at least 50% or speed differences of at least 4.
 - The Battle Lab can run two deterministic greedy simulations that vary the preferred element-duel winner, respect current targeting and action constraints, and report timeouts at 500 actions.
-- Content version `prototype-4` adds 48 initial forge recipes for collectible rings, gems, monsters, and spells. `trainingFlameBand` and `plainQuartz` remain development-only and have no recipes.
+- Content version `production-items-v1` has 183 recipes: one for every active ring, gem, monster, and retained spell.
 - Content version `prototype-5` renames the highest rarity tier from `legendary` to `epic`.
-- Prototype recipes use exactly three quantity-1 materials from the matching crafting family. Common outputs use three common materials; refined outputs use one refined and two common materials; rare outputs use one rare, one refined, and one common material; epic outputs use one epic, one rare, and one refined material.
+- Recipes use exactly three material units from the matching crafting family and aggregate repeated materials. Common outputs use three common units; refined outputs use one refined and two common units; rare outputs use one rare, one refined, and one common unit; epic outputs use one epic, one rare, and one refined unit.
 - Crafted prototype items are level 1 and quality 0. Crafted rings start with one socket. The setup screen includes a development forge panel with material stock controls, real consumption, restock, improvement actions, and crafted-instance output.
 - The development forge persists credits, material stock, crafted item output, and the next crafted-instance sequence in browser `localStorage`.
 - Development inventory starts with 1000 prototype credits. Quality improvement spends credits to add 5 quality points to a crafted item up to 100. Ring socket improvement spends credits to increase crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.

@@ -61,7 +61,7 @@ function ringSource(
     id: "ring",
     item: {
       id: "ring",
-      definitionId: "emberLoop",
+      definitionId: "ashenLoop",
       label: "Ember Loop",
       element: "fire",
       rarity: "normal",

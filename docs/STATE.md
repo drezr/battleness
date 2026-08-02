@@ -4,6 +4,35 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- Content version `production-items-v1` is now active: 54 rings, 54 gems, 69 monsters, the six
+  existing test spells, 70 materials, and 183 stable recipes. Runtime definitions, locales,
+  fixtures, campaign starters, onboarding, balance reports, and server equipment views use the
+  final IDs. The former `prototype-6` definitions and grid artwork remain only under explicit
+  `legacy/prototype-6` archive paths.
+- TexturePacker atlases for rings, gems, and monsters are imported from validated JSON metadata into
+  `packages/content/src/atlases/` and served as `rings.png`, `gems.png`, and `monsters.png` by both
+  apps. The shared renderer supports trimmed and rotated frames and validates exact definition
+  coverage. Spells and materials continue using their existing test grid atlases.
+- Gem and monster energy/cooldown penalties support tenths. A ring sums every gem and enchantment
+  contribution using fixed-point tenths and floors the final total once; hero speed includes rings,
+  gems, and monster/spell enchantments. Current spells declare speed `0` until their production
+  definitions and artwork are created.
+- Production recipes consume exactly three material units and aggregate repeated materials. Every
+  active object has one recipe, and ring, gem, and monster recipes have unique material multisets
+  within their item type. Development starting stock is three units per material.
+- Dev Lab persistence uses v2 keys. Incompatible v1 inventory, loadout, and preset data is removed
+  at startup with an explicit UI notice. Account onboarding is version 2 and grants `ashenLoop`,
+  `emberShard`, and the retained test `firebolt` spell.
+- A guarded staging-only gameplay reset command is available as
+  `pnpm --filter @battleness/web staging:reset-gameplay -- --apply`. It requires the exact staging
+  database name, a verified backup identifier, and explicit confirmation; it preserves accounts,
+  authentication, sessions, profiles, preferences, and content-release records. It has not been
+  executed against staging.
+- Phase 14 production and operations work is active again. The second encrypted backup destination
+  outside the app/database VPS pair is complete on a home Raspberry Pi with 90-day retention.
+  External backup failure or missed-run notifications remain pending because the user chose not to
+  add a heartbeat service yet. Staging acceptance, production monitoring, load/soak testing,
+  security review, and production deployment also remain.
 - Forge gem enchantment now has a dedicated player-facing `/forge/enchant` route and a distinct
   destination on the Forge Hub. `/forge/socket` is limited to ring socket capacity, socketing, and
   unsocketing. Inventory handoff sends rings to Socket and sends gems, spells, and monsters to
@@ -34,17 +63,9 @@ This file records modifications made to the project during agent-assisted work.
   readiness and material-stock header links remain available, and no routes, data, or business
   behavior changed. Browser checks at desktop, portrait mobile, and short landscape confirm the new
   order without horizontal overflow.
-- All 54 production ring assets from `battleness-production-items-v1-asset-bible.json` are generated
-  as individual transparent native-resolution PNG files under
-  `apps/web/public/assets/items/rings/`. The collection follows the shared dark high-fantasy 3D
-  direction, preserves the fire/electric/ice and rarity languages, and keeps at least six percent
-  transparent margin around every complete ring without downscaling the generated subjects.
-- All 54 production gem assets and all 69 production monster assets from the same asset bible are
-  generated as individual transparent native-resolution PNG files under
-  `apps/web/public/assets/items/gems/` and `apps/web/public/assets/items/monsters/`. Every final
-  canvas is square, preserves the generated subject pixels without downscaling, keeps at least six
-  percent transparent margin, and passes expected-ID, RGBA, alpha-bounds, transparent-corner, and
-  safe-margin validation.
+- The 54 production ring, 54 gem, and 69 monster source images were generated and validated as
+  transparent native-resolution PNGs before being packed. Active app delivery now uses the three
+  TexturePacker atlases instead of shipping every source PNG under the public application tree.
 - The PvP Hub's Private, Casual, and Ranked mode cards are now full-card links like the other hub
   destinations. Their redundant footer buttons, reserved action row, and fixed 420/330/270-pixel
   heights are removed; cards size from their content while retaining mode artwork, feature details,
@@ -190,10 +211,9 @@ This file records modifications made to the project during agent-assisted work.
 - Monster summons now use monotonic per-player/per-definition instance numbers for the battle, so a
   destroyed monster's instance ID cannot be reused by a later summon in the same action or battle.
   This prevents a destruction effect from being associated with a newly summoned replacement monster.
-- The user has temporarily paused Phase 14 production work to continue ergonomics and UI changes in
-  a separate agent context. Phase 14 remains incomplete; its remaining staging acceptance,
-  monitoring, load/soak, security, production-promotion, single-instance, backup-target, and external
-  notification work is consolidated in `docs/TODO.md` for later resumption.
+- The temporary Phase 14 pause for ergonomics and UI work has ended. Phase 14 remains incomplete;
+  its active staging acceptance, monitoring, load/soak, security, production-promotion,
+  single-instance, backup-target, and external-notification work is consolidated in `docs/TODO.md`.
 - The live battle ergonomics and finished-result iteration is complete. The next requested product
   focus is a game-wide visual transformation because the current player app still feels too much
   like a website or dashboard. The next iteration should establish a cohesive game-first language
@@ -269,12 +289,12 @@ This file records modifications made to the project during agent-assisted work.
   backup, encrypts it with the public backup recipient certificate, and copies it to `bnapp` under
   `/var/backups/battleness/postgresql-offhost` with 30-day retention. The private decryption key
   remains outside the repo and off the servers on the user's desktop. The first encrypted copy and
-  decrypt/list verification passed on 2026-07-21. A second off-pair backup target and alerting remain
-  production follow-up work.
-- The second backup destination outside the two VPS is intentionally deferred. The user does not want
-  to pay for object storage right now and does not yet have a high-availability home server. The
-  documented future direction is a private home server, likely a Raspberry Pi, once it can provide
-  acceptable availability.
+  decrypt/list verification passed on 2026-07-21. External alert delivery remains production
+  follow-up work.
+- The second backup destination outside the two VPS is complete. A home Raspberry Pi initiates a
+  forced read-only `rrsync` pull from the encrypted `bndb` export, validates SHA-256 sidecars and a
+  36-hour freshness limit, retains 90 days under `/home/drezr/bn/postgresql`, and never mirrors
+  source deletions. The first off-server decryption and isolated restore drill passed on 2026-08-02.
 - The first operations runbook now defines exact-commit release packaging, immutable release
   directories, pre-migration backups, PostgreSQL migration gates, atomic symlink activation,
   post-deployment checks, application rollback, destructive database recovery safeguards,
@@ -282,9 +302,8 @@ This file records modifications made to the project during agent-assisted work.
 - The database backup path now includes a daily systemd watchdog that checks the last local and
   off-host service results, enforces a 30-hour maximum age, validates both dumps and their checksums,
   and requires a non-empty matching encrypted archive on the app VPS. It fails with structured
-  `CRITICAL backup_monitor` journal records. External delivery and missed-run detection are
-  intentionally on standby at the user's request; no hosted heartbeat, webhook, or SMTP integration
-  is configured.
+  `CRITICAL backup_monitor` journal records. External delivery and missed-run detection remain
+  pending Phase 14 work; no heartbeat, webhook, or SMTP integration is configured yet.
 - A PostgreSQL operational cleanup job runs daily in apply mode. It removes expired or
   revoked sessions, expired OAuth attempts, old terminal casual/ranked queue entries, cancelled
   private lobbies without battles, and inactive ranked discipline state while explicitly preserving
@@ -441,6 +460,21 @@ This file records modifications made to the project during agent-assisted work.
 - Added a centralized project TODO in `docs/TODO.md` covering Game App persistence, inventory, forge, battle integration, campaign, rewards, market, profile, authentication, PvP, player market, presentation, production, and open design questions.
 
 ## Change Log
+
+### 2026-08-02
+
+- Resumed Phase 14 production and operations work after the completed game-wide UI iteration.
+- Added SHA-256 sidecars and a 30-day encrypted pull export on `bndb`, protected by a locked account
+  whose forced read-only `rrsync` command rejects shell access, writes, forwarding, and paths outside
+  the export directory.
+- Installed the Raspberry Pi pull script and daily systemd timer. It pins the `bndb` host key, stores
+  encrypted archives under `/home/drezr/bn/postgresql`, validates checksums and a 36-hour freshness
+  limit, never propagates source deletions, and retains 90 days.
+- Verified the first Pi pull, denied-command and denied-write restrictions, idempotent rerun,
+  ciphertext checksum, off-server decryption, and isolated PostgreSQL restore. The restored staging
+  copy contained 33 public tables and 17 Prisma migrations before cleanup.
+- Left external heartbeat and notification delivery pending at the user's request to avoid adding a
+  new external service during this backup implementation.
 
 ### 2026-08-01
 

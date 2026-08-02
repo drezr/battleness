@@ -8,6 +8,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "generate:production": "node scripts/generate-production-content.mjs",
+    "import:production-atlases": "node scripts/import-production-atlases.mjs",
     "typecheck": "tsc -p tsconfig.json",
     "validate": "vitest run src/validate.test.ts"
   },

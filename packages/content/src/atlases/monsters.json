@@ -1,0 +1,1465 @@
+{
+  "frames": [
+    {
+      "filename": "aetherRay.png",
+      "frame": {
+        "x": 236,
+        "y": 269,
+        "w": 266,
+        "h": 220
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 40,
+        "w": 266,
+        "h": 220
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "arcFinch.png",
+      "frame": {
+        "x": 1598,
+        "y": 1,
+        "w": 266,
+        "h": 160
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 70,
+        "w": 266,
+        "h": 160
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "ashling.png",
+      "frame": {
+        "x": 1070,
+        "y": 1341,
+        "w": 175,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 63,
+        "y": 17,
+        "w": 175,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "aurexion.png",
+      "frame": {
+        "x": 1421,
+        "y": 1073,
+        "w": 162,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 69,
+        "y": 17,
+        "w": 162,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "azhurath.png",
+      "frame": {
+        "x": 461,
+        "y": 537,
+        "w": 209,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 46,
+        "y": 17,
+        "w": 209,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "borealSerpent.png",
+      "frame": {
+        "x": 458,
+        "y": 1341,
+        "w": 210,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 45,
+        "y": 17,
+        "w": 210,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "brandStalker.png",
+      "frame": {
+        "x": 672,
+        "y": 537,
+        "w": 205,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 48,
+        "y": 17,
+        "w": 205,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "brightwireFox.png",
+      "frame": {
+        "x": 234,
+        "y": 805,
+        "w": 266,
+        "h": 225
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 38,
+        "w": 266,
+        "h": 225
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "cinderJackal.png",
+      "frame": {
+        "x": 1245,
+        "y": 1073,
+        "w": 266,
+        "h": 174
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 63,
+        "w": 266,
+        "h": 174
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "coalback.png",
+      "frame": {
+        "x": 1,
+        "y": 805,
+        "w": 266,
+        "h": 231
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 35,
+        "w": 266,
+        "h": 231
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "coilRaptor.png",
+      "frame": {
+        "x": 1428,
+        "y": 1,
+        "w": 168,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 66,
+        "y": 17,
+        "w": 168,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "copperLynx.png",
+      "frame": {
+        "x": 1248,
+        "y": 1609,
+        "w": 237,
+        "h": 262
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 32,
+        "y": 19,
+        "w": 237,
+        "h": 262
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "crucibleDrake.png",
+      "frame": {
+        "x": 893,
+        "y": 1609,
+        "w": 242,
+        "h": 184
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 29,
+        "y": 58,
+        "w": 242,
+        "h": 184
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "cryoMoth.png",
+      "frame": {
+        "x": 670,
+        "y": 1341,
+        "w": 207,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 47,
+        "y": 17,
+        "w": 207,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "eiraKhel.png",
+      "frame": {
+        "x": 235,
+        "y": 537,
+        "w": 224,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 38,
+        "y": 17,
+        "w": 224,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "emberImp.png",
+      "frame": {
+        "x": 1748,
+        "y": 269,
+        "w": 176,
+        "h": 264
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 62,
+        "y": 18,
+        "w": 176,
+        "h": 264
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "eternalWarden.png",
+      "frame": {
+        "x": 1732,
+        "y": 1073,
+        "w": 199,
+        "h": 265
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 51,
+        "y": 18,
+        "w": 199,
+        "h": 265
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "frostBeetle.png",
+      "frame": {
+        "x": 879,
+        "y": 269,
+        "w": 266,
+        "h": 181
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 60,
+        "w": 266,
+        "h": 181
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "furnaceRam.png",
+      "frame": {
+        "x": 695,
+        "y": 1,
+        "w": 201,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 50,
+        "y": 17,
+        "w": 201,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "galvanMantis.png",
+      "frame": {
+        "x": 234,
+        "y": 1073,
+        "w": 211,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 45,
+        "y": 17,
+        "w": 211,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "glacierRam.png",
+      "frame": {
+        "x": 259,
+        "y": 1,
+        "w": 219,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 41,
+        "y": 17,
+        "w": 219,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "hailWisp.png",
+      "frame": {
+        "x": 1080,
+        "y": 1,
+        "w": 173,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 64,
+        "y": 17,
+        "w": 173,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "iceGuardian.png",
+      "frame": {
+        "x": 1,
+        "y": 1341,
+        "w": 227,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 37,
+        "y": 17,
+        "w": 227,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "ilexVonn.png",
+      "frame": {
+        "x": 875,
+        "y": 805,
+        "w": 182,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 59,
+        "y": 17,
+        "w": 182,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "ionStrider.png",
+      "frame": {
+        "x": 898,
+        "y": 1,
+        "w": 180,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 60,
+        "y": 17,
+        "w": 180,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "iskVaelor.png",
+      "frame": {
+        "x": 447,
+        "y": 1073,
+        "w": 211,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 45,
+        "y": 17,
+        "w": 211,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "ithyrax.png",
+      "frame": {
+        "x": 1760,
+        "y": 1,
+        "w": 204,
+        "h": 265
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 48,
+        "y": 17,
+        "w": 204,
+        "h": 265
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "ixaraTheFirstSpark.png",
+      "frame": {
+        "x": 1060,
+        "y": 537,
+        "w": 175,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 63,
+        "y": 17,
+        "w": 175,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "kharadynPrime.png",
+      "frame": {
+        "x": 1239,
+        "y": 269,
+        "w": 172,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 64,
+        "y": 17,
+        "w": 172,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "kharvexTheUndying.png",
+      "frame": {
+        "x": 1414,
+        "y": 1341,
+        "w": 164,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 68,
+        "y": 17,
+        "w": 164,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "maelorVane.png",
+      "frame": {
+        "x": 1582,
+        "y": 805,
+        "w": 162,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 69,
+        "y": 17,
+        "w": 162,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "magmaLynx.png",
+      "frame": {
+        "x": 1,
+        "y": 1609,
+        "w": 253,
+        "h": 236
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 24,
+        "y": 32,
+        "w": 253,
+        "h": 236
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "mordrakar.png",
+      "frame": {
+        "x": 1062,
+        "y": 269,
+        "w": 175,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 63,
+        "y": 17,
+        "w": 175,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "morveth.png",
+      "frame": {
+        "x": 1413,
+        "y": 269,
+        "w": 170,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 65,
+        "y": 17,
+        "w": 170,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "nymOrakai.png",
+      "frame": {
+        "x": 1747,
+        "y": 537,
+        "w": 164,
+        "h": 265
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 68,
+        "y": 17,
+        "w": 164,
+        "h": 265
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "nythros.png",
+      "frame": {
+        "x": 1237,
+        "y": 537,
+        "w": 175,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 63,
+        "y": 17,
+        "w": 175,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "orrun.png",
+      "frame": {
+        "x": 1238,
+        "y": 805,
+        "w": 175,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 63,
+        "y": 17,
+        "w": 175,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "paleUrsid.png",
+      "frame": {
+        "x": 230,
+        "y": 1341,
+        "w": 266,
+        "h": 226
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 37,
+        "w": 266,
+        "h": 226
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "pulseScarab.png",
+      "frame": {
+        "x": 1,
+        "y": 269,
+        "w": 233,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 34,
+        "y": 17,
+        "w": 233,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "pyreHound.png",
+      "frame": {
+        "x": 1066,
+        "y": 1073,
+        "w": 266,
+        "h": 177
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 61,
+        "w": 266,
+        "h": 177
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "quickfang.png",
+      "frame": {
+        "x": 1079,
+        "y": 1609,
+        "w": 167,
+        "h": 241
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 65,
+        "y": 30,
+        "w": 167,
+        "h": 241
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "quorinNull.png",
+      "frame": {
+        "x": 1059,
+        "y": 805,
+        "w": 177,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 61,
+        "y": 17,
+        "w": 177,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "rageSprite.png",
+      "frame": {
+        "x": 1255,
+        "y": 1,
+        "w": 171,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 65,
+        "y": 17,
+        "w": 171,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "redMantis.png",
+      "frame": {
+        "x": 1584,
+        "y": 537,
+        "w": 161,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 70,
+        "y": 17,
+        "w": 161,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "rimeGolem.png",
+      "frame": {
+        "x": 461,
+        "y": 805,
+        "w": 209,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 46,
+        "y": 17,
+        "w": 209,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "rimeTortoise.png",
+      "frame": {
+        "x": 1512,
+        "y": 1609,
+        "w": 237,
+        "h": 189
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 31,
+        "y": 56,
+        "w": 237,
+        "h": 189
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "scoriaBeetle.png",
+      "frame": {
+        "x": 672,
+        "y": 805,
+        "w": 266,
+        "h": 201
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 49,
+        "w": 266,
+        "h": 201
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "searingBasilisk.png",
+      "frame": {
+        "x": 1414,
+        "y": 537,
+        "w": 266,
+        "h": 168
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 67,
+        "w": 266,
+        "h": 168
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "shieldWisp.png",
+      "frame": {
+        "x": 879,
+        "y": 537,
+        "w": 179,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 61,
+        "y": 17,
+        "w": 179,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "snowSentinel.png",
+      "frame": {
+        "x": 693,
+        "y": 1609,
+        "w": 198,
+        "h": 251
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 51,
+        "y": 25,
+        "w": 198,
+        "h": 251
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "solaeryn.png",
+      "frame": {
+        "x": 1,
+        "y": 1073,
+        "w": 266,
+        "h": 231
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 35,
+        "w": 266,
+        "h": 231
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "staticWisp.png",
+      "frame": {
+        "x": 1585,
+        "y": 269,
+        "w": 161,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 70,
+        "y": 17,
+        "w": 161,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "stormglassDrake.png",
+      "frame": {
+        "x": 870,
+        "y": 1073,
+        "w": 266,
+        "h": 194
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 54,
+        "w": 266,
+        "h": 194
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "stormHound.png",
+      "frame": {
+        "x": 239,
+        "y": 1609,
+        "w": 231,
+        "h": 253
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 35,
+        "y": 24,
+        "w": 231,
+        "h": 253
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "syrakos.png",
+      "frame": {
+        "x": 1,
+        "y": 537,
+        "w": 266,
+        "h": 232
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 34,
+        "w": 266,
+        "h": 232
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "tempestSovereign.png",
+      "frame": {
+        "x": 480,
+        "y": 1,
+        "w": 213,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 44,
+        "y": 17,
+        "w": 213,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "theLastWinter.png",
+      "frame": {
+        "x": 879,
+        "y": 1341,
+        "w": 189,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 56,
+        "y": 17,
+        "w": 189,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "thePaleCurrent.png",
+      "frame": {
+        "x": 1585,
+        "y": 1073,
+        "w": 145,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 78,
+        "y": 17,
+        "w": 145,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "theQuietWarden.png",
+      "frame": {
+        "x": 1415,
+        "y": 805,
+        "w": 165,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 67,
+        "y": 17,
+        "w": 165,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "theRedPilgrim.png",
+      "frame": {
+        "x": 1740,
+        "y": 1340,
+        "w": 196,
+        "h": 254
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 52,
+        "y": 23,
+        "w": 196,
+        "h": 254
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "thyrix.png",
+      "frame": {
+        "x": 1580,
+        "y": 1341,
+        "w": 158,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 72,
+        "y": 17,
+        "w": 158,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "vaeloraTheStill.png",
+      "frame": {
+        "x": 660,
+        "y": 1073,
+        "w": 208,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 46,
+        "y": 17,
+        "w": 208,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "velkhar.png",
+      "frame": {
+        "x": 1746,
+        "y": 805,
+        "w": 173,
+        "h": 265
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 64,
+        "y": 18,
+        "w": 173,
+        "h": 265
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "veyrNinthFlame.png",
+      "frame": {
+        "x": 1,
+        "y": 1,
+        "w": 266,
+        "h": 256
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 23,
+        "w": 266,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "vhalTeryx.png",
+      "frame": {
+        "x": 674,
+        "y": 269,
+        "w": 203,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 49,
+        "y": 17,
+        "w": 203,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "voltMite.png",
+      "frame": {
+        "x": 472,
+        "y": 1609,
+        "w": 253,
+        "h": 219
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 24,
+        "y": 41,
+        "w": 253,
+        "h": 219
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "whiteBastionBeast.png",
+      "frame": {
+        "x": 1703,
+        "y": 1609,
+        "w": 191,
+        "h": 260
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 55,
+        "y": 20,
+        "w": 191,
+        "h": 260
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "winterCrab.png",
+      "frame": {
+        "x": 1247,
+        "y": 1341,
+        "w": 266,
+        "h": 165
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 68,
+        "w": 266,
+        "h": 165
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "zereth.png",
+      "frame": {
+        "x": 458,
+        "y": 269,
+        "w": 214,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 43,
+        "y": 17,
+        "w": 214,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    }
+  ],
+  "meta": {
+    "app": "https://www.codeandweb.com/texturepacker",
+    "version": "1.0",
+    "image": "monsters.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 1965,
+      "h": 1863
+    },
+    "scale": "1",
+    "smartupdate": "$TexturePacker:SmartUpdate:40c1ead876112aa35fabbc5b6057566f:b4acbb5d8f9c502e81dcae6668a548aa:729adc6043343cfda41c447ce8f464d6$"
+  }
+}

@@ -17,8 +17,10 @@ import {
   MAX_LEVEL,
   QUALITY_IMPROVEMENT_STEP,
   qualityImprovementCost,
+  resolveItemPenaltyIncrease,
   resolveItemStat,
   resolveHeroMaxHealth,
+  sumItemPenalties,
   socketImprovementCost,
   type CraftableItemType,
   type CampaignOpponent,
@@ -87,7 +89,7 @@ const pvpTransactionOptions = {
   timeout: 30_000,
 } as const;
 const pvpTransactionAttempts = 4;
-const currentOnboardingVersion = 1;
+const currentOnboardingVersion = 2;
 
 async function runPvpTransaction<T>(
   client: PrismaClient,
@@ -134,6 +136,7 @@ type EquipmentSpellEnchantmentItem = {
   damage: number;
   energyPenalty: number;
   cooldownPenalty: number;
+  speed: number;
 };
 
 type EquipmentMonsterEnchantmentItem = {
@@ -148,6 +151,9 @@ type EquipmentMonsterEnchantmentItem = {
   damage: number;
   health: number;
   cooldown: number;
+  energyPenalty: number;
+  cooldownPenalty: number;
+  speed: number;
   skill: string | null;
 };
 
@@ -166,6 +172,7 @@ type EquipmentGemItem = {
   damage: number;
   energyPenalty: number;
   cooldownPenalty: number;
+  speed: number;
   enchantment: EquipmentEnchantmentItem | null;
 };
 
@@ -3523,10 +3530,10 @@ async function registerCurrentContentRelease(client: PrismaContext): Promise<voi
 
 export async function ensurePlayerOnboarding(client: PrismaClient): Promise<void> {
   const playerId = currentPlayerId();
-  const starterRingId = `${playerId}.starter.v1.ring`;
-  const starterGemId = `${playerId}.starter.v1.gem`;
-  const starterSpellId = `${playerId}.starter.v1.spell`;
-  const starterLoadoutId = `${playerId}.starter.v1.loadout`;
+  const starterRingId = `${playerId}.starter.v2.ring`;
+  const starterGemId = `${playerId}.starter.v2.gem`;
+  const starterSpellId = `${playerId}.starter.v2.spell`;
+  const starterLoadoutId = `${playerId}.starter.v2.loadout`;
 
   const granted = await client.$transaction(async (transaction) => {
     const claim = await transaction.player.updateMany({
@@ -3564,7 +3571,7 @@ export async function ensurePlayerOnboarding(client: PrismaClient): Promise<void
           id: starterRingId,
           playerId,
           type: "ring",
-          definitionId: "trainingFlameBand",
+          definitionId: "ashenLoop",
           contentVersion,
           experience: 0,
           quality: 0,
@@ -3576,7 +3583,7 @@ export async function ensurePlayerOnboarding(client: PrismaClient): Promise<void
           id: starterGemId,
           playerId,
           type: "gem",
-          definitionId: "rubyShard",
+          definitionId: "emberShard",
           contentVersion,
           experience: 0,
           quality: 0,
@@ -3667,7 +3674,7 @@ export async function seedDevelopmentPlayer(client: PrismaContext): Promise<void
     return;
   }
 
-  await saveMaterialStock(client, playerId, createMaterialStock(definitions.materials, 2));
+  await saveMaterialStock(client, playerId, createMaterialStock(definitions.materials, 3));
 }
 
 async function saveMaterialStock(
@@ -3930,11 +3937,16 @@ function toEquipmentRingView(input: {
     (total, gem) => total + (gem.enchantment?.type === "monster" ? gem.enchantment.damage : 0),
     0,
   );
-  const energyPenalty = gems.reduce((total, gem) => total + gem.energyPenalty, 0);
-  const cooldownPenalty = gems.reduce((total, gem) => total + gem.cooldownPenalty, 0);
+  const energyPenalty = sumItemPenalties(gems.map((gem) => gem.energyPenalty));
+  const cooldownPenalty = sumItemPenalties(gems.map((gem) => gem.cooldownPenalty));
+  const speed = definition.baseSpeed + gems.reduce((total, gem) => total + gem.speed, 0);
   const ringDamage = resolveItemStat(definition.baseDamage, ringLevel, input.ring.quality);
-  const resolvedEnergyCost = Math.max(1, definition.baseEnergyCost + energyPenalty);
-  const resolvedCooldown = definition.baseCooldown + cooldownPenalty;
+  const resolvedEnergyCost = Math.max(
+    1,
+    definition.baseEnergyCost + resolveItemPenaltyIncrease(gems.map((gem) => gem.energyPenalty)),
+  );
+  const resolvedCooldown =
+    definition.baseCooldown + resolveItemPenaltyIncrease(gems.map((gem) => gem.cooldownPenalty));
 
   return {
     id: input.ring.id,
@@ -3952,6 +3964,7 @@ function toEquipmentRingView(input: {
     baseEnergyCost: definition.baseEnergyCost,
     baseCooldown: definition.baseCooldown,
     baseSpeed: definition.baseSpeed,
+    speed,
     damage: ringDamage + gemDamage + spellDamage + monsterDamage,
     ringDamage,
     gemDamage,
@@ -3990,7 +4003,7 @@ function toSocketRingView(input: {
 }
 
 function toEquipmentSummary(equippedRings: readonly EquipmentRingItem[]) {
-  const totalSpeed = equippedRings.reduce((total, ring) => total + ring.baseSpeed, 0);
+  const totalSpeed = equippedRings.reduce((total, ring) => total + ring.speed, 0);
   const totalDamage = equippedRings.reduce((total, ring) => total + ring.damage, 0);
   const totalRingDamage = equippedRings.reduce((total, ring) => total + ring.ringDamage, 0);
   const totalGemDamage = equippedRings.reduce((total, ring) => total + ring.gemDamage, 0);
@@ -4068,10 +4081,8 @@ function toSocketGemView(input: {
     input.enchantmentByGemId.get(input.gem.id),
     input.inventoryById,
   );
-  const spellEnergyPenalty =
-    resolvedEnchantment?.type === "spell" ? resolvedEnchantment.energyPenalty : 0;
-  const spellCooldownPenalty =
-    resolvedEnchantment?.type === "spell" ? resolvedEnchantment.cooldownPenalty : 0;
+  const enchantmentEnergyPenalty = resolvedEnchantment?.energyPenalty ?? 0;
+  const enchantmentCooldownPenalty = resolvedEnchantment?.cooldownPenalty ?? 0;
 
   return {
     id: input.gem.id,
@@ -4083,8 +4094,9 @@ function toSocketGemView(input: {
     level: gemLevel,
     quality: input.gem.quality,
     damage: resolveItemStat(definition.baseDamage, gemLevel, input.gem.quality),
-    energyPenalty: definition.baseEnergyPenalty + spellEnergyPenalty,
-    cooldownPenalty: definition.baseCooldownPenalty + spellCooldownPenalty,
+    energyPenalty: sumItemPenalties([definition.baseEnergyPenalty, enchantmentEnergyPenalty]),
+    cooldownPenalty: sumItemPenalties([definition.baseCooldownPenalty, enchantmentCooldownPenalty]),
+    speed: definition.baseSpeed + (resolvedEnchantment?.speed ?? 0),
     socketedRingId: input.socket?.ringItemId ?? null,
     socketIndex: input.socket?.socketIndex ?? null,
     enchantment: resolvedEnchantment,
@@ -4322,10 +4334,8 @@ function toEquipmentGemView(
   const resolvedEnchantment = enchantment
     ? toEquipmentEnchantmentView(enchantment, inventoryById)
     : null;
-  const spellEnergyPenalty =
-    resolvedEnchantment?.type === "spell" ? resolvedEnchantment.energyPenalty : 0;
-  const spellCooldownPenalty =
-    resolvedEnchantment?.type === "spell" ? resolvedEnchantment.cooldownPenalty : 0;
+  const enchantmentEnergyPenalty = resolvedEnchantment?.energyPenalty ?? 0;
+  const enchantmentCooldownPenalty = resolvedEnchantment?.cooldownPenalty ?? 0;
 
   return {
     id: row.id,
@@ -4338,8 +4348,9 @@ function toEquipmentGemView(
     quality: row.quality,
     socketIndex,
     damage: resolveItemStat(definition.baseDamage, gemLevel, row.quality),
-    energyPenalty: definition.baseEnergyPenalty + spellEnergyPenalty,
-    cooldownPenalty: definition.baseCooldownPenalty + spellCooldownPenalty,
+    energyPenalty: sumItemPenalties([definition.baseEnergyPenalty, enchantmentEnergyPenalty]),
+    cooldownPenalty: sumItemPenalties([definition.baseCooldownPenalty, enchantmentCooldownPenalty]),
+    speed: definition.baseSpeed + (resolvedEnchantment?.speed ?? 0),
     enchantment: resolvedEnchantment,
   };
 }
@@ -4382,6 +4393,7 @@ function toEquipmentEnchantmentView(
       damage,
       energyPenalty: definition.baseEnergyPenalty,
       cooldownPenalty: definition.baseCooldownPenalty,
+      speed: definition.baseSpeed ?? 0,
     };
   }
 
@@ -4401,6 +4413,9 @@ function toEquipmentEnchantmentView(
       damage: resolveItemStat(definition.baseDamage, monsterLevel, target.quality),
       health: resolveItemStat(definition.baseHealth, monsterLevel, target.quality),
       cooldown: definition.baseCooldown,
+      energyPenalty: definition.baseEnergyPenalty ?? 0,
+      cooldownPenalty: definition.baseCooldownPenalty ?? 0,
+      speed: definition.baseSpeed,
       skill: definition.skill ?? null,
     };
   }
@@ -5874,6 +5889,7 @@ function toLiveBattlePlayerView(
           damage: gem.damage,
           energyPenalty: gem.energyPenalty,
           cooldownPenalty: gem.cooldownPenalty,
+          speed: gem.speed,
           ...(visibility === "full" || visibility.enchantmentGemIds.has(gem.id)
             ? { enchantment: toLiveBattleEnchantmentView(state, gem) }
             : {}),
@@ -5908,6 +5924,7 @@ function toLiveBattleEnchantmentView(
       ),
       energyPenalty: definition.baseEnergyPenalty,
       cooldownPenalty: definition.baseCooldownPenalty,
+      speed: definition.baseSpeed ?? 0,
     };
   }
 
@@ -5926,6 +5943,8 @@ function toLiveBattleEnchantmentView(
     damage: definition.baseDamage,
     cooldown: definition.baseCooldown,
     speed: definition.baseSpeed,
+    energyPenalty: definition.baseEnergyPenalty ?? 0,
+    cooldownPenalty: definition.baseCooldownPenalty ?? 0,
     skill: definition.skill ?? null,
   };
 }

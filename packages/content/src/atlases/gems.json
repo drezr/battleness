@@ -1,0 +1,1150 @@
+{
+  "frames": [
+    {
+      "filename": "absoluteSilence.png",
+      "frame": {
+        "x": 860,
+        "y": 1,
+        "w": 157,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 72,
+        "y": 17,
+        "w": 157,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "aevryn.png",
+      "frame": {
+        "x": 1,
+        "y": 537,
+        "w": 242,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 30,
+        "y": 17,
+        "w": 242,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "arcShard.png",
+      "frame": {
+        "x": 263,
+        "y": 1073,
+        "w": 243,
+        "h": 254
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 28,
+        "y": 23,
+        "w": 243,
+        "h": 254
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "ashOpal.png",
+      "frame": {
+        "x": 727,
+        "y": 1073,
+        "w": 209,
+        "h": 245
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 45,
+        "y": 28,
+        "w": 209,
+        "h": 245
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "astraxion.png",
+      "frame": {
+        "x": 672,
+        "y": 537,
+        "w": 178,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 61,
+        "y": 17,
+        "w": 178,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "borealCrystal.png",
+      "frame": {
+        "x": 1454,
+        "y": 269,
+        "w": 129,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 86,
+        "y": 17,
+        "w": 129,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "brightLattice.png",
+      "frame": {
+        "x": 475,
+        "y": 805,
+        "w": 190,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 56,
+        "y": 17,
+        "w": 190,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "cinderPearl.png",
+      "frame": {
+        "x": 265,
+        "y": 1,
+        "w": 207,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 47,
+        "y": 17,
+        "w": 207,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "coalheart.png",
+      "frame": {
+        "x": 508,
+        "y": 1073,
+        "w": 217,
+        "h": 250
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 42,
+        "y": 25,
+        "w": 217,
+        "h": 250
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "copperEye.png",
+      "frame": {
+        "x": 1324,
+        "y": 1,
+        "w": 130,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 85,
+        "y": 17,
+        "w": 130,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "crucibleEye.png",
+      "frame": {
+        "x": 1703,
+        "y": 802,
+        "w": 263,
+        "h": 200
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 19,
+        "y": 51,
+        "w": 263,
+        "h": 200
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "cryoliteHeart.png",
+      "frame": {
+        "x": 1797,
+        "y": 547,
+        "w": 199,
+        "h": 227
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 51,
+        "y": 36,
+        "w": 199,
+        "h": 227
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "elyndra.png",
+      "frame": {
+        "x": 1019,
+        "y": 537,
+        "w": 162,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 69,
+        "y": 17,
+        "w": 162,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "emberShard.png",
+      "frame": {
+        "x": 1460,
+        "y": 537,
+        "w": 129,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 86,
+        "y": 17,
+        "w": 129,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "eyeOfThyr.png",
+      "frame": {
+        "x": 474,
+        "y": 1,
+        "w": 207,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 47,
+        "y": 17,
+        "w": 207,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "frostChip.png",
+      "frame": {
+        "x": 1855,
+        "y": 1,
+        "w": 125,
+        "h": 260
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 88,
+        "y": 20,
+        "w": 125,
+        "h": 260
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "galvanPearl.png",
+      "frame": {
+        "x": 474,
+        "y": 269,
+        "w": 200,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 50,
+        "y": 17,
+        "w": 200,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "glacierOpal.png",
+      "frame": {
+        "x": 1591,
+        "y": 536,
+        "w": 204,
+        "h": 264
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 48,
+        "y": 18,
+        "w": 204,
+        "h": 264
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "hailstone.png",
+      "frame": {
+        "x": 241,
+        "y": 805,
+        "w": 232,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 34,
+        "y": 17,
+        "w": 232,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "heartOfAzhor.png",
+      "frame": {
+        "x": 1,
+        "y": 805,
+        "w": 238,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 31,
+        "y": 17,
+        "w": 238,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "heartOfIthyros.png",
+      "frame": {
+        "x": 1,
+        "y": 269,
+        "w": 253,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 24,
+        "y": 17,
+        "w": 253,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "ionCrystal.png",
+      "frame": {
+        "x": 1585,
+        "y": 217,
+        "w": 100,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 101,
+        "y": 17,
+        "w": 100,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "iskarasTear.png",
+      "frame": {
+        "x": 1327,
+        "y": 537,
+        "w": 131,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 85,
+        "y": 17,
+        "w": 131,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "kaesis.png",
+      "frame": {
+        "x": 1176,
+        "y": 1,
+        "w": 146,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 77,
+        "y": 17,
+        "w": 146,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "khalyss.png",
+      "frame": {
+        "x": 1852,
+        "y": 319,
+        "w": 226,
+        "h": 188
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 37,
+        "y": 56,
+        "w": 226,
+        "h": 188
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "mavreksTear.png",
+      "frame": {
+        "x": 1176,
+        "y": 269,
+        "w": 142,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 79,
+        "y": 17,
+        "w": 142,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "moltenGarnet.png",
+      "frame": {
+        "x": 1325,
+        "y": 805,
+        "w": 135,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 82,
+        "y": 17,
+        "w": 135,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "morvael.png",
+      "frame": {
+        "x": 1585,
+        "y": 319,
+        "w": 215,
+        "h": 265
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 43,
+        "y": 18,
+        "w": 215,
+        "h": 265
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "nexil.png",
+      "frame": {
+        "x": 1020,
+        "y": 269,
+        "w": 154,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 73,
+        "y": 17,
+        "w": 154,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "nyssara.png",
+      "frame": {
+        "x": 852,
+        "y": 537,
+        "w": 165,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 68,
+        "y": 17,
+        "w": 165,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "orisVale.png",
+      "frame": {
+        "x": 475,
+        "y": 537,
+        "w": 195,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 53,
+        "y": 17,
+        "w": 195,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "othrys.png",
+      "frame": {
+        "x": 683,
+        "y": 1,
+        "w": 175,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 63,
+        "y": 17,
+        "w": 175,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "palePrism.png",
+      "frame": {
+        "x": 1456,
+        "y": 1,
+        "w": 127,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 87,
+        "y": 17,
+        "w": 127,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "pulseDiamond.png",
+      "frame": {
+        "x": 245,
+        "y": 537,
+        "w": 228,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 36,
+        "y": 17,
+        "w": 228,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "pyrelight.png",
+      "frame": {
+        "x": 667,
+        "y": 805,
+        "w": 181,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 60,
+        "y": 17,
+        "w": 181,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "quoriel.png",
+      "frame": {
+        "x": 1174,
+        "y": 805,
+        "w": 149,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 76,
+        "y": 17,
+        "w": 149,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "redAxiom.png",
+      "frame": {
+        "x": 1320,
+        "y": 269,
+        "w": 132,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 84,
+        "y": 17,
+        "w": 132,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "rimeQuartz.png",
+      "frame": {
+        "x": 1585,
+        "y": 1,
+        "w": 106,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 97,
+        "y": 17,
+        "w": 106,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "scoriaChip.png",
+      "frame": {
+        "x": 1689,
+        "y": 1073,
+        "w": 164,
+        "h": 230
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 68,
+        "y": 35,
+        "w": 164,
+        "h": 230
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "serephine.png",
+      "frame": {
+        "x": 1585,
+        "y": 109,
+        "w": 106,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 97,
+        "y": 17,
+        "w": 106,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "snowPearl.png",
+      "frame": {
+        "x": 1422,
+        "y": 1073,
+        "w": 232,
+        "h": 265
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 34,
+        "y": 18,
+        "w": 232,
+        "h": 265
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "solarJasper.png",
+      "frame": {
+        "x": 855,
+        "y": 269,
+        "w": 163,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 69,
+        "y": 17,
+        "w": 163,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "sparkPrism.png",
+      "frame": {
+        "x": 1021,
+        "y": 805,
+        "w": 151,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 75,
+        "y": 17,
+        "w": 151,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "staticPearl.png",
+      "frame": {
+        "x": 1,
+        "y": 1073,
+        "w": 256,
+        "h": 260
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 23,
+        "y": 20,
+        "w": 256,
+        "h": 260
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "stormglass.png",
+      "frame": {
+        "x": 850,
+        "y": 805,
+        "w": 169,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 66,
+        "y": 17,
+        "w": 169,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "thalenVoss.png",
+      "frame": {
+        "x": 1588,
+        "y": 805,
+        "w": 113,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 94,
+        "y": 17,
+        "w": 113,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "theLastEmber.png",
+      "frame": {
+        "x": 1,
+        "y": 1,
+        "w": 266,
+        "h": 262
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 19,
+        "w": 266,
+        "h": 262
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "theLivingCircuit.png",
+      "frame": {
+        "x": 1019,
+        "y": 1,
+        "w": 155,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 73,
+        "y": 17,
+        "w": 155,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "veyraSol.png",
+      "frame": {
+        "x": 1462,
+        "y": 805,
+        "w": 124,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 88,
+        "y": 17,
+        "w": 124,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "voltChip.png",
+      "frame": {
+        "x": 938,
+        "y": 1073,
+        "w": 244,
+        "h": 261
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 28,
+        "y": 20,
+        "w": 244,
+        "h": 261
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "whiteLattice.png",
+      "frame": {
+        "x": 256,
+        "y": 269,
+        "w": 216,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 42,
+        "y": 17,
+        "w": 216,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "winterEye.png",
+      "frame": {
+        "x": 1201,
+        "y": 1073,
+        "w": 244,
+        "h": 219
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 28,
+        "y": 41,
+        "w": 244,
+        "h": 219
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "xathra.png",
+      "frame": {
+        "x": 1183,
+        "y": 537,
+        "w": 142,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 80,
+        "y": 17,
+        "w": 142,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "zynthera.png",
+      "frame": {
+        "x": 676,
+        "y": 269,
+        "w": 177,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 62,
+        "y": 17,
+        "w": 177,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    }
+  ],
+  "meta": {
+    "app": "https://www.codeandweb.com/texturepacker",
+    "version": "1.0",
+    "image": "gems.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 2041,
+      "h": 1330
+    },
+    "scale": "1",
+    "smartupdate": "$TexturePacker:SmartUpdate:89e62dbce43b546bf79427d650c17068:b7f3a4e4c2b03ea83f8cc4efc00de701:729adc6043343cfda41c447ce8f464d6$"
+  }
+}

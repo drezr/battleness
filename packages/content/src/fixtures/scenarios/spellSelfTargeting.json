@@ -3,10 +3,14 @@
   "descriptionKey": "scenario.spellSelfTargeting.description",
   "battleSetupId": "basicDuel",
   "actions": [
+    { "type": "endTurn", "playerId": "playerOne" },
+    { "type": "endTurn", "playerId": "playerTwo" },
+    { "type": "endTurn", "playerId": "playerOne" },
+    { "type": "endTurn", "playerId": "playerTwo" },
     {
       "type": "useRing",
       "playerId": "playerOne",
-      "ringInstanceId": "playerOne.ring.sparkBand",
+      "ringInstanceId": "playerOne.ring.staticLoop",
       "targetId": "playerTwo.hero",
       "enchantmentTargets": {
         "playerOne.gem.sparkPrism": "playerOne.hero"

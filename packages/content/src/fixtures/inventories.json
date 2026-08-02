@@ -1,18 +1,18 @@
 {
   "rings": [
     {
-      "id": "playerOne.ring.emberLoop",
-      "definitionId": "emberLoop",
+      "id": "playerOne.ring.ashenLoop",
+      "definitionId": "ashenLoop",
       "ownerId": "playerOne",
       "experience": 100,
       "quality": 72,
       "socketCount": 1,
-      "socketedGemInstanceIds": ["playerOne.gem.rubyShard"],
+      "socketedGemInstanceIds": ["playerOne.gem.emberShard"],
       "equipped": true
     },
     {
-      "id": "playerOne.ring.sparkBand",
-      "definitionId": "sparkBand",
+      "id": "playerOne.ring.staticLoop",
+      "definitionId": "staticLoop",
       "ownerId": "playerOne",
       "experience": 100,
       "quality": 66,
@@ -21,8 +21,8 @@
       "equipped": true
     },
     {
-      "id": "playerTwo.ring.frostSeal",
-      "definitionId": "frostSeal",
+      "id": "playerTwo.ring.rimeLoop",
+      "definitionId": "rimeLoop",
       "ownerId": "playerTwo",
       "experience": 100,
       "quality": 70,
@@ -31,18 +31,18 @@
       "equipped": true
     },
     {
-      "id": "playerTwo.ring.ironCircle",
-      "definitionId": "ironCircle",
+      "id": "playerTwo.ring.ionSignet",
+      "definitionId": "ionSignet",
       "ownerId": "playerTwo",
       "experience": 100,
       "quality": 62,
       "socketCount": 1,
-      "socketedGemInstanceIds": ["playerTwo.gem.plainQuartz"],
+      "socketedGemInstanceIds": ["playerTwo.gem.arcShard"],
       "equipped": true
     },
     {
-      "id": "playerLowLevel.ring.stormCoil",
-      "definitionId": "stormCoil",
+      "id": "playerLowLevel.ring.theSilentCurrent",
+      "definitionId": "theSilentCurrent",
       "ownerId": "playerLowLevel",
       "experience": 100,
       "quality": 55,
@@ -51,18 +51,18 @@
       "equipped": true
     },
     {
-      "id": "playerHighLevel.ring.stormCoil",
-      "definitionId": "stormCoil",
+      "id": "playerHighLevel.ring.theSilentCurrent",
+      "definitionId": "theSilentCurrent",
       "ownerId": "playerHighLevel",
       "experience": 100,
       "quality": 55,
       "socketCount": 1,
-      "socketedGemInstanceIds": ["playerHighLevel.gem.plainQuartz"],
+      "socketedGemInstanceIds": ["playerHighLevel.gem.arcShard"],
       "equipped": true
     },
     {
-      "id": "playerElectric.ring.stormCoil",
-      "definitionId": "stormCoil",
+      "id": "playerElectric.ring.theSilentCurrent",
+      "definitionId": "quickwire",
       "ownerId": "playerElectric",
       "experience": 100,
       "quality": 68,
@@ -71,20 +71,20 @@
       "equipped": true
     },
     {
-      "id": "playerFire.ring.trainingFlameBand",
-      "definitionId": "trainingFlameBand",
+      "id": "playerFire.ring.furnaceLink",
+      "definitionId": "furnaceLink",
       "ownerId": "playerFire",
       "experience": 100,
       "quality": 68,
       "socketCount": 1,
-      "socketedGemInstanceIds": ["playerFire.gem.rubyShard"],
+      "socketedGemInstanceIds": ["playerFire.gem.emberShard"],
       "equipped": true
     }
   ],
   "gems": [
     {
-      "id": "playerOne.gem.rubyShard",
-      "definitionId": "rubyShard",
+      "id": "playerOne.gem.emberShard",
+      "definitionId": "emberShard",
       "ownerId": "playerOne",
       "experience": 100,
       "quality": 60,
@@ -135,7 +135,7 @@
     },
     {
       "id": "playerTwo.gem.staticPearl",
-      "definitionId": "staticPearl",
+      "definitionId": "cinderPearl",
       "ownerId": "playerTwo",
       "experience": 100,
       "quality": 65,
@@ -145,8 +145,8 @@
       }
     },
     {
-      "id": "playerTwo.gem.plainQuartz",
-      "definitionId": "plainQuartz",
+      "id": "playerTwo.gem.arcShard",
+      "definitionId": "cinderPearl",
       "ownerId": "playerTwo",
       "experience": 100,
       "quality": 50
@@ -159,26 +159,22 @@
       "quality": 52
     },
     {
-      "id": "playerHighLevel.gem.plainQuartz",
-      "definitionId": "plainQuartz",
+      "id": "playerHighLevel.gem.arcShard",
+      "definitionId": "staticPearl",
       "ownerId": "playerHighLevel",
       "experience": 100,
       "quality": 50
     },
     {
       "id": "playerElectric.gem.staticPearl",
-      "definitionId": "staticPearl",
+      "definitionId": "copperEye",
       "ownerId": "playerElectric",
       "experience": 100,
-      "quality": 66,
-      "enchantment": {
-        "type": "monster",
-        "monsterInstanceId": "playerElectric.monster.stormHound"
-      }
+      "quality": 66
     },
     {
-      "id": "playerFire.gem.rubyShard",
-      "definitionId": "rubyShard",
+      "id": "playerFire.gem.emberShard",
+      "definitionId": "emberShard",
       "ownerId": "playerFire",
       "experience": 100,
       "quality": 66,

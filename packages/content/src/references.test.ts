@@ -19,21 +19,21 @@ describe("content reference validation", () => {
     data.inventory.gems[0].ownerId = "missingPlayer";
 
     expectIssues(data, [
-      'Ring instance "playerOne.ring.emberLoop" references unknown definition "missingRing".',
-      'Gem instance "playerOne.gem.rubyShard" has unknown owner "missingPlayer".',
+      'Ring instance "playerOne.ring.ashenLoop" references unknown definition "missingRing".',
+      'Gem instance "playerOne.gem.emberShard" has unknown owner "missingPlayer".',
     ]);
   });
 
   it("reports invalid equipped-ring and socket relationships", () => {
     const data = createReferenceData();
     data.players[0].equippedRingInstanceIds.push("missing.ring", "missing.ring");
-    data.inventory.rings[0].socketedGemInstanceIds.push("playerOne.gem.rubyShard");
+    data.inventory.rings[0].socketedGemInstanceIds.push("playerOne.gem.emberShard");
 
     expectIssues(data, [
       'Player "playerOne" equipped rings contains duplicate reference "missing.ring".',
       'Player "playerOne" equips unknown ring instance "missing.ring".',
-      'Ring instance "playerOne.ring.emberLoop" has 2 socketed gems but only 1 sockets.',
-      'Ring instance "playerOne.ring.emberLoop" socketed gems contains duplicate reference "playerOne.gem.rubyShard".',
+      'Ring instance "playerOne.ring.ashenLoop" has 2 socketed gems but only 1 sockets.',
+      'Ring instance "playerOne.ring.ashenLoop" socketed gems contains duplicate reference "playerOne.gem.emberShard".',
     ]);
   });
 
@@ -57,7 +57,7 @@ describe("content reference validation", () => {
     };
 
     expectIssues(data, [
-      'Gem instance "playerOne.gem.rubyShard" references unknown spell instance "missing.spell".',
+      'Gem instance "playerOne.gem.emberShard" references unknown spell instance "missing.spell".',
       'Gem instance "playerOne.gem.frostChip" references spell instance "playerTwo.spell.iceShard" owned by "playerTwo".',
       'Spell instance "playerTwo.spell.iceShard" enchants both "playerOne.gem.frostChip" and "playerOne.gem.sparkPrism".',
     ]);
@@ -94,7 +94,7 @@ describe("content reference validation", () => {
 
     expectIssues(data, [
       'Material definition "aluminium" has base price 400; common materials require 100.',
-      'Locale "en" is missing required key "ring.emberLoop.name".',
+      'Locale "en" is missing required key "ring.ashenLoop.name".',
     ]);
   });
 
@@ -106,8 +106,7 @@ describe("content reference validation", () => {
     };
 
     expectIssues(data, [
-      'Recipe definition "craftRingEmberLoop" ingredient "hydrogen" has quantity 2; prototype recipes require quantity 1.',
-      'Recipe definition "craftRingEmberLoop" uses spell material "hydrogen" for ring crafting.',
+      'Recipe definition "craftRingAshenLoop" uses spell material "hydrogen" for ring crafting.',
     ]);
   });
 });

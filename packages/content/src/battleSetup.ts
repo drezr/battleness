@@ -40,6 +40,7 @@ import {
   spellDefinitionSchema,
 } from "./schemas";
 import { levelFromExperience, resolveHeroMaxHealth, resolveItemStat } from "./progression";
+import { resolveItemPenaltyIncrease, sumItemPenalties } from "./penalties";
 
 const definitionData = {
   gems: gemDefinitionSchema.array().parse(gemsJson),
@@ -192,8 +193,7 @@ function createRingCombatInstance(
   const gems = instance.socketedGemInstanceIds.map((gemInstanceId) =>
     createGemCombatInstance(ownerId, gemInstanceId, inventory, resolvedDefinitions),
   );
-  const energyPenalty = gems.reduce((sum, gem) => sum + gem.energyPenalty, 0);
-  const cooldownPenalty = gems.reduce((sum, gem) => sum + gem.cooldownPenalty, 0);
+  const speed = definition.baseSpeed + gems.reduce((sum, gem) => sum + gem.speed, 0);
 
   return {
     id: instance.id,
@@ -203,10 +203,14 @@ function createRingCombatInstance(
     element: definition.element,
     rarity: definition.rarity,
     damage: resolveItemStat(definition.baseDamage, level, instance.quality),
-    energyCost: Math.max(1, definition.baseEnergyCost + energyPenalty),
-    cooldown: definition.baseCooldown + cooldownPenalty,
+    energyCost: Math.max(
+      1,
+      definition.baseEnergyCost + resolveItemPenaltyIncrease(gems.map((gem) => gem.energyPenalty)),
+    ),
+    cooldown:
+      definition.baseCooldown + resolveItemPenaltyIncrease(gems.map((gem) => gem.cooldownPenalty)),
     currentCooldown: 0,
-    speed: definition.baseSpeed,
+    speed,
     socketCount: instance.socketCount,
     gems,
   };
@@ -228,6 +232,7 @@ function createGemCombatInstance(
   const enchantment = resolveGemEnchantment(ownerId, instance, inventory, resolvedDefinitions);
   let energyPenalty = definition.baseEnergyPenalty;
   let cooldownPenalty = definition.baseCooldownPenalty;
+  let speed = definition.baseSpeed;
 
   if (enchantment?.type === "spell") {
     const spell =
@@ -235,8 +240,20 @@ function createGemCombatInstance(
     if (!spell) {
       throw new Error(`Resolved spell definition ${enchantment.spellId} was not found.`);
     }
-    energyPenalty += spell.baseEnergyPenalty;
-    cooldownPenalty += spell.baseCooldownPenalty;
+    energyPenalty = sumItemPenalties([energyPenalty, spell.baseEnergyPenalty]);
+    cooldownPenalty = sumItemPenalties([cooldownPenalty, spell.baseCooldownPenalty]);
+    speed += spell.baseSpeed ?? 0;
+  }
+
+  if (enchantment?.type === "monster") {
+    const monster =
+      resolvedDefinitions.monsters[enchantment.resolvedDefinitionId ?? enchantment.monsterId];
+    if (!monster) {
+      throw new Error(`Resolved monster definition ${enchantment.monsterId} was not found.`);
+    }
+    energyPenalty = sumItemPenalties([energyPenalty, monster.baseEnergyPenalty ?? 0]);
+    cooldownPenalty = sumItemPenalties([cooldownPenalty, monster.baseCooldownPenalty ?? 0]);
+    speed += monster.baseSpeed;
   }
 
   return {
@@ -249,6 +266,7 @@ function createGemCombatInstance(
     damage: resolveItemStat(definition.baseDamage, level, instance.quality),
     energyPenalty,
     cooldownPenalty,
+    speed,
     enchantment,
   };
 }
@@ -403,6 +421,8 @@ function toEngineMonsterDefinition(definition: ContentMonsterDefinition): Monste
     baseDamage: definition.baseDamage,
     baseCooldown: definition.baseCooldown,
     baseSpeed: definition.baseSpeed,
+    baseEnergyPenalty: definition.baseEnergyPenalty,
+    baseCooldownPenalty: definition.baseCooldownPenalty,
     skill: definition.skill,
   };
 }
@@ -413,6 +433,7 @@ function toEngineSpellDefinition(definition: ContentSpellDefinition): SpellDefin
     nameKey: definition.nameKey,
     element: definition.element,
     rarity: definition.rarity,
+    baseSpeed: definition.baseSpeed,
     baseEnergyPenalty: definition.baseEnergyPenalty,
     baseCooldownPenalty: definition.baseCooldownPenalty,
     effects: definition.effects,

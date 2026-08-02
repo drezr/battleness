@@ -71,6 +71,7 @@ import {
   type DevelopmentLoadout,
 } from "./devLoadouts";
 import { itemArtworkStyle, validateItemAssets, type ItemAssetKind } from "./itemAssets";
+import { clearIncompatibleDevelopmentStorage } from "./developmentStorageVersion";
 import "./styles.css";
 
 validateContent();
@@ -145,6 +146,7 @@ if (!app) {
 }
 
 const root = app;
+const developmentStorageWasReset = clearIncompatibleDevelopmentStorage();
 let selectedScenarioId = fixtures.scenarios[0]?.id ?? "";
 let setupMode: SetupMode = "scenario";
 let battleLabItemSourceMode: BattleLabItemSourceMode = "free";
@@ -385,6 +387,12 @@ function renderSetup(): void {
         </div>
       </header>
 
+      ${
+        developmentStorageWasReset
+          ? `<p class="lab-feedback success">${escapeHtml(t("ui.developmentStorageResetV2"))}</p>`
+          : ""
+      }
+
       <main class="setup-layout">
         <section class="panel setup-summary">
           <h2>${escapeHtml(t("ui.battleSetup"))}</h2>
@@ -449,7 +457,7 @@ function createDefaultBattleLabConfig(): BattleLabConfig {
         level: 1,
         rings: [
           {
-            definitionId: "sparkBand",
+            definitionId: "staticLoop",
             level: 1,
             quality: 0,
             gems: [
@@ -474,7 +482,7 @@ function createDefaultBattleLabConfig(): BattleLabConfig {
         level: 1,
         rings: [
           {
-            definitionId: "frostSeal",
+            definitionId: "rimeLoop",
             level: 1,
             quality: 0,
             gems: [
@@ -4222,7 +4230,9 @@ function renderBoardRing(ring: RingView, activePlayer: BattlePlayerView | null):
         ${Array.from({ length: 3 }, (_, index) => {
           const gem = ring.gems[index];
           return `<span class="${
-            gem ? `filled ${rarityClass(gem.rarity)} element-${gem.element}` : ""
+            gem
+              ? `filled item-artwork gem-artwork ${rarityClass(gem.rarity)} element-${gem.element}`
+              : ""
           }" data-rarity="${gem?.rarity ?? ""}" title="${
             gem ? escapeHtml(`${t(gem.nameKey)} - ${t(`ui.element.${gem.element}`)}`) : ""
           }" ${gem ? `style="${itemArtworkStyle("gem", gem.definitionId)}"` : ""}></span>`;

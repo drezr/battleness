@@ -13,15 +13,15 @@ describe("content balance report", () => {
         definitions.spells.length,
     );
 
-    const emberLoop = report.items.find((item) => item.id === "emberLoop");
+    const ashenLoop = report.items.find((item) => item.id === "ashenLoop");
     const firebolt = report.items.find((item) => item.id === "firebolt");
     const iceGuardian = report.items.find((item) => item.id === "iceGuardian");
 
-    expect(emberLoop?.profiles.find((profile) => profile.profileId === "base")?.stats.damage).toBe(
-      4,
+    expect(ashenLoop?.profiles.find((profile) => profile.profileId === "base")?.stats.damage).toBe(
+      5,
     );
-    expect(emberLoop?.profiles.find((profile) => profile.profileId === "max")?.stats.damage).toBe(
-      8,
+    expect(ashenLoop?.profiles.find((profile) => profile.profileId === "max")?.stats.damage).toBe(
+      11,
     );
     expect(firebolt?.profiles.find((profile) => profile.profileId === "mid")?.stats.damage).toBe(5);
     expect(iceGuardian?.profiles.find((profile) => profile.profileId === "max")?.stats.health).toBe(

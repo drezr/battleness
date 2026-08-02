@@ -3,9 +3,9 @@ import { itemArtworkRarityClass } from "./itemAssets";
 
 describe("item artwork rarity borders", () => {
   it.each([
-    ["ring", "emberLoop", "rarity-border-common"],
-    ["gem", "emberCore", "rarity-border-refined"],
-    ["monster", "magmaColossus", "rarity-border-rare"],
+    ["ring", "ashenLoop", "rarity-border-common"],
+    ["gem", "moltenGarnet", "rarity-border-refined"],
+    ["monster", "maelorVane", "rarity-border-rare"],
     ["material", "iridium", "rarity-border-epic"],
   ])("resolves the %s %s rarity from content", (kind, definitionId, expectedClass) => {
     expect(itemArtworkRarityClass(kind, definitionId)).toBe(expectedClass);

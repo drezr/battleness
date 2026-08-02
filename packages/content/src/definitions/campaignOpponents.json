@@ -11,13 +11,13 @@
     "repeatable": true,
     "rings": [
       {
-        "definitionId": "emberLoop",
+        "definitionId": "ashenLoop",
         "experience": 100,
         "quality": 0,
         "socketCount": 1,
         "gems": [
           {
-            "definitionId": "rubyShard",
+            "definitionId": "emberShard",
             "experience": 100,
             "quality": 0,
             "enchantment": {
@@ -57,7 +57,7 @@
     "repeatable": true,
     "rings": [
       {
-        "definitionId": "sparkBand",
+        "definitionId": "staticLoop",
         "experience": 900,
         "quality": 20,
         "socketCount": 1,
@@ -103,7 +103,7 @@
     "repeatable": true,
     "rings": [
       {
-        "definitionId": "frostSeal",
+        "definitionId": "rimeLoop",
         "experience": 2500,
         "quality": 40,
         "socketCount": 1,

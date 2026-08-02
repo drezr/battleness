@@ -4,7 +4,7 @@ export type DevelopmentLoadout = {
   ringInstanceIds: string[];
 };
 
-const storageKey = "battleness.developmentLoadouts.v1";
+const storageKey = "battleness.developmentLoadouts.v2";
 const format = "battlenessDevelopmentLoadouts";
 
 export function listDevelopmentLoadouts(storage: Storage = localStorage): DevelopmentLoadout[] {
@@ -67,7 +67,7 @@ export function parseDevelopmentLoadoutsJson(value: string): DevelopmentLoadout[
     throw new Error("Development loadouts are not valid JSON.");
   }
 
-  if (!isRecord(parsed) || parsed.format !== format || parsed.version !== 1) {
+  if (!isRecord(parsed) || parsed.format !== format || parsed.version !== 2) {
     throw new Error("Development loadouts format is not supported.");
   }
   if (!Array.isArray(parsed.loadouts)) {
@@ -81,7 +81,7 @@ function serializeDevelopmentLoadouts(loadouts: readonly DevelopmentLoadout[]): 
   return JSON.stringify(
     {
       format,
-      version: 1,
+      version: 2,
       loadouts,
     },
     null,

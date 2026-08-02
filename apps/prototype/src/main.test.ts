@@ -17,38 +17,40 @@ describe("battle board interactions", () => {
   it("prepares a ring and uses it on a board target", () => {
     startBattle("basicRingAttack");
 
-    const ring = getButton('[data-board-ring-id="playerOne.ring.sparkBand"]');
+    const selector = '[data-board-ring-id="playerOne.ring.staticLoop"]';
+    advanceUntilEnabled(selector);
+    const ring = getButton(selector);
     ring.click();
 
-    expect(ringAfterRender("playerOne.ring.sparkBand").classList).toContain("selected");
-    expect(getElement(".board-action-hint").textContent).toContain("Spark Band prepared");
+    expect(ringAfterRender("playerOne.ring.staticLoop").classList).toContain("selected");
+    expect(getElement(".board-action-hint").textContent).toContain("Static Loop prepared");
 
     getButton('[data-board-target-id="playerTwo.hero"]').click();
 
-    expect(ringAfterRender("playerOne.ring.sparkBand").classList).not.toContain("selected");
+    expect(ringAfterRender("playerOne.ring.staticLoop").classList).not.toContain("selected");
     expect(eventTypes()).toContain("ringUsed");
   });
 
   it("renders rarity classes on rings, gems, and monsters", () => {
     startBattle("basicRingAttack");
 
-    expect(ringAfterRender("playerOne.ring.sparkBand").classList).toContain("rarity-common");
-    expect(ringAfterRender("playerTwo.ring.ironCircle").classList).toContain("rarity-refined");
-    expect(getElement('[title="Static Pearl - Electric"]').classList).toContain("rarity-refined");
+    expect(ringAfterRender("playerOne.ring.staticLoop").classList).toContain("rarity-common");
+    expect(ringAfterRender("playerTwo.ring.ionSignet").classList).toContain("rarity-refined");
+    expect(getElement('[title="Static Pearl - Electric"]').classList).toContain("rarity-common");
     expect(
-      getElement('[data-board-ring-id="playerOne.ring.sparkBand"] .element-badge').textContent,
+      getElement('[data-board-ring-id="playerOne.ring.staticLoop"] .element-badge').textContent,
     ).toBe("Electric");
   });
 
   it("renders artwork for every current content definition in the setup collection", () => {
     const assets = document.querySelectorAll<HTMLElement>("[data-asset-kind][data-asset-id]");
 
-    expect(assets).toHaveLength(120);
+    expect(assets).toHaveLength(253);
     expect(
-      getElement('[data-asset-kind="ring"][data-asset-id="emberLoop"] .item-artwork').getAttribute(
+      getElement('[data-asset-kind="ring"][data-asset-id="ashenLoop"] .item-artwork').getAttribute(
         "style",
       ),
-    ).toContain("/assets/items/rings-atlas.png");
+    ).toContain("/assets/items/rings.png");
     expect(
       getElement(
         '[data-asset-kind="material"][data-asset-id="graphene"] .item-artwork',
@@ -63,7 +65,7 @@ describe("battle board interactions", () => {
     expect(report.textContent).toContain("Base");
     expect(report.textContent).toContain("Mid");
     expect(report.textContent).toContain("Max");
-    expect(report.textContent).toContain("Ember Loop");
+    expect(report.textContent).toContain("Ashen Loop");
     expect(report.textContent).toContain("damage/energy");
     expect(document.querySelectorAll(".balance-report-group")).toHaveLength(4);
   });
@@ -75,7 +77,7 @@ describe("battle board interactions", () => {
 
     selectValue(
       '[data-lab-player-index="0"][data-lab-ring-index="0"][data-lab-ring-field="definitionId"]',
-      "solarCrown",
+      "crownOfMaelgor",
     );
     getButton('[data-lab-add-gem="0:0"]').click();
 
@@ -91,15 +93,15 @@ describe("battle board interactions", () => {
     );
     selectValue(
       '[data-lab-player-index="0"][data-lab-ring-index="0"][data-lab-gem-index="1"][data-lab-enchantment-field="definitionId"]',
-      "solarDrake",
+      "azhurath",
     );
 
     getButton("#startBattle").click();
 
     const ring = getButton('[data-board-ring-id="labPlayerOne.lab.ring.1"]');
-    expect(ring.textContent).toContain("Solar Crown");
+    expect(ring.textContent).toContain("Crown of Maelgor");
     expect(ring.querySelector(".ring-artwork")?.getAttribute("style")).toContain(
-      "/assets/items/rings-atlas.png",
+      "/assets/items/rings.png",
     );
   });
 
@@ -114,7 +116,7 @@ describe("battle board interactions", () => {
 
     selectValue(
       '[data-lab-player-index="0"][data-lab-ring-index="0"][data-lab-ring-field="definitionId"]',
-      "solarCrown",
+      "crownOfMaelgor",
     );
     getButton("#loadBattleLabPreset").click();
 
@@ -125,7 +127,7 @@ describe("battle board interactions", () => {
     expect(
       Array.from(restoredRingSelect.options).find((option) => option.hasAttribute("selected"))
         ?.value,
-    ).toBe("sparkBand");
+    ).toBe("staticLoop");
 
     getButton("#exportBattleLab").click();
     const json = getTextarea("#battleLabJson");
@@ -159,17 +161,17 @@ describe("battle board interactions", () => {
   });
 
   it("crafts an item through the development forge", () => {
-    expect(getElement(".forge-panel").textContent).toContain("Ember Loop - Ring");
+    expect(getElement(".forge-panel").textContent).toContain("Ashen Loop - Ring");
 
     getButton("#craftSelectedRecipe").click();
 
-    expect(getElement(".crafted-items").textContent).toContain("Ember Loop");
+    expect(getElement(".crafted-items").textContent).toContain("Ashen Loop");
     expect(getElement(".crafted-items").textContent).toContain(
-      "forgePlayer.ring.emberLoop.crafted.1",
+      "forgePlayer.ring.ashenLoop.crafted.1",
     );
-    expect(getElement(".forge-ingredients").textContent).toContain("1/1");
-    expect(localStorage.getItem("battleness.developmentInventory.v1")).toContain(
-      "forgePlayer.ring.emberLoop.crafted.1",
+    expect(getElement(".forge-ingredients").textContent).toContain("0/3");
+    expect(localStorage.getItem("battleness.developmentInventory.v2")).toContain(
+      "forgePlayer.ring.ashenLoop.crafted.1",
     );
 
     getButton("#exportDevelopmentInventory").click();
@@ -201,14 +203,14 @@ describe("battle board interactions", () => {
   it("renders a complete development inventory view with filters", () => {
     expect(document.querySelectorAll(".material-stock-card")).toHaveLength(70);
     expect(getElement('[data-inventory-material-id="aluminium"]').textContent).toContain(
-      "Quantity: 2",
+      "Quantity: 3",
     );
 
     getButton("#craftSelectedRecipe").click();
 
-    expect(getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]')).toBeTruthy();
+    expect(getElement('[data-inventory-id="forgePlayer.ring.ashenLoop.crafted.1"]')).toBeTruthy();
     expect(getElement('[data-inventory-material-id="aluminium"]').textContent).toContain(
-      "Quantity: 1",
+      "Quantity: 0",
     );
 
     selectValue("#inventoryTypeFilter", "gem");
@@ -219,12 +221,12 @@ describe("battle board interactions", () => {
     selectValue("#inventoryTypeFilter", "all");
     selectValue("#inventoryElementFilter", "fire");
 
-    expect(getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]')).toBeTruthy();
+    expect(getElement('[data-inventory-id="forgePlayer.ring.ashenLoop.crafted.1"]')).toBeTruthy();
 
     selectValue("#inventoryElementFilter", "ice");
 
     expect(
-      document.querySelector('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]'),
+      document.querySelector('[data-inventory-id="forgePlayer.ring.ashenLoop.crafted.1"]'),
     ).toBeNull();
   });
 
@@ -233,24 +235,24 @@ describe("battle board interactions", () => {
 
     expect(getElement(".inventory-summary").textContent).toContain("1000");
     expect(
-      getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
+      getElement('[data-inventory-id="forgePlayer.ring.ashenLoop.crafted.1"]').textContent,
     ).toContain("Quality: 0");
 
     getButton(
-      '[data-improve-quality-type="ring"][data-improve-quality-id="forgePlayer.ring.emberLoop.crafted.1"]',
+      '[data-improve-quality-type="ring"][data-improve-quality-id="forgePlayer.ring.ashenLoop.crafted.1"]',
     ).click();
 
     expect(
-      getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
+      getElement('[data-inventory-id="forgePlayer.ring.ashenLoop.crafted.1"]').textContent,
     ).toContain("Quality: 5");
     expect(getElement(".development-inventory").textContent).toContain("975");
 
-    getButton('[data-improve-sockets-ring-id="forgePlayer.ring.emberLoop.crafted.1"]').click();
+    getButton('[data-improve-sockets-ring-id="forgePlayer.ring.ashenLoop.crafted.1"]').click();
 
     expect(
-      getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
+      getElement('[data-inventory-id="forgePlayer.ring.ashenLoop.crafted.1"]').textContent,
     ).toContain("Sockets: 2");
-    expect(localStorage.getItem("battleness.developmentInventory.v1")).toContain(
+    expect(localStorage.getItem("battleness.developmentInventory.v2")).toContain(
       '"socketCount": 2',
     );
 
@@ -258,7 +260,7 @@ describe("battle board interactions", () => {
     selectValue("#battleLabItemSourceMode", "inventory");
     selectValue(
       '[data-lab-player-index="0"][data-lab-ring-index="0"][data-lab-ring-field="sourceInstanceId"]',
-      "forgePlayer.ring.emberLoop.crafted.1",
+      "forgePlayer.ring.ashenLoop.crafted.1",
     );
 
     expect(
@@ -271,18 +273,18 @@ describe("battle board interactions", () => {
 
   it("uses crafted development inventory instances in Battle Lab", () => {
     getButton("#craftSelectedRecipe").click();
-    selectValue("#forgeRecipeSelect", "craftGemRubyShard");
+    selectValue("#forgeRecipeSelect", "craftGemEmberShard");
     getButton("#craftSelectedRecipe").click();
     selectValue("#forgeRecipeSelect", "craftSpellFirebolt");
     getButton("#craftSelectedRecipe").click();
-    getButton('[data-socket-gem-ring-id="forgePlayer.ring.emberLoop.crafted.1"]').click();
-    getButton('[data-enchant-gem-id="forgePlayer.gem.rubyShard.crafted.2"]').click();
+    getButton('[data-socket-gem-ring-id="forgePlayer.ring.ashenLoop.crafted.1"]').click();
+    getButton('[data-enchant-gem-id="forgePlayer.gem.emberShard.crafted.2"]').click();
 
     expect(
-      getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
-    ).toContain("Ruby Shard");
+      getElement('[data-inventory-id="forgePlayer.ring.ashenLoop.crafted.1"]').textContent,
+    ).toContain("Ember Shard");
     expect(
-      getElement('[data-inventory-id="forgePlayer.gem.rubyShard.crafted.2"]').textContent,
+      getElement('[data-inventory-id="forgePlayer.gem.emberShard.crafted.2"]').textContent,
     ).toContain("Spell: Firebolt");
 
     selectValue("#setupMode", "battleLab");
@@ -290,7 +292,7 @@ describe("battle board interactions", () => {
 
     selectValue(
       '[data-lab-player-index="0"][data-lab-ring-index="0"][data-lab-ring-field="sourceInstanceId"]',
-      "forgePlayer.ring.emberLoop.crafted.1",
+      "forgePlayer.ring.ashenLoop.crafted.1",
     );
 
     expect(
@@ -299,7 +301,7 @@ describe("battle board interactions", () => {
     ).toBe(true);
     expect(getElement(".battle-lab-editor").textContent).toContain("Sockets");
     expect(getElement(".battle-lab-editor").textContent).toContain(
-      "forgePlayer.gem.rubyShard.crafted.2",
+      "forgePlayer.gem.emberShard.crafted.2",
     );
     expect(getElement(".battle-lab-editor").textContent).toContain(
       "forgePlayer.spell.firebolt.crafted.3",
@@ -308,40 +310,40 @@ describe("battle board interactions", () => {
     getButton("#startBattle").click();
 
     expect(getButton('[data-board-ring-id="labPlayerOne.lab.ring.1"]').textContent).toContain(
-      "Ember Loop",
+      "Ashen Loop",
     );
   });
 
   it("builds a saved development loadout and sends it to Battle Lab", () => {
     getButton("#craftSelectedRecipe").click();
-    selectValue("#forgeRecipeSelect", "craftGemRubyShard");
+    selectValue("#forgeRecipeSelect", "craftGemEmberShard");
     getButton("#craftSelectedRecipe").click();
     selectValue("#forgeRecipeSelect", "craftSpellFirebolt");
     getButton("#craftSelectedRecipe").click();
-    getButton('[data-socket-gem-ring-id="forgePlayer.ring.emberLoop.crafted.1"]').click();
-    getButton('[data-enchant-gem-id="forgePlayer.gem.rubyShard.crafted.2"]').click();
+    getButton('[data-socket-gem-ring-id="forgePlayer.ring.ashenLoop.crafted.1"]').click();
+    getButton('[data-enchant-gem-id="forgePlayer.gem.emberShard.crafted.2"]').click();
 
-    const loadoutRing = getInput('[data-loadout-ring-id="forgePlayer.ring.emberLoop.crafted.1"]');
+    const loadoutRing = getInput('[data-loadout-ring-id="forgePlayer.ring.ashenLoop.crafted.1"]');
     loadoutRing.checked = true;
     loadoutRing.dispatchEvent(new Event("change"));
 
     expect(getElement(".loadout-builder").textContent).toContain("Selected rings");
-    expect(getElement(".loadout-builder").textContent).toContain("Ruby Shard");
+    expect(getElement(".loadout-builder").textContent).toContain("Ember Shard");
 
     const loadoutName = getInput("#developmentLoadoutName");
     loadoutName.value = "Fire starter";
     getButton("#saveDevelopmentLoadout").click();
 
-    expect(localStorage.getItem("battleness.developmentLoadouts.v1")).toContain("Fire starter");
+    expect(localStorage.getItem("battleness.developmentLoadouts.v2")).toContain("Fire starter");
 
     const selectedLoadoutRing = getInput(
-      '[data-loadout-ring-id="forgePlayer.ring.emberLoop.crafted.1"]',
+      '[data-loadout-ring-id="forgePlayer.ring.ashenLoop.crafted.1"]',
     );
     selectedLoadoutRing.checked = false;
     selectedLoadoutRing.dispatchEvent(new Event("change"));
     getButton("#loadDevelopmentLoadout").click();
 
-    expect(getInput('[data-loadout-ring-id="forgePlayer.ring.emberLoop.crafted.1"]').checked).toBe(
+    expect(getInput('[data-loadout-ring-id="forgePlayer.ring.ashenLoop.crafted.1"]').checked).toBe(
       true,
     );
 
@@ -349,10 +351,10 @@ describe("battle board interactions", () => {
 
     expect(getSelect("#battleLabItemSourceMode").value).toBe("inventory");
     expect(getElement(".battle-lab-editor").textContent).toContain(
-      "forgePlayer.ring.emberLoop.crafted.1",
+      "forgePlayer.ring.ashenLoop.crafted.1",
     );
     expect(getElement(".battle-lab-editor").textContent).toContain(
-      "forgePlayer.gem.rubyShard.crafted.2",
+      "forgePlayer.gem.emberShard.crafted.2",
     );
     expect(getElement(".battle-lab-editor").textContent).toContain(
       "forgePlayer.spell.firebolt.crafted.3",
@@ -361,7 +363,7 @@ describe("battle board interactions", () => {
     getButton("#startBattle").click();
 
     expect(getButton('[data-board-ring-id="labPlayerOne.lab.ring.1"]').textContent).toContain(
-      "Ember Loop",
+      "Ashen Loop",
     );
   });
 
@@ -369,26 +371,26 @@ describe("battle board interactions", () => {
     craftStarterRingGemAndSpell();
 
     getButton(
-      '[data-improve-quality-type="ring"][data-improve-quality-id="forgePlayer.ring.emberLoop.crafted.1"]',
+      '[data-improve-quality-type="ring"][data-improve-quality-id="forgePlayer.ring.ashenLoop.crafted.1"]',
     ).click();
-    getButton('[data-socket-gem-ring-id="forgePlayer.ring.emberLoop.crafted.1"]').click();
-    getButton('[data-enchant-gem-id="forgePlayer.gem.rubyShard.crafted.2"]').click();
+    getButton('[data-socket-gem-ring-id="forgePlayer.ring.ashenLoop.crafted.1"]').click();
+    getButton('[data-enchant-gem-id="forgePlayer.gem.emberShard.crafted.2"]').click();
 
     expect(
-      getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
+      getElement('[data-inventory-id="forgePlayer.ring.ashenLoop.crafted.1"]').textContent,
     ).toContain("Quality: 5");
     expect(
-      getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
-    ).toContain("Ruby Shard");
+      getElement('[data-inventory-id="forgePlayer.ring.ashenLoop.crafted.1"]').textContent,
+    ).toContain("Ember Shard");
     expect(
-      getElement('[data-inventory-id="forgePlayer.gem.rubyShard.crafted.2"]').textContent,
+      getElement('[data-inventory-id="forgePlayer.gem.emberShard.crafted.2"]').textContent,
     ).toContain("Spell: Firebolt");
 
     selectValue("#setupMode", "battleLab");
     selectValue("#battleLabItemSourceMode", "inventory");
     selectValue(
       '[data-lab-player-index="0"][data-lab-ring-index="0"][data-lab-ring-field="sourceInstanceId"]',
-      "forgePlayer.ring.emberLoop.crafted.1",
+      "forgePlayer.ring.ashenLoop.crafted.1",
     );
 
     expect(
@@ -404,29 +406,29 @@ describe("battle board interactions", () => {
     useLabPlayerOneStarterRingOnHero();
     getButton("#manualConcede").click();
 
-    expect(getElement(".battle-result-summary").textContent).toContain("Ember Loop");
+    expect(getElement(".battle-result-summary").textContent).toContain("Ashen Loop");
     expect(getElement(".battle-result-summary").textContent).toContain("Firebolt");
-    expect(getElement(".battle-rewards").textContent).toContain("Ember Loop +28 XP");
-    expect(getElement(".battle-rewards").textContent).toContain("Ruby Shard +28 XP");
+    expect(getElement(".battle-rewards").textContent).toContain("Ashen Loop +28 XP");
+    expect(getElement(".battle-rewards").textContent).toContain("Ember Shard +28 XP");
     expect(getElement(".battle-rewards").textContent).toContain("Firebolt +28 XP");
 
     getButton("#claimBattleRewards").click();
 
-    const persistedInventory = localStorage.getItem("battleness.developmentInventory.v1") ?? "";
+    const persistedInventory = localStorage.getItem("battleness.developmentInventory.v2") ?? "";
     expect(persistedInventory).toContain('"credits": 1125');
-    expect(persistedInventory).toContain('"aluminium": 2');
+    expect(persistedInventory).toContain('"aluminium": 1');
 
     getButton("#backToSetup").click();
 
     expect(getElement(".inventory-summary").textContent).toContain("1125");
     expect(getElement('[data-inventory-material-id="aluminium"]').textContent).toContain(
-      "Quantity: 2",
+      "Quantity: 1",
     );
     expect(
-      getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
+      getElement('[data-inventory-id="forgePlayer.ring.ashenLoop.crafted.1"]').textContent,
     ).toContain("XP 128/400");
     expect(
-      getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
+      getElement('[data-inventory-id="forgePlayer.ring.ashenLoop.crafted.1"]').textContent,
     ).toContain("Quality: 5");
   });
 
@@ -435,7 +437,7 @@ describe("battle board interactions", () => {
 
     expect(
       getButton('[data-board-monster-id="playerTwo.monster.shieldWisp.1"]').classList,
-    ).toContain("rarity-rare");
+    ).toContain("rarity-refined");
     expect(
       getElement('[data-board-monster-id="playerTwo.monster.shieldWisp.1"] .element-badge')
         .textContent,
@@ -465,31 +467,31 @@ describe("battle board interactions", () => {
     expect(getButton("#claimBattleRewards").disabled).toBe(true);
     expect(getButton("#claimBattleRewards").textContent).toContain("Rewards claimed");
     expect(getElement(".battle-result-summary").textContent).toContain("Rewards claimed");
-    expect(localStorage.getItem("battleness.developmentInventory.v1")).toContain('"credits": 1150');
-    expect(localStorage.getItem("battleness.developmentInventory.v1")).toContain('"aluminium": 3');
+    expect(localStorage.getItem("battleness.developmentInventory.v2")).toContain('"credits": 1150');
+    expect(localStorage.getItem("battleness.developmentInventory.v2")).toContain('"aluminium": 4');
 
     getButton("#backToSetup").click();
 
     expect(getElement('[data-inventory-material-id="aluminium"]').textContent).toContain(
-      "Quantity: 3",
+      "Quantity: 4",
     );
     expect(getElement(".inventory-summary").textContent).toContain("1150");
   });
 
   it("claims cumulative item XP for equipped and used development inventory items", () => {
     getButton("#craftSelectedRecipe").click();
-    selectValue("#forgeRecipeSelect", "craftGemRubyShard");
+    selectValue("#forgeRecipeSelect", "craftGemEmberShard");
     getButton("#craftSelectedRecipe").click();
     selectValue("#forgeRecipeSelect", "craftSpellFirebolt");
     getButton("#craftSelectedRecipe").click();
-    getButton('[data-socket-gem-ring-id="forgePlayer.ring.emberLoop.crafted.1"]').click();
-    getButton('[data-enchant-gem-id="forgePlayer.gem.rubyShard.crafted.2"]').click();
+    getButton('[data-socket-gem-ring-id="forgePlayer.ring.ashenLoop.crafted.1"]').click();
+    getButton('[data-enchant-gem-id="forgePlayer.gem.emberShard.crafted.2"]').click();
 
     selectValue("#setupMode", "battleLab");
     selectValue("#battleLabItemSourceMode", "inventory");
     selectValue(
       '[data-lab-player-index="0"][data-lab-ring-index="0"][data-lab-ring-field="sourceInstanceId"]',
-      "forgePlayer.ring.emberLoop.crafted.1",
+      "forgePlayer.ring.ashenLoop.crafted.1",
     );
     getButton("#startBattle").click();
 
@@ -505,19 +507,19 @@ describe("battle board interactions", () => {
     getButton("#manualConcede").click();
 
     expect(getElement(".battle-result-summary").textContent).toContain("Rings used");
-    expect(getElement(".battle-result-summary").textContent).toContain("Ember Loop");
+    expect(getElement(".battle-result-summary").textContent).toContain("Ashen Loop");
     expect(getElement(".battle-result-summary").textContent).toContain("Spells cast");
     expect(getElement(".battle-result-summary").textContent).toContain("Firebolt");
     expect(getElement(".battle-result-summary").textContent).toContain("Item XP generated");
-    expect(getElement(".battle-result-summary").textContent).toContain("Ember Loop +28 XP");
-    expect(getElement(".battle-rewards").textContent).toContain("Ember Loop +28 XP");
-    expect(getElement(".battle-rewards").textContent).toContain("Ruby Shard +28 XP");
+    expect(getElement(".battle-result-summary").textContent).toContain("Ashen Loop +28 XP");
+    expect(getElement(".battle-rewards").textContent).toContain("Ashen Loop +28 XP");
+    expect(getElement(".battle-rewards").textContent).toContain("Ember Shard +28 XP");
     expect(getElement(".battle-rewards").textContent).toContain("Firebolt +28 XP");
 
     getButton("#claimBattleRewards").click();
 
     const inventory = JSON.parse(
-      localStorage.getItem("battleness.developmentInventory.v1") ?? "{}",
+      localStorage.getItem("battleness.developmentInventory.v2") ?? "{}",
     ) as {
       craftedItems: Array<{
         item: {
@@ -529,12 +531,12 @@ describe("battle board interactions", () => {
 
     expect(
       inventory.craftedItems.find(
-        (crafted) => crafted.item.id === "forgePlayer.ring.emberLoop.crafted.1",
+        (crafted) => crafted.item.id === "forgePlayer.ring.ashenLoop.crafted.1",
       )?.item.experience,
     ).toBe(128);
     expect(
       inventory.craftedItems.find(
-        (crafted) => crafted.item.id === "forgePlayer.gem.rubyShard.crafted.2",
+        (crafted) => crafted.item.id === "forgePlayer.gem.emberShard.crafted.2",
       )?.item.experience,
     ).toBe(128);
     expect(
@@ -546,10 +548,10 @@ describe("battle board interactions", () => {
     getButton("#backToSetup").click();
 
     expect(
-      getElement('[data-inventory-id="forgePlayer.ring.emberLoop.crafted.1"]').textContent,
+      getElement('[data-inventory-id="forgePlayer.ring.ashenLoop.crafted.1"]').textContent,
     ).toContain("XP 128/400");
     expect(
-      getElement('[data-inventory-id="forgePlayer.gem.rubyShard.crafted.2"]').textContent,
+      getElement('[data-inventory-id="forgePlayer.gem.emberShard.crafted.2"]').textContent,
     ).toContain("XP 128/400");
     expect(
       getElement('[data-inventory-id="forgePlayer.spell.firebolt.crafted.3"]').textContent,
@@ -590,11 +592,9 @@ describe("battle board interactions", () => {
 
   it("shows a summoned Haste monster as immediately ready", () => {
     startBattle("basicRingAttack");
-    for (let turn = 0; turn < 7; turn += 1) {
-      getButton("#boardEndTurn").click();
-    }
-
-    getButton('[data-board-ring-id="playerTwo.ring.frostSeal"]').click();
+    const selector = '[data-board-ring-id="playerTwo.ring.rimeLoop"]';
+    advanceUntilEnabled(selector);
+    getButton(selector).click();
     getButton('[data-board-target-id="playerTwo.hero"]').click();
 
     const monster = getButton('[data-board-monster-id="playerTwo.monster.stormHound.1"]');
@@ -609,17 +609,17 @@ describe("battle board interactions", () => {
     getButton("#boardEndTurn").click();
     getButton("#boardEndTurn").click();
 
-    useBoardMonster("playerOne.monster.arcStriker.1", "playerTwo.monster.iceGuardian.1");
+    useBoardMonster("playerOne.monster.galvanMantis.1", "playerTwo.monster.iceGuardian.1");
 
     expect(
       getButton('[data-board-monster-id="playerTwo.monster.shieldWisp.1"]').textContent,
     ).toContain("Shield - Broken");
     expect(
-      getButton('[data-board-monster-id="playerTwo.monster.emberImp.1"]').textContent,
+      getButton('[data-board-monster-id="playerTwo.monster.cinderJackal.1"]').textContent,
     ).toContain("Rage - Active");
 
     useBoardMonster("playerOne.monster.stormHound.1", "playerTwo.monster.iceGuardian.1");
-    useBoardMonster("playerOne.monster.emberLancer.1", "playerTwo.monster.iceGuardian.1");
+    useBoardMonster("playerOne.monster.ashling.1", "playerTwo.monster.iceGuardian.1");
 
     expect(eventTypes()).toEqual(
       expect.arrayContaining([
@@ -673,8 +673,16 @@ function startBattle(scenarioId: string): void {
 
 function summonIceGuardian(): void {
   startBattle("summonAndTaunt");
-  getButton('[data-board-ring-id="playerOne.ring.sparkBand"]').click();
+  const selector = '[data-board-ring-id="playerOne.ring.staticLoop"]';
+  advanceUntilEnabled(selector);
+  getButton(selector).click();
   getButton('[data-board-target-id="playerTwo.hero"]').click();
+}
+
+function advanceUntilEnabled(selector: string, maxTurns = 10): void {
+  for (let turn = 0; turn < maxTurns && getButton(selector).disabled; turn += 1) {
+    getButton("#boardEndTurn").click();
+  }
 }
 
 function useBoardMonster(monsterInstanceId: string, targetId: string): void {
@@ -684,7 +692,7 @@ function useBoardMonster(monsterInstanceId: string, targetId: string): void {
 
 function craftStarterRingGemAndSpell(): void {
   getButton("#craftSelectedRecipe").click();
-  selectValue("#forgeRecipeSelect", "craftGemRubyShard");
+  selectValue("#forgeRecipeSelect", "craftGemEmberShard");
   getButton("#craftSelectedRecipe").click();
   selectValue("#forgeRecipeSelect", "craftSpellFirebolt");
   getButton("#craftSelectedRecipe").click();

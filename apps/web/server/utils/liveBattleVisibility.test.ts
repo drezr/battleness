@@ -4,9 +4,9 @@ import { liveBattleRevealState } from "./liveBattleVisibility";
 
 const spellGem: GemCombatInstance = {
   id: "opponent.gem.spell",
-  definitionId: "rubyShard",
+  definitionId: "emberShard",
   ownerId: "opponent",
-  nameKey: "gem.rubyShard.name",
+  nameKey: "gem.emberShard.name",
   element: "fire",
   rarity: "common",
   damage: 1,
@@ -17,9 +17,9 @@ const spellGem: GemCombatInstance = {
 
 const monsterGem = (id: string): GemCombatInstance => ({
   id,
-  definitionId: "rubyShard",
+  definitionId: "emberShard",
   ownerId: "opponent",
-  nameKey: "gem.rubyShard.name",
+  nameKey: "gem.emberShard.name",
   element: "fire",
   rarity: "common",
   damage: 1,
@@ -29,10 +29,10 @@ const monsterGem = (id: string): GemCombatInstance => ({
 });
 
 const ring: RingCombatInstance = {
-  id: "opponent.ring.emberLoop",
-  definitionId: "emberLoop",
+  id: "opponent.ring.ashenLoop",
+  definitionId: "ashenLoop",
   ownerId: "opponent",
-  nameKey: "ring.emberLoop.name",
+  nameKey: "ring.ashenLoop.name",
   element: "fire",
   rarity: "common",
   damage: 4,

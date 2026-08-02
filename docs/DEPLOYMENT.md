@@ -137,7 +137,8 @@ into an isolated `battleness_restore_check*` database before the throwaway datab
 `/var/backups/battleness/postgresql-offhost`. The off-host copy uses a dedicated SSH key owned by the
 `postgres` user on `bndb`, accepted only by the `deploy` account on `bnapp`. The off-host retention
 target is 30 days. The private decryption key is intentionally kept outside the repository and off
-the servers at `C:\Users\dumon\Desktop\battleness-postgresql-backup-private-key.pem`.
+the servers at
+`C:\Users\dumon\Desktop\bn\battleness-postgresql-backup-private-key.pem`.
 
 Install on the database host as root:
 
@@ -159,6 +160,16 @@ Install the encrypted off-host copy service on the database host after provision
 certificate, SSH key, known-hosts file, and remote directory:
 
 ```sh
+apt-get install rsync
+getent group battleness-backup-read >/dev/null || groupadd --system battleness-backup-read
+id battleness-backup-pull >/dev/null 2>&1 || \
+  useradd --system --create-home --home-dir /var/lib/battleness-backup-pull \
+    --shell /bin/bash battleness-backup-pull
+usermod -a -G battleness-backup-read postgres
+usermod -a -G battleness-backup-read battleness-backup-pull
+passwd -l battleness-backup-pull
+install -o postgres -g battleness-backup-read -m 2750 -d \
+  /var/backups/battleness/postgresql-export
 install -o postgres -g postgres -m 0750 -d /etc/battleness/postgresql-backup
 install -o postgres -g postgres -m 0640 recipient.pem \
   /etc/battleness/postgresql-backup/recipient.pem
@@ -171,6 +182,39 @@ install -o root -g root -m 0644 ops/postgresql/battleness-postgresql-offhost.tim
 systemctl daemon-reload
 systemctl enable --now battleness-postgresql-offhost.timer
 ```
+
+The Raspberry Pi owns a dedicated Ed25519 key at
+`/home/drezr/.ssh/battleness_backup_pull_ed25519`. Its public key is the only authorized key for the
+locked `battleness-backup-pull` account on `bndb` and must use this restriction:
+
+```text
+restrict,command="/usr/bin/rrsync -ro /var/backups/battleness/postgresql-export" ssh-ed25519 ...
+```
+
+This forced command rejects interactive commands, writes, forwarding, and access outside the
+encrypted export directory. The Pi pins the `bndb` host key in
+`/home/drezr/.ssh/battleness_backup_known_hosts`.
+
+Install the pull job on the Raspberry Pi:
+
+```sh
+install -o drezr -g drezr -m 0700 -d /home/drezr/bn/postgresql
+install -o root -g root -m 0755 ops/raspberry-pi/pull-postgresql-backups.sh \
+  /usr/local/sbin/battleness-postgresql-pull
+install -o root -g root -m 0644 ops/raspberry-pi/battleness-postgresql-pull.service \
+  /etc/systemd/system/battleness-postgresql-pull.service
+install -o root -g root -m 0644 ops/raspberry-pi/battleness-postgresql-pull.timer \
+  /etc/systemd/system/battleness-postgresql-pull.timer
+systemctl daemon-reload
+systemctl enable --now battleness-postgresql-pull.timer
+systemctl start battleness-postgresql-pull.service
+systemctl show battleness-postgresql-pull.service --property=Result --property=ExecMainStatus
+```
+
+The Pi pulls at `05:30 UTC` with up to ten minutes of randomized delay, accepts backups no older
+than 36 hours, validates every SHA-256 sidecar, stores only encrypted CMS archives under
+`/home/drezr/bn/postgresql`, and retains them for 90 days. It never mirrors deletions from `bndb`.
+The decryption key is not present on the Pi.
 
 Install the backup watchdog after the local and off-host services:
 
@@ -244,23 +288,23 @@ The restore-check script only creates databases named `battleness_restore_check*
 throwaway database after validation unless `KEEP_RESTORE_DATABASE=1` is set. It validates that the
 restored database contains public tables and Prisma migration history.
 
-The current off-host target is the app VPS, which protects against loss of the database VPS but not
-against provider-account, region, or credential-wide incidents. A second encrypted copy target
-outside the app/database VPS pair is intentionally deferred for now because no high-availability
-home server or paid storage service is available yet. The intended future option is a private home
-server with acceptable availability, likely a Raspberry Pi. Before public launch, revisit that
-target or choose a low-cost object-storage provider, monitor backup age and service failures, and
-periodically restore the newest production backup into an isolated database.
+The app VPS remains the first off-host target. A Raspberry Pi at the operator's home is the second,
+provider-independent target. `bndb` retains a 30-day encrypted export with SHA-256 sidecars, and the
+Pi initiates the read-only transfer and keeps 90 days. On 2026-08-02, the first Pi copy passed its
+ciphertext checksum, was decrypted with the off-server private key, and restored into an isolated
+PostgreSQL database; the restore contained 33 public tables and 17 Prisma migrations before the
+throwaway database was dropped.
 
 The database host also runs `battleness-postgresql-monitor.timer` after the daily local and off-host
 jobs. It checks that both oneshot services last succeeded, the newest local backup is at most 30
 hours old, both database dumps and the checksum manifest are present, all checksums pass, and a
 non-empty encrypted archive with the same timestamp exists on the app VPS and is at most 30 hours
 old. Failures produce `CRITICAL backup_monitor` records in journald and a failed systemd unit. This
-local watchdog is installed and verified. External notification delivery is intentionally on
-standby at the user's request: no hosted heartbeat, webhook, or SMTP credentials will be configured
-for now. When this work resumes, the preferred option is an external heartbeat service with email
-delivery because it can also detect a missing timer or a completely unavailable VPS.
+local watchdog is installed and verified. External notification delivery is now required Phase 14
+work. The selected channel must report watchdog failures and use an external heartbeat or equivalent
+mechanism that can also detect a missing timer or a completely unavailable VPS. Test the complete
+operator delivery path before production promotion. The user chose not to add that external service
+during the Raspberry Pi backup implementation, so this notification work remains pending.
 
 The operational cleanup job runs daily in apply mode after the backup window. It targets only
 `battleness_staging` until the production schema is deployed. The approved retention policy is seven
@@ -276,6 +320,40 @@ checks pass against that database.
 Both VPS use a journald retention drop-in from `ops/systemd/journald-battleness.conf`. Persistent
 system journals are limited to 30 days and 512 MiB per server. These limits apply to operational
 logs only and do not alter permanent gameplay or market records.
+
+## Production Item Cutover: Staging Gameplay Reset
+
+The `production-items-v1` cutover intentionally keeps OAuth accounts, player identity/profile
+fields, sessions, preferences, and registered content releases while removing staging gameplay
+state. The guarded command refuses any database whose URL path is not exactly
+`battleness_staging`. It does not run as part of deployment.
+
+Before applying the reset:
+
+1. Create a fresh staging PostgreSQL backup and record its immutable timestamp or archive name.
+2. Verify checksums and restore that exact backup into the isolated restore-check database.
+3. Deploy the release and apply its migrations, but stop `battleness-staging.service` before the
+   reset so no gameplay mutation can race the transaction.
+4. In a shell containing the staging `BATTLENESS_DATABASE_URL`, inspect the no-op plan:
+
+```sh
+pnpm --filter @battleness/web staging:reset-gameplay
+```
+
+5. Apply only after replacing the backup identifier with the verified archive name:
+
+```sh
+BATTLENESS_STAGING_BACKUP_ID="verified-backup-identifier" \
+BATTLENESS_STAGING_RESET_CONFIRMATION="RESET battleness_staging FOR production-items-v1" \
+pnpm --filter @battleness/web staging:reset-gameplay -- --apply
+```
+
+The transaction clears inventory, sockets/enchantments, equipment/loadouts, materials, rewards,
+campaign progress, battles and queues, ranked state/seasons, cosmetics, and both markets. It resets
+player experience, credits, item sequence, active loadout, and onboarding version so the next
+authenticated request grants the v2 starter set. Restart the service, verify health, sign in with a
+preserved account, and confirm that `ashenLoop`, `emberShard`, and `firebolt` are granted exactly
+once. If any verification fails, keep the service stopped and restore the recorded backup.
 
 ## Current OVH Bootstrap Status
 
@@ -309,9 +387,9 @@ As of 2026-07-20, the first two clean OVH VPS instances have been bootstrapped o
   backup archive and copies it to the app VPS under
   `/var/backups/battleness/postgresql-offhost` with 30-day off-host retention. The first encrypted
   copy and decrypt/list verification passed on 2026-07-21.
-- A second encrypted backup destination outside both VPS is intentionally pending. The current
-  preferred future direction is a private home server with good availability, likely a Raspberry Pi,
-  rather than paying for object storage immediately.
+- A Raspberry Pi outside the OVH VPS pair pulls the encrypted export from `bndb` through a forced
+  read-only `rrsync` account and stores it under `/home/drezr/bn/postgresql` for 90 days. The first
+  pull, checksum, decryption, and isolated restore drill passed on 2026-08-02.
 
 Generated deployment secrets and database URLs are intentionally kept outside the repository. Do not
 commit real environment files, database passwords, OAuth credentials, SSH passwords, or private keys.

@@ -66,33 +66,33 @@ describe("battle setup stat resolution", () => {
         id: "progressedPlayer",
         username: "Progressed Player",
         experience: 10_000,
-        equippedRingInstanceIds: ["progressedPlayer.ring.emberLoop"],
+        equippedRingInstanceIds: ["progressedPlayer.ring.ashenLoop"],
       },
       {
         id: "basePlayer",
         username: "Base Player",
         experience: 0,
-        equippedRingInstanceIds: ["basePlayer.ring.frostSeal"],
+        equippedRingInstanceIds: ["basePlayer.ring.rimeLoop"],
       },
     ];
     const inventory: InventoryFixture = {
       rings: [
         {
-          id: "progressedPlayer.ring.emberLoop",
-          definitionId: "emberLoop",
+          id: "progressedPlayer.ring.ashenLoop",
+          definitionId: "ashenLoop",
           ownerId: "progressedPlayer",
           experience: 10_000,
           quality: 60,
           socketCount: 2,
           socketedGemInstanceIds: [
-            "progressedPlayer.gem.rubyShard",
+            "progressedPlayer.gem.emberShard",
             "progressedPlayer.gem.frostChip",
           ],
           equipped: true,
         },
         {
-          id: "basePlayer.ring.frostSeal",
-          definitionId: "frostSeal",
+          id: "basePlayer.ring.rimeLoop",
+          definitionId: "rimeLoop",
           ownerId: "basePlayer",
           experience: 0,
           quality: 0,
@@ -103,8 +103,8 @@ describe("battle setup stat resolution", () => {
       ],
       gems: [
         {
-          id: "progressedPlayer.gem.rubyShard",
-          definitionId: "rubyShard",
+          id: "progressedPlayer.gem.emberShard",
+          definitionId: "emberShard",
           ownerId: "progressedPlayer",
           experience: 10_000,
           quality: 60,
@@ -154,9 +154,9 @@ describe("battle setup stat resolution", () => {
     const monster = setup.definitions.monsters["progressedPlayer.monster.iceGuardian"];
 
     expect(player.level).toBe(10);
-    expect(player.hero).toEqual({ health: 36, maxHealth: 36, speed: 1 });
-    expect(ring.damage).toBe(5);
-    expect(ring.speed).toBe(1);
+    expect(player.hero).toEqual({ health: 36, maxHealth: 36, speed: 4 });
+    expect(ring.damage).toBe(6);
+    expect(ring.speed).toBe(4);
     expect(spellGem.damage).toBe(2);
     expect(spellGem.enchantment).toEqual({
       type: "spell",
@@ -193,7 +193,7 @@ describe("battle setup stat resolution", () => {
       ringInstanceId: ring.id,
       targetId: "progressedPlayer.hero",
       enchantmentTargets: {
-        "progressedPlayer.gem.rubyShard": "progressedPlayer.hero",
+        "progressedPlayer.gem.emberShard": "progressedPlayer.hero",
       },
     });
     const summonedMonster = result.state.players[0].monsters[0];

@@ -8,12 +8,12 @@ const baseSnapshot = {
   player: { id: "playerOne", activeLoadoutId: null },
   inventoryItems: [
     item({
-      id: "playerOne.ring.emberLoop",
+      id: "playerOne.ring.ashenLoop",
       type: "ring",
-      definitionId: "emberLoop",
+      definitionId: "ashenLoop",
       socketCount: 2,
     }),
-    item({ id: "playerOne.gem.rubyShard", type: "gem", definitionId: "rubyShard" }),
+    item({ id: "playerOne.gem.emberShard", type: "gem", definitionId: "emberShard" }),
     item({ id: "playerOne.monster.emberImp", type: "monster", definitionId: "emberImp" }),
     item({ id: "playerOne.spell.firebolt", type: "spell", definitionId: "firebolt" }),
   ],
@@ -21,15 +21,15 @@ const baseSnapshot = {
   ringSockets: [
     {
       playerId: "playerOne",
-      ringItemId: "playerOne.ring.emberLoop",
+      ringItemId: "playerOne.ring.ashenLoop",
       socketIndex: 0,
-      gemItemId: "playerOne.gem.rubyShard",
+      gemItemId: "playerOne.gem.emberShard",
     },
   ],
   gemEnchantments: [
     {
       playerId: "playerOne",
-      gemItemId: "playerOne.gem.rubyShard",
+      gemItemId: "playerOne.gem.emberShard",
       targetItemId: "playerOne.spell.firebolt",
       targetType: "spell",
     },
@@ -37,7 +37,7 @@ const baseSnapshot = {
   equippedRings: [
     {
       playerId: "playerOne",
-      ringItemId: "playerOne.ring.emberLoop",
+      ringItemId: "playerOne.ring.ashenLoop",
       slotIndex: 0,
     },
   ],
@@ -48,7 +48,7 @@ const baseSnapshot = {
       rings: [
         {
           loadoutId: "loadoutOne",
-          ringItemId: "playerOne.ring.emberLoop",
+          ringItemId: "playerOne.ring.ashenLoop",
           slotIndex: 0,
         },
       ],
@@ -61,7 +61,7 @@ const baseSnapshot = {
       credits: 100,
       heroExperience: 0,
       materials: [{ materialId: "aluminium", quantity: 1 }],
-      items: [{ inventoryItemId: "playerOne.ring.emberLoop", experience: 8 }],
+      items: [{ inventoryItemId: "playerOne.ring.ashenLoop", experience: 8 }],
     },
   ],
 } satisfies PlayerGameStateSnapshot;
@@ -76,9 +76,9 @@ describe("validatePlayerGameStateSnapshot", () => {
       ...baseSnapshot,
       inventoryItems: [
         item({
-          id: "playerOne.ring.emberLoop",
+          id: "playerOne.ring.ashenLoop",
           type: "ring",
-          definitionId: "emberLoop",
+          definitionId: "ashenLoop",
           socketCount: 1,
         }),
         item({ id: "playerOne.spell.firebolt", type: "spell", definitionId: "firebolt" }),
@@ -86,7 +86,7 @@ describe("validatePlayerGameStateSnapshot", () => {
       ringSockets: [
         {
           playerId: "playerTwo",
-          ringItemId: "playerOne.ring.emberLoop",
+          ringItemId: "playerOne.ring.ashenLoop",
           socketIndex: 1,
           gemItemId: "playerOne.spell.firebolt",
         },
@@ -97,9 +97,9 @@ describe("validatePlayerGameStateSnapshot", () => {
     });
 
     expect(issues).toContain(
-      'Ring socket for ring "playerOne.ring.emberLoop" is owned by "playerTwo".',
+      'Ring socket for ring "playerOne.ring.ashenLoop" is owned by "playerTwo".',
     );
-    expect(issues).toContain('Ring socket index is invalid for ring "playerOne.ring.emberLoop".');
+    expect(issues).toContain('Ring socket index is invalid for ring "playerOne.ring.ashenLoop".');
     expect(issues).toContain('Ring socket references non-gem item "playerOne.spell.firebolt".');
   });
 
@@ -109,7 +109,7 @@ describe("validatePlayerGameStateSnapshot", () => {
       gemEnchantments: [
         {
           playerId: "playerOne",
-          gemItemId: "playerOne.gem.rubyShard",
+          gemItemId: "playerOne.gem.emberShard",
           targetItemId: "playerOne.monster.emberImp",
           targetType: "spell",
         },
@@ -124,7 +124,7 @@ describe("validatePlayerGameStateSnapshot", () => {
   it("reports equipped-ring and loadout limit violations", () => {
     const equippedRings = Array.from({ length: 11 }, (_, index) => ({
       playerId: "playerOne",
-      ringItemId: "playerOne.ring.emberLoop",
+      ringItemId: "playerOne.ring.ashenLoop",
       slotIndex: index,
     }));
     const loadoutRings = equippedRings.map((ring) => ({
@@ -147,8 +147,8 @@ describe("validatePlayerGameStateSnapshot", () => {
 
     expect(issues).toContain('Player "playerOne" has more than 10 equipped rings.');
     expect(issues).toContain('Loadout "loadoutOne" has more than 10 rings.');
-    expect(issues).toContain('Equipped ring "playerOne.ring.emberLoop" has invalid slot index.');
-    expect(issues).toContain('Loadout ring "playerOne.ring.emberLoop" has invalid slot index.');
+    expect(issues).toContain('Equipped ring "playerOne.ring.ashenLoop" has invalid slot index.');
+    expect(issues).toContain('Loadout ring "playerOne.ring.ashenLoop" has invalid slot index.');
   });
 
   it("reports invalid reward references", () => {

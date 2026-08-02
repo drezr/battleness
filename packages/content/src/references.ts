@@ -139,19 +139,17 @@ function validateRecipes(
     const expectedRarities = expectedRaritiesByOutputRarity[output.rarity];
     const seenMaterials = new Set<string>();
 
-    for (const [index, ingredient] of recipe.ingredients.entries()) {
+    const expandedIngredients = recipe.ingredients.flatMap((ingredient) =>
+      Array.from({ length: ingredient.quantity }, () => ingredient),
+    );
+
+    for (const ingredient of recipe.ingredients) {
       if (seenMaterials.has(ingredient.materialId)) {
         issues.push(
           `Recipe definition "${recipe.id}" uses material "${ingredient.materialId}" more than once.`,
         );
       }
       seenMaterials.add(ingredient.materialId);
-
-      if (ingredient.quantity !== 1) {
-        issues.push(
-          `Recipe definition "${recipe.id}" ingredient "${ingredient.materialId}" has quantity ${ingredient.quantity}; prototype recipes require quantity 1.`,
-        );
-      }
 
       const material = definitions.materialDefinitions.get(ingredient.materialId);
       if (!material) {
@@ -165,7 +163,11 @@ function validateRecipes(
           `Recipe definition "${recipe.id}" uses ${material.craftingFamily} material "${material.id}" for ${recipe.outputType} crafting.`,
         );
       }
-      if (material.rarity !== expectedRarities[index]) {
+    }
+
+    for (const [index, ingredient] of expandedIngredients.entries()) {
+      const material = definitions.materialDefinitions.get(ingredient.materialId);
+      if (material && material.rarity !== expectedRarities[index]) {
         issues.push(
           `Recipe definition "${recipe.id}" ingredient ${index + 1} uses ${material.rarity} material "${material.id}"; expected ${expectedRarities[index]}.`,
         );

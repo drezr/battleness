@@ -40,7 +40,7 @@ The game is a one-versus-one, turn-based combat game. Each player controls a her
 - Monster levels increase damage and health.
 - Spell levels increase direct-damage effect amounts. Energy and cooldown penalties do not scale for now.
 - Rings, gems, monsters, and spells have quality from 0 to 100%.
-- A hero's speed is the sum of the base speed values of their equipped rings.
+- A hero's speed is the sum of the base speed values of equipped rings, socketed gems, and their monster or spell enchantments.
 - Elemental types are electric, fire, and ice.
 - Electric beats fire, fire beats ice, and ice beats electric.
 - Gems, monsters, and spells can add energy and cooldown penalties to the ring that contains them.
@@ -195,7 +195,7 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - Improvement: The forge action that spends credits to increase item quality or increase a ring's socket count.
 - Shop: The game vendor where players can buy materials and sell items.
 - Player Market: A future economy system where players can list items for sale and buy items listed by other players.
-- Initial prototype recipes always consume exactly three quantity-1 materials from the matching crafting family.
+- Production recipes consume exactly three material units from the matching crafting family. A recipe may repeat a material, represented canonically by an aggregated quantity.
 - Material rarities scale by crafted item rarity: common items use three common materials; refined items use one refined and two common materials; rare items use one rare, one refined, and one common material; epic items use one epic, one rare, and one refined material.
 - Initial crafted items are level 1 and quality 0. Crafted rings start with one socket.
 - The prototype development forge persists credits, material stock, crafted item instances, and the next crafted-instance sequence in browser `localStorage`.
@@ -327,7 +327,7 @@ This section separates executable game rules from implementation decisions. It i
 - Energy is restored at the start of each turn.
 - Energy follows each player's own turn count: 1 on that player's first turn, 2 on that player's second turn, and so on until the cap of 8.
 - Energy not spent during a turn does not carry over unless a later rule changes this.
-- A ring's current energy cost is based on its own energy value plus energy penalties from contained gems, monsters, and spells.
+- A ring's current energy cost and cooldown add penalties from contained gems, monsters, and spells. Decimal contributions are summed first and the final energy or cooldown increase is floored once.
 - A ring's current energy cost cannot be lower than 1.
 - Exact rounding rules for future cost modifiers are not defined yet.
 
@@ -355,7 +355,7 @@ This section separates executable game rules from implementation decisions. It i
 - Energy costs, cooldowns, speed, energy penalties, and cooldown penalties do not scale for now.
 - A hero's maximum health is `30 + floor(30 * level / 50)`. Maximum health is 30 at level 0, 45 at level 25, and 60 at level 50.
 - Hero level does not change turn energy. Each player's energy still progresses from 1 to 8 according to that player's own turn count.
-- Hero speed is the sum of the unscaled base speed values of equipped rings. Level and quality do not modify speed.
+- Hero speed is the sum of the unscaled base speed values of equipped rings, socketed gems, and their monster or spell enchantments. Level and quality do not modify speed.
 - Spell energy and cooldown penalties remain equal to their base values until a future balancing pass explicitly changes this rule.
 - Positive integer stat calculations use floor rounding unless a more specific combat rule says otherwise.
 - Progression formulas belong in the content/setup layer. The combat engine continues to receive fully resolved values through `BattleSetup`.
@@ -413,7 +413,7 @@ This section separates executable game rules from implementation decisions. It i
 - Inventory fixtures contain player-owned ring, gem, monster, and spell instances. Every item instance stores `id`, `definitionId`, `ownerId`, `experience`, and `quality`.
 - Ring instances additionally store `socketCount`, `socketedGemInstanceIds`, and `equipped`.
 - Gem instances may contain an enchantment with either `monsterInstanceId` or `spellInstanceId`.
-- Content version `prototype-2` introduced experience-derived levels and independently progressable monster and spell instances. Content version `prototype-3` adds the confirmed collection, new rarity identifiers, and enriched materials. Content version `prototype-5` renames the highest rarity tier from `legendary` to `epic`.
+- Historical versions `prototype-2` through `prototype-6` introduced progression, rarity, recipes, and campaign fixtures. `production-items-v1` is the active collection version and replaces the prototype rings, gems, and monsters while retaining the six test spells.
 - The initial `BattleSetup` should contain `id`, `seed`, two players, resolved combat stats, equipped ring instances, socketed gem instances, referenced definitions, and optional initial status for first-player element choice.
 - The initial `BattleAction` union should include `chooseElement`, `useRing`, `useMonster`, `endTurn`, and `concede`.
 - The version 1 `BattleRecord` shape includes `format`, `formatVersion`, `rulesVersion`, `contentVersion`, `setup`, `actions`, `result`, and `finalStateChecksum`.
@@ -477,7 +477,7 @@ This section separates executable game rules from implementation decisions. It i
   official material buy price, then pay `max(1, floor(recipeValue * 0.25))` credits.
 - Item XP, level, quality, socket-count improvements, and other investments do not increase the
   initial buyback value.
-- Development-only items without a crafting recipe cannot be sold to the game.
+- Every active production item has a crafting recipe and can therefore receive a server-owned game-market valuation when no other eligibility rule blocks it.
 - Equipped rings, rings referenced by a loadout, rings containing socketed gems, socketed gems,
   enchantment gems or targets, and player-market escrow items cannot be sold to the game.
 - Material and item sales are atomic, server-valued, and journaled with globally unique request
@@ -516,7 +516,7 @@ This section separates executable game rules from implementation decisions. It i
 
 - The first balance collection is documented in `docs/CONTENT_COLLECTION_PROPOSAL.md` and campaign content is currently implemented as content version `prototype-6`.
 - The collection contains 12 collectible rings, 12 collectible gems, 18 monsters, 6 direct-damage spells, and 70 materials.
-- `trainingFlameBand` and `plainQuartz` remain development-only definitions outside the collectible pool.
+- `trainingFlameBand` and `plainQuartz` are removed from active content and retained only in the technical `prototype-6` archive.
 - The collection contains 48 initial recipes: one recipe for every collectible ring, gem, monster, and spell. Development-only definitions are intentionally excluded.
 - The prototype setup screen can craft these recipes into local development inventory instances, and Battle Lab can use those crafted instances as a development item source.
 - The material collection is detailed in `docs/MATERIAL_COLLECTION_PROPOSAL.md` and is derived from the historical 70-row SQLite `mats` table.

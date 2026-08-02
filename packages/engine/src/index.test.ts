@@ -53,10 +53,10 @@ const setup: BattleSetup = {
       energy: { current: 1, maxForTurn: 1, turnCount: 1 },
       rings: [
         {
-          id: "playerOne.ring.sparkBand",
-          definitionId: "sparkBand",
+          id: "playerOne.ring.staticLoop",
+          definitionId: "staticLoop",
           ownerId: "playerOne",
-          nameKey: "ring.sparkBand.name",
+          nameKey: "ring.staticLoop.name",
           element: "electric",
           rarity: "common",
           damage: 2,
@@ -76,6 +76,7 @@ const setup: BattleSetup = {
               damage: 1,
               energyPenalty: 0,
               cooldownPenalty: 0,
+              speed: 0,
               enchantment: { type: "spell", spellId: "spark" },
             },
           ],
@@ -167,7 +168,7 @@ describe("createBattleState", () => {
     invalidSetup.players[0].rings[0].cooldown = 0;
 
     expect(() => createBattleState(invalidSetup)).toThrow(
-      "Ring playerOne.ring.sparkBand cooldown must be at least 1.",
+      "Ring playerOne.ring.staticLoop cooldown must be at least 1.",
     );
   });
 
@@ -329,7 +330,7 @@ describe("createBattleState", () => {
     const result = applyBattleAction(state, {
       type: "useRing",
       playerId: "playerOne",
-      ringInstanceId: "playerOne.ring.sparkBand",
+      ringInstanceId: "playerOne.ring.staticLoop",
       targetId: "playerTwo.hero",
       enchantmentTargets: {
         "playerOne.gem.sparkPrism": "playerOne.hero",
@@ -356,7 +357,7 @@ describe("createBattleState", () => {
     const result = applyBattleAction(state, {
       type: "useRing",
       playerId: "playerOne",
-      ringInstanceId: "playerOne.ring.sparkBand",
+      ringInstanceId: "playerOne.ring.staticLoop",
       targetId: "playerTwo.monster.emberImp.1",
     });
 
@@ -377,7 +378,7 @@ describe("createBattleState", () => {
     const firstUse = applyBattleAction(state, {
       type: "useRing",
       playerId: "playerOne",
-      ringInstanceId: "playerOne.ring.sparkBand",
+      ringInstanceId: "playerOne.ring.staticLoop",
       targetId: "playerOne.hero",
       enchantmentTargets: {
         "playerOne.gem.sparkPrism": "playerOne.hero",
@@ -390,13 +391,13 @@ describe("createBattleState", () => {
       applyBattleAction(firstUse.state, {
         type: "useRing",
         playerId: "playerOne",
-        ringInstanceId: "playerOne.ring.sparkBand",
+        ringInstanceId: "playerOne.ring.staticLoop",
         targetId: "playerOne.hero",
         enchantmentTargets: {
           "playerOne.gem.sparkPrism": "playerOne.hero",
         },
       }),
-    ).toThrow("Ring playerOne.ring.sparkBand is on cooldown.");
+    ).toThrow("Ring playerOne.ring.staticLoop is on cooldown.");
   });
 
   it("prevents targeting an enemy hero while that enemy controls a Taunt monster", () => {
@@ -408,7 +409,7 @@ describe("createBattleState", () => {
       applyBattleAction(state, {
         type: "useRing",
         playerId: "playerOne",
-        ringInstanceId: "playerOne.ring.sparkBand",
+        ringInstanceId: "playerOne.ring.staticLoop",
         targetId: "playerTwo.hero",
       }),
     ).toThrow("protected by Taunt");
@@ -456,7 +457,7 @@ describe("createBattleState", () => {
   it("transfers Pierce overkill damage to the monster controller's hero", () => {
     const pierceSetup = structuredClone(setup);
     pierceSetup.players[0].monsters = [
-      createMonster("playerOne", "emberLancer", {
+      createMonster("playerOne", "ashling", {
         damage: 7,
         baseDamage: 7,
         skill: "pierce",
@@ -469,7 +470,7 @@ describe("createBattleState", () => {
     const result = applyBattleAction(state, {
       type: "useMonster",
       playerId: "playerOne",
-      monsterInstanceId: "playerOne.monster.emberLancer.1",
+      monsterInstanceId: "playerOne.monster.ashling.1",
       targetId: "playerTwo.monster.target.1",
     });
 
@@ -477,7 +478,7 @@ describe("createBattleState", () => {
     expect(result.state.players[1].hero.health).toBe(28);
     expect(result.events).toContainEqual({
       type: "pierceOverflow",
-      monsterInstanceId: "playerOne.monster.emberLancer.1",
+      monsterInstanceId: "playerOne.monster.ashling.1",
       targetMonsterInstanceId: "playerTwo.monster.target.1",
       targetHeroId: "playerTwo.hero",
       amount: 2,
@@ -487,7 +488,7 @@ describe("createBattleState", () => {
   it("blocks Pierce overflow against the protected hero on the starting turn", () => {
     const pierceSetup = structuredClone(setup);
     pierceSetup.players[0].monsters = [
-      createMonster("playerOne", "emberLancer", {
+      createMonster("playerOne", "ashling", {
         damage: 7,
         baseDamage: 7,
         skill: "pierce",
@@ -499,7 +500,7 @@ describe("createBattleState", () => {
     const result = applyBattleAction(state, {
       type: "useMonster",
       playerId: "playerOne",
-      monsterInstanceId: "playerOne.monster.emberLancer.1",
+      monsterInstanceId: "playerOne.monster.ashling.1",
       targetId: "playerTwo.monster.target.1",
     });
 
@@ -529,7 +530,7 @@ describe("createBattleState", () => {
     const result = applyBattleAction(state, {
       type: "useRing",
       playerId: "playerOne",
-      ringInstanceId: "playerOne.ring.sparkBand",
+      ringInstanceId: "playerOne.ring.staticLoop",
       targetId: "playerOne.hero",
     });
 
@@ -575,7 +576,7 @@ describe("createBattleState", () => {
     const firstUse = applyBattleAction(state, {
       type: "useRing",
       playerId: "playerOne",
-      ringInstanceId: "playerOne.ring.sparkBand",
+      ringInstanceId: "playerOne.ring.staticLoop",
       targetId: "playerOne.hero",
     });
 
@@ -588,7 +589,7 @@ describe("createBattleState", () => {
     const secondUse = applyBattleAction(firstUse.state, {
       type: "useRing",
       playerId: "playerOne",
-      ringInstanceId: "playerOne.ring.sparkBand",
+      ringInstanceId: "playerOne.ring.staticLoop",
       targetId: "playerOne.monster.emberImp.1",
     });
 
@@ -675,7 +676,7 @@ describe("createBattleState", () => {
   it("resolves MultiHit against every monster behind the legal Taunt target", () => {
     const multiHitSetup = structuredClone(setup);
     multiHitSetup.players[0].monsters = [
-      createMonster("playerOne", "arcStriker", {
+      createMonster("playerOne", "galvanMantis", {
         element: "electric",
         skill: "multiHit",
       }),
@@ -694,13 +695,13 @@ describe("createBattleState", () => {
     const result = applyBattleAction(state, {
       type: "useMonster",
       playerId: "playerOne",
-      monsterInstanceId: "playerOne.monster.arcStriker.1",
+      monsterInstanceId: "playerOne.monster.galvanMantis.1",
       targetId: "playerTwo.monster.iceGuardian.1",
     });
 
     expect(result.events).toContainEqual({
       type: "multiHitResolved",
-      monsterInstanceId: "playerOne.monster.arcStriker.1",
+      monsterInstanceId: "playerOne.monster.galvanMantis.1",
       targetIds: [
         "playerTwo.monster.iceGuardian.1",
         "playerTwo.monster.shieldWisp.1",
@@ -714,7 +715,7 @@ describe("createBattleState", () => {
   it("allows MultiHit to damage every monster on the attacker's side", () => {
     const alliedMultiHitSetup = structuredClone(setup);
     alliedMultiHitSetup.players[0].monsters = [
-      createMonster("playerOne", "arcStriker", {
+      createMonster("playerOne", "galvanMantis", {
         element: "electric",
         skill: "multiHit",
       }),
@@ -725,7 +726,7 @@ describe("createBattleState", () => {
     const result = applyBattleAction(state, {
       type: "useMonster",
       playerId: "playerOne",
-      monsterInstanceId: "playerOne.monster.arcStriker.1",
+      monsterInstanceId: "playerOne.monster.galvanMantis.1",
       targetId: "playerOne.monster.ally.1",
     });
 
@@ -737,7 +738,7 @@ describe("createBattleState", () => {
     const result = applyBattleAction(state, {
       type: "useRing",
       playerId: "playerOne",
-      ringInstanceId: "playerOne.ring.sparkBand",
+      ringInstanceId: "playerOne.ring.staticLoop",
       targetId: "playerTwo.hero",
       enchantmentTargets: {
         "playerOne.gem.sparkPrism": "playerTwo.hero",
@@ -768,7 +769,7 @@ describe("createBattleState", () => {
     const result = applyBattleAction(state, {
       type: "useRing",
       playerId: "playerOne",
-      ringInstanceId: "playerOne.ring.sparkBand",
+      ringInstanceId: "playerOne.ring.staticLoop",
       targetId: "playerTwo.hero",
     });
 
@@ -790,7 +791,7 @@ describe("createBattleState", () => {
     const result = applyBattleAction(state, {
       type: "useRing",
       playerId: "playerOne",
-      ringInstanceId: "playerOne.ring.sparkBand",
+      ringInstanceId: "playerOne.ring.staticLoop",
       targetId: "playerTwo.hero",
       enchantmentTargets: {
         "playerOne.gem.sparkPrism": "playerOne.hero",
@@ -810,7 +811,7 @@ describe("createBattleState", () => {
     const afterRing = applyBattleAction(state, {
       type: "useRing",
       playerId: "playerOne",
-      ringInstanceId: "playerOne.ring.sparkBand",
+      ringInstanceId: "playerOne.ring.staticLoop",
       targetId: "playerTwo.hero",
     }).state;
     const playerTwoTurn = applyBattleAction(afterRing, {
@@ -824,7 +825,7 @@ describe("createBattleState", () => {
 
     expect(playerOneTurn.events).toContainEqual({
       type: "cooldownChanged",
-      targetId: "playerOne.ring.sparkBand",
+      targetId: "playerOne.ring.staticLoop",
       from: 1,
       to: 0,
     });
@@ -894,7 +895,7 @@ describe("battle records", () => {
     state = applyBattleAction(state, {
       type: "useRing",
       playerId: "playerOne",
-      ringInstanceId: "playerOne.ring.sparkBand",
+      ringInstanceId: "playerOne.ring.staticLoop",
       targetId: "playerOne.hero",
       enchantmentTargets: {
         "playerOne.gem.sparkPrism": "playerOne.hero",

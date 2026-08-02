@@ -22,6 +22,7 @@
     "prisma:postgres:migrate:status": "prisma migrate status --schema prisma/postgresql/schema.prisma",
     "prisma:postgres:drift:check": "prisma migrate diff --from-schema-datasource prisma/postgresql/schema.prisma --to-schema-datamodel prisma/postgresql/schema.prisma --exit-code",
     "prisma:postgres:smoke": "node scripts/postgresql-smoke.mjs",
+    "staging:reset-gameplay": "pnpm prisma:postgres:generate && node scripts/reset-staging-gameplay.mjs",
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {

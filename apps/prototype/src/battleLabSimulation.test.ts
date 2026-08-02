@@ -12,7 +12,7 @@ const config: BattleLabConfig = {
       level: 1,
       rings: [
         {
-          definitionId: "sparkBand",
+          definitionId: "staticLoop",
           level: 1,
           quality: 50,
           gems: [{ definitionId: "sparkPrism", level: 1, quality: 50 }],
@@ -25,7 +25,7 @@ const config: BattleLabConfig = {
       level: 1,
       rings: [
         {
-          definitionId: "frostSeal",
+          definitionId: "rimeLoop",
           level: 1,
           quality: 50,
           gems: [{ definitionId: "frostChip", level: 1, quality: 50 }],

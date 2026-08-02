@@ -4,11 +4,14 @@ This is the centralized working TODO for BattleNess. It focuses on what remains 
 
 ## Current Focus
 
-The live battle ergonomics and result-screen iteration is complete. The next product focus is a
-game-wide visual iteration that makes the player app feel like a game rather than a conventional
-website or dashboard. Phase 14 is paused, not complete or cancelled. Its remaining acceptance,
-hardening, monitoring, and production-promotion work is consolidated in the resume checklist at the
-end of the Phase 14 section so it can be resumed after the UI work.
+- [x] Replace the prototype ring, gem, and monster collection with `production-items-v1`, import the
+      TexturePacker atlases, retain test spells, generate stable three-unit recipes, migrate
+      fixtures/onboarding, and archive the former `prototype-6` content.
+
+The game-wide visual iteration is complete, and Phase 14 production and operations work is active
+again. Its remaining acceptance, backup resilience, external notification, monitoring, hardening,
+and production-promotion work is consolidated in the resume checklist at the end of the Phase 14
+section.
 
 ## Phase 1 - Game App Data Foundation
 
@@ -292,15 +295,15 @@ end of the Phase 14 section so it can be resumed after the UI work.
       staging restoration into an isolated database.
 - [x] Add the first encrypted off-host database backup copy path from the database VPS to the app VPS
       and verify decryptability.
-- [ ] Add a second encrypted backup copy target outside the app/database VPS pair. This is
-      intentionally deferred until a private high-availability home server is available, likely a
-      Raspberry Pi, or until a paid storage service is chosen.
+- [x] Configure a Raspberry Pi pull target outside the app/database VPS pair with a restricted
+      read-only SSH key, encrypted archives and checksums, 90-day retention, daily systemd execution,
+      and an isolated PostgreSQL restore drill from the retrieved copy.
 - [x] Add a daily local backup watchdog for backup age, dump presence and checksums, matching
       encrypted off-host copy age, and previous backup-service failures.
 - [ ] Connect backup watchdog failures and missed runs to an external notification channel before
-      public production launch. This is intentionally on standby at the user's request; the local
-      watchdog remains active, and an external heartbeat with email delivery is the preferred future
-      option.
+      public production launch, including detection of a completely unavailable VPS and a tested
+      operator delivery path. The user chose not to add an external heartbeat service during the
+      Raspberry Pi backup implementation, so this remains pending.
 - [x] Define the production migration, release, rollback, database recovery, and emergency
       maintenance runbook.
 - [ ] Add production monitoring and alerts for availability, error rate, database health, failed
@@ -339,6 +342,11 @@ Required before public production promotion:
       season-reward behavior where practical.
 - [ ] Add production monitoring and alerts for availability, latency, application errors, PostgreSQL,
       failed match settlement, queue maintenance, WebSocket reconnects, and backup failures.
+- [x] Configure the Raspberry Pi as the second encrypted backup destination outside the VPS pair,
+      retain 90 days, verify ciphertext checksums and decryptability, and prove an isolated restore
+      from the Pi copy.
+- [ ] Connect backup failures and missed runs to an external notification channel, then test both a
+      watchdog failure and a missing-heartbeat or unavailable-host condition.
 - [ ] Run load and soak tests for polling, WebSocket invalidations, matchmaking, market concurrency,
       authoritative battle actions, PostgreSQL connections, and process memory.
 - [ ] Run the dependency and production security review, including Nginx/TLS, cookies, OAuth,
@@ -348,13 +356,6 @@ Required before public production promotion:
       `battleness.com`, enable TLS, run production smoke checks, and retain rollback artifacts.
 - [ ] Keep production on one Game App instance until the process-local realtime hub is replaced by
       shared pub/sub.
-
-Intentionally deferred, but retained for a later infrastructure pass:
-
-- [ ] Add a second encrypted backup destination outside the VPS pair when the planned private
-      high-availability server, likely a Raspberry Pi, is available or paid storage is accepted.
-- [ ] Connect backup failures and missed runs to an external notification channel. This remains on
-      standby by user decision and must be reconsidered before broader public exposure.
 
 ## Open Design Questions
 

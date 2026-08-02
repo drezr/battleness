@@ -450,6 +450,8 @@ h3 {
 }
 
 .item-artwork {
+  position: relative;
+  overflow: hidden;
   display: block;
   width: 64px;
   aspect-ratio: 1;
@@ -460,6 +462,22 @@ h3 {
   background-position: var(--item-atlas-position);
   background-repeat: no-repeat;
   background-size: var(--item-atlas-size);
+}
+
+.item-artwork::before {
+  position: absolute;
+  left: var(--item-sprite-left, 0);
+  top: var(--item-sprite-top, 0);
+  display: var(--item-sprite-display, none);
+  width: var(--item-sprite-width, 100%);
+  height: var(--item-sprite-height, 100%);
+  transform: var(--item-sprite-transform, none);
+  transform-origin: top left;
+  background-image: var(--item-atlas);
+  background-position: var(--item-sprite-background-position, 0 0);
+  background-repeat: no-repeat;
+  background-size: var(--item-sprite-background-size, auto);
+  content: "";
 }
 
 .material-card .item-artwork {

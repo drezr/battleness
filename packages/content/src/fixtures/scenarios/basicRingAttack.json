@@ -10,7 +10,7 @@
     {
       "type": "useRing",
       "playerId": "playerTwo",
-      "ringInstanceId": "playerTwo.ring.ironCircle",
+      "ringInstanceId": "playerTwo.ring.ionSignet",
       "targetId": "playerOne.hero"
     }
   ],

@@ -58,13 +58,13 @@ describe("content package", () => {
       level: 1,
       rings: [
         {
-          id: "campaign.emberTrial.ring.emberLoop.1",
-          definitionId: "emberLoop",
+          id: "campaign.emberTrial.ring.ashenLoop.1",
+          definitionId: "ashenLoop",
           ownerId: "campaign.emberTrial",
           gems: [
             {
-              id: "campaign.emberTrial.gem.rubyShard.1.1",
-              definitionId: "rubyShard",
+              id: "campaign.emberTrial.gem.emberShard.1.1",
+              definitionId: "emberShard",
               enchantment: {
                 type: "monster",
                 monsterId: "emberImp",
@@ -140,21 +140,20 @@ describe("content package", () => {
     expect(spellIds).toEqual(expect.arrayContaining(["spark", "firebolt", "iceShard"]));
   });
 
-  it("implements the confirmed prototype collection", () => {
-    expect(definitions.rings).toHaveLength(13);
-    expect(definitions.gems).toHaveLength(13);
-    expect(definitions.monsters).toHaveLength(18);
+  it("implements the production-items-v1 collection", () => {
+    expect(definitions.rings).toHaveLength(54);
+    expect(definitions.gems).toHaveLength(54);
+    expect(definitions.monsters).toHaveLength(69);
     expect(definitions.spells).toHaveLength(6);
     expect(definitions.materials).toHaveLength(70);
-    expect(definitions.recipes).toHaveLength(48);
+    expect(definitions.recipes).toHaveLength(183);
 
-    const collectibleRings = definitions.rings.filter((ring) => ring.id !== "trainingFlameBand");
-    const collectibleGems = definitions.gems.filter((gem) => gem.id !== "plainQuartz");
     const elementRarityPairs = (items: readonly { element: string; rarity: string }[]) =>
       new Set(items.map((item) => `${item.element}:${item.rarity}`));
 
-    expect(elementRarityPairs(collectibleRings)).toHaveLength(12);
-    expect(elementRarityPairs(collectibleGems)).toHaveLength(12);
+    expect(elementRarityPairs(definitions.rings)).toHaveLength(12);
+    expect(elementRarityPairs(definitions.gems)).toHaveLength(12);
+    expect(elementRarityPairs(definitions.monsters)).toHaveLength(12);
   });
 
   it("defines one three-material recipe for every collectible item", () => {
@@ -162,24 +161,31 @@ describe("content package", () => {
       definitions.recipes.map((recipe) => `${recipe.outputType}:${recipe.outputDefinitionId}`),
     );
 
-    expect(recipeOutputIds.has("ring:trainingFlameBand")).toBe(false);
-    expect(recipeOutputIds.has("gem:plainQuartz")).toBe(false);
-    expect(definitions.recipes.every((recipe) => recipe.ingredients.length === 3)).toBe(true);
     expect(
-      definitions.recipes.every((recipe) =>
-        recipe.ingredients.every((item) => item.quantity === 1),
+      definitions.recipes.every(
+        (recipe) => recipe.ingredients.reduce((total, item) => total + item.quantity, 0) === 3,
       ),
     ).toBe(true);
     expect(recipeOutputIds).toEqual(
       new Set([
-        ...definitions.rings
-          .filter((ring) => ring.id !== "trainingFlameBand")
-          .map((ring) => `ring:${ring.id}`),
-        ...definitions.gems.filter((gem) => gem.id !== "plainQuartz").map((gem) => `gem:${gem.id}`),
+        ...definitions.rings.map((ring) => `ring:${ring.id}`),
+        ...definitions.gems.map((gem) => `gem:${gem.id}`),
         ...definitions.monsters.map((monster) => `monster:${monster.id}`),
         ...definitions.spells.map((spell) => `spell:${spell.id}`),
       ]),
     );
+
+    for (const outputType of ["ring", "gem", "monster"] as const) {
+      const fingerprints = definitions.recipes
+        .filter((recipe) => recipe.outputType === outputType)
+        .map((recipe) =>
+          recipe.ingredients
+            .map((ingredient) => `${ingredient.materialId}:${ingredient.quantity}`)
+            .sort()
+            .join("|"),
+        );
+      expect(new Set(fingerprints).size).toBe(fingerprints.length);
+    }
   });
 
   it("requires ring-only socket counts in recipes", () => {
@@ -192,22 +198,22 @@ describe("content package", () => {
   });
 
   it("crafts an item instance and consumes material stock", () => {
-    const recipe = definitions.recipes.find((candidate) => candidate.id === "craftRingEmberLoop");
+    const recipe = definitions.recipes.find((candidate) => candidate.id === "craftRingAshenLoop");
     if (!recipe) {
-      throw new Error("Expected craftRingEmberLoop to exist.");
+      throw new Error("Expected craftRingAshenLoop to exist.");
     }
     const result = craftRecipe({
       recipe,
       ownerId: "playerOne",
-      stock: createMaterialStock(definitions.materials, 2),
+      stock: createMaterialStock(definitions.materials, 4),
       instanceSequence: 1,
     });
 
     expect(result.crafted).toEqual({
       type: "ring",
       item: {
-        id: "playerOne.ring.emberLoop.crafted.1",
-        definitionId: "emberLoop",
+        id: "playerOne.ring.ashenLoop.crafted.1",
+        definitionId: "ashenLoop",
         ownerId: "playerOne",
         experience: 100,
         quality: 0,
@@ -217,19 +223,19 @@ describe("content package", () => {
       },
     });
     expect(result.stock.aluminium).toBe(1);
-    expect(result.stock.iron).toBe(1);
-    expect(result.stock.sodium).toBe(1);
+    expect(result.stock.iron).toBe(4);
+    expect(result.stock.sodium).toBe(4);
   });
 
   it("improves crafted item quality and ring sockets by spending credits", () => {
-    const recipe = definitions.recipes.find((candidate) => candidate.id === "craftRingEmberLoop");
+    const recipe = definitions.recipes.find((candidate) => candidate.id === "craftRingAshenLoop");
     if (!recipe) {
-      throw new Error("Expected craftRingEmberLoop to exist.");
+      throw new Error("Expected craftRingAshenLoop to exist.");
     }
     const crafted = craftRecipe({
       recipe,
       ownerId: "playerOne",
-      stock: createMaterialStock(definitions.materials, 2),
+      stock: createMaterialStock(definitions.materials, 4),
       instanceSequence: 1,
     }).crafted;
     if (crafted.type !== "ring") {
@@ -366,13 +372,13 @@ describe("content package", () => {
 
   it("creates a validated BattleSetup from prototype fixtures", () => {
     const setup = createBattleSetupFromFixture("basicDuel");
-    const sparkBand = setup.players[0].rings.find((ring) => ring.definitionId === "sparkBand");
+    const staticLoop = setup.players[0].rings.find((ring) => ring.definitionId === "staticLoop");
 
     expect(setup.players).toHaveLength(2);
     expect(setup.activePlayerId).toBeNull();
-    expect(sparkBand?.gems.length).toBe(2);
-    expect(sparkBand?.rarity).toBe("common");
-    expect(sparkBand?.gems[1]?.rarity).toBe("refined");
+    expect(staticLoop?.gems.length).toBe(2);
+    expect(staticLoop?.rarity).toBe("common");
+    expect(staticLoop?.gems[1]?.rarity).toBe("common");
     expect(Object.keys(setup.definitions.spells)).toEqual(
       expect.arrayContaining(["spark", "firebolt", "iceShard"]),
     );
@@ -414,7 +420,9 @@ describe("content package", () => {
     expect(monsters.find((monster) => monster.definitionId === "shieldWisp")?.shieldActive).toBe(
       true,
     );
-    expect(monsters.find((monster) => monster.definitionId === "emberImp")?.rageActive).toBe(false);
+    expect(monsters.find((monster) => monster.definitionId === "cinderJackal")?.rageActive).toBe(
+      false,
+    );
   });
 
   it("executes the initial JSON scenario fixtures through the engine", () => {

@@ -14,6 +14,7 @@ export const ringDefinitionSchema = z.object({
   baseEnergyCost: z.number().int().nonnegative(),
   baseCooldown: z.number().int().positive(),
   baseSpeed: z.number().int().nonnegative(),
+  intendedRole: z.string().min(1).optional(),
 });
 
 export const gemDefinitionSchema = z.object({
@@ -22,8 +23,10 @@ export const gemDefinitionSchema = z.object({
   element: elementSchema,
   rarity: raritySchema,
   baseDamage: z.number().int().nonnegative(),
-  baseEnergyPenalty: z.number().int().nonnegative(),
-  baseCooldownPenalty: z.number().int().nonnegative(),
+  baseEnergyPenalty: z.number().nonnegative().multipleOf(0.1),
+  baseCooldownPenalty: z.number().nonnegative().multipleOf(0.1),
+  baseSpeed: z.number().int().nonnegative().default(0),
+  intendedRole: z.string().min(1).optional(),
 });
 
 export const monsterDefinitionSchema = z
@@ -36,7 +39,10 @@ export const monsterDefinitionSchema = z
     baseDamage: z.number().int().nonnegative(),
     baseCooldown: z.number().int().positive(),
     baseSpeed: z.number().int().nonnegative(),
+    baseEnergyPenalty: z.number().nonnegative().multipleOf(0.1).default(0),
+    baseCooldownPenalty: z.number().nonnegative().multipleOf(0.1).default(0),
     skill: skillSchema.optional(),
+    intendedRole: z.string().min(1).optional(),
   })
   .strict();
 
@@ -53,6 +59,7 @@ export const spellDefinitionSchema = z.object({
   nameKey: z.string().min(1),
   element: elementSchema,
   rarity: raritySchema,
+  baseSpeed: z.number().int().nonnegative().default(0),
   baseEnergyPenalty: z.number().int().nonnegative(),
   baseCooldownPenalty: z.number().int().nonnegative(),
   effects: z.array(spellEffectSchema).min(1),
@@ -133,10 +140,22 @@ export const recipeDefinitionSchema = z
     craftedLevel: z.number().int().min(1).max(50),
     craftedQuality: z.number().int().min(0).max(100),
     ringSocketCount: z.number().int().min(1).max(3).optional(),
-    ingredients: z.tuple([recipeIngredientSchema, recipeIngredientSchema, recipeIngredientSchema]),
+    ingredients: z.array(recipeIngredientSchema).min(1).max(3),
   })
   .strict()
   .superRefine((recipe, context) => {
+    const totalMaterialQuantity = recipe.ingredients.reduce(
+      (total, ingredient) => total + ingredient.quantity,
+      0,
+    );
+    if (totalMaterialQuantity !== 3) {
+      context.addIssue({
+        code: "custom",
+        path: ["ingredients"],
+        message: "Recipes require exactly three material units in total.",
+      });
+    }
+
     if (recipe.outputType === "ring") {
       if (recipe.ringSocketCount === undefined) {
         context.addIssue({

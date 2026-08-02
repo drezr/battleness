@@ -43,7 +43,7 @@ import {
 import { validateCampaignReferences } from "./campaign";
 import { validateContentReferences } from "./references";
 
-export const contentVersion = "prototype-6";
+export const contentVersion = "production-items-v1";
 
 export const definitions = {
   campaignOpponents: campaignOpponents as readonly CampaignOpponent[],
@@ -133,3 +133,5 @@ export * from "./references";
 export * from "./schemas";
 export * from "./forge";
 export * from "./campaign";
+export * from "./penalties";
+export * from "./itemAtlases";
