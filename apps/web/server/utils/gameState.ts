@@ -3425,39 +3425,35 @@ export async function unequipPlayerRing(ringItemId: string) {
 export async function resetDevelopmentPlayerState() {
   const prisma = usePrisma();
 
+  await deleteDevelopmentPlayer(prisma, currentPlayerId());
+  await seedDevelopmentPlayer(prisma);
+  return getPlayerState();
+}
+
+async function deleteDevelopmentPlayer(prisma: PrismaClient, playerId: string): Promise<void> {
   await prisma.$transaction(async (transaction) => {
     await transaction.rankedRatingAdjustment.deleteMany({
       where: {
         battleRecord: {
-          OR: [
-            { playerOneId: currentPlayerId() },
-            { playerTwoId: currentPlayerId() },
-            { winnerPlayerId: currentPlayerId() },
-          ],
+          OR: [{ playerOneId: playerId }, { playerTwoId: playerId }, { winnerPlayerId: playerId }],
         },
       },
     });
     await transaction.privateMatch.deleteMany({
-      where: { participants: { some: { playerId: currentPlayerId() } } },
+      where: { participants: { some: { playerId } } },
     });
     await transaction.battleRecord.deleteMany({
       where: {
-        OR: [
-          { playerOneId: currentPlayerId() },
-          { playerTwoId: currentPlayerId() },
-          { winnerPlayerId: currentPlayerId() },
-        ],
+        OR: [{ playerOneId: playerId }, { playerTwoId: playerId }, { winnerPlayerId: playerId }],
       },
     });
     await transaction.playerMarketListing.deleteMany({
       where: {
-        OR: [{ sellerId: currentPlayerId() }, { buyerId: currentPlayerId() }],
+        OR: [{ sellerId: playerId }, { buyerId: playerId }],
       },
     });
-    await transaction.player.deleteMany({ where: { id: currentPlayerId() } });
+    await transaction.player.deleteMany({ where: { id: playerId } });
   });
-  await seedDevelopmentPlayer(prisma);
-  return getPlayerState();
 }
 
 export async function disconnectGameStateClientForTests(): Promise<void> {
@@ -3638,7 +3634,7 @@ export async function ensurePlayerOnboarding(client: PrismaClient): Promise<void
   }
 }
 
-export async function seedDevelopmentPlayer(client: PrismaContext): Promise<void> {
+export async function seedDevelopmentPlayer(client: PrismaClient): Promise<void> {
   if (isPublicDeployment()) {
     return;
   }
@@ -3647,6 +3643,18 @@ export async function seedDevelopmentPlayer(client: PrismaContext): Promise<void
 
   const playerId = currentPlayerId();
   const isDefaultDevelopmentPlayer = playerId === developmentPlayerId;
+  const existingPlayer = await client.player.findUnique({
+    where: { id: playerId },
+    select: { onboardingVersion: true },
+  });
+
+  if (
+    isDefaultDevelopmentPlayer &&
+    existingPlayer &&
+    existingPlayer.onboardingVersion < currentOnboardingVersion
+  ) {
+    await deleteDevelopmentPlayer(client, playerId);
+  }
 
   await client.player.upsert({
     where: { id: playerId },
@@ -3657,6 +3665,7 @@ export async function seedDevelopmentPlayer(client: PrismaContext): Promise<void
       experience: 0,
       credits: developmentStartingCredits,
       nextItemSequence: 1,
+      onboardingVersion: isDefaultDevelopmentPlayer ? currentOnboardingVersion : 0,
     },
     update: { lastActiveAt: new Date() },
   });

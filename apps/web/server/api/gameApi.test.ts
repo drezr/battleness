@@ -762,6 +762,48 @@ describe("Nuxt Game App APIs", () => {
     });
   });
 
+  it("resets obsolete local development gameplay before validating the new content", async () => {
+    await prisma.player.update({
+      where: { id: "devPlayer" },
+      data: { onboardingVersion: 0 },
+    });
+    await prisma.inventoryItem.createMany({
+      data: [
+        {
+          id: "devPlayer.ring.emberLoop.crafted.1",
+          playerId: "devPlayer",
+          type: "ring",
+          definitionId: "emberLoop",
+          contentVersion: "prototype-6",
+          experience: 0,
+          quality: 0,
+          socketCount: 1,
+        },
+        {
+          id: "devPlayer.gem.rubyShard.crafted.2",
+          playerId: "devPlayer",
+          type: "gem",
+          definitionId: "rubyShard",
+          contentVersion: "prototype-6",
+          experience: 0,
+          quality: 0,
+        },
+      ],
+    });
+
+    const response = (await playerHandler({})) as PlayerApiResponse;
+    const player = await prisma.player.findUniqueOrThrow({
+      where: { id: "devPlayer" },
+      include: { inventoryItems: true, materialStock: true },
+    });
+
+    expect(response.inventory).toEqual([]);
+    expect(response.player.credits).toBe(1_000_000);
+    expect(player.onboardingVersion).toBe(2);
+    expect(player.inventoryItems).toEqual([]);
+    expect(player.materialStock).toHaveLength(70);
+  });
+
   it("persists player-market listings, escrow locks, and idempotent mutation journals", async () => {
     const buyerId = "playerMarketBuyer";
     const ringId = "playerMarket.ring";
