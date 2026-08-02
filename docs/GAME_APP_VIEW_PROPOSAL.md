@@ -19,6 +19,7 @@ BattleNess App
 +-- Forge
 |   +-- Craft
 |   +-- Socket
+|   +-- Enchant
 |   +-- Quality
 +-- Inventory
 |   +-- Items
@@ -51,6 +52,7 @@ BattleNess App
 /forge                    -> Forge hub
 /forge/craft              -> Craft items from recipes and materials
 /forge/socket             -> Add/remove gems from rings
+/forge/enchant            -> Bind/remove spell or monster enchantments on gems
 /forge/quality            -> Improve item quality with credits
 
 /inventory                -> Inventory hub
@@ -242,7 +244,7 @@ Purpose: choose the forge workflow.
 ```text
 +--------------------------------------------------------------------------------+
 | [Forge Actions]                                                                 |
-| [Craft] [Socket] [Quality]                                                      |
+| [Craft] [Socket] [Enchant] [Quality]                                            |
 +--------------------------------------------------------------------------------+
 | [Resource Summary]                                                              |
 | - credits                                                                       |
@@ -291,6 +293,21 @@ Purpose: manage gems inside rings.
 +--------------------------------------------------------------------------------+
 ```
 
+## Forge Enchant
+
+Purpose: bind one owned spell or monster to an owned gem, replace the binding atomically, or remove
+it without destroying either item.
+
+```text
++--------------------------------------------------------------------------------+
+| [Gem Selector]                       [Spell Or Monster Selector]                 |
+| - owned gems                         - available enchantment items               |
+| - current enchantment                - current usage state                       |
++--------------------------------------------------------------------------------+
+| {Enchant} {Replace With Confirmation} {Remove Enchantment}                      |
++--------------------------------------------------------------------------------+
+```
+
 ## Forge Quality
 
 Purpose: spend credits to improve item quality.
@@ -309,10 +326,8 @@ Purpose: spend credits to improve item quality.
 +--------------------------------------------------------------------------------+
 ```
 
-Possible later split:
-
-- `quality` can stay separate from `socket` because the decisions, costs, and item eligibility are different.
-- A future `enchant` route could exist if gem enchantment becomes too complex to live in inventory or socketing.
+The `quality`, `socket`, and `enchant` workflows remain separate because their decisions, costs, and
+item eligibility are different.
 
 ## Inventory Hub
 
@@ -536,6 +551,7 @@ The first Game App milestone should include:
 - Inventory loadouts.
 - Forge craft.
 - Forge socket.
+- Forge enchant.
 - Forge quality.
 - Battle hub with loadout validation.
 

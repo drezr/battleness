@@ -52,6 +52,7 @@ export const sectionLinks = {
     { labelKey: "navigation.hub", to: "/forge" },
     { labelKey: "navigation.craft", to: "/forge/craft" },
     { labelKey: "navigation.socket", to: "/forge/socket" },
+    { labelKey: "navigation.enchant", to: "/forge/enchant" },
     { labelKey: "navigation.quality", to: "/forge/quality" },
   ],
   inventory: [
@@ -180,6 +181,11 @@ export const viewsByPath: Record<string, MockView> = {
         titleKey: "forge.socket.title",
         bodyKey: "mock.forge.socketBody",
         actions: [{ labelKey: "mock.forge.openSocket", to: "/forge/socket" }],
+      },
+      {
+        titleKey: "forge.enchant.title",
+        bodyKey: "forge.enchant.description",
+        actions: [{ labelKey: "navigation.enchant", to: "/forge/enchant" }],
       },
       {
         titleKey: "forge.quality.title",

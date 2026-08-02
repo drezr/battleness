@@ -152,9 +152,9 @@ const selectedDetailManageTo = computed(() => {
   const item = selectedDetailItem.value;
   if (!item) return undefined;
   if (item.type === "ring") return `/forge/socket?ringId=${encodeURIComponent(item.id)}`;
-  if (item.type === "gem") return `/forge/socket?gemId=${encodeURIComponent(item.id)}`;
+  if (item.type === "gem") return `/forge/enchant?gemId=${encodeURIComponent(item.id)}`;
   if (item.type === "spell" || item.type === "monster") {
-    return `/forge/socket?targetId=${encodeURIComponent(item.id)}`;
+    return `/forge/enchant?targetId=${encodeURIComponent(item.id)}`;
   }
   return undefined;
 });

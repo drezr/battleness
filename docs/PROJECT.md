@@ -22,7 +22,7 @@ The game is a one-versus-one, turn-based combat game. Each player controls a her
 - A ring has an energy cost, cooldown, damage, and 1 to 3 sockets.
 - Gems are placed into ring sockets and add damage.
 - Gems can be enchanted by a monster or a spell.
-- Gem enchantments are modified only under Forge > Socket. Inventory exposes their resolved composition as read-only information and links the selected item to the Forge workflow.
+- Gem enchantments are modified only under the dedicated Forge > Enchant view. Forge > Socket manages ring socket capacity and gem socketing only. Inventory exposes resolved composition as read-only information and links gems, spells, and monsters to the Enchant workflow.
 - A gem and an available spell or monster may be selected independently; ownership, type, uniqueness, and market-escrow compatibility are validated automatically.
 - A gem holds at most one spell or monster enchantment. Replacing or removing it is free, never destroys the attached item, and is allowed while its ring is equipped as long as no battle or market lock prevents the mutation.
 - When a ring is used, the gems inside it can summon their monsters or cast their spells.

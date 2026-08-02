@@ -1003,6 +1003,7 @@
 }
 
 .forge-workflow-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -1032,6 +1033,11 @@
 }
 
 .forge-hub-page .hub-workflow-card:nth-child(3) {
+  --forge-accent: 207 90 228;
+  --forge-position: 48% center;
+}
+
+.forge-hub-page .hub-workflow-card:nth-child(4) {
   --forge-accent: 91 215 144;
   --forge-position: 78% center;
 }

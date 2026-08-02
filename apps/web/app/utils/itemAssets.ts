@@ -1,4 +1,7 @@
+import { definitions } from "@battleness/content";
+
 export type ItemAssetKind = keyof typeof itemAtlases;
+export type ItemRarity = "common" | "refined" | "rare" | "epic";
 
 type ItemAtlas = {
   path: string;
@@ -158,6 +161,14 @@ const itemAtlases = {
   },
 } as const satisfies Record<string, ItemAtlas>;
 
+const itemRarities = {
+  ring: new Map(definitions.rings.map((definition) => [definition.id, definition.rarity])),
+  gem: new Map(definitions.gems.map((definition) => [definition.id, definition.rarity])),
+  monster: new Map(definitions.monsters.map((definition) => [definition.id, definition.rarity])),
+  spell: new Map(definitions.spells.map((definition) => [definition.id, definition.rarity])),
+  material: new Map(definitions.materials.map((definition) => [definition.id, definition.rarity])),
+} satisfies Record<ItemAssetKind, ReadonlyMap<string, ItemRarity>>;
+
 export function itemArtworkStyle(kind: string, definitionId: string): Record<string, string> {
   if (!isItemAssetKind(kind)) {
     return {};
@@ -187,6 +198,24 @@ export function hasItemArtwork(kind: string, definitionId: string): boolean {
   return Object.keys(itemArtworkStyle(kind, definitionId)).length > 0;
 }
 
+export function itemArtworkRarityClass(
+  kind: string,
+  definitionId: string,
+  rarity?: string,
+): string | undefined {
+  const resolvedRarity = isItemRarity(rarity)
+    ? rarity
+    : isItemAssetKind(kind)
+      ? itemRarities[kind].get(definitionId)
+      : undefined;
+
+  return resolvedRarity ? `rarity-border-${resolvedRarity}` : undefined;
+}
+
 function isItemAssetKind(kind: string): kind is ItemAssetKind {
   return kind in itemAtlases;
+}
+
+function isItemRarity(rarity: string | undefined): rarity is ItemRarity {
+  return rarity === "common" || rarity === "refined" || rarity === "rare" || rarity === "epic";
 }

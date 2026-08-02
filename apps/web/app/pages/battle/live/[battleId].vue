@@ -210,7 +210,11 @@
                   }}</span>
                 </div>
                 <div class="live-card-art live-monster-art">
-                  <ItemArtwork :definition-id="monster.definitionId" kind="monster" />
+                  <ItemArtwork
+                    :definition-id="monster.definitionId"
+                    kind="monster"
+                    :rarity-border="false"
+                  />
                   <div
                     v-if="monster.skill || monster.shieldActive || monster.rageActive"
                     class="live-card-status-row"
@@ -274,7 +278,11 @@
                   :key="ring.id"
                   :class="['live-reveal-chip', `rarity-border-${ring.rarity}`]"
                 >
-                  <ItemArtwork :definition-id="ring.definitionId" kind="ring" />
+                  <ItemArtwork
+                    :definition-id="ring.definitionId"
+                    kind="ring"
+                    :rarity-border="false"
+                  />
                   <strong>{{ ringName(ring) }}</strong>
                   <small>{{ ringTotalDamage(ring) }} / {{ ring.energyCost }}</small>
                 </article>
@@ -326,7 +334,11 @@
                   }}</span>
                 </div>
                 <div class="live-card-art live-monster-art">
-                  <ItemArtwork :definition-id="monster.definitionId" kind="monster" />
+                  <ItemArtwork
+                    :definition-id="monster.definitionId"
+                    kind="monster"
+                    :rarity-border="false"
+                  />
                   <div
                     v-if="monster.skill || monster.shieldActive || monster.rageActive"
                     class="live-card-status-row"
@@ -416,7 +428,7 @@
               }}</span>
             </div>
             <div class="live-card-art live-ring-art">
-              <ItemArtwork :definition-id="ring.definitionId" kind="ring" />
+              <ItemArtwork :definition-id="ring.definitionId" kind="ring" :rarity-border="false" />
             </div>
             <div class="live-ring-frame" aria-hidden="true"></div>
             <dl class="live-card-stats live-ring-stats">
@@ -474,6 +486,7 @@
                     v-if="slot.gem"
                     :definition-id="slot.gem.definitionId"
                     kind="gem"
+                    :rarity-border="false"
                     :title="contentText(`gem.${slot.gem.definitionId}.name`, slot.gem.label)"
                   />
                 </span>

@@ -40,7 +40,7 @@ end of the Phase 14 section so it can be resumed after the UI work.
 - [x] Render craft output and material artwork.
 - [x] Implement `/forge/socket` using the Dev Lab socketing rules.
 - [x] Prevent one gem from being socketed into more than one ring.
-- [x] Implement Forge-only gem enchantment management with independent selection, confirmed atomic replacement, free non-destructive removal, equipped-ring support, and read-only Inventory handoff.
+- [x] Implement gem enchantment management in a dedicated Forge > Enchant view with independent selection, confirmed atomic replacement, free non-destructive removal, equipped-ring support, and read-only Inventory handoff.
 - [x] Prevent one spell or monster instance from being reused as multiple gem enchantments.
 - [x] Implement `/forge/quality` with credit costs and quality improvement.
 - [x] Implement ring socket-count improvement under `/forge/socket`.
@@ -362,7 +362,7 @@ Intentionally deferred, but retained for a later infrastructure pass:
 - [x] What fixed rewards should campaign opponents grant? Each content record now defines first-clear and repeat-victory values.
 - [x] What initial hero XP rewards should development battles grant? Win grants 100 XP, draw grants 60 XP, and loss grants 25 XP. Campaign and PvP formulas remain open within their respective modes.
 - [x] Should ring socket-count improvement live under `/forge/socket`, `/forge/quality`, or a separate improvement view? Decided and implemented under `/forge/socket`.
-- [x] Should spell and monster gem enchantment be managed in inventory, forge, or both? Mutations live only under Forge > Socket; Inventory shows read-only composition and links the selected item into Forge.
+- [x] Should spell and monster gem enchantment be managed in inventory, forge, or both? Mutations live only under the dedicated Forge > Enchant view; Inventory shows read-only composition and links the selected item into the appropriate Forge workflow.
 - [x] Should the Game Market sell only materials at first? It buys materials from players and also
       buys eligible crafted rings, gems, monsters, and spells using recipe-based values.
 - [x] What data should be public in player-facing PvP before, during, and after battle? Search is anonymous; pre-combat identity is limited; loadouts and ring counts stay hidden; rings, gems, and enchantments reveal through use; monsters reveal on summon; participant results and replays show full loadouts; public profiles show competitive records only.

@@ -66,8 +66,30 @@
           </dl>
         </NuxtLink>
 
-        <NuxtLink class="hub-workflow-card hub-link-card" to="/forge/quality">
+        <NuxtLink class="hub-workflow-card hub-link-card" to="/forge/enchant">
           <span class="hub-workflow-number">03</span>
+          <span class="hub-workflow-heading">
+            <span class="hub-workflow-icon"><WandSparkles :size="28" /></span>
+            <span>
+              <span class="eyebrow">{{ t("forge.hub.enchantment") }}</span>
+              <h2>{{ t("forge.enchant.title") }}</h2>
+            </span>
+          </span>
+          <p>{{ t("forge.enchant.description") }}</p>
+          <dl>
+            <div>
+              <dt>{{ t("common.gems") }}</dt>
+              <dd>{{ gemCount }}</dd>
+            </div>
+            <div>
+              <dt>{{ t("forge.enchant.targets") }}</dt>
+              <dd>{{ enchantmentTargetCount }}</dd>
+            </div>
+          </dl>
+        </NuxtLink>
+
+        <NuxtLink class="hub-workflow-card hub-link-card" to="/forge/quality">
+          <span class="hub-workflow-number">04</span>
           <span class="hub-workflow-heading">
             <span class="hub-workflow-icon"><Sparkles :size="28" /></span>
             <span>
@@ -150,6 +172,7 @@ import {
   PackageOpen,
   ScrollText,
   Sparkles,
+  WandSparkles,
 } from "@lucide/vue";
 import type { PlayerState } from "~/utils/playerState";
 import { inventoryCountByType, totalMaterialQuantity } from "~/utils/playerState";
@@ -165,6 +188,12 @@ const craftableCount = computed(
 const materialUnits = computed(() => totalMaterialQuantity(state.value?.materials));
 const ringCount = computed(() => inventoryCountByType(state.value?.inventory, "ring"));
 const gemCount = computed(() => inventoryCountByType(state.value?.inventory, "gem"));
+const enchantmentTargetCount = computed(
+  () =>
+    (state.value?.inventory ?? []).filter(
+      (item) => item.type === "spell" || item.type === "monster",
+    ).length,
+);
 const qualityCandidates = computed(
   () => state.value?.inventory.filter((item) => item.quality < 100).length ?? 0,
 );

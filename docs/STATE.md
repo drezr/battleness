@@ -4,6 +4,18 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- Forge gem enchantment now has a dedicated player-facing `/forge/enchant` route and a distinct
+  destination on the Forge Hub. `/forge/socket` is limited to ring socket capacity, socketing, and
+  unsocketing. Inventory handoff sends rings to Socket and sends gems, spells, and monsters to
+  Enchant with query-backed preselection. The existing server-owned enchant, replacement, removal,
+  ownership, uniqueness, escrow, and equipped-ring rules are unchanged.
+- Every Game App item artwork outside the active live-battle arena now carries a border resolved
+  from its content rarity: light gray for common, blue for refined, orange for rare, and purple for
+  epic. `ItemArtwork` owns the shared resolution so Inventory, Forge, Market, Profile, campaign,
+  hubs, detail modals, history, and result surfaces stay consistent. The active battle explicitly
+  opts out because its rings, gems, and monsters already use dedicated rarity frames. Focused tests
+  cover content-derived and explicit versioned rarity values, and browser checks confirm all four
+  computed border colors plus the larger Home and Battle Hub artwork treatments.
 - The shared child-view return control now uses a clearly visible 44-pixel rounded surface, cyan
   border and icon, restrained gradient, and compact depth treatment beside page titles. Hover,
   focus, active, and reduced-motion behavior remain explicit, and the localized accessible label is
@@ -22,11 +34,17 @@ This file records modifications made to the project during agent-assisted work.
   readiness and material-stock header links remain available, and no routes, data, or business
   behavior changed. Browser checks at desktop, portrait mobile, and short landscape confirm the new
   order without horizontal overflow.
-- The first three production item assets from `battleness-production-items-v1-asset-bible.json`
-  are generated as individual transparent native-resolution PNG files under
-  `apps/web/public/assets/items/rings/`: `ashenLoop.png`, `cinderKnot.png`, and `charBand.png`.
-  They follow the shared dark high-fantasy 3D direction and remain a review batch before the rest
-  of the production item collection is generated.
+- All 54 production ring assets from `battleness-production-items-v1-asset-bible.json` are generated
+  as individual transparent native-resolution PNG files under
+  `apps/web/public/assets/items/rings/`. The collection follows the shared dark high-fantasy 3D
+  direction, preserves the fire/electric/ice and rarity languages, and keeps at least six percent
+  transparent margin around every complete ring without downscaling the generated subjects.
+- All 54 production gem assets and all 69 production monster assets from the same asset bible are
+  generated as individual transparent native-resolution PNG files under
+  `apps/web/public/assets/items/gems/` and `apps/web/public/assets/items/monsters/`. Every final
+  canvas is square, preserves the generated subject pixels without downscaling, keeps at least six
+  percent transparent margin, and passes expected-ID, RGBA, alpha-bounds, transparent-corner, and
+  safe-margin validation.
 - The PvP Hub's Private, Casual, and Ranked mode cards are now full-card links like the other hub
   destinations. Their redundant footer buttons, reserved action row, and fixed 420/330/270-pixel
   heights are removed; cards size from their content while retaining mode artwork, feature details,
@@ -287,7 +305,7 @@ This file records modifications made to the project during agent-assisted work.
 - The cross-mode PvP information contract is implemented and regression-tested. Search is anonymous; pre-combat identity is limited to display name, hero level, visible rank, and readiness; even opponent ring count remains hidden. Rings reveal permanently on first use, gems and enchantments on first effect, monsters expose full combat data when summoned, participant results and replays expose complete loadouts, and public PvP profiles expose competitive records without inventory or loadouts. A shared presentation-policy matrix and API integration assertions cover every phase across private, casual, and ranked PvP.
 - The pre-combat PvP information boundary is enforced server-side across private, casual, and ranked modes. Search states have no opponent identity, matched opponents expose only display name, hero level, visible rank, and readiness, private lobby loadout metadata is returned only for the current participant, and live battle opponent DTOs no longer expose ring count. Shared client types, localized presentations, and cross-mode API assertions use the same projection.
 - Live battle staged reveal is implemented without parallel persistence. The server deterministically reconstructs permanent per-participant visibility from the battle snapshot and action journal: first ring use reveals that ring and its contributing gems, while spell and monster enchantments remain omitted until an actual cast or summon. The localized combat view renders only those revealed opponent items in a read-only dock, and pure plus API integration tests cover hidden, ring/gem, and triggered-enchantment phases.
-- Gem-enchantment ownership is now explicit in the player experience: Inventory shows persisted socket and enchantment relationships read-only and hands relevant items to Forge > Socket through query-backed preselection. Forge supports independent gem and target selection, confirmed atomic replacement, free non-destructive removal, equipped-ring mutation outside combat, and unrestricted elemental combinations while preserving ownership, uniqueness, and market-escrow validation. API coverage verifies replacement, released targets, new ownership, and enriched inventory reads.
+- Gem-enchantment ownership is explicit in the player experience: Inventory shows persisted socket and enchantment relationships read-only and hands gems, spells, and monsters to Forge > Enchant through query-backed preselection. Enchant supports independent gem and target selection, confirmed atomic replacement, free non-destructive removal, equipped-ring mutation outside combat, and unrestricted elemental combinations while preserving ownership, uniqueness, and market-escrow validation. API coverage verifies replacement, released targets, new ownership, and enriched inventory reads.
 - The Nuxt server now provides basic operational observability: safe request correlation through `x-request-id`, structured JSON request and ranked-maintenance failure records, battle and authenticated-player context without request secrets, a bounded process-local development buffer, and authenticated development-only inspection and clearing endpoints. The operating policy and production limitations are documented in `docs/OBSERVABILITY.md`.
 - GitHub Actions CI now enforces the Prettier baseline and builds the Nuxt Game App for production in addition to type checking, linting, tests, and the existing PostgreSQL migration, drift, and smoke checks.
 - Game Market, Player Market, and private market history now use the tactical player-facing design system without changing their transactional APIs. The fixed market presents full-width material and crafted-item catalogues with a contextual buy, sell, or recipe-valued buyback modal plus a compact activity log. The player market presents permanent-listing status, a collapsed escrow listing form, primary and advanced search filters, price-forward listing cards, and clear purchase or free-cancellation actions. History is a private ledger with direction, item metadata, settlement value, date, and role filtering. Idempotency, escrow, anonymous counterparties, permanent listings, and transaction privacy remain unchanged.
@@ -426,6 +444,18 @@ This file records modifications made to the project during agent-assisted work.
 
 ### 2026-08-01
 
+- Added rarity-colored borders to the shared Game App item artwork component, using the established
+  common, refined, rare, and epic border colors and content definitions as the default rarity
+  source. Removed two Home and Battle Hub overrides that suppressed artwork borders, while making
+  every active live-battle artwork call opt out so the arena retains its specialized rarity frames.
+  Added focused rarity-resolution tests and browser-verified common, refined, rare, and epic icons
+  across Inventory, Forge, Home, and Battle Hub.
+- Corrected four production ring renders after visual review. `nymVaros` and `theNinthBrand` now
+  use one continuous wearable band with a smooth unobstructed finger opening and compact top-mounted
+  focal elements. `scoriaHalo` now uses a balanced square three-quarter composition instead of the
+  previous wide crown-like silhouette. `vhalSeryn` now condenses its floating fiery core into a
+  top-mounted setting and removes the oversized secondary halo. All four replacements retain their
+  original elemental, material, rarity, transparency, and safe-margin requirements.
 - Restyled the shared child-view return link as a more visible rounded cyan-accented control while
   retaining its 44-pixel interaction target, localized accessible name, focus outline, and
   reduced-motion behavior. Browser-verified six representative route families across desktop,
@@ -439,9 +469,18 @@ This file records modifications made to the project during agent-assisted work.
   below Craft, Socket, and Quality. The templates use the same order visually and semantically so
   navigation precedes secondary intelligence for keyboard and assistive-technology users. Verified
   desktop, portrait-mobile, and short-landscape layouts with no horizontal overflow.
-- Generated the first review batch from the production item asset bible: transparent native 1254x1254
-  PNG renders for `ashenLoop`, `cinderKnot`, and `charBand` under the Game App ring asset directory.
-  Generation is intentionally paused after these first three assets for visual-direction approval.
+- Completed all 54 production ring renders from the item asset bible as individual transparent PNG
+  files under the Game App ring asset directory. Sources retain their native generated detail; final
+  canvases are square and expanded only when required to preserve the complete subject and the
+  asset-style minimum six-percent transparent margin. Automated checks cover expected IDs, RGBA
+  output, square dimensions, transparent corners, non-empty alpha bounds, and safe margins.
+- Completed the 54-gem and 69-monster production collections from the item asset bible. Each asset
+  was generated independently through its own JSON prompt, converted from a removable chroma-key
+  source to transparent RGBA, and stored under the matching Game App item directory. Final canvases
+  retain native subject resolution and expand only to restore square format or the minimum
+  six-percent safe margin. Automated validation and element-specific visual contact sheets cover all
+  123 expected IDs, transparency, framing, elemental recognition, silhouette readability, and
+  category diversity.
 - Restyled the page-title help trigger as a restrained 32-pixel circle inside its existing 44-pixel
   keyboard and touch target. Removed the unnecessary trigger from Home while leaving its title style
   unchanged. Browser checks covered desktop and mobile Battle, Forge, Inventory, and Home geometry,
