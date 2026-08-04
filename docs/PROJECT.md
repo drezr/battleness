@@ -874,6 +874,12 @@ This section separates executable game rules from implementation decisions. It i
 
 - Status: decided.
 - Decision: Keep versioned JSON content definitions as the source of truth and import them into the database if runtime querying, admin tooling, or production operations require it. Player-owned instances and progression data belong in the database.
+- Authoring sources that generate active definitions belong under `packages/content/sources/`, while
+  generated runtime definitions remain under `packages/content/src/definitions/`. The production v1
+  item asset bible is `packages/content/sources/production-items-v1.asset-bible.json`.
+- The production v1 asset bible covers all 253 active definitions: 54 rings, 54 gems, 69 monsters,
+  six retained test spells, and 70 materials. Every entry includes atlas-ready visual direction even
+  when its production atlas has not been imported yet.
 - Reason: JSON definitions are easy to review, generate, diff, validate, and version. Database import can support production needs without making the database the design source.
 - Tradeoffs: This requires import tooling and content version tracking so saved player item instances and match records remain compatible with content changes.
 

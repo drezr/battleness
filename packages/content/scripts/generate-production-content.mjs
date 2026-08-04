@@ -4,14 +4,9 @@ import { fileURLToPath } from "node:url";
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const contentRoot = resolve(scriptDirectory, "..");
-const repositoryRoot = resolve(contentRoot, "..", "..");
 const definitionsRoot = resolve(contentRoot, "src", "definitions");
 const localesRoot = resolve(contentRoot, "src", "locales");
-const biblePath = resolve(
-  repositoryRoot,
-  "docs",
-  "battleness-production-items-v1-asset-bible.json",
-);
+const biblePath = resolve(contentRoot, "sources", "production-items-v1.asset-bible.json");
 
 const readJson = async (path) => JSON.parse(await readFile(path, "utf8"));
 const writeJson = async (path, value) =>
@@ -226,9 +221,35 @@ function assertBible(value) {
     ["rings", 54],
     ["gems", 54],
     ["monsters", 69],
+    ["spells", 6],
+    ["materials", 70],
   ]) {
     if (!Array.isArray(value[kind]) || value[kind].length !== expected) {
       throw new Error(`Expected ${expected} ${kind} in the production asset bible.`);
+    }
+    if (value.counts?.[kind] !== expected) {
+      throw new Error(`Expected the asset bible count for ${kind} to be ${expected}.`);
+    }
+  }
+
+  const items = [
+    ...value.rings,
+    ...value.gems,
+    ...value.monsters,
+    ...value.spells,
+    ...value.materials,
+  ];
+  if (value.counts?.total !== items.length) {
+    throw new Error(`Expected the asset bible total count to be ${items.length}.`);
+  }
+  for (const item of items) {
+    if (
+      !item.asset ||
+      !item.asset.visualDescription ||
+      !item.asset.generationPrompt ||
+      !item.asset.negativePrompt
+    ) {
+      throw new Error(`Asset bible item ${item.id} has incomplete artwork guidance.`);
     }
   }
 }

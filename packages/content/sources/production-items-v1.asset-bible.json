@@ -1,6 +1,6 @@
 {
   "contentVersion": "production-items-v1",
-  "generatedAt": "2026-07-31",
+  "generatedAt": "2026-08-03",
   "assetStyle": {
     "id": "battlenessAssetStyleV1",
     "purpose": "Unified visual specification for AI-generated BattleNess inventory and summon assets.",
@@ -44,7 +44,9 @@
     "categoryRules": {
       "rings": "Every ring must be a wearable ring with a clearly visible opening and band. Vary band width, profile, setting, construction method, gemstone placement and asymmetry. Do not turn all rings into crowns.",
       "gems": "Vary crystal geometry: shard, pearl, prism, cabochon, cluster, orb, lattice, eye, heart, tear or mineral specimen. Each gem must have a distinct internal structure or inclusion. Avoid repeating the same diamond cut.",
-      "monsters": "Show the complete creature and make its species readable before its elemental effect. Vary anatomy, body mass, stance, number of limbs, armor placement and focal feature. Elemental effects must support rather than replace the creature design."
+      "monsters": "Show the complete creature and make its species readable before its elemental effect. Vary anatomy, body mass, stance, number of limbs, armor placement and focal feature. Elemental effects must support rather than replace the creature design.",
+      "spells": "Show one isolated magical phenomenon without a caster, hand, weapon, environment or card frame. Give every spell a compact readable silhouette, a distinct motion language and a structural focal point rather than an amorphous cloud of particles.",
+      "materials": "Show one physically believable crafting specimen or one unified sealed vessel when containment is necessary. Preserve recognizable real-world color, phase and texture while using rarity-appropriate fantasy preparation. Never add chemical symbols, labels or periodic-table text."
     },
     "consistencyRules": [
       "One subject only per image.",
@@ -91,7 +93,9 @@
     "rings": 54,
     "gems": 54,
     "monsters": 69,
-    "total": 177
+    "spells": 6,
+    "materials": 70,
+    "total": 253
   },
   "rings": [
     {
@@ -5082,6 +5086,2040 @@
           "atlasReady": true
         },
         "visualTags": ["monster", "ice", "epic", "summon", "shield"]
+      }
+    }
+  ],
+  "spells": [
+    {
+      "id": "firebolt",
+      "name": "Firebolt",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "common",
+      "energyPenalty": 1,
+      "cooldownPenalty": 0,
+      "speed": 0,
+      "effects": [
+        {
+          "type": "dealDamage",
+          "amount": 4,
+          "target": "any"
+        }
+      ],
+      "intendedRole": "reliable direct fire burst",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Firebolt is a compact forward-pointing projectile with a black obsidian core wrapped in tightly spiraling orange flame. A short comet tail, a few controlled sparks and a sharp spearhead silhouette communicate a focused impact rather than a loose fireball. Volcanic fire palette of ember red, molten orange, charcoal black and white-hot gold. The rarity treatment uses a simple practical construction with one focal effect and modest magical spill. The isolated spell effect remains fully visible and readable at inventory-icon size.",
+        "generationPrompt": "Single isolated fantasy game spell asset named 'Firebolt': a compact forward-pointing projectile with a black obsidian core wrapped in tightly spiraling orange flame, short comet tail, controlled sparks, sharp spearhead silhouette. Volcanic fire palette of ember red, molten orange, charcoal black and white-hot gold. Visual gameplay role: reliable direct fire burst. Rarity common: a simple practical construction with one focal effect and modest magical spill. No caster and no environment. Dynamic front-biased three-quarter view, centered, fully visible, strong readable silhouette, AAA dark-fantasy action-RPG spell icon, highly detailed 3D magical-effect concept render, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, caster, hand, wand, weapon, multiple spells, duplicate effect, cropped effect, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, shapeless cloud, excessive bloom, excessive particles, glitter noise, lens flare covering the spell, unreadable silhouette",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "dynamic front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "fire", "common", "direct-damage"]
+      }
+    },
+    {
+      "id": "solarFlare",
+      "name": "Solar Flare",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "rare",
+      "energyPenalty": 1,
+      "cooldownPenalty": 2,
+      "speed": 0,
+      "effects": [
+        {
+          "type": "dealDamage",
+          "amount": 7,
+          "target": "any"
+        }
+      ],
+      "intendedRole": "heavy delayed fire burst",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Solar Flare is a radiant miniature solar disc split by a bright white-gold core and surrounded by asymmetric red-orange prominences. Concentric heat rings and two sweeping flame arcs create rare relic-like complexity while keeping the circular blast silhouette readable. Volcanic fire palette of ember red, molten orange, charcoal black and white-hot gold. The rarity treatment uses named-relic complexity, unusual asymmetry, layered magical structure and strong controlled energy. The isolated spell effect remains fully visible and readable at inventory-icon size.",
+        "generationPrompt": "Single isolated fantasy game spell asset named 'Solar Flare': a radiant miniature solar disc with a white-gold core, asymmetric red-orange prominences, concentric heat rings and two sweeping flame arcs. Volcanic fire palette of ember red, molten orange, charcoal black and white-hot gold. Visual gameplay role: heavy delayed fire burst. Rarity rare: named-relic complexity, unusual asymmetry, layered magical structure and strong controlled energy. No caster and no environment. Dynamic front-biased three-quarter view, centered, fully visible, strong readable silhouette, AAA dark-fantasy action-RPG spell icon, highly detailed 3D magical-effect concept render, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, caster, hand, wand, weapon, multiple spells, duplicate effect, cropped effect, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, shapeless cloud, excessive bloom, excessive particles, glitter noise, lens flare covering the spell, unreadable silhouette",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "dynamic front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "fire", "rare", "direct-damage"]
+      }
+    },
+    {
+      "id": "spark",
+      "name": "Spark",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "common",
+      "energyPenalty": 0,
+      "cooldownPenalty": 0,
+      "speed": 0,
+      "effects": [
+        {
+          "type": "dealDamage",
+          "amount": 2,
+          "target": "any"
+        }
+      ],
+      "intendedRole": "fast efficient electric strike",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Spark is a small needle-like discharge jumping between two close fragments of stormglass that read as one unified magical phenomenon. One bright yellow-white zigzag and a restrained blue corona emphasize speed, precision and low power cost. Storm-electric palette of bright yellow, white-gold, dark gunmetal and limited blue accents. The rarity treatment uses a simple practical construction with one focal effect and modest magical spill. The isolated spell effect remains fully visible and readable at inventory-icon size.",
+        "generationPrompt": "Single isolated fantasy game spell asset named 'Spark': a small needle-like yellow-white electrical discharge jumping between two close stormglass fragments as one unified phenomenon, restrained blue corona, fast precise silhouette. Storm-electric palette of bright yellow, white-gold, dark gunmetal and limited blue accents. Visual gameplay role: fast efficient electric strike. Rarity common: a simple practical construction with one focal effect and modest magical spill. No caster and no environment. Dynamic front-biased three-quarter view, centered, fully visible, strong readable silhouette, AAA dark-fantasy action-RPG spell icon, highly detailed 3D magical-effect concept render, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, caster, hand, wand, weapon, multiple spells, duplicate effect, cropped effect, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, shapeless cloud, excessive bloom, excessive particles, glitter noise, lens flare covering the spell, unreadable silhouette",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "dynamic front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "electric", "common", "direct-damage"]
+      }
+    },
+    {
+      "id": "arcPulse",
+      "name": "Arc Pulse",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "rare",
+      "energyPenalty": 0,
+      "cooldownPenalty": 1,
+      "speed": 0,
+      "effects": [
+        {
+          "type": "dealDamage",
+          "amount": 3,
+          "target": "any"
+        }
+      ],
+      "intendedRole": "controlled electric pulse",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Arc Pulse is a rare concentric shockwave shaped like a tilted conductive torus, with a brilliant white-gold center and branching lightning racing around its rim. Layered copper arcs and a clean expanding pulse contour communicate measured area energy without visual noise. Storm-electric palette of bright yellow, white-gold, dark gunmetal and limited blue accents. The rarity treatment uses named-relic complexity, unusual asymmetry, layered magical structure and strong controlled energy. The isolated spell effect remains fully visible and readable at inventory-icon size.",
+        "generationPrompt": "Single isolated fantasy game spell asset named 'Arc Pulse': a tilted conductive torus forming a concentric electric shockwave, brilliant white-gold center, branching lightning around the rim, layered copper arcs, clean expanding pulse contour. Storm-electric palette of bright yellow, white-gold, dark gunmetal and limited blue accents. Visual gameplay role: controlled electric pulse. Rarity rare: named-relic complexity, unusual asymmetry, layered magical structure and strong controlled energy. No caster and no environment. Dynamic front-biased three-quarter view, centered, fully visible, strong readable silhouette, AAA dark-fantasy action-RPG spell icon, highly detailed 3D magical-effect concept render, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, caster, hand, wand, weapon, multiple spells, duplicate effect, cropped effect, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, shapeless cloud, excessive bloom, excessive particles, glitter noise, lens flare covering the spell, unreadable silhouette",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "dynamic front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "electric", "rare", "direct-damage"]
+      }
+    },
+    {
+      "id": "iceShard",
+      "name": "Ice Shard",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "common",
+      "energyPenalty": 1,
+      "cooldownPenalty": 0,
+      "speed": 0,
+      "effects": [
+        {
+          "type": "dealDamage",
+          "amount": 3,
+          "target": "any"
+        }
+      ],
+      "intendedRole": "reliable direct ice strike",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Ice Shard is a single jagged pale-cyan projectile with a narrow armored tip, translucent blue core and frost-white fracture planes. A short trail of crystalline splinters remains attached to the main silhouette so the spell reads as one fast piercing object. Glacial palette of pale cyan, sapphire blue, frost white and cold silver. The rarity treatment uses a simple practical construction with one focal effect and modest magical spill. The isolated spell effect remains fully visible and readable at inventory-icon size.",
+        "generationPrompt": "Single isolated fantasy game spell asset named 'Ice Shard': a single jagged pale-cyan ice projectile with a narrow armored tip, translucent blue core, frost-white fracture planes and a short attached crystalline trail. Glacial palette of pale cyan, sapphire blue, frost white and cold silver. Visual gameplay role: reliable direct ice strike. Rarity common: a simple practical construction with one focal effect and modest magical spill. No caster and no environment. Dynamic front-biased three-quarter view, centered, fully visible, strong readable silhouette, AAA dark-fantasy action-RPG spell icon, highly detailed 3D magical-effect concept render, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, caster, hand, wand, weapon, multiple spells, duplicate effect, cropped effect, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, shapeless cloud, excessive bloom, excessive particles, glitter noise, lens flare covering the spell, unreadable silhouette",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "dynamic front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "ice", "common", "direct-damage"]
+      }
+    },
+    {
+      "id": "glacialSpike",
+      "name": "Glacial Spike",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "rare",
+      "energyPenalty": 2,
+      "cooldownPenalty": 0,
+      "speed": 0,
+      "effects": [
+        {
+          "type": "dealDamage",
+          "amount": 5,
+          "target": "any"
+        }
+      ],
+      "intendedRole": "heavy efficient ice strike",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Glacial Spike is a massive asymmetric spear of ancient blue ice wrapped by two broken silver rune bands. Layered frost strata, a deep sapphire core and controlled freezing mist give it rare monumental weight while preserving a decisive pointed silhouette. Glacial palette of pale cyan, sapphire blue, frost white and cold silver. The rarity treatment uses named-relic complexity, unusual asymmetry, layered magical structure and strong controlled energy. The isolated spell effect remains fully visible and readable at inventory-icon size.",
+        "generationPrompt": "Single isolated fantasy game spell asset named 'Glacial Spike': a massive asymmetric spear of ancient blue ice wrapped by two broken silver rune bands, layered frost strata, deep sapphire core and controlled freezing mist. Glacial palette of pale cyan, sapphire blue, frost white and cold silver. Visual gameplay role: heavy efficient ice strike. Rarity rare: named-relic complexity, unusual asymmetry, layered magical structure and strong controlled energy. No caster and no environment. Dynamic front-biased three-quarter view, centered, fully visible, strong readable silhouette, AAA dark-fantasy action-RPG spell icon, highly detailed 3D magical-effect concept render, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, caster, hand, wand, weapon, multiple spells, duplicate effect, cropped effect, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, shapeless cloud, excessive bloom, excessive particles, glitter noise, lens flare covering the spell, unreadable silhouette",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "dynamic front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "ice", "rare", "direct-damage"]
+      }
+    }
+  ],
+  "materials": [
+    {
+      "id": "aluminium",
+      "name": "Aluminium",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "ring",
+      "basePrice": 100,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 13,
+      "chemicalSymbol": "Al",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Aluminium is represented as a lightweight pale-silver ingot fragment with broad brushed facets, softened edges and a faint cool sheen. It must read as dense forge stock intended for ring metallurgy. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Aluminium': a lightweight pale-silver ingot fragment with broad brushed facets, softened edges and a faint cool sheen. It must read as dense forge stock intended for ring metallurgy. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "common", "chemicalElement"]
+      }
+    },
+    {
+      "id": "iron",
+      "name": "Iron",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "ring",
+      "basePrice": 100,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 26,
+      "chemicalSymbol": "Fe",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Iron is represented as a dense dark iron billet with hammered faces, charcoal scale and warm red oxidation caught in its cracks. It must read as dense forge stock intended for ring metallurgy. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Iron': a dense dark iron billet with hammered faces, charcoal scale and warm red oxidation caught in its cracks. It must read as dense forge stock intended for ring metallurgy. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "common", "chemicalElement"]
+      }
+    },
+    {
+      "id": "sodium",
+      "name": "Sodium",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "ring",
+      "basePrice": 100,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 11,
+      "chemicalSymbol": "Na",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Sodium is represented as a soft silvery metal nugget sealed inside one thick faceted glass ampoule beneath clear amber protective oil. It must read as dense forge stock intended for ring metallurgy. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Sodium': a soft silvery metal nugget sealed inside one thick faceted glass ampoule beneath clear amber protective oil. It must read as dense forge stock intended for ring metallurgy. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "common", "chemicalElement"]
+      }
+    },
+    {
+      "id": "magnesium",
+      "name": "Magnesium",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "ring",
+      "basePrice": 100,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 12,
+      "chemicalSymbol": "Mg",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Magnesium is represented as a chalky silver ribbon coiled into a compact bundle, with one edge glowing brilliant white as if freshly ignited. It must read as dense forge stock intended for ring metallurgy. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Magnesium': a chalky silver ribbon coiled into a compact bundle, with one edge glowing brilliant white as if freshly ignited. It must read as dense forge stock intended for ring metallurgy. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "common", "chemicalElement"]
+      }
+    },
+    {
+      "id": "manganese",
+      "name": "Manganese",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "ring",
+      "basePrice": 100,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 25,
+      "chemicalSymbol": "Mn",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Manganese is represented as a brittle steel-gray crystalline lump with angular black dendrites and subtle violet oxidation. It must read as dense forge stock intended for ring metallurgy. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Manganese': a brittle steel-gray crystalline lump with angular black dendrites and subtle violet oxidation. It must read as dense forge stock intended for ring metallurgy. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "common", "chemicalElement"]
+      }
+    },
+    {
+      "id": "calcium",
+      "name": "Calcium",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "ring",
+      "basePrice": 100,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 20,
+      "chemicalSymbol": "Ca",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Calcium is represented as a porous pale-silver mineral-metal chunk with bone-white oxidation blooming across fresh broken faces. It must read as dense forge stock intended for ring metallurgy. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Calcium': a porous pale-silver mineral-metal chunk with bone-white oxidation blooming across fresh broken faces. It must read as dense forge stock intended for ring metallurgy. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "common", "chemicalElement"]
+      }
+    },
+    {
+      "id": "copper",
+      "name": "Copper",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "ring",
+      "basePrice": 100,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 29,
+      "chemicalSymbol": "Cu",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Copper is represented as a curled copper plate fragment with hammered orange metal, green verdigris veins and a bright polished edge. It must read as dense forge stock intended for ring metallurgy. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Copper': a curled copper plate fragment with hammered orange metal, green verdigris veins and a bright polished edge. It must read as dense forge stock intended for ring metallurgy. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "common", "chemicalElement"]
+      }
+    },
+    {
+      "id": "titanium",
+      "name": "Titanium",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "ring",
+      "basePrice": 400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 22,
+      "chemicalSymbol": "Ti",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Titanium is represented as a strong blue-gray forged wedge with precise bevels and iridescent heat-color bands. It must read as dense forge stock intended for ring metallurgy. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Titanium': a strong blue-gray forged wedge with precise bevels and iridescent heat-color bands. It must read as dense forge stock intended for ring metallurgy. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "refined", "chemicalElement"]
+      }
+    },
+    {
+      "id": "chromium",
+      "name": "Chromium",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "ring",
+      "basePrice": 400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 24,
+      "chemicalSymbol": "Cr",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Chromium is represented as a mirror-bright chrome crystal cluster with hard geometric planes and cold blue reflections. It must read as dense forge stock intended for ring metallurgy. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Chromium': a mirror-bright chrome crystal cluster with hard geometric planes and cold blue reflections. It must read as dense forge stock intended for ring metallurgy. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "refined", "chemicalElement"]
+      }
+    },
+    {
+      "id": "zinc",
+      "name": "Zinc",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "ring",
+      "basePrice": 400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 30,
+      "chemicalSymbol": "Zn",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Zinc is represented as a bluish-silver cast ingot shard with a distinctive frosted crystalline fracture pattern. It must read as dense forge stock intended for ring metallurgy. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Zinc': a bluish-silver cast ingot shard with a distinctive frosted crystalline fracture pattern. It must read as dense forge stock intended for ring metallurgy. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "refined", "chemicalElement"]
+      }
+    },
+    {
+      "id": "nickel",
+      "name": "Nickel",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "ring",
+      "basePrice": 400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 28,
+      "chemicalSymbol": "Ni",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Nickel is represented as a compact warm-silver metal disk fragment with smooth toughness, tiny meteor-like pits and a golden cast. It must read as dense forge stock intended for ring metallurgy. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Nickel': a compact warm-silver metal disk fragment with smooth toughness, tiny meteor-like pits and a golden cast. It must read as dense forge stock intended for ring metallurgy. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "refined", "chemicalElement"]
+      }
+    },
+    {
+      "id": "cobalt",
+      "name": "Cobalt",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "ring",
+      "basePrice": 400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 27,
+      "chemicalSymbol": "Co",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Cobalt is represented as a dark steel-blue crystalline ore core wrapped by a restrained electric-blue mineral glow. It must read as dense forge stock intended for ring metallurgy. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Cobalt': a dark steel-blue crystalline ore core wrapped by a restrained electric-blue mineral glow. It must read as dense forge stock intended for ring metallurgy. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "refined", "chemicalElement"]
+      }
+    },
+    {
+      "id": "lead",
+      "name": "Lead",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "ring",
+      "basePrice": 400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 82,
+      "chemicalSymbol": "Pb",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Lead is represented as a heavy dull blue-gray block with rounded compressed edges, deep tool marks and a soft matte surface. It must read as dense forge stock intended for ring metallurgy. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Lead': a heavy dull blue-gray block with rounded compressed edges, deep tool marks and a soft matte surface. It must read as dense forge stock intended for ring metallurgy. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "refined", "chemicalElement"]
+      }
+    },
+    {
+      "id": "silver",
+      "name": "Silver",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "ring",
+      "basePrice": 1600,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 47,
+      "chemicalSymbol": "Ag",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Silver is represented as a luminous silver filigree ingot folded around a naturally branching metallic crystal. It must read as dense forge stock intended for ring metallurgy. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Silver': a luminous silver filigree ingot folded around a naturally branching metallic crystal. It must read as dense forge stock intended for ring metallurgy. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "rare", "chemicalElement"]
+      }
+    },
+    {
+      "id": "mercury",
+      "name": "Mercury",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "ring",
+      "basePrice": 1600,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 80,
+      "chemicalSymbol": "Hg",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Mercury is represented as a single sealed crystal vessel containing one mirror-bright liquid-metal sphere splitting into smaller beads. It must read as dense forge stock intended for ring metallurgy. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Mercury': a single sealed crystal vessel containing one mirror-bright liquid-metal sphere splitting into smaller beads. It must read as dense forge stock intended for ring metallurgy. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "rare", "chemicalElement"]
+      }
+    },
+    {
+      "id": "gold",
+      "name": "Gold",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "ring",
+      "basePrice": 1600,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 79,
+      "chemicalSymbol": "Au",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Gold is represented as a rich yellow-gold native nugget with rounded crystalline growths and deep warm reflections. It must read as dense forge stock intended for ring metallurgy. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Gold': a rich yellow-gold native nugget with rounded crystalline growths and deep warm reflections. It must read as dense forge stock intended for ring metallurgy. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "rare", "chemicalElement"]
+      }
+    },
+    {
+      "id": "platinum",
+      "name": "Platinum",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "ring",
+      "basePrice": 1600,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 78,
+      "chemicalSymbol": "Pt",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Platinum is represented as a dense pale platinum rosette of interlocked metallic crystals with cool white highlights. It must read as dense forge stock intended for ring metallurgy. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Platinum': a dense pale platinum rosette of interlocked metallic crystals with cool white highlights. It must read as dense forge stock intended for ring metallurgy. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "rare", "chemicalElement"]
+      }
+    },
+    {
+      "id": "tungsten",
+      "name": "Tungsten",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "ring",
+      "basePrice": 1600,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 74,
+      "chemicalSymbol": "W",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Tungsten is represented as a massive dark gunmetal prism with razor-hard beveled edges and a small white-hot forged seam. It must read as dense forge stock intended for ring metallurgy. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Tungsten': a massive dark gunmetal prism with razor-hard beveled edges and a small white-hot forged seam. It must read as dense forge stock intended for ring metallurgy. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "rare", "chemicalElement"]
+      }
+    },
+    {
+      "id": "uranium",
+      "name": "Uranium",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "ring",
+      "basePrice": 1600,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 92,
+      "chemicalSymbol": "U",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Uranium is represented as a dark metallic ore shard threaded with controlled yellow-green radioluminescent veins inside a protective crystal shell. It must read as dense forge stock intended for ring metallurgy. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Uranium': a dark metallic ore shard threaded with controlled yellow-green radioluminescent veins inside a protective crystal shell. It must read as dense forge stock intended for ring metallurgy. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "rare", "chemicalElement"]
+      }
+    },
+    {
+      "id": "iridium",
+      "name": "Iridium",
+      "type": "material",
+      "rarity": "epic",
+      "craftingFamily": "ring",
+      "basePrice": 6400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 77,
+      "chemicalSymbol": "Ir",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Iridium is represented as an exceptionally dense blue-white star-shaped metallic crystal with rainbow interference along its edges. It must read as dense forge stock intended for ring metallurgy. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Iridium': an exceptionally dense blue-white star-shaped metallic crystal with rainbow interference along its edges. It must read as dense forge stock intended for ring metallurgy. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "epic", "chemicalElement"]
+      }
+    },
+    {
+      "id": "plutonium",
+      "name": "Plutonium",
+      "type": "material",
+      "rarity": "epic",
+      "craftingFamily": "ring",
+      "basePrice": 6400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 94,
+      "chemicalSymbol": "Pu",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Plutonium is represented as a blackened metal core inside one ornate containment cage, glowing with restrained ember-red radioactive heat. It must read as dense forge stock intended for ring metallurgy. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Plutonium': a blackened metal core inside one ornate containment cage, glowing with restrained ember-red radioactive heat. It must read as dense forge stock intended for ring metallurgy. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "epic", "chemicalElement"]
+      }
+    },
+    {
+      "id": "neptunium",
+      "name": "Neptunium",
+      "type": "material",
+      "rarity": "epic",
+      "craftingFamily": "ring",
+      "basePrice": 6400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 93,
+      "chemicalSymbol": "Np",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Neptunium is represented as a deep steel-blue actinide crystal held in concentric dark-metal arcs with a ghostly cyan inner corona. It must read as dense forge stock intended for ring metallurgy. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Neptunium': a deep steel-blue actinide crystal held in concentric dark-metal arcs with a ghostly cyan inner corona. It must read as dense forge stock intended for ring metallurgy. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "epic", "chemicalElement"]
+      }
+    },
+    {
+      "id": "radium",
+      "name": "Radium",
+      "type": "material",
+      "rarity": "epic",
+      "craftingFamily": "ring",
+      "basePrice": 6400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 88,
+      "chemicalSymbol": "Ra",
+      "intendedRole": "ring crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Radium is represented as an antique pale metal reliquary shard saturated by a vivid green-white internal radiance. It must read as dense forge stock intended for ring metallurgy. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Radium': an antique pale metal reliquary shard saturated by a vivid green-white internal radiance. It must read as dense forge stock intended for ring metallurgy. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "ring", "epic", "chemicalElement"]
+      }
+    },
+    {
+      "id": "hydrogen",
+      "name": "Hydrogen",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "spell",
+      "basePrice": 100,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 1,
+      "chemicalSymbol": "H",
+      "intendedRole": "spell crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Hydrogen is represented as one delicate transparent ampoule containing a nearly weightless pale-blue luminous gas vortex. It must read as volatile alchemical essence intended for spellcraft. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Hydrogen': one delicate transparent ampoule containing a nearly weightless pale-blue luminous gas vortex. It must read as volatile alchemical essence intended for spellcraft. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "spell", "common", "chemicalElement"]
+      }
+    },
+    {
+      "id": "oxygen",
+      "name": "Oxygen",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "spell",
+      "basePrice": 100,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 8,
+      "chemicalSymbol": "O",
+      "intendedRole": "spell crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Oxygen is represented as one clear pressure vial filled with a crisp sky-blue spiral of condensed vapor and tiny frost beads. It must read as volatile alchemical essence intended for spellcraft. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Oxygen': one clear pressure vial filled with a crisp sky-blue spiral of condensed vapor and tiny frost beads. It must read as volatile alchemical essence intended for spellcraft. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "spell", "common", "chemicalElement"]
+      }
+    },
+    {
+      "id": "nitrogen",
+      "name": "Nitrogen",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "spell",
+      "basePrice": 100,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 7,
+      "chemicalSymbol": "N",
+      "intendedRole": "spell crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Nitrogen is represented as one dark glass capsule holding a calm indigo mist with a thin liquid-cold layer at its base. It must read as volatile alchemical essence intended for spellcraft. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Nitrogen': one dark glass capsule holding a calm indigo mist with a thin liquid-cold layer at its base. It must read as volatile alchemical essence intended for spellcraft. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "spell", "common", "chemicalElement"]
+      }
+    },
+    {
+      "id": "helium",
+      "name": "Helium",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "spell",
+      "basePrice": 100,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 2,
+      "chemicalSymbol": "He",
+      "intendedRole": "spell crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Helium is represented as one round crystal bulb containing a buoyant peach-gold glow that gathers at the top like a tiny floating sun. It must read as volatile alchemical essence intended for spellcraft. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Helium': one round crystal bulb containing a buoyant peach-gold glow that gathers at the top like a tiny floating sun. It must read as volatile alchemical essence intended for spellcraft. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "spell", "common", "chemicalElement"]
+      }
+    },
+    {
+      "id": "chlorine",
+      "name": "Chlorine",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "spell",
+      "basePrice": 400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 17,
+      "chemicalSymbol": "Cl",
+      "intendedRole": "spell crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Chlorine is represented as one reinforced alchemical ampoule containing dense yellow-green gas in slow venomous curls. It must read as volatile alchemical essence intended for spellcraft. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Chlorine': one reinforced alchemical ampoule containing dense yellow-green gas in slow venomous curls. It must read as volatile alchemical essence intended for spellcraft. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "spell", "refined", "chemicalElement"]
+      }
+    },
+    {
+      "id": "fluorine",
+      "name": "Fluorine",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "spell",
+      "basePrice": 400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 9,
+      "chemicalSymbol": "F",
+      "intendedRole": "spell crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Fluorine is represented as one etched crystal containment capsule filled with an intensely pale-yellow reactive plasma mist. It must read as volatile alchemical essence intended for spellcraft. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Fluorine': one etched crystal containment capsule filled with an intensely pale-yellow reactive plasma mist. It must read as volatile alchemical essence intended for spellcraft. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "spell", "refined", "chemicalElement"]
+      }
+    },
+    {
+      "id": "bromine",
+      "name": "Bromine",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "spell",
+      "basePrice": 400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 35,
+      "chemicalSymbol": "Br",
+      "intendedRole": "spell crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Bromine is represented as one heavy glass vial holding dark red-brown liquid beneath a curling rust-colored vapor. It must read as volatile alchemical essence intended for spellcraft. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Bromine': one heavy glass vial holding dark red-brown liquid beneath a curling rust-colored vapor. It must read as volatile alchemical essence intended for spellcraft. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "spell", "refined", "chemicalElement"]
+      }
+    },
+    {
+      "id": "neon",
+      "name": "Neon",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "spell",
+      "basePrice": 1600,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 10,
+      "chemicalSymbol": "Ne",
+      "intendedRole": "spell crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Neon is represented as one elegant sealed glass torus filled by a vivid orange-red luminous discharge. It must read as volatile alchemical essence intended for spellcraft. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Neon': one elegant sealed glass torus filled by a vivid orange-red luminous discharge. It must read as volatile alchemical essence intended for spellcraft. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "spell", "rare", "chemicalElement"]
+      }
+    },
+    {
+      "id": "argon",
+      "name": "Argon",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "spell",
+      "basePrice": 1600,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 18,
+      "chemicalSymbol": "Ar",
+      "intendedRole": "spell crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Argon is represented as one thick faceted vessel containing a serene violet-blue glow with clean concentric plasma bands. It must read as volatile alchemical essence intended for spellcraft. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Argon': one thick faceted vessel containing a serene violet-blue glow with clean concentric plasma bands. It must read as volatile alchemical essence intended for spellcraft. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "spell", "rare", "chemicalElement"]
+      }
+    },
+    {
+      "id": "iodine",
+      "name": "Iodine",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "spell",
+      "basePrice": 1600,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 53,
+      "chemicalSymbol": "I",
+      "intendedRole": "spell crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Iodine is represented as one crystal capsule with lustrous black-violet iodine plates below a rich purple sublimating vapor. It must read as volatile alchemical essence intended for spellcraft. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Iodine': one crystal capsule with lustrous black-violet iodine plates below a rich purple sublimating vapor. It must read as volatile alchemical essence intended for spellcraft. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "spell", "rare", "chemicalElement"]
+      }
+    },
+    {
+      "id": "krypton",
+      "name": "Krypton",
+      "type": "material",
+      "rarity": "epic",
+      "craftingFamily": "spell",
+      "basePrice": 6400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 36,
+      "chemicalSymbol": "Kr",
+      "intendedRole": "spell crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Krypton is represented as one regal pressure crystal containing a brilliant icy-white gas core surrounded by lavender lightning filaments. It must read as volatile alchemical essence intended for spellcraft. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Krypton': one regal pressure crystal containing a brilliant icy-white gas core surrounded by lavender lightning filaments. It must read as volatile alchemical essence intended for spellcraft. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "spell", "epic", "chemicalElement"]
+      }
+    },
+    {
+      "id": "xenon",
+      "name": "Xenon",
+      "type": "material",
+      "rarity": "epic",
+      "craftingFamily": "spell",
+      "basePrice": 6400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 54,
+      "chemicalSymbol": "Xe",
+      "intendedRole": "spell crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Xenon is represented as one monumental faceted ampoule filled with blue-violet radiance and layered pearlescent plasma clouds. It must read as volatile alchemical essence intended for spellcraft. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Xenon': one monumental faceted ampoule filled with blue-violet radiance and layered pearlescent plasma clouds. It must read as volatile alchemical essence intended for spellcraft. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "spell", "epic", "chemicalElement"]
+      }
+    },
+    {
+      "id": "radon",
+      "name": "Radon",
+      "type": "material",
+      "rarity": "epic",
+      "craftingFamily": "spell",
+      "basePrice": 6400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 86,
+      "chemicalSymbol": "Rn",
+      "intendedRole": "spell crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Radon is represented as one ominous lead-crystal containment orb holding a dense green-gold radioactive fog around a dark center. It must read as volatile alchemical essence intended for spellcraft. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Radon': one ominous lead-crystal containment orb holding a dense green-gold radioactive fog around a dark center. It must read as volatile alchemical essence intended for spellcraft. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "spell", "epic", "chemicalElement"]
+      }
+    },
+    {
+      "id": "astatine",
+      "name": "Astatine",
+      "type": "material",
+      "rarity": "epic",
+      "craftingFamily": "spell",
+      "basePrice": 6400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 85,
+      "chemicalSymbol": "At",
+      "intendedRole": "spell crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Astatine is represented as one legendary black crystal vial containing unstable violet metal droplets and a red-gold decay corona. It must read as volatile alchemical essence intended for spellcraft. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Astatine': one legendary black crystal vial containing unstable violet metal droplets and a red-gold decay corona. It must read as volatile alchemical essence intended for spellcraft. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "spell", "epic", "chemicalElement"]
+      }
+    },
+    {
+      "id": "pearl",
+      "name": "Pearl",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "gem",
+      "basePrice": 100,
+      "realWorldType": "gemstone",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Pearl is represented as a single imperfect ivory pearl with soft nacre bands, a natural teardrop silhouette and cool rose iridescence. It must read as a precious lapidary specimen intended for gem crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Pearl': a single imperfect ivory pearl with soft nacre bands, a natural teardrop silhouette and cool rose iridescence. It must read as a precious lapidary specimen intended for gem crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "common", "gemstone"]
+      }
+    },
+    {
+      "id": "amethyst",
+      "name": "Amethyst",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "gem",
+      "basePrice": 100,
+      "realWorldType": "gemstone",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Amethyst is represented as a compact raw amethyst point cluster with deep violet cores and pale translucent tips. It must read as a precious lapidary specimen intended for gem crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Amethyst': a compact raw amethyst point cluster with deep violet cores and pale translucent tips. It must read as a precious lapidary specimen intended for gem crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "common", "gemstone"]
+      }
+    },
+    {
+      "id": "chromite",
+      "name": "Chromite",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "gem",
+      "basePrice": 100,
+      "realWorldType": "mineral",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Chromite is represented as a heavy black octahedral chromite crystal with metallic luster and rusty brown host-rock seams. It must read as a precious lapidary specimen intended for gem crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Chromite': a heavy black octahedral chromite crystal with metallic luster and rusty brown host-rock seams. It must read as a precious lapidary specimen intended for gem crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "common", "mineral"]
+      }
+    },
+    {
+      "id": "topaz",
+      "name": "Topaz",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "gem",
+      "basePrice": 100,
+      "realWorldType": "gemstone",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Topaz is represented as one elongated honey-gold topaz crystal with vertical striations and a clean chisel-shaped termination. It must read as a precious lapidary specimen intended for gem crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Topaz': one elongated honey-gold topaz crystal with vertical striations and a clean chisel-shaped termination. It must read as a precious lapidary specimen intended for gem crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "common", "gemstone"]
+      }
+    },
+    {
+      "id": "turquoise",
+      "name": "Turquoise",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "gem",
+      "basePrice": 100,
+      "realWorldType": "gemstone",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Turquoise is represented as a rounded turquoise cabochon rough with vivid blue-green body color and branching brown matrix. It must read as a precious lapidary specimen intended for gem crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Turquoise': a rounded turquoise cabochon rough with vivid blue-green body color and branching brown matrix. It must read as a precious lapidary specimen intended for gem crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "common", "gemstone"]
+      }
+    },
+    {
+      "id": "citrine",
+      "name": "Citrine",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "gem",
+      "basePrice": 400,
+      "realWorldType": "gemstone",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Citrine is represented as a clear golden citrine prism with smoky roots and sunlit amber zoning. It must read as a precious lapidary specimen intended for gem crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Citrine': a clear golden citrine prism with smoky roots and sunlit amber zoning. It must read as a precious lapidary specimen intended for gem crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "refined", "gemstone"]
+      }
+    },
+    {
+      "id": "azurite",
+      "name": "Azurite",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "gem",
+      "basePrice": 400,
+      "realWorldType": "mineral",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Azurite is represented as a sculptural cluster of saturated azure blades growing over a dark malachite-green matrix. It must read as a precious lapidary specimen intended for gem crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Azurite': a sculptural cluster of saturated azure blades growing over a dark malachite-green matrix. It must read as a precious lapidary specimen intended for gem crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "refined", "mineral"]
+      }
+    },
+    {
+      "id": "moonstone",
+      "name": "Moonstone",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "gem",
+      "basePrice": 400,
+      "realWorldType": "gemstone",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Moonstone is represented as an oval milky moonstone rough with a floating blue adularescent light beneath its surface. It must read as a precious lapidary specimen intended for gem crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Moonstone': an oval milky moonstone rough with a floating blue adularescent light beneath its surface. It must read as a precious lapidary specimen intended for gem crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "refined", "gemstone"]
+      }
+    },
+    {
+      "id": "sunstone",
+      "name": "Sunstone",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "gem",
+      "basePrice": 400,
+      "realWorldType": "gemstone",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Sunstone is represented as a warm peach-orange sunstone crystal filled with coppery glitter planes that form one directional flash. It must read as a precious lapidary specimen intended for gem crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Sunstone': a warm peach-orange sunstone crystal filled with coppery glitter planes that form one directional flash. It must read as a precious lapidary specimen intended for gem crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "refined", "gemstone"]
+      }
+    },
+    {
+      "id": "opal",
+      "name": "Opal",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "gem",
+      "basePrice": 400,
+      "realWorldType": "mineraloid",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Opal is represented as an irregular pale opal nodule with controlled rainbow play-of-color suspended in translucent stone. It must read as a precious lapidary specimen intended for gem crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Opal': an irregular pale opal nodule with controlled rainbow play-of-color suspended in translucent stone. It must read as a precious lapidary specimen intended for gem crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "refined", "mineraloid"]
+      }
+    },
+    {
+      "id": "sapphire",
+      "name": "Sapphire",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "gem",
+      "basePrice": 1600,
+      "realWorldType": "gemstone",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Sapphire is represented as a deep royal-blue hexagonal sapphire crystal with crisp growth lines and a luminous center. It must read as a precious lapidary specimen intended for gem crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Sapphire': a deep royal-blue hexagonal sapphire crystal with crisp growth lines and a luminous center. It must read as a precious lapidary specimen intended for gem crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "rare", "gemstone"]
+      }
+    },
+    {
+      "id": "ruby",
+      "name": "Ruby",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "gem",
+      "basePrice": 1600,
+      "realWorldType": "gemstone",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Ruby is represented as a rich crimson ruby crystal embedded in a small dark marble matrix, glowing along natural fractures. It must read as a precious lapidary specimen intended for gem crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Ruby': a rich crimson ruby crystal embedded in a small dark marble matrix, glowing along natural fractures. It must read as a precious lapidary specimen intended for gem crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "rare", "gemstone"]
+      }
+    },
+    {
+      "id": "emerald",
+      "name": "Emerald",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "gem",
+      "basePrice": 1600,
+      "realWorldType": "gemstone",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Emerald is represented as an elongated emerald-green beryl prism with stepped faces and garden-like internal inclusions. It must read as a precious lapidary specimen intended for gem crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Emerald': an elongated emerald-green beryl prism with stepped faces and garden-like internal inclusions. It must read as a precious lapidary specimen intended for gem crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "rare", "gemstone"]
+      }
+    },
+    {
+      "id": "diamond",
+      "name": "Diamond",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "gem",
+      "basePrice": 1600,
+      "realWorldType": "gemstone",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Diamond is represented as a raw colorless diamond octahedron with sharp natural faces, realistic dispersion and a dark carbon inclusion. It must read as a precious lapidary specimen intended for gem crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Diamond': a raw colorless diamond octahedron with sharp natural faces, realistic dispersion and a dark carbon inclusion. It must read as a precious lapidary specimen intended for gem crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "rare", "gemstone"]
+      }
+    },
+    {
+      "id": "redDiamond",
+      "name": "Red Diamond",
+      "type": "material",
+      "rarity": "epic",
+      "craftingFamily": "gem",
+      "basePrice": 6400,
+      "realWorldType": "gemstone",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Red Diamond is represented as a monumental deep-red diamond crystal with asymmetric crown facets and ember-like light trapped inside. It must read as a precious lapidary specimen intended for gem crafting. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Red Diamond': a monumental deep-red diamond crystal with asymmetric crown facets and ember-like light trapped inside. It must read as a precious lapidary specimen intended for gem crafting. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "epic", "gemstone"]
+      }
+    },
+    {
+      "id": "blackOpal",
+      "name": "Black Opal",
+      "type": "material",
+      "rarity": "epic",
+      "craftingFamily": "gem",
+      "basePrice": 6400,
+      "realWorldType": "mineraloid",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Black Opal is represented as a legendary black opal cabochon rough displaying broad electric blue, green and crimson fire across a midnight body. It must read as a precious lapidary specimen intended for gem crafting. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Black Opal': a legendary black opal cabochon rough displaying broad electric blue, green and crimson fire across a midnight body. It must read as a precious lapidary specimen intended for gem crafting. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "epic", "mineraloid"]
+      }
+    },
+    {
+      "id": "alexandrite",
+      "name": "Alexandrite",
+      "type": "material",
+      "rarity": "epic",
+      "craftingFamily": "gem",
+      "basePrice": 6400,
+      "realWorldType": "gemstone",
+      "intendedRole": "gem crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Alexandrite is represented as a regal alexandrite crystal whose opposing facets shift from emerald green to wine red under split lighting. It must read as a precious lapidary specimen intended for gem crafting. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Alexandrite': a regal alexandrite crystal whose opposing facets shift from emerald green to wine red under split lighting. It must read as a precious lapidary specimen intended for gem crafting. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "gem", "epic", "gemstone"]
+      }
+    },
+    {
+      "id": "sand",
+      "name": "Sand",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "monster",
+      "basePrice": 100,
+      "realWorldType": "geologicalMaterial",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Sand is represented as a single compact hourglass-shaped clump of golden sand held together by faint earthen magic, individual grains visible at the edges. It must read as primal biological, geological or elemental matter intended for monster crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Sand': a single compact hourglass-shaped clump of golden sand held together by faint earthen magic, individual grains visible at the edges. It must read as primal biological, geological or elemental matter intended for monster crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "common", "geologicalMaterial"]
+      }
+    },
+    {
+      "id": "wax",
+      "name": "Wax",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "monster",
+      "basePrice": 100,
+      "realWorldType": "biomaterial",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Wax is represented as a thick amber beeswax slab curled around one cooled drip, with honeycomb texture pressed into one face. It must read as primal biological, geological or elemental matter intended for monster crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Wax': a thick amber beeswax slab curled around one cooled drip, with honeycomb texture pressed into one face. It must read as primal biological, geological or elemental matter intended for monster crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "common", "biomaterial"]
+      }
+    },
+    {
+      "id": "rubber",
+      "name": "Rubber",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "monster",
+      "basePrice": 100,
+      "realWorldType": "industrialMaterial",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Rubber is represented as a dense matte-black natural rubber coil with elastic tension, rough cut ends and a subtle blue highlight. It must read as primal biological, geological or elemental matter intended for monster crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Rubber': a dense matte-black natural rubber coil with elastic tension, rough cut ends and a subtle blue highlight. It must read as primal biological, geological or elemental matter intended for monster crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "common", "industrialMaterial"]
+      }
+    },
+    {
+      "id": "coal",
+      "name": "Coal",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "monster",
+      "basePrice": 100,
+      "realWorldType": "geologicalMaterial",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Coal is represented as a jagged coal chunk with layered black sedimentary bands, dusty edges and a restrained ember deep inside. It must read as primal biological, geological or elemental matter intended for monster crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Coal': a jagged coal chunk with layered black sedimentary bands, dusty edges and a restrained ember deep inside. It must read as primal biological, geological or elemental matter intended for monster crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "common", "geologicalMaterial"]
+      }
+    },
+    {
+      "id": "cellulose",
+      "name": "Cellulose",
+      "type": "material",
+      "rarity": "common",
+      "craftingFamily": "monster",
+      "basePrice": 100,
+      "realWorldType": "biomaterial",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Cellulose is represented as a compact bundle of pale fibrous cellulose sheets twisted into a sturdy organic braid. It must read as primal biological, geological or elemental matter intended for monster crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Cellulose': a compact bundle of pale fibrous cellulose sheets twisted into a sturdy organic braid. It must read as primal biological, geological or elemental matter intended for monster crafting. The treatment is practical and raw, with one unmistakable material feature, believable wear and minimal magical embellishment. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "common", "biomaterial"]
+      }
+    },
+    {
+      "id": "oil",
+      "name": "Oil",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "monster",
+      "basePrice": 400,
+      "realWorldType": "geologicalMaterial",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Oil is represented as one squat sealed obsidian-glass flask containing viscous black-gold oil with an iridescent surface swirl. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Oil': one squat sealed obsidian-glass flask containing viscous black-gold oil with an iridescent surface swirl. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "refined", "geologicalMaterial"]
+      }
+    },
+    {
+      "id": "carbon",
+      "name": "Carbon",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "monster",
+      "basePrice": 400,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 6,
+      "chemicalSymbol": "C",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Carbon is represented as a single material specimen transitioning from rough charcoal-black carbon into a small ordered graphite crystal lattice. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Carbon': a single material specimen transitioning from rough charcoal-black carbon into a small ordered graphite crystal lattice. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "refined", "chemicalElement"]
+      }
+    },
+    {
+      "id": "ink",
+      "name": "Ink",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "monster",
+      "basePrice": 400,
+      "realWorldType": "industrialMaterial",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Ink is represented as one sealed angular inkwell containing midnight liquid that forms a single suspended tendril inside the glass. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Ink': one sealed angular inkwell containing midnight liquid that forms a single suspended tendril inside the glass. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "refined", "industrialMaterial"]
+      }
+    },
+    {
+      "id": "silk",
+      "name": "Silk",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "monster",
+      "basePrice": 400,
+      "realWorldType": "biomaterial",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Silk is represented as a lustrous ivory silk cocoon wrapped in one continuous shimmering filament with pale gold highlights. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Silk': a lustrous ivory silk cocoon wrapped in one continuous shimmering filament with pale gold highlights. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "refined", "biomaterial"]
+      }
+    },
+    {
+      "id": "keratin",
+      "name": "Keratin",
+      "type": "material",
+      "rarity": "refined",
+      "craftingFamily": "monster",
+      "basePrice": 400,
+      "realWorldType": "biomaterial",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Keratin is represented as a layered horn-like keratin plate with translucent amber edges, growth ridges and a strong curved silhouette. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Keratin': a layered horn-like keratin plate with translucent amber edges, growth ridges and a strong curved silhouette. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen is cleanly prepared with improved craftsmanship, layered support details and moderate controlled arcane accents. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "refined", "biomaterial"]
+      }
+    },
+    {
+      "id": "silicon",
+      "name": "Silicon",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "monster",
+      "basePrice": 1600,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 14,
+      "chemicalSymbol": "Si",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Silicon is represented as a blue-gray polycrystalline silicon shard with mirror facets and a precise geometric fracture. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Silicon': a blue-gray polycrystalline silicon shard with mirror facets and a precise geometric fracture. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "rare", "chemicalElement"]
+      }
+    },
+    {
+      "id": "sulfur",
+      "name": "Sulfur",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "monster",
+      "basePrice": 1600,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 16,
+      "chemicalSymbol": "S",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Sulfur is represented as a vivid yellow sulfur crystal cluster of sharp orthorhombic blades over a dark volcanic base. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Sulfur': a vivid yellow sulfur crystal cluster of sharp orthorhombic blades over a dark volcanic base. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "rare", "chemicalElement"]
+      }
+    },
+    {
+      "id": "phosphorus",
+      "name": "Phosphorus",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "monster",
+      "basePrice": 1600,
+      "realWorldType": "chemicalElement",
+      "atomicNumber": 15,
+      "chemicalSymbol": "P",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Phosphorus is represented as one protected dark crystal capsule containing waxy red phosphorus fragments with a restrained ghostly glow. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Phosphorus': one protected dark crystal capsule containing waxy red phosphorus fragments with a restrained ghostly glow. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "rare", "chemicalElement"]
+      }
+    },
+    {
+      "id": "chitin",
+      "name": "Chitin",
+      "type": "material",
+      "rarity": "rare",
+      "craftingFamily": "monster",
+      "basePrice": 1600,
+      "realWorldType": "biomaterial",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Chitin is represented as a curved iridescent chitin carapace plate with segmented ridges, hooked edges and deep teal-black color. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Chitin': a curved iridescent chitin carapace plate with segmented ridges, hooked edges and deep teal-black color. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen has collector-grade clarity, unusual geometry, fine containment details and strong but controlled supernatural behavior. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "rare", "biomaterial"]
+      }
+    },
+    {
+      "id": "plasma",
+      "name": "Plasma",
+      "type": "material",
+      "rarity": "epic",
+      "craftingFamily": "monster",
+      "basePrice": 6400,
+      "realWorldType": "stateOfMatter",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Plasma is represented as a single self-contained toroidal knot of white-hot violet plasma bound by thin golden magnetic arcs. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Plasma': a single self-contained toroidal knot of white-hot violet plasma bound by thin golden magnetic arcs. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "epic", "stateOfMatter"]
+      }
+    },
+    {
+      "id": "graphene",
+      "name": "Graphene",
+      "type": "material",
+      "rarity": "epic",
+      "craftingFamily": "monster",
+      "basePrice": 6400,
+      "realWorldType": "industrialMaterial",
+      "intendedRole": "monster crafting stock",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Graphene is represented as a legendary folded sheet of black graphene forming a crisp hexagonal honeycomb ribbon with blue edge-light. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. The complete specimen remains centered, physically believable and readable as a small inventory icon.",
+        "generationPrompt": "Single isolated dark-fantasy crafting material asset named 'Graphene': a legendary folded sheet of black graphene forming a crisp hexagonal honeycomb ribbon with blue edge-light. It must read as primal biological, geological or elemental matter intended for monster crafting. The specimen has an iconic masterwork silhouette, monumental presentation and spectacular controlled energy without becoming a UI emblem. One unified subject, front-biased three-quarter product view, centered, fully visible, strong readable silhouette, AAA fantasy action-RPG inventory icon, highly detailed 3D concept render, physically believable material response, crisp edges, cinematic rim lighting, transparent alpha background.",
+        "negativePrompt": "text, letters, numbers, chemical symbol, periodic-table label, logo, watermark, UI frame, card border, atlas grid, multiple containers, multiple separate specimens, duplicate subject, cropped object, human hand, pedestal, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, excessive bloom, excessive particles, glitter noise, lens flare covering the object, low contrast silhouette, modern laboratory branding",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter product view",
+          "atlasReady": true
+        },
+        "visualTags": ["material", "monster", "epic", "industrialMaterial"]
       }
     }
   ]

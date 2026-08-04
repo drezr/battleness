@@ -9,6 +9,11 @@ This file records modifications made to the project during agent-assisted work.
   fixtures, campaign starters, onboarding, balance reports, and server equipment views use the
   final IDs. The former `prototype-6` definitions and grid artwork remain only under explicit
   `legacy/prototype-6` archive paths.
+- The production item asset bible is a content-authoring source rather than documentation. It lives
+  at `packages/content/sources/production-items-v1.asset-bible.json`; generation and atlas import
+  scripts resolve it relative to the content package. It now covers all 253 active definitions,
+  including individualized asset direction for the 70 materials and six retained test spells;
+  their production atlases remain pending.
 - TexturePacker atlases for rings, gems, and monsters are imported from validated JSON metadata into
   `packages/content/src/atlases/` and served as `rings.png`, `gems.png`, and `monsters.png` by both
   apps. The shared renderer supports trimmed and rotated frames and validates exact definition
@@ -66,6 +71,9 @@ This file records modifications made to the project during agent-assisted work.
 - The 54 production ring, 54 gem, and 69 monster source images were generated and validated as
   transparent native-resolution PNGs before being packed. Active app delivery now uses the three
   TexturePacker atlases instead of shipping every source PNG under the public application tree.
+- The 70 production material source images are generated under `assets/materials/large` as
+  transparent, square, native-resolution PNGs with safe atlas margins. Their TexturePacker atlas
+  remains intentionally pending for the user-managed packing step.
 - The PvP Hub's Private, Casual, and Ranked mode cards are now full-card links like the other hub
   destinations. Their redundant footer buttons, reserved action row, and fixed 420/330/270-pixel
   heights are removed; cards size from their content while retaining mode artwork, feature details,
@@ -460,6 +468,23 @@ This file records modifications made to the project during agent-assisted work.
 - Added a centralized project TODO in `docs/TODO.md` covering Game App persistence, inventory, forge, battle integration, campaign, rewards, market, profile, authentication, PvP, player market, presentation, production, and open design questions.
 
 ## Change Log
+
+### 2026-08-03
+
+- Repaired chroma-key transparency damage in the `opal`, `oxygen`, `radium`, and `radon` material
+  sources. The four assets were locally reconstructed, redetoured, and revalidated on checkerboard
+  backgrounds while preserving intentional structural openings.
+- Generated all 70 production material source images from the package-owned asset bible into
+  `assets/materials/large`. Each image preserves its native generated resolution, uses a transparent
+  square canvas with at least a 5.9% safe margin, and passed exact-ID, alpha-corner, framing, and
+  visual contact-sheet checks. No material atlas was created.
+- Moved the production item asset bible from `docs/` to
+  `packages/content/sources/production-items-v1.asset-bible.json` and updated both content-authoring
+  scripts and the project handoff reference to use the package-owned source path.
+- Added all 70 active materials and six retained direct-damage spells to the production asset bible.
+  Every entry preserves its runtime data and has an individualized visual description, generation
+  prompt, negative prompt, composition contract, and visual tags. Automated coverage now verifies
+  all 253 bible entries against the active definitions and English content names.
 
 ### 2026-08-02
 

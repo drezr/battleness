@@ -86,7 +86,7 @@ try {
           create: {
             id: inventoryItemId,
             type: "ring",
-            definitionId: "emberLoop",
+            definitionId: "ashenLoop",
             contentVersion: releaseVersion,
             experience: 0,
             quality: 0,
@@ -115,7 +115,7 @@ try {
         id: playerMarketListingId,
         sellerId: playerId,
         resourceType: "ring",
-        definitionId: "emberLoop",
+        definitionId: "ashenLoop",
         rarity: "common",
         element: "fire",
         level: 0,

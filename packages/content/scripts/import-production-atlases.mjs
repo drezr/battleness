@@ -13,10 +13,7 @@ const contentRoot = resolve(scriptDirectory, "..");
 const repositoryRoot = resolve(contentRoot, "..", "..");
 const atlasMetadataRoot = resolve(contentRoot, "src", "atlases");
 const bible = JSON.parse(
-  await readFile(
-    resolve(repositoryRoot, "docs", "battleness-production-items-v1-asset-bible.json"),
-    "utf8",
-  ),
+  await readFile(resolve(contentRoot, "sources", "production-items-v1.asset-bible.json"), "utf8"),
 );
 
 await mkdir(atlasMetadataRoot, { recursive: true });

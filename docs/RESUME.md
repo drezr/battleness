@@ -468,7 +468,9 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 
 ## Production Content Collection
 
-- `docs/battleness-production-items-v1-asset-bible.json` is the source for 54 rings, 54 gems, and 69 monsters. The active collection retains 6 direct-damage test spells and 70 materials.
+- `packages/content/sources/production-items-v1.asset-bible.json` covers all 253 active definitions:
+  54 rings, 54 gems, 69 monsters, 6 retained direct-damage test spells, and 70 materials. Every entry
+  has atlas-ready visual direction; production atlases for spells and materials are not imported yet.
 - `trainingFlameBand` and `plainQuartz` are no longer active. Historical definitions live only in the `legacy/prototype-6` archive.
 - The implemented collection deliberately retains test spells until production spell definitions and artwork are available.
 - `docs/MATERIAL_COLLECTION_PROPOSAL.md` replaces the initial 12-material list with a detailed 70-material model derived from the historical SQLite `mats` table.

@@ -135,6 +135,28 @@ continue if the service or checksum verification fails. The normal release proce
 require restoring this backup; it is the recovery point for an incompatible migration or data
 incident.
 
+## Home Backup Verification
+
+The Raspberry Pi independently pulls encrypted database exports from `bndb` every day. Check the
+latest pull without exposing or copying the decryption key to the Pi:
+
+```sh
+systemctl show battleness-postgresql-pull.service \
+  -p Result -p ExecMainStatus -p ActiveState
+systemctl list-timers battleness-postgresql-pull.timer --no-pager
+cd /home/drezr/bn/postgresql
+latest="$(find . -maxdepth 1 -type f -name '20??????T??????Z.tar.gz.cms' \
+  -printf '%f\n' | sort | tail -1)"
+sha256sum --check "${latest}.sha256"
+```
+
+Require `Result=success`, `ExecMainStatus=0`, an active timer, and a valid checksum. For a restore
+drill, transfer one encrypted archive and its checksum from the Pi to the operator workstation,
+decrypt it with the off-server recipient certificate and private key, then run
+`battleness-postgresql-restore-check` against the extracted staging or production dump on `bndb`.
+The restore checker uses only a `battleness_restore_check*` throwaway database and removes it after
+successful verification.
+
 ## Build A Release
 
 Create an archive from the exact commit on the operator workstation. The following PowerShell

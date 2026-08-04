@@ -15,6 +15,8 @@ Environment=OFFSITE_SSH_TARGET=deploy@145.239.72.77
 Environment=OFFSITE_REMOTE_DIR=/var/backups/battleness/postgresql-offhost
 Environment=OFFSITE_RETENTION_DAYS=30
 Environment=SSH_KNOWN_HOSTS=/etc/battleness/postgresql-backup/known_hosts
+Environment=PULL_EXPORT_ROOT=/var/backups/battleness/postgresql-export
+Environment=PULL_EXPORT_RETENTION_DAYS=30
 ExecStart=/usr/local/sbin/battleness-postgresql-replicate-offhost
 Nice=10
 IOSchedulingClass=best-effort
@@ -23,3 +25,4 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectHome=true
 ReadOnlyPaths=/var/backups/battleness/postgresql /etc/battleness/postgresql-backup
+ReadWritePaths=/var/backups/battleness/postgresql-export

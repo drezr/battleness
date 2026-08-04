@@ -117,6 +117,7 @@ done
 
 if [[ -n "$timestamp" && -f "$OFFSITE_SSH_KEY" && -f "$SSH_KNOWN_HOSTS" ]]; then
   remote_archive="${OFFSITE_REMOTE_DIR}/${timestamp}.tar.gz.cms"
+  remote_checksum="${remote_archive}.sha256"
   ssh_options=(
     -i "$OFFSITE_SSH_KEY"
     -o BatchMode=yes
@@ -126,7 +127,7 @@ if [[ -n "$timestamp" && -f "$OFFSITE_SSH_KEY" && -f "$SSH_KNOWN_HOSTS" ]]; then
     -o UserKnownHostsFile="$SSH_KNOWN_HOSTS"
   )
 
-  if remote_epoch="$(ssh "${ssh_options[@]}" "$OFFSITE_SSH_TARGET" "test -s '${remote_archive}' && stat -c %Y '${remote_archive}'")"; then
+  if remote_epoch="$(ssh "${ssh_options[@]}" "$OFFSITE_SSH_TARGET" "test -s '${remote_archive}' && test -s '${remote_checksum}' && cd '${OFFSITE_REMOTE_DIR}' && sha256sum --check --status '$(basename "$remote_checksum")' && stat -c %Y '${remote_archive}'")"; then
     if [[ "$remote_epoch" =~ ^[0-9]+$ ]]; then
       now_epoch="$(date -u +%s)"
       offsite_age_seconds=$((now_epoch - remote_epoch))
@@ -139,7 +140,7 @@ if [[ -n "$timestamp" && -f "$OFFSITE_SSH_KEY" && -f "$SSH_KNOWN_HOSTS" ]]; then
       add_failure invalid_offsite_backup_mtime
     fi
   else
-    add_failure matching_offsite_backup_missing_or_unreachable
+    add_failure matching_offsite_backup_or_checksum_missing_invalid_or_unreachable
   fi
 fi
 
