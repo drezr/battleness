@@ -74,6 +74,9 @@ This file records modifications made to the project during agent-assisted work.
 - The 70 production material source images are generated under `assets/materials/large` as
   transparent, square, native-resolution PNGs with safe atlas margins. Their TexturePacker atlas
   remains intentionally pending for the user-managed packing step.
+- The 42 production spell source images are generated under `assets/spells` as transparent,
+  square, native-resolution PNGs with safe atlas margins. They cover all 14 Fire, 14 Electric, and
+  14 Ice definitions from the supplied production collection; their atlas remains pending.
 - The PvP Hub's Private, Casual, and Ranked mode cards are now full-card links like the other hub
   destinations. Their redundant footer buttons, reserved action row, and fixed 420/330/270-pixel
   heights are removed; cards size from their content while retaining mode artwork, feature details,
@@ -468,6 +471,14 @@ This file records modifications made to the project during agent-assisted work.
 - Added a centralized project TODO in `docs/TODO.md` covering Game App persistence, inventory, forge, battle integration, campaign, rewards, market, profile, authentication, PvP, player market, presentation, production, and open design questions.
 
 ## Change Log
+
+### 2026-08-06
+
+- Generated all 42 production spell source images from the supplied
+  `battleness-production-spells-v1.json` collection into `assets/spells`. Each image follows its
+  `assetDescription`, preserves native generated resolution, uses a transparent square canvas with
+  at least a 5.9% safe margin, and passed exact-ID, alpha-corner, chroma-residue, framing, and visual
+  contact-sheet checks. No spell atlas was created.
 
 ### 2026-08-03
 
