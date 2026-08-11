@@ -25,6 +25,11 @@ describe("content package", () => {
     expect(() => validateContent()).not.toThrow();
   });
 
+  it("localizes the runtime monster created by Transmute", () => {
+    expect(locales.en["monster.transmutedElectric.name"]).toBe("Transmuted Electric");
+    expect(locales.fr["monster.transmutedElectric.name"]).toBe("Monstre électrique transmuté");
+  });
+
   it("defines a validated linear campaign with fixed rewards", () => {
     expect(definitions.campaignOpponents.map((opponent) => opponent.id)).toEqual([
       "emberTrial",
