@@ -5,9 +5,11 @@ import {
   battleResolutionEffects,
   battleTargets,
   cooldownReady,
+  hasLegalSpellTarget,
   presentBattleEvent,
   ringTotalDamage,
   shouldShowInitialBattleLoading,
+  spellTargetIsLegal,
   type LiveBattleActionSource,
 } from "./liveBattlePresentation";
 
@@ -191,6 +193,61 @@ describe("live battle presentation", () => {
       battleTargets(battle).find((target) => target.id === battle.opponent.heroTargetId),
     ).toMatchObject({ blockedByTaunt: false, firstTurnProtected: false });
   });
+
+  it("detects when a targeted spell has no legal target", () => {
+    const targets = battleTargets(battleState());
+    const monsterRule = {
+      allowedTargets: ["anyMonster" as const],
+      requiresTauntTargeting: false,
+    };
+
+    expect(hasLegalSpellTarget(targets, monsterRule)).toBe(false);
+    expect(spellTargetIsLegal(targets.find((target) => target.kind === "hero")!, monsterRule)).toBe(
+      false,
+    );
+  });
+
+  it.each([
+    [
+      "anyCombatant",
+      ["opponent.hero", "opponent.monster.target.1", "viewer.hero", "viewer.monster.target.1"],
+    ],
+    ["anyMonster", ["opponent.monster.target.1", "viewer.monster.target.1"]],
+    ["alliedMonster", ["viewer.monster.target.1"]],
+    ["enemyMonster", ["opponent.monster.target.1"]],
+  ] as const)(
+    "matches the %s spell target contract in the live UI",
+    (allowedTarget, expectedIds) => {
+      const battle = battleState();
+      const targetMonster = {
+        definitionId: "emberImp",
+        label: "Target Imp",
+        element: "fire" as const,
+        rarity: "common" as const,
+        health: 4,
+        maxHealth: 4,
+        damage: 3,
+        cooldown: 2,
+        currentCooldown: 0,
+        skill: null,
+        skills: [],
+        statuses: [],
+        temporary: false,
+        shieldActive: false,
+        rageActive: false,
+      };
+      battle.viewer.monsters = [{ ...targetMonster, id: "viewer.monster.target.1" }];
+      battle.opponent.monsters = [{ ...targetMonster, id: "opponent.monster.target.1" }];
+      const rule = { allowedTargets: [allowedTarget], requiresTauntTargeting: false };
+
+      expect(
+        battleTargets(battle)
+          .filter((target) => spellTargetIsLegal(target, rule))
+          .map((target) => target.id)
+          .sort(),
+      ).toEqual([...expectedIds].sort());
+    },
+  );
 
   it("uses granted skills and Freeze when presenting Taunt target legality", () => {
     const battle = battleState();

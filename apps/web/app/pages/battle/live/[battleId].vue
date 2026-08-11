@@ -720,9 +720,11 @@ import {
   battleResolutionEffects,
   battleTargets,
   cooldownReady,
+  hasLegalSpellTarget,
   presentBattleEvent,
   ringTotalDamage,
   shouldShowInitialBattleLoading,
+  spellTargetIsLegal,
   type LiveBattleActionSource,
   type LiveBattleEventPresentation,
   type LiveBattleResolutionEffects,
@@ -914,9 +916,7 @@ function canSelectTarget(targetId: string): boolean {
   const target = targetState(targetId);
   const spellTarget = activeSpellTarget.value;
   const legalForCurrentStage = spellTarget
-    ? target !== undefined &&
-      spellTarget.allowedTargets.some((allowed) => spellTargetAllows(allowed, target)) &&
-      (!spellTarget.requiresTauntTargeting || !target.blockedByTaunt)
+    ? target !== undefined && spellTargetIsLegal(target, spellTarget)
     : Boolean(target && !target.blockedByTaunt);
   return Boolean(
     selectedSource.value &&
@@ -926,15 +926,6 @@ function canSelectTarget(targetId: string): boolean {
   );
 }
 
-function spellTargetAllows(
-  allowed: SpellTargetRequest["allowedTargets"][number],
-  target: NonNullable<ReturnType<typeof targetState>>,
-): boolean {
-  if (allowed === "anyCombatant") return true;
-  if (target.kind !== "monster") return false;
-  if (allowed === "anyMonster") return true;
-  return allowed === "alliedMonster" ? target.side === "viewer" : target.side === "opponent";
-}
 function targetInteractionLabel(targetId: string): string {
   const target = targetState(targetId);
   if (target?.blockedByTaunt && !canSelectTarget(targetId)) return t("battle.live.blockedByTaunt");
@@ -972,10 +963,17 @@ function eventLabel(id: string): string {
 function localizedEventParams(
   params: LiveBattleEventPresentation["params"],
 ): Record<string, string | number> {
-  if (typeof params.element !== "string" || !elements.includes(params.element as never)) {
-    return params;
+  const localized = { ...params };
+  if (typeof params.element === "string" && elements.includes(params.element as never)) {
+    localized.element = t(`element.${params.element}`);
   }
-  return { ...params, element: t(`element.${params.element}`) };
+  if (typeof params.status === "string") {
+    localized.status = t(`battle.live.effects.${params.status}`);
+  }
+  if (typeof params.skill === "string") {
+    localized.skill = t(`battle.live.effects.${params.skill}`);
+  }
+  return localized;
 }
 function collectBattleLabels(state: LiveBattleState): Record<string, string> {
   const labels: Record<string, string> = {};
@@ -1105,13 +1103,12 @@ async function executeTarget(targetId: string): Promise<void> {
     pendingSpellTargets.value = source.item.gems.flatMap((gem) => {
       const enchantment = gem.enchantment;
       if (enchantment?.type !== "spell" || enchantment.targeting.selection === "none") return [];
-      const acceptsPrimary =
-        primaryTarget &&
-        enchantment.targeting.allowedTargets.some((allowed) =>
-          spellTargetAllows(allowed, primaryTarget),
-        ) &&
-        (!enchantment.requiresTauntTargeting || !primaryTarget.blockedByTaunt);
-      return acceptsPrimary
+      const targetRule = {
+        allowedTargets: enchantment.targeting.allowedTargets,
+        requiresTauntTargeting: enchantment.requiresTauntTargeting,
+      };
+      const acceptsPrimary = primaryTarget && spellTargetIsLegal(primaryTarget, targetRule);
+      return acceptsPrimary || !hasLegalSpellTarget(targetStates.value.values(), targetRule)
         ? []
         : [
             {

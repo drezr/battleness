@@ -29,6 +29,11 @@ export type LiveBattleTarget = {
   firstTurnProtected: boolean;
 };
 
+export type LiveBattleSpellTargetRule = {
+  allowedTargets: ("anyCombatant" | "anyMonster" | "alliedMonster" | "enemyMonster")[];
+  requiresTauntTargeting: boolean;
+};
+
 export function shouldShowInitialBattleLoading(
   pending: boolean,
   battle: LiveBattleState | null | undefined,
@@ -105,6 +110,28 @@ export function battleTargets(battle: LiveBattleState): LiveBattleTarget[] {
       firstTurnProtected: false,
     })),
   ];
+}
+
+export function spellTargetIsLegal(
+  target: LiveBattleTarget,
+  rule: LiveBattleSpellTargetRule,
+): boolean {
+  const allowed = rule.allowedTargets.some((allowedTarget) => {
+    if (allowedTarget === "anyCombatant") return true;
+    if (target.kind !== "monster") return false;
+    if (allowedTarget === "anyMonster") return true;
+    return allowedTarget === "alliedMonster"
+      ? target.side === "viewer"
+      : target.side === "opponent";
+  });
+  return allowed && (!rule.requiresTauntTargeting || !target.blockedByTaunt);
+}
+
+export function hasLegalSpellTarget(
+  targets: Iterable<LiveBattleTarget>,
+  rule: LiveBattleSpellTargetRule,
+): boolean {
+  return [...targets].some((target) => spellTargetIsLegal(target, rule));
 }
 
 export function presentBattleEvent(

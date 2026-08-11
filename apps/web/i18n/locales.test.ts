@@ -43,4 +43,32 @@ describe("Game App locales", () => {
       expect((value as string).trim(), key).not.toBe("");
     }
   });
+
+  it.each([
+    "shieldBroken",
+    "shieldGranted",
+    "shieldExpired",
+    "damageChanged",
+    "lastBreath",
+    "copied",
+    "transformed",
+    "pierce",
+    "rage",
+    "multiHit",
+    "taunt",
+    "shield",
+    "burn",
+    "shock",
+    "freeze",
+    "burnRemoved",
+    "shockRemoved",
+    "freezeRemoved",
+    "lastBreathRemoved",
+    "rageActivated",
+    "hasteActivated",
+    "monsterDestroyed",
+  ])("localizes the live battle effect %s", (effect) => {
+    expect(en.battle.live.effects).toHaveProperty(effect);
+    expect(fr.battle.live.effects).toHaveProperty(effect);
+  });
 });

@@ -265,6 +265,8 @@ This section separates executable game rules from implementation decisions. It i
 - Using a ring puts that ring on cooldown.
 - Using a ring applies the ring's damage and the damage from its gems to a legal target, unless damage is prevented by another rule.
 - Using a ring triggers the enchantments contained by its gems.
+- If a targeted spell has no legal target when its ring is used, that spell fails without cancelling
+  the ring's energy payment, cooldown, damage, or other enchantments.
 - Ring use resolves in this order: pay energy, put the ring on cooldown, apply ring and gem damage, trigger enchantments in socket order, then check win conditions.
 
 ### Gems And Enchantments

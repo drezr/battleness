@@ -38,9 +38,15 @@ section.
 - [x] Implement the production spell collection by following
       `docs/SPELLS_IMPLEMENTATION_INSTRUCTIONS.md`, including target-contract approval, typed effect
       primitives, deterministic engine behavior, localization, recipes, migration, atomic atlas
-      activation, and complete local validation.
+      activation, and complete local validation. A catalogue-driven acceptance suite additionally
+      executes all 42 active definitions and guards every live selected-target contract.
 - [ ] Perform the coordinated staging backup/restore verification, guarded gameplay reset,
-      authenticated smoke tests, log review, and rollback drill before production promotion.
+      authenticated smoke tests, log review, and rollback drill before production promotion. The
+      backup, isolated restore, v2 deployment/reset, and authenticated route/content sweep passed on
+      2026-08-11. Commit, CI-validate, and redeploy the impossible-spell-target hotfix found during
+      training combat. The equivalent local no-target and legal-target browser smokes now pass,
+      including Burn's delayed damage, expiration, and localized presentation. Commit, CI-validate,
+      redeploy, repeat the staging action smoke, and complete the rollback drill.
 
 ## Phase 1 - Game App Data Foundation
 

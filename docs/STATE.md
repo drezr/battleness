@@ -4,6 +4,29 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- Local production-spell acceptance now executes every one of the 42 active definitions directly
+  from `definitions/spells.json`, checks the emitted spell event and a mechanic-specific result
+  event, and guards exact one-to-one coverage between active IDs and behavioral expectations. This
+  complements the existing focused primitive and interaction tests, which use purpose-built
+  definitions. Live-presentation tests now also cover all four selected-target contracts:
+  `anyCombatant`, `anyMonster`, `alliedMonster`, and `enemyMonster`.
+- Staging spell smoke testing found and locally corrected an impossible-target deadlock: when a
+  targeted spell has no legal target, the live client no longer opens an empty target-selection
+  step and the engine lets the spell fail without cancelling the containing ring action. Focused
+  engine and live-presentation tests cover the fallback. A local browser smoke then reproduced the
+  exact starter craft/socket/enchant/equip flow and proved both branches: Burn I is skipped while
+  Ashen Loop still resolves when no monster exists, and requests a legal secondary monster target
+  when one exists. Burn dealt its delayed 3 damage at the start of the controller's next turn and
+  expired normally. Live effect overlays and diagnostic event parameters now localize every
+  supported status and granted skill instead of exposing raw locale keys.
+- On 2026-08-11, staging deployed commit `4575c48f` as release
+  `20260811T165703Z-4575c48f`. Backup `20260811T165725Z` passed checksums and an isolated restore
+  containing 33 tables and 17 migrations before the guarded `production-items-v2` gameplay reset
+  completed. Authenticated Home, Battle, Inventory, Forge, Market, spell detail, and recipe checks
+  passed. The service remained healthy with zero restarts; the only warning logs were expected 401s
+  from unauthenticated pre-login page loads. The training action smoke exposed the impossible-target
+  issue above, so final combat and rollback validation remain pending until the hotfix is committed,
+  CI-validated, and redeployed.
 - The `production-items-v2` cutover is active: all 42 approved spells, 219 total recipes, localized
   English/French names and gameplay descriptions, and the packed spell atlas are used by both apps.
   Rules version `production-spells-v1` records the expanded command and replay contract. The six

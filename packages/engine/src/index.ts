@@ -577,11 +577,16 @@ function useRing(
   requireValidTarget(state, player.id, action.targetId);
   assertTauntAllowsTarget(state, player.id, action.targetId);
 
+  const spellsWithoutLegalTargets = new Set<string>();
   for (const gem of ring.gems) {
     if (gem.enchantment?.type !== "spell") {
       continue;
     }
     const spell = getSpellDefinition(state, gem);
+    if (!hasLegalSpellTarget(state, player.id, spell)) {
+      spellsWithoutLegalTargets.add(gem.id);
+      continue;
+    }
     const spellTarget = resolveSpellTarget(action, gem, spell);
     validateSpellTarget(state, player.id, spell, spellTarget);
   }
@@ -635,6 +640,10 @@ function useRing(
           gem.enchantment.resolvedDefinitionId,
         ),
       );
+      continue;
+    }
+
+    if (spellsWithoutLegalTargets.has(gem.id)) {
       continue;
     }
 
@@ -802,6 +811,43 @@ function resolveSpellTarget(
     return undefined;
   }
   return action.enchantmentTargets?.[gem.id] ?? action.targetId;
+}
+
+function hasLegalSpellTarget(
+  state: BattleState,
+  sourcePlayerId: string,
+  spell: SpellDefinition,
+): boolean {
+  if (spell.targeting?.selection === "none") {
+    return true;
+  }
+
+  const allowedTargets = spell.targeting?.allowedTargets ?? ["anyCombatant"];
+  const checksTaunt = spell.effects.some((effect) => effect.type === "dealDamage");
+  return state.players.some((player) =>
+    [
+      { kind: "hero" as const, player },
+      ...player.monsters.map((monster) => ({ kind: "monster" as const, player, monster })),
+    ].some((target) => {
+      const allowed = allowedTargets.some((allowedTarget) => {
+        switch (allowedTarget) {
+          case "anyCombatant":
+            return true;
+          case "anyMonster":
+            return target.kind === "monster";
+          case "alliedMonster":
+            return target.kind === "monster" && target.player.id === sourcePlayerId;
+          case "enemyMonster":
+            return target.kind === "monster" && target.player.id !== sourcePlayerId;
+        }
+      });
+      if (!allowed || !checksTaunt || target.player.id === sourcePlayerId) {
+        return allowed;
+      }
+      const taunts = target.player.monsters.filter(hasTaunt);
+      return taunts.length === 0 || (target.kind === "monster" && hasTaunt(target.monster));
+    }),
+  );
 }
 
 function validateSpellTarget(

@@ -370,6 +370,30 @@ describe("createBattleState", () => {
     expect(result.state.players[1].monsters).toEqual([]);
   });
 
+  it("lets ring damage resolve when a targeted spell has no legal target", () => {
+    const noMonsterTargetSetup = structuredClone(setup);
+    noMonsterTargetSetup.definitions.spells.spark.targeting = {
+      selection: "one",
+      allowedTargets: ["anyMonster"],
+    };
+    const state = createBattleState(noMonsterTargetSetup);
+    state.players[0].energy.turnCount = 2;
+
+    const result = applyBattleAction(state, {
+      type: "useRing",
+      playerId: "playerOne",
+      ringInstanceId: "playerOne.ring.staticLoop",
+      targetId: "playerTwo.hero",
+    });
+
+    expect(result.events.map((event) => event.type)).toEqual([
+      "ringUsed",
+      "energySpent",
+      "damageDealt",
+    ]);
+    expect(result.state.players[1].hero.health).toBe(27);
+  });
+
   it("prevents using the same ring twice in one turn even when energy remains", () => {
     const state = createBattleState(setup);
     const ringEnergyCost = state.players[0].rings[0].energyCost;
