@@ -53,16 +53,25 @@ separate permanent Dev Lab prototype.
 
 ## Immediate Handoff
 
-- `production-items-v1` replaces the test ring/gem/monster collection with 54 rings, 54 gems, and
-  69 monsters from the asset bible while retaining the six test spells. The three TexturePacker
-  atlases and metadata are active in both apps, including trimmed and rotated frames; the old
-  `prototype-6` definitions and grid atlases are archived under explicit legacy paths.
+- `production-items-v2` is active with 54 rings, 54 gems, 69 monsters, 42 spells, 70 materials, and
+  219 recipes. All five packed atlases are active in both apps with exact definition coverage. The
+  former six-spell grid is archived under `packages/content/src/legacy/production-items-v1/`.
+- The 42-spell catalogue is approved and active. Live combat collects per-gem spell targets when the
+  primary ring target is incompatible, and the engine validates the full action before mutation.
+- The production gameplay contract is approved and all four inactive engine slices are implemented.
+  Engine and content schemas now cover targeting, Burn, Shock, Freeze, area status/damage, Cleanse,
+  source-attributed granted skills and Shields, cooldown setters, deterministic logged Refresh,
+  persistent supported-ring kill triggers, action-prepared Pierce/Funeral Brand, Bloodflame, and
+  Last Breath, plus destruction, captured values, random secondary effects, Copy, Transmute, and
+  temporary copies. Each of the 42 production spells now has scenario coverage. The next phase is
+  the atomic `production-items-v2` integration, now completed with localization, recipes,
+  starter/persistence migration, AI/UI targeting, rules/content versions, and atlas activation.
 - Production penalties sum decimal contributions across gems and enchantments before flooring once;
   speed now flows from rings, gems, monsters, and spells (the retained spells currently have zero
-  speed). All 183 active objects have stable three-unit recipes, with repeated materials aggregated
-  and unique recipe multisets for rings, gems, and monsters.
-- Dev Lab local persistence is v2 and explicitly clears incompatible v1 data. Account onboarding is
-  v2 with `ashenLoop`, `emberShard`, and `firebolt`. Before deploying the content cutover to staging,
+  speed). All 219 active objects have stable three-unit recipes, with repeated materials aggregated
+  and unique recipe multisets within each craftable item type.
+- Dev Lab local persistence is v3 and explicitly clears incompatible v1/v2 data. Account onboarding
+  is v3 with `ashenLoop`, `emberShard`, and `burnI`. Before deploying the content cutover to staging,
   take and verify a database backup, then follow the guarded staging gameplay reset procedure in
   `docs/DEPLOYMENT.md`; the reset script has not been run remotely.
 - Child-view return links now appear as visible 44-pixel rounded cyan-accented controls beside page
@@ -452,7 +461,7 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - `packages/content/src/balanceReport.ts` compares ring, gem, spell, and monster definitions across base (`level 1`, `quality 0`), mid (`level 10`, `quality 50`), and max (`level 50`, `quality 100`) progression profiles. It reports primary metrics and high outliers by item type and rarity, and the prototype setup screen renders the report for balancing review.
 - Owned monster and spell instances are explicit inventory records referenced by gem enchantments.
 - Resolved monster and spell definitions use battle-scoped instance IDs internally while combat events and summoned-monster IDs retain stable content IDs.
-- Content version `production-items-v1` is current; the former prototype definitions are archived for technical reference only.
+- Content version `production-items-v2` is current; former prototype and six-spell definitions are archived for technical reference only.
 - Focused unit and integration tests cover thresholds, caps, floor rounding, invalid inputs, resolved setup stats, and runtime use of resolved enchantments.
 
 ## Content Reference Validation
@@ -468,9 +477,10 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 
 ## Production Content Collection
 
-- `packages/content/sources/production-items-v1.asset-bible.json` covers all 253 active definitions:
+- `packages/content/sources/production-items-v2.asset-bible.json` covers all 253 active definitions:
   54 rings, 54 gems, 69 monsters, 6 retained direct-damage test spells, and 70 materials. Every entry
-  has atlas-ready visual direction; production atlases for spells and materials are not imported yet.
+  has atlas-ready visual direction. Its atlas manifest records rings, gems, monsters, and materials
+  as imported and the separate 42-spell proposal atlas as produced but inactive.
 - `trainingFlameBand` and `plainQuartz` are no longer active. Historical definitions live only in the `legacy/prototype-6` archive.
 - The implemented collection deliberately retains test spells until production spell definitions and artwork are available.
 - `docs/MATERIAL_COLLECTION_PROPOSAL.md` replaces the initial 12-material list with a detailed 70-material model derived from the historical SQLite `mats` table.
@@ -564,7 +574,9 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - Yellow selection outlines and red blocked-state indicators remain distinct from the rarity border.
 - Localized elemental badges appear in the top-right corner of ring, gem, and monster cards across those same views.
 - Socketed gem markers use elemental fill colors and rarity border colors simultaneously.
-- TexturePacker atlases cover every active ring, gem, and monster; the existing grid atlases cover test spells and materials. Stable ID mappings and startup coverage validation live in `packages/content/src/itemAtlases.ts`.
+- TexturePacker atlases cover every active ring, gem, monster, and material; only the retained test
+  spells use a grid atlas. Stable ID mappings and startup coverage validation live in
+  `packages/content/src/itemAtlases.ts`.
 - The battle and setup interfaces render ring, gem, and monster atlas crops. Spell and material crops are mapped for future forge, inventory, and shop interfaces.
 - The setup screen exposes all 253 active definitions in a localized, collapsible development collection.
 - The setup screen now supports a Battle Lab mode for editing two loadouts and launching an unscripted battle.
@@ -573,7 +585,7 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - Battle Lab loadouts support strict JSON import/export and named browser-local presets. These presets are development-only and do not replace future account persistence.
 - The editor includes resolved stat comparisons and diagnostic warnings for efficiency differences of at least 50% or speed differences of at least 4.
 - The Battle Lab can run two deterministic greedy simulations that vary the preferred element-duel winner, respect current targeting and action constraints, and report timeouts at 500 actions.
-- Content version `production-items-v1` has 183 recipes: one for every active ring, gem, monster, and retained spell.
+- Content version `production-items-v2` has 219 recipes: one for every active ring, gem, monster, and spell.
 - Content version `prototype-5` renames the highest rarity tier from `legendary` to `epic`.
 - Recipes use exactly three material units from the matching crafting family and aggregate repeated materials. Common outputs use three common units; refined outputs use one refined and two common units; rare outputs use one rare, one refined, and one common unit; epic outputs use one epic, one rare, and one refined unit.
 - Crafted prototype items are level 1 and quality 0. Crafted rings start with one socket. The setup screen includes a development forge panel with material stock controls, real consumption, restock, improvement actions, and crafted-instance output.

@@ -216,11 +216,19 @@
                     :rarity-border="false"
                   />
                   <div
-                    v-if="monster.skill || monster.shieldActive || monster.rageActive"
+                    v-if="
+                      monster.skills.length ||
+                      monster.temporary ||
+                      monster.shieldActive ||
+                      monster.rageActive
+                    "
                     class="live-card-status-row"
                   >
-                    <span v-if="monster.skill" class="pill muted-pill">{{
-                      skillLabel(monster.skill)
+                    <span v-for="skill in monster.skills" :key="skill" class="pill muted-pill">{{
+                      skillLabel(skill)
+                    }}</span>
+                    <span v-if="monster.temporary" class="pill element-electric">{{
+                      t("battle.live.temporaryMonster")
                     }}</span>
                     <span v-if="monster.shieldActive" class="pill element-ice">{{
                       t("battle.live.shieldActive")
@@ -340,11 +348,19 @@
                     :rarity-border="false"
                   />
                   <div
-                    v-if="monster.skill || monster.shieldActive || monster.rageActive"
+                    v-if="
+                      monster.skills.length ||
+                      monster.temporary ||
+                      monster.shieldActive ||
+                      monster.rageActive
+                    "
                     class="live-card-status-row"
                   >
-                    <span v-if="monster.skill" class="pill muted-pill">{{
-                      skillLabel(monster.skill)
+                    <span v-for="skill in monster.skills" :key="skill" class="pill muted-pill">{{
+                      skillLabel(skill)
+                    }}</span>
+                    <span v-if="monster.temporary" class="pill element-electric">{{
+                      t("battle.live.temporaryMonster")
                     }}</span>
                     <span v-if="monster.shieldActive" class="pill element-ice">{{
                       t("battle.live.shieldActive")
@@ -538,6 +554,16 @@
         </div>
       </section>
 
+      <p v-if="activeSpellTarget" class="panel live-action-error" role="status">
+        {{
+          t("battle.live.selectSpellTarget", {
+            spell: activeSpellTarget.label,
+            current: completedSpellTargetCount + 1,
+            total: totalSpellTargetCount,
+          })
+        }}
+      </p>
+
       <p v-if="actionError" class="panel live-action-error" role="alert">{{ actionError }}</p>
 
       <Teleport to="body">
@@ -730,6 +756,10 @@ const canAct = computed(
 const elements = ["electric", "fire", "ice"] as const;
 const selectedSource = ref<LiveBattleActionSource | null>(null);
 const selectedTargetId = ref<string | null>(null);
+const primaryRingTargetId = ref<string | null>(null);
+const pendingSpellTargets = ref<SpellTargetRequest[]>([]);
+const ringEnchantmentTargets = ref<Record<string, string>>({});
+const totalSpellTargetCount = ref(0);
 const submitting = ref(false);
 const claimingReward = ref(false);
 const showDeveloperModal = ref(false);
@@ -748,6 +778,17 @@ const presentedEvents = computed(() =>
   lastEvents.value.map((event) => presentBattleEvent(event, eventLabel)),
 );
 const resolutionSourceIds = computed(() => new Set(resolutionEffects.value.sourceIds));
+const activeSpellTarget = computed(() => pendingSpellTargets.value[0] ?? null);
+const completedSpellTargetCount = computed(
+  () => totalSpellTargetCount.value - pendingSpellTargets.value.length,
+);
+
+type SpellTargetRequest = {
+  gemId: string;
+  label: string;
+  allowedTargets: ("anyCombatant" | "anyMonster" | "alliedMonster" | "enemyMonster")[];
+  requiresTauntTargeting: boolean;
+};
 
 const activeDeadlineAt = computed(() =>
   battle.value?.status === "choosingFirstPlayer"
@@ -871,17 +912,32 @@ function targetLabel(targetId: string): string {
 }
 function canSelectTarget(targetId: string): boolean {
   const target = targetState(targetId);
+  const spellTarget = activeSpellTarget.value;
+  const legalForCurrentStage = spellTarget
+    ? target !== undefined &&
+      spellTarget.allowedTargets.some((allowed) => spellTargetAllows(allowed, target)) &&
+      (!spellTarget.requiresTauntTargeting || !target.blockedByTaunt)
+    : Boolean(target && !target.blockedByTaunt);
   return Boolean(
     selectedSource.value &&
     sourceAvailability(selectedSource.value).available &&
-    target &&
-    !target.blockedByTaunt &&
+    legalForCurrentStage &&
     !submitting.value,
   );
 }
+
+function spellTargetAllows(
+  allowed: SpellTargetRequest["allowedTargets"][number],
+  target: NonNullable<ReturnType<typeof targetState>>,
+): boolean {
+  if (allowed === "anyCombatant") return true;
+  if (target.kind !== "monster") return false;
+  if (allowed === "anyMonster") return true;
+  return allowed === "alliedMonster" ? target.side === "viewer" : target.side === "opponent";
+}
 function targetInteractionLabel(targetId: string): string {
   const target = targetState(targetId);
-  if (target?.blockedByTaunt) return t("battle.live.blockedByTaunt");
+  if (target?.blockedByTaunt && !canSelectTarget(targetId)) return t("battle.live.blockedByTaunt");
   return canSelectTarget(targetId)
     ? t("battle.live.attackTarget", { target: targetLabel(targetId) })
     : targetLabel(targetId);
@@ -893,7 +949,9 @@ function targetCardClasses(targetId: string, base: string, rarity?: string) {
     rarity ? `rarity-border-${rarity}` : "",
     {
       "target-selected": selectedTargetId.value === targetId,
-      "target-blocked": Boolean(selectedSource.value && target?.blockedByTaunt),
+      "target-blocked": Boolean(
+        selectedSource.value && target?.blockedByTaunt && !canSelectTarget(targetId),
+      ),
       "target-available": canSelectTarget(targetId),
       "resolution-source": resolutionSourceIds.value.has(targetId),
       "resolution-impact": Boolean(resolutionEffect(targetId)),
@@ -968,6 +1026,10 @@ function prepareSource(source: LiveBattleActionSource): void {
   if (!canPrepareSource(source)) return;
   selectedSource.value = source;
   selectedTargetId.value = null;
+  primaryRingTargetId.value = null;
+  pendingSpellTargets.value = [];
+  ringEnchantmentTargets.value = {};
+  totalSpellTargetCount.value = 0;
   actionError.value = "";
 }
 function canPrepareSource(source: LiveBattleActionSource): boolean {
@@ -1003,6 +1065,10 @@ function handleViewerMonsterInteraction(monster: LiveBattleMonsterView): void {
 function clearPreparedAction(): void {
   selectedSource.value = null;
   selectedTargetId.value = null;
+  primaryRingTargetId.value = null;
+  pendingSpellTargets.value = [];
+  ringEnchantmentTargets.value = {};
+  totalSpellTargetCount.value = 0;
 }
 
 async function submitAction(action: LiveBattleActionCommand): Promise<void> {
@@ -1033,9 +1099,53 @@ async function executeTarget(targetId: string): Promise<void> {
   if (!canSelectTarget(targetId) || !selectedSource.value) return;
   const source = selectedSource.value;
   selectedTargetId.value = targetId;
+  if (source.kind === "ring" && primaryRingTargetId.value === null) {
+    primaryRingTargetId.value = targetId;
+    const primaryTarget = targetState(targetId);
+    pendingSpellTargets.value = source.item.gems.flatMap((gem) => {
+      const enchantment = gem.enchantment;
+      if (enchantment?.type !== "spell" || enchantment.targeting.selection === "none") return [];
+      const acceptsPrimary =
+        primaryTarget &&
+        enchantment.targeting.allowedTargets.some((allowed) =>
+          spellTargetAllows(allowed, primaryTarget),
+        ) &&
+        (!enchantment.requiresTauntTargeting || !primaryTarget.blockedByTaunt);
+      return acceptsPrimary
+        ? []
+        : [
+            {
+              gemId: gem.id,
+              label: enchantment.label,
+              allowedTargets: enchantment.targeting.allowedTargets,
+              requiresTauntTargeting: enchantment.requiresTauntTargeting,
+            },
+          ];
+    });
+    totalSpellTargetCount.value = pendingSpellTargets.value.length;
+    if (pendingSpellTargets.value.length > 0) {
+      selectedTargetId.value = null;
+      return;
+    }
+  } else if (source.kind === "ring" && activeSpellTarget.value) {
+    ringEnchantmentTargets.value[activeSpellTarget.value.gemId] = targetId;
+    pendingSpellTargets.value.shift();
+    if (pendingSpellTargets.value.length > 0) {
+      selectedTargetId.value = null;
+      return;
+    }
+  }
+
   const action: LiveBattleActionCommand =
     source.kind === "ring"
-      ? { type: "useRing", ringInstanceId: source.id, targetId }
+      ? {
+          type: "useRing",
+          ringInstanceId: source.id,
+          targetId: primaryRingTargetId.value ?? targetId,
+          ...(Object.keys(ringEnchantmentTargets.value).length > 0
+            ? { enchantmentTargets: ringEnchantmentTargets.value }
+            : {}),
+        }
       : { type: "useMonster", monsterInstanceId: source.id, targetId };
   await submitAction(action);
   if (selectedSource.value?.id === source.id) selectedTargetId.value = null;

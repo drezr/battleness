@@ -6,11 +6,178 @@ export type TargetId = `${string}.hero` | `${string}.monster.${string}.${number}
 export type BattleStatus = "choosingFirstPlayer" | "active" | "finished";
 export type FirstPlayerChoiceReason = "speed" | "level" | "elementDuel" | "elementDuelTiebreaker";
 
-export type SpellEffect = {
+export type SpellAllowedTarget = "anyCombatant" | "anyMonster" | "alliedMonster" | "enemyMonster";
+
+export type SpellTargeting =
+  | { selection: "none"; allowedTargets: [] }
+  | { selection: "one"; allowedTargets: SpellAllowedTarget[] };
+
+export type DealDamageSpellEffect = {
   type: "dealDamage";
   amount: number;
-  target: "any";
+  element?: ElementType;
+  target: "any" | "selected";
 };
+
+export type ApplyStatusSpellEffect =
+  | {
+      type: "applyStatus";
+      status: "burn";
+      damage: number;
+      durationOwnerTurns: number;
+      tickTiming?: "startOfTargetControllerTurn";
+    }
+  | {
+      type: "applyStatus";
+      status: "shock" | "freeze";
+      durationOwnerTurns: number;
+    }
+  | {
+      type: "applyStatus";
+      status: "lastBreath";
+      duration: "endOfCurrentTurn";
+      onDestroy: {
+        type: "attackRandomLegalEnemyBeforeRemoval";
+        ignoreCurrentCooldown: true;
+      };
+    };
+
+export type PersistentRingTriggerEffect =
+  | { type: "modifySupportedRingDamage"; amount: number; duration: "battle" }
+  | { type: "restoreCurrentTurnEnergy"; amount: number; cap: "currentTurnMaximum" }
+  | { type: "modifySupportedRingCurrentCooldown"; amount: number; minimum: 0 };
+
+export type SpellEffect =
+  | DealDamageSpellEffect
+  | ApplyStatusSpellEffect
+  | {
+      type: "forEachMonster";
+      scope: "allMonsters";
+      effect: ApplyStatusSpellEffect;
+    }
+  | {
+      type: "dealDamageToAll";
+      scope: "enemyMonsters";
+      amount?: number;
+      amountFromCapturedStat?: "currentDamage";
+      element: ElementType;
+    }
+  | {
+      type: "modifyCurrentCooldown";
+      target: "selected";
+      amount: number;
+      maximumFrom: "resolvedBaseCooldown";
+    }
+  | {
+      type: "removeStatuses";
+      target: "selected";
+      scope: "allTemporaryStatuses";
+      removeSkills: false;
+    }
+  | {
+      type: "grantSkill";
+      skill: Exclude<MonsterSkill, "haste">;
+      duration: "untilMonsterDestroyed";
+      activateImmediately?: true;
+      duplicateBehavior: "noEffect";
+    }
+  | {
+      type: "grantTemporaryShield";
+      target: "selected";
+      expires: "startOfTargetControllerNextTurn";
+      duplicateBehavior: "noEffect";
+    }
+  | {
+      type: "setCurrentCooldown";
+      target: "selected";
+      value?: 0;
+      valueFrom?: "resolvedBaseCooldown";
+    }
+  | {
+      type: "setCurrentCooldownForAll";
+      scope: "alliedMonsters";
+      value: 0;
+    }
+  | {
+      type: "randomTarget";
+      scope: "alliedRingsWithCooldownAboveZero";
+      onSuccess: { type: "modifyRingCurrentCooldown"; amount: number; minimum: 0 };
+    }
+  | {
+      type: "randomTarget";
+      scope: "otherAlliedMonsters";
+      onSuccess: {
+        type: "modifyMonsterDamage";
+        amountFrom: "destroyedTargetCurrentDamage";
+        duration: "battle";
+      };
+    }
+  | {
+      type: "randomTarget";
+      scope: "enemyMonsters";
+      onSuccess: { type: "destroyMonster"; target: "random" };
+    }
+  | {
+      type: "randomTarget";
+      scope: "otherMonstersControlledBySelectedTargetOwner";
+      onSuccess: { type: "dealDamage"; amount: number; element: ElementType };
+    }
+  | {
+      type: "registerTrigger";
+      event: "supportedRingKilledMonster";
+      effect: PersistentRingTriggerEffect;
+    }
+  | {
+      type: "conditionalPierceForAction";
+      target: "selectedEnemyMonster";
+      source: "ringAndGemDamage";
+    }
+  | {
+      type: "ifTargetSurvives";
+      effect: { type: "modifyMonsterDamage"; amount: number; duration: "battle" };
+    }
+  | {
+      type: "registerActionScopedTrigger";
+      event: "selectedMonsterDestroyedDuringCurrentRingAction";
+      effect: {
+        type: "dealDamageToControllingHero";
+        amountFrom: "destroyedMonsterCurrentDamage";
+        element: ElementType;
+      };
+    }
+  | { type: "destroyMonster"; target: "selected" }
+  | { type: "destroyAllMonsters"; scope: "allMonsters" }
+  | { type: "captureStat"; source: "selected"; stat: "currentDamage" }
+  | {
+      type: "copyMonster";
+      source: "selected";
+      copyMode: "currentCombatStats";
+      initialCooldown: 1;
+      copyStatuses: false;
+    }
+  | {
+      type: "transformMonster";
+      target: "selected";
+      result: {
+        element: ElementType;
+        damage: number;
+        maxHealth: number;
+        currentHealth: number;
+        baseCooldown: number;
+        currentCooldown: number;
+        skill: null;
+      };
+    }
+  | {
+      type: "createTemporaryMonsterCopy";
+      source: "selected";
+      copyDamage: true;
+      copyElement: true;
+      maxHealth: number;
+      skill: null;
+      initialCooldown: 0;
+      expires: "endOfCurrentTurn";
+    };
 
 export type SpellDefinition = {
   id: string;
@@ -20,6 +187,7 @@ export type SpellDefinition = {
   baseSpeed?: number;
   baseEnergyPenalty: number;
   baseCooldownPenalty: number;
+  targeting?: SpellTargeting;
   effects: SpellEffect[];
 };
 
@@ -71,6 +239,13 @@ export type RingCombatInstance = {
   speed: number;
   socketCount: number;
   gems: GemCombatInstance[];
+  triggers?: RingBattleTrigger[];
+};
+
+export type RingBattleTrigger = {
+  event: "supportedRingKilledMonster";
+  source: TemporaryStatusSource;
+  effect: PersistentRingTriggerEffect;
 };
 
 export type GemCombatInstance = {
@@ -114,9 +289,53 @@ export type MonsterCombatInstance = {
   currentCooldown: number;
   speed: number;
   skill?: MonsterSkill;
+  grantedSkills?: GrantedMonsterSkill[];
   shieldActive: boolean;
+  shields?: ShieldInstance[];
   rageActive: boolean;
+  statuses?: TemporaryMonsterStatus[];
+  temporary?: {
+    source: TemporaryStatusSource;
+    expires: "endOfCurrentTurn";
+  };
 };
+
+export type GrantedMonsterSkill = {
+  skill: Exclude<MonsterSkill, "haste">;
+  source: TemporaryStatusSource;
+};
+
+export type ShieldInstance = {
+  source: { kind: "natural" } | ({ kind: "grantedSkill" | "temporary" } & TemporaryStatusSource);
+  expires?: "startOfOwnerNextTurn";
+};
+
+export type TemporaryStatusSource = {
+  playerId: string;
+  spellId: string;
+  gemId: string;
+};
+
+export type TemporaryMonsterStatus =
+  | {
+      type: "burn";
+      source: TemporaryStatusSource;
+      remainingOwnerTurns: number;
+      damage: number;
+      element: "fire";
+    }
+  | {
+      type: "shock" | "freeze";
+      source: TemporaryStatusSource;
+      remainingOwnerTurns: number;
+      expiresAfterCurrentOwnerTurn?: boolean;
+    }
+  | {
+      type: "lastBreath";
+      source: TemporaryStatusSource;
+      expires: "endOfCurrentTurn";
+      triggered?: boolean;
+    };
 
 export type MonsterSkill = "haste" | "multiHit" | "pierce" | "rage" | "shield" | "taunt";
 
@@ -195,10 +414,73 @@ export type BattleEvent =
       amount: number;
       element?: ElementType;
     }
-  | { type: "spellCast"; spellId: string; sourceGemId: string; targetId: TargetId }
+  | { type: "spellCast"; spellId: string; sourceGemId: string; targetId?: TargetId }
+  | {
+      type: "statusApplied";
+      monsterInstanceId: string;
+      status: TemporaryMonsterStatus["type"];
+      sourceSpellId: string;
+      remainingOwnerTurns?: number;
+      expires?: "endOfCurrentTurn";
+    }
+  | {
+      type: "statusRemoved";
+      monsterInstanceId: string;
+      status: TemporaryMonsterStatus["type"];
+      reason: "cleansed" | "expired";
+    }
   | { type: "monsterSummoned"; playerId: string; monsterInstanceId: string; monsterId: string }
   | { type: "monsterUsed"; playerId: string; monsterInstanceId: string; targetId: TargetId }
   | { type: "shieldBroken"; monsterInstanceId: string; sourceId: string }
+  | {
+      type: "skillGranted";
+      monsterInstanceId: string;
+      skill: Exclude<MonsterSkill, "haste">;
+      sourceSpellId: string;
+    }
+  | {
+      type: "shieldGranted";
+      monsterInstanceId: string;
+      sourceSpellId: string;
+      temporary: boolean;
+    }
+  | { type: "shieldExpired"; monsterInstanceId: string }
+  | { type: "randomTargetSelected"; sourceSpellId: string; targetId: string }
+  | {
+      type: "triggerRegistered";
+      sourceSpellId: string;
+      ringInstanceId: string;
+      event: RingBattleTrigger["event"] | "selectedMonsterDestroyedDuringCurrentRingAction";
+    }
+  | {
+      type: "triggerActivated";
+      sourceSpellId: string;
+      sourceId: string;
+      targetId?: string;
+    }
+  | { type: "ringDamageChanged"; ringInstanceId: string; from: number; to: number }
+  | { type: "monsterDamageChanged"; monsterInstanceId: string; from: number; to: number }
+  | { type: "energyRestored"; playerId: string; amount: number; current: number }
+  | {
+      type: "actionPierceOverflow";
+      sourceSpellId: string;
+      targetMonsterInstanceId: string;
+      targetHeroId: TargetId;
+      amount: number;
+    }
+  | {
+      type: "lastBreathTriggered";
+      monsterInstanceId: string;
+      targetId?: TargetId;
+    }
+  | {
+      type: "monsterCopied";
+      sourceMonsterInstanceId: string;
+      monsterInstanceId: string;
+      playerId: string;
+      temporary: boolean;
+    }
+  | { type: "monsterTransformed"; monsterInstanceId: string; sourceSpellId: string }
   | {
       type: "pierceOverflow";
       monsterInstanceId: string;
@@ -227,6 +509,7 @@ export type BattleState = BattleSetup & {
   actionHistory: BattleAction[];
   log: BattleEvent[];
   result: BattleResult | null;
+  randomCursor?: number;
 };
 
 export type BattleActionResult = {

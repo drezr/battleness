@@ -116,28 +116,18 @@ function chooseGreedyAction(state: BattleState): BattleAction {
 
     for (const targetId of targets) {
       const spellGems = ring.gems.filter((gem) => gem.enchantment?.type === "spell");
-      const spellTargets = [targetId];
-      const opponentHeroId = `${opponent.id}.hero` as TargetId;
-      if (targetId !== opponentHeroId && spellGems.length > 0) {
-        spellTargets.push(opponentHeroId);
-      }
-
-      for (const spellTarget of spellTargets) {
-        const enchantmentTargets = Object.fromEntries(
-          spellGems.map((gem) => [gem.id, spellTarget]),
-        );
-        candidates.push({
-          action: {
-            type: "useRing",
-            playerId: player.id,
-            ringInstanceId: ring.id,
-            targetId,
-            enchantmentTargets,
-          },
-          score: ringDamageScore(state, ring),
-          id: `${ring.id}:${spellTarget}`,
-        });
-      }
+      const enchantmentTargets = automatedSpellTargets(state, player.id, spellGems, targetId);
+      candidates.push({
+        action: {
+          type: "useRing",
+          playerId: player.id,
+          ringInstanceId: ring.id,
+          targetId,
+          enchantmentTargets,
+        },
+        score: ringDamageScore(state, ring),
+        id: ring.id,
+      });
     }
   }
 
@@ -156,6 +146,63 @@ function chooseGreedyAction(state: BattleState): BattleAction {
     type: "endTurn",
     playerId: player.id,
   };
+}
+
+function automatedSpellTargets(
+  state: BattleState,
+  playerId: string,
+  gems: BattleState["players"][number]["rings"][number]["gems"],
+  primaryTargetId: TargetId,
+): Record<string, TargetId> {
+  const targetIds = state.players.flatMap((player) => [
+    `${player.id}.hero` as TargetId,
+    ...player.monsters.map((monster) => monster.id as TargetId),
+  ]);
+  return Object.fromEntries(
+    gems.flatMap((gem) => {
+      if (gem.enchantment?.type !== "spell") return [];
+      const definition =
+        state.definitions.spells[gem.enchantment.resolvedDefinitionId ?? gem.enchantment.spellId];
+      if (!definition || definition.targeting?.selection === "none") return [];
+      const target = [primaryTargetId, ...targetIds.filter((id) => id !== primaryTargetId)].find(
+        (targetId) => automatedSpellTargetAllowed(state, playerId, definition, targetId),
+      );
+      return target ? [[gem.id, target] as const] : [];
+    }),
+  );
+}
+
+function automatedSpellTargetAllowed(
+  state: BattleState,
+  playerId: string,
+  spell: BattleState["definitions"]["spells"][string],
+  targetId: TargetId,
+): boolean {
+  const owner = state.players.find(
+    (player) =>
+      `${player.id}.hero` === targetId ||
+      player.monsters.some((monster) => monster.id === targetId),
+  );
+  if (!owner) return false;
+  const monster = owner.monsters.find((candidate) => candidate.id === targetId);
+  const allowed = (spell.targeting?.allowedTargets ?? ["anyCombatant"]).some((rule) => {
+    if (rule === "anyCombatant") return true;
+    if (!monster) return false;
+    if (rule === "anyMonster") return true;
+    return rule === "alliedMonster" ? owner.id === playerId : owner.id !== playerId;
+  });
+  if (!allowed || !spell.effects.some((effect) => effect.type === "dealDamage")) return allowed;
+  const taunts = owner.monsters.filter(
+    (candidate) =>
+      (candidate.skill === "taunt" ||
+        candidate.grantedSkills?.some((grant) => grant.skill === "taunt")) &&
+      !candidate.statuses?.some((status) => status.type === "freeze"),
+  );
+  return (
+    owner.id === playerId ||
+    taunts.length === 0 ||
+    taunts.some((candidate) => candidate.id === targetId)
+  );
 }
 
 function ringDamageScore(

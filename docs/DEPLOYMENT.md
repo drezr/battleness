@@ -323,7 +323,7 @@ logs only and do not alter permanent gameplay or market records.
 
 ## Production Item Cutover: Staging Gameplay Reset
 
-The `production-items-v1` cutover intentionally keeps OAuth accounts, player identity/profile
+The `production-items-v2` cutover intentionally keeps OAuth accounts, player identity/profile
 fields, sessions, preferences, and registered content releases while removing staging gameplay
 state. The guarded command refuses any database whose URL path is not exactly
 `battleness_staging`. It does not run as part of deployment.
@@ -344,7 +344,7 @@ pnpm --filter @battleness/web staging:reset-gameplay
 
 ```sh
 BATTLENESS_STAGING_BACKUP_ID="verified-backup-identifier" \
-BATTLENESS_STAGING_RESET_CONFIRMATION="RESET battleness_staging FOR production-items-v1" \
+BATTLENESS_STAGING_RESET_CONFIRMATION="RESET battleness_staging FOR production-items-v2" \
 pnpm --filter @battleness/web staging:reset-gameplay -- --apply
 ```
 
@@ -352,7 +352,7 @@ The transaction clears inventory, sockets/enchantments, equipment/loadouts, mate
 campaign progress, battles and queues, ranked state/seasons, cosmetics, and both markets. It resets
 player experience, credits, item sequence, active loadout, and onboarding version so the next
 authenticated request grants the v2 starter set. Restart the service, verify health, sign in with a
-preserved account, and confirm that `ashenLoop`, `emberShard`, and `firebolt` are granted exactly
+preserved account, and confirm that `ashenLoop`, `emberShard`, and `burnI` are granted exactly
 once. If any verification fails, keep the service stopped and restore the recorded backup.
 
 ## Current OVH Bootstrap Status

@@ -68,7 +68,7 @@ export function cooldownReady(
 export function battleTargets(battle: LiveBattleState): LiveBattleTarget[] {
   const opponentTaunts = new Set(
     battle.opponent.monsters
-      .filter((monster) => monster.skill === "taunt")
+      .filter((monster) => monster.skills.includes("taunt") && !monster.statuses.includes("freeze"))
       .map((monster) => monster.id),
   );
   const hasOpponentTaunt = opponentTaunts.size > 0;
@@ -165,9 +165,27 @@ export function presentBattleEvent(
         amount: event.amount,
       });
     case "spellCast":
-      return presentation("spellCast", "action", {
-        source: label(event.spellId),
-        target: label(event.targetId),
+      return event.targetId
+        ? presentation("spellCast", "action", {
+            source: label(event.spellId),
+            target: label(event.targetId),
+          })
+        : presentation("spellCastNoTarget", "action", { source: label(event.spellId) });
+    case "statusApplied":
+      return event.expires === "endOfCurrentTurn"
+        ? presentation("statusAppliedUntilEndOfTurn", "status", {
+            monster: label(event.monsterInstanceId),
+            status: event.status,
+          })
+        : presentation("statusApplied", "status", {
+            monster: label(event.monsterInstanceId),
+            status: event.status,
+            turns: event.remainingOwnerTurns ?? 0,
+          });
+    case "statusRemoved":
+      return presentation("statusRemoved", "status", {
+        monster: label(event.monsterInstanceId),
+        status: event.status,
       });
     case "monsterSummoned":
       return presentation("monsterSummoned", "action", {
@@ -181,6 +199,70 @@ export function presentBattleEvent(
       });
     case "shieldBroken":
       return presentation("shieldBroken", "status", {
+        monster: label(event.monsterInstanceId),
+      });
+    case "skillGranted":
+      return presentation("skillGranted", "status", {
+        monster: label(event.monsterInstanceId),
+        skill: event.skill,
+      });
+    case "shieldGranted":
+      return presentation("shieldGranted", "status", {
+        monster: label(event.monsterInstanceId),
+      });
+    case "shieldExpired":
+      return presentation("shieldExpired", "status", {
+        monster: label(event.monsterInstanceId),
+      });
+    case "randomTargetSelected":
+      return presentation("randomTargetSelected", "status", {
+        target: label(event.targetId),
+      });
+    case "triggerRegistered":
+      return presentation("triggerRegistered", "status", {
+        source: label(event.sourceSpellId),
+        ring: label(event.ringInstanceId),
+      });
+    case "triggerActivated":
+      return presentation("triggerActivated", "status", {
+        source: label(event.sourceSpellId),
+      });
+    case "ringDamageChanged":
+      return presentation("ringDamageChanged", "status", {
+        ring: label(event.ringInstanceId),
+        from: event.from,
+        to: event.to,
+      });
+    case "monsterDamageChanged":
+      return presentation("monsterDamageChanged", "status", {
+        monster: label(event.monsterInstanceId),
+        from: event.from,
+        to: event.to,
+      });
+    case "energyRestored":
+      return presentation("energyRestored", "status", {
+        player: label(event.playerId),
+        amount: event.amount,
+        current: event.current,
+      });
+    case "actionPierceOverflow":
+      return presentation("actionPierceOverflow", "damage", {
+        source: label(event.sourceSpellId),
+        target: label(event.targetHeroId),
+        amount: event.amount,
+      });
+    case "lastBreathTriggered":
+      return presentation("lastBreathTriggered", "status", {
+        monster: label(event.monsterInstanceId),
+        target: event.targetId ? label(event.targetId) : "-",
+      });
+    case "monsterCopied":
+      return presentation(event.temporary ? "monsterCopiedTemporary" : "monsterCopied", "action", {
+        source: label(event.sourceMonsterInstanceId),
+        monster: label(event.monsterInstanceId),
+      });
+    case "monsterTransformed":
+      return presentation("monsterTransformed", "status", {
         monster: label(event.monsterInstanceId),
       });
     case "pierceOverflow":
@@ -235,11 +317,38 @@ export function battleResolutionEffects(events: BattleEvent[]): LiveBattleResolu
       case "shieldBroken":
         targetEffect(targets, event.monsterInstanceId).statuses.add("shieldBroken");
         break;
+      case "skillGranted":
+        targetEffect(targets, event.monsterInstanceId).statuses.add(event.skill);
+        break;
+      case "shieldGranted":
+        targetEffect(targets, event.monsterInstanceId).statuses.add("shieldGranted");
+        break;
+      case "shieldExpired":
+        targetEffect(targets, event.monsterInstanceId).statuses.add("shieldExpired");
+        break;
+      case "monsterDamageChanged":
+        targetEffect(targets, event.monsterInstanceId).statuses.add("damageChanged");
+        break;
+      case "lastBreathTriggered":
+        targetEffect(targets, event.monsterInstanceId).statuses.add("lastBreath");
+        break;
+      case "monsterCopied":
+        targetEffect(targets, event.monsterInstanceId).statuses.add("copied");
+        break;
+      case "monsterTransformed":
+        targetEffect(targets, event.monsterInstanceId).statuses.add("transformed");
+        break;
       case "rageActivated":
         targetEffect(targets, event.monsterInstanceId).statuses.add("rageActivated");
         break;
       case "hasteActivated":
         targetEffect(targets, event.monsterInstanceId).statuses.add("hasteActivated");
+        break;
+      case "statusApplied":
+        targetEffect(targets, event.monsterInstanceId).statuses.add(event.status);
+        break;
+      case "statusRemoved":
+        targetEffect(targets, event.monsterInstanceId).statuses.add(`${event.status}Removed`);
         break;
       case "monsterDestroyed":
         targetEffect(targets, event.monsterInstanceId).statuses.add("monsterDestroyed");

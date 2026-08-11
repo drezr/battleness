@@ -46,6 +46,10 @@
           </div>
         </div>
 
+        <p v-if="item.description && item.type !== 'material'" class="muted">
+          {{ localizedDescription }}
+        </p>
+
         <dl class="summary-grid item-detail-grid">
           <div v-if="hasNumber(item.level)" class="stat">
             <dt>{{ t("common.level") }}</dt>
@@ -114,6 +118,21 @@
               <dd>{{ stat.value }}</dd>
             </div>
           </dl>
+        </section>
+
+        <section v-if="item.targeting" class="item-detail-section">
+          <h3>{{ t("itemDetail.targeting") }}</h3>
+          <p class="muted">
+            {{ t(`itemDetail.targetSelection.${item.targeting.selection}`) }}
+            <template v-if="item.targeting.allowedTargets.length > 0">
+              —
+              {{
+                item.targeting.allowedTargets
+                  .map((target) => t(`itemDetail.target.${target}`))
+                  .join(", ")
+              }}
+            </template>
+          </p>
         </section>
 
         <section v-if="previewStats.length > 0" class="item-detail-section">
@@ -297,6 +316,10 @@ type DetailItem = {
   baseCooldown?: number;
   baseSpeed?: number;
   skill?: string | null;
+  targeting?: {
+    selection: "none" | "one";
+    allowedTargets: string[];
+  };
   stats?: DetailStat[];
   gems?: DetailGem[];
   enchantment?: DetailGem["enchantment"];

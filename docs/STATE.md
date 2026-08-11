@@ -4,30 +4,51 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
-- Content version `production-items-v1` is now active: 54 rings, 54 gems, 69 monsters, the six
-  existing test spells, 70 materials, and 183 stable recipes. Runtime definitions, locales,
+- The `production-items-v2` cutover is active: all 42 approved spells, 219 total recipes, localized
+  English/French names and gameplay descriptions, and the packed spell atlas are used by both apps.
+  Rules version `production-spells-v1` records the expanded command and replay contract. The six
+  retired spell definitions, recipes, names, and grid artwork are archived under
+  `packages/content/src/legacy/production-items-v1/`.
+- Account onboarding version 3 grants `ashenLoop`, `emberShard`, and `burnI`. Existing owned copies
+  of the six retired spells are deterministically mapped to supported production definitions before
+  player-state validation. Dev Lab persistence uses v3 keys and clears incompatible v1/v2 data.
+- Live ring actions collect additional spell targets per socketed gem when the primary ring target
+  does not satisfy a spell rule. The server validates the complete atomic `enchantmentTargets` map
+  before mutation; direct spell damage respects Taunt while non-damage hostile effects do not.
+- The production spell gameplay contract is approved for `production-items-v2`. The existing
+  per-gem `enchantmentTargets` command field is retained; action-scoped preparation effects,
+  complete owner-turn status timing, multiple granted skills, same-turn cooldown-zero reuse,
+  targeted Taunt behavior, direct-damage scaling, source-aware Shields, destruction triggers, and
+  copy/transformation inheritance now have explicit rules in `docs/PROJECT.md`.
+- The inactive Slice A engine foundation supports strictly typed and Zod-validated targeting,
+  Burn, Shock, Freeze, all-monster status iteration, enemy-area damage, immediate cooldown changes,
+  and Cleanse. Battle state stores source-aware temporary statuses, reapplication keeps the longer
+  remaining duration, Burn ticks before cooldowns, Freeze disables Taunt, and structured status
+  events feed both Dev Lab and Game App presentation. One scenario covers each of the 17 Slice A
+  spells, with additional Shield, reapplication, expiration, Taunt, snapshot, and cleanse tests.
+  This foundation is now active through the production cutover.
+- Content version `production-items-v2` is active: 54 rings, 54 gems, 69 monsters, 42 production
+  spells, 70 materials, and 219 stable recipes. Runtime definitions, locales,
   fixtures, campaign starters, onboarding, balance reports, and server equipment views use the
   final IDs. The former `prototype-6` definitions and grid artwork remain only under explicit
   `legacy/prototype-6` archive paths.
 - The production item asset bible is a content-authoring source rather than documentation. It lives
-  at `packages/content/sources/production-items-v1.asset-bible.json`; generation and atlas import
-  scripts resolve it relative to the content package. It now covers all 253 active definitions,
-  including individualized asset direction for the 70 materials and six retained test spells;
-  their production atlases remain pending.
-- TexturePacker atlases for rings, gems, and monsters are imported from validated JSON metadata into
-  `packages/content/src/atlases/` and served as `rings.png`, `gems.png`, and `monsters.png` by both
-  apps. The shared renderer supports trimmed and rotated frames and validates exact definition
-  coverage. Spells and materials continue using their existing test grid atlases.
+  at `packages/content/sources/production-items-v2.asset-bible.json`; generation and atlas import
+  scripts resolve it relative to the content package. It covers all 289 active definitions and its
+  atlas manifest records every item family, including spells, as imported.
+- TexturePacker atlases for rings, gems, monsters, and materials are imported from validated JSON
+  metadata into `packages/content/src/atlases/` and served by both apps. The shared renderer supports
+  trimmed and rotated frames and validates exact definition coverage, including the 42 spells.
 - Gem and monster energy/cooldown penalties support tenths. A ring sums every gem and enchantment
   contribution using fixed-point tenths and floors the final total once; hero speed includes rings,
-  gems, and monster/spell enchantments. Current spells declare speed `0` until their production
-  definitions and artwork are created.
+  gems, and monster/spell enchantments. Current test spells declare speed `0`; the separate
+  production spell proposal remains inactive until its definitions and effects are implemented.
 - Production recipes consume exactly three material units and aggregate repeated materials. Every
   active object has one recipe, and ring, gem, and monster recipes have unique material multisets
   within their item type. Development starting stock is three units per material.
-- Dev Lab persistence uses v2 keys. Incompatible v1 inventory, loadout, and preset data is removed
-  at startup with an explicit UI notice. Account onboarding is version 2 and grants `ashenLoop`,
-  `emberShard`, and the retained test `firebolt` spell.
+- Dev Lab persistence uses v3 keys. Incompatible v1/v2 inventory, loadout, and preset data is removed
+  at startup with an explicit UI notice. Account onboarding is version 3 and grants `ashenLoop`,
+  `emberShard`, and `burnI`.
 - A guarded staging-only gameplay reset command is available as
   `pnpm --filter @battleness/web staging:reset-gameplay -- --apply`. It requires the exact staging
   database name, a verified backup identifier, and explicit confirmation; it preserves accounts,
@@ -472,6 +493,80 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Change Log
 
+### 2026-08-11
+
+- Approved and documented the production spell collection gameplay contracts, including the global
+  `production-items-v2` cutover, `burnI` onboarding replacement, existing per-gem target map,
+  preparation-phase exceptions, status timing, granted-skill composition, cooldown-zero reuse,
+  Taunt scope, damage scaling, Shield instances, destruction triggers, and copy/transformation
+  inheritance.
+- Added typed engine and strict Zod unions for Slice A targeting and effects while retaining legacy
+  direct-damage compatibility and fixed-point decimal spell penalties.
+- Implemented source-aware Burn, Shock, and Freeze state; longer-duration-only reapplication; Burn
+  start-turn ticks; full owner-turn Shock/Freeze restrictions; Freeze-based Taunt suppression;
+  stable-snapshot area status and damage resolution; Rime Lock cooldown mutation; and Cleanse.
+- Added optional-target spell events plus structured status events and localized Dev Lab/Game App
+  presentation. Added exact dormant-catalogue schema coverage, one engine scenario per Slice A spell,
+  and focused ordering, Shield, Taunt, reapplication, cleanse, and area-resolution tests. The active
+  definitions and public spell atlas were intentionally not changed.
+- Added the inactive Slice B contracts and engine behavior for permanent battle-granted Pierce,
+  Rage, MultiHit, Taunt, and Shield; temporary Crystal Skin Shields; selected and board-wide cooldown
+  setters; and deterministic logged Refresh selection. Natural skills remain distinct from
+  source-attributed grants, Shield instances consume one source per damage instance, start-turn
+  Crystal Skin expiration precedes Burn, and cooldown zero permits immediate same-turn reuse.
+- Extended Dev Lab and Game App event presentation plus live Taunt projection for granted skills and
+  Freeze suppression. Added exact catalogue-schema coverage, one scenario for every Slice B spell,
+  and interaction tests for duplicates, immediate Rage, functional granted attack skills, Taunt,
+  source-aware Shields, expiration ordering, and repeated monster/ring use. Active definitions and
+  the public spell atlas remain unchanged.
+- Added the inactive Slice C contracts and engine behavior for Damage/Energy/Cooldown on Kill,
+  Pierce, Bloodflame, Funeral Brand, and Last Breath. Persistent ring triggers retain spell/gem/player
+  provenance, register once, begin affecting later ring uses, and settle only kills from initial
+  ring-and-gem damage. Pierce and Funeral Brand are armed in an ephemeral pre-damage action context;
+  Funeral Brand remains armed through later sockets.
+- Centralized damage-caused monster destruction so Last Breath can deterministically perform one
+  legal final attack before Funeral Brand settlement and removal without recursive self-triggering.
+  Added structured localized trigger, stat-change, energy-restoration, action-Pierce, and Last Breath
+  events plus exact schema and engine scenarios for all seven Slice C spells and ordering tests for
+  Shield, Rage, Taunt, later sockets, spell-only kills, and first-turn hero protection. Active spell
+  definitions and the public atlas remain unchanged.
+- Added the inactive Slice D contracts and engine behavior for Devotion, Sacrifice, Destruction,
+  Chain Explosion, Copy, Transmute, Arc Relay, and Zerakai Protocol. Direct destruction bypasses
+  Shield while reusing Last Breath and Funeral Brand settlement; captured damage remains unscaled;
+  all random recipients/targets are selected deterministically and logged.
+- Copy now creates a new allied runtime identity with current health/damage, resolved cooldown,
+  natural and granted permanent skills, fresh Shield state, and no statuses or activated Rage.
+  Transmute preserves controller and board identity while replacing all other combat state with the
+  authored 2/2 Electric result. Zerakai Protocol creates a ready, one-health, skillless temporary
+  copy whose unique identity remains reserved after direct end-of-turn destruction. The live battle
+  projection exposes all granted skills and temporary-monster state.
+- Added exact dormant-catalogue schema coverage and one engine scenario for each Slice D spell, plus
+  focused coverage for deterministic replay selection, Shield bypass, simultaneous Destruction,
+  Last Breath and Funeral Brand on direct destruction, captured area damage, board capacity, copy
+  inheritance, Transmute replacement, Arc Relay after primary death, and temporary-copy reuse and
+  expiry. All 42 production spells now have inactive engine scenarios; active definitions and the
+  public spell atlas remain unchanged pending the atomic `production-items-v2` cutover.
+
+### 2026-08-10
+
+- Replaced the 10-by-7 test material grid with the supplied 70-frame TexturePacker atlas in both
+  applications. The importer validates exact material IDs and 300-by-300 logical source canvases,
+  normalizes the image name, and supports targeted category imports. The shared renderer now handles
+  all trimmed and rotated material frames through `packages/content/src/atlases/materials.json`.
+- Removed both tracked `materials-atlas.png` grid copies after their `materials.png` replacements
+  were verified. The deleted test assets remain recoverable from Git history.
+- Updated the production asset bible date and added a `productionAtlases` manifest with frame counts,
+  dimensions, metadata paths, and import status. Rings, gems, monsters, and materials are imported;
+  the production spell atlas is stored separately as produced but inactive.
+- Preserved the supplied 42-spell proposal as
+  `packages/content/sources/production-spells-v1.json` and its normalized TexturePacker atlas under
+  `assets/spells/atlas/`. Automated coverage validates exact catalogue/frame/source-image coverage,
+  PNG dimensions, rotated/trimmed bounds, and the deliberate absence of public activation.
+- Added `docs/SPELLS_IMPLEMENTATION_INSTRUCTIONS.md` as the complete handoff for a separate spell
+  implementation task. It documents the target-selection recommendation, typed effect architecture,
+  dependency-ordered spell slices, content/atlas cutover, persistence migration, testing gates, and
+  definition of done.
+
 ### 2026-08-06
 
 - Generated all 42 production spell source images from the supplied
@@ -490,7 +585,7 @@ This file records modifications made to the project during agent-assisted work.
   square canvas with at least a 5.9% safe margin, and passed exact-ID, alpha-corner, framing, and
   visual contact-sheet checks. No material atlas was created.
 - Moved the production item asset bible from `docs/` to
-  `packages/content/sources/production-items-v1.asset-bible.json` and updated both content-authoring
+  `packages/content/sources/production-items-v2.asset-bible.json` and updated both content-authoring
   scripts and the project handoff reference to use the package-owned source path.
 - Added all 70 active materials and six retained direct-damage spells to the production asset bible.
   Every entry preserves its runtime data and has an individualized visual description, generation

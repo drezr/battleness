@@ -1,98 +1,997 @@
 [
   {
-    "id": "firebolt",
-    "nameKey": "spell.firebolt.name",
+    "id": "burnI",
+    "nameKey": "spell.burnI.name",
+    "descriptionKey": "spell.burnI.description",
     "element": "fire",
     "rarity": "common",
-    "baseEnergyPenalty": 1,
-    "baseCooldownPenalty": 0,
+    "baseEnergyPenalty": 0.3,
+    "baseCooldownPenalty": 0.4,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
     "effects": [
       {
-        "type": "dealDamage",
-        "amount": 4,
-        "target": "any"
+        "type": "applyStatus",
+        "status": "burn",
+        "damage": 3,
+        "durationOwnerTurns": 1,
+        "tickTiming": "startOfTargetControllerTurn"
       }
-    ],
-    "baseSpeed": 0
+    ]
   },
   {
-    "id": "solarFlare",
-    "nameKey": "spell.solarFlare.name",
+    "id": "burnII",
+    "nameKey": "spell.burnII.name",
+    "descriptionKey": "spell.burnII.description",
+    "element": "fire",
+    "rarity": "refined",
+    "baseEnergyPenalty": 0.5,
+    "baseCooldownPenalty": 0.6,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
+    "effects": [
+      {
+        "type": "applyStatus",
+        "status": "burn",
+        "damage": 3,
+        "durationOwnerTurns": 2,
+        "tickTiming": "startOfTargetControllerTurn"
+      }
+    ]
+  },
+  {
+    "id": "burnIII",
+    "nameKey": "spell.burnIII.name",
+    "descriptionKey": "spell.burnIII.description",
     "element": "fire",
     "rarity": "rare",
-    "baseEnergyPenalty": 1,
-    "baseCooldownPenalty": 2,
+    "baseEnergyPenalty": 0.7,
+    "baseCooldownPenalty": 0.8,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
     "effects": [
       {
-        "type": "dealDamage",
-        "amount": 7,
-        "target": "any"
+        "type": "applyStatus",
+        "status": "burn",
+        "damage": 3,
+        "durationOwnerTurns": 3,
+        "tickTiming": "startOfTargetControllerTurn"
       }
-    ],
-    "baseSpeed": 0
+    ]
   },
   {
-    "id": "spark",
-    "nameKey": "spell.spark.name",
-    "element": "electric",
-    "rarity": "common",
-    "baseEnergyPenalty": 0,
-    "baseCooldownPenalty": 0,
+    "id": "carbonize",
+    "nameKey": "spell.carbonize.name",
+    "descriptionKey": "spell.carbonize.description",
+    "element": "fire",
+    "rarity": "refined",
+    "baseEnergyPenalty": 0.7,
+    "baseCooldownPenalty": 0.8,
+    "baseSpeed": 0,
+    "targeting": {
+      "selection": "none",
+      "allowedTargets": []
+    },
+    "effects": [
+      {
+        "type": "forEachMonster",
+        "scope": "allMonsters",
+        "effect": {
+          "type": "applyStatus",
+          "status": "burn",
+          "damage": 3,
+          "durationOwnerTurns": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "giftPierce",
+    "nameKey": "spell.giftPierce.name",
+    "descriptionKey": "spell.giftPierce.description",
+    "element": "fire",
+    "rarity": "refined",
+    "baseEnergyPenalty": 0.5,
+    "baseCooldownPenalty": 0.7,
+    "baseSpeed": 2,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
+    "effects": [
+      {
+        "type": "grantSkill",
+        "skill": "pierce",
+        "duration": "untilMonsterDestroyed",
+        "duplicateBehavior": "noEffect"
+      }
+    ]
+  },
+  {
+    "id": "damageOnKill",
+    "nameKey": "spell.damageOnKill.name",
+    "descriptionKey": "spell.damageOnKill.description",
+    "element": "fire",
+    "rarity": "rare",
+    "baseEnergyPenalty": 0.6,
+    "baseCooldownPenalty": 0.8,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "none",
+      "allowedTargets": []
+    },
+    "effects": [
+      {
+        "type": "registerTrigger",
+        "event": "supportedRingKilledMonster",
+        "effect": {
+          "type": "modifySupportedRingDamage",
+          "amount": 2,
+          "duration": "battle"
+        }
+      }
+    ]
+  },
+  {
+    "id": "devotion",
+    "nameKey": "spell.devotion.name",
+    "descriptionKey": "spell.devotion.description",
+    "element": "fire",
+    "rarity": "rare",
+    "baseEnergyPenalty": 0.7,
+    "baseCooldownPenalty": 0.8,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["alliedMonster"]
+    },
+    "effects": [
+      {
+        "type": "destroyMonster",
+        "target": "selected"
+      },
+      {
+        "type": "randomTarget",
+        "scope": "otherAlliedMonsters",
+        "onSuccess": {
+          "type": "modifyMonsterDamage",
+          "amountFrom": "destroyedTargetCurrentDamage",
+          "duration": "battle"
+        }
+      }
+    ]
+  },
+  {
+    "id": "pierceLegacy",
+    "nameKey": "spell.pierceLegacy.name",
+    "descriptionKey": "spell.pierceLegacy.description",
+    "element": "fire",
+    "rarity": "epic",
+    "baseEnergyPenalty": 0.8,
+    "baseCooldownPenalty": 0.9,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["enemyMonster"]
+    },
+    "effects": [
+      {
+        "type": "conditionalPierceForAction",
+        "target": "selectedEnemyMonster",
+        "source": "ringAndGemDamage"
+      }
+    ]
+  },
+  {
+    "id": "destruction",
+    "nameKey": "spell.destruction.name",
+    "descriptionKey": "spell.destruction.description",
+    "element": "fire",
+    "rarity": "epic",
+    "baseEnergyPenalty": 1,
+    "baseCooldownPenalty": 1,
+    "baseSpeed": 0,
+    "targeting": {
+      "selection": "none",
+      "allowedTargets": []
+    },
+    "effects": [
+      {
+        "type": "destroyAllMonsters",
+        "scope": "allMonsters"
+      }
+    ]
+  },
+  {
+    "id": "giftRage",
+    "nameKey": "spell.giftRage.name",
+    "descriptionKey": "spell.giftRage.description",
+    "element": "fire",
+    "rarity": "refined",
+    "baseEnergyPenalty": 0.4,
+    "baseCooldownPenalty": 0.6,
+    "baseSpeed": 2,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
+    "effects": [
+      {
+        "type": "grantSkill",
+        "skill": "rage",
+        "duration": "untilMonsterDestroyed",
+        "duplicateBehavior": "noEffect"
+      }
+    ]
+  },
+  {
+    "id": "bloodflame",
+    "nameKey": "spell.bloodflame.name",
+    "descriptionKey": "spell.bloodflame.description",
+    "element": "fire",
+    "rarity": "refined",
+    "baseEnergyPenalty": 0.5,
+    "baseCooldownPenalty": 0.7,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["alliedMonster"]
+    },
     "effects": [
       {
         "type": "dealDamage",
         "amount": 2,
-        "target": "any"
+        "element": "fire",
+        "target": "selected"
+      },
+      {
+        "type": "ifTargetSurvives",
+        "effect": {
+          "type": "modifyMonsterDamage",
+          "amount": 2,
+          "duration": "battle"
+        }
       }
-    ],
-    "baseSpeed": 0
+    ]
   },
   {
-    "id": "arcPulse",
-    "nameKey": "spell.arcPulse.name",
+    "id": "chainExplosion",
+    "nameKey": "spell.chainExplosion.name",
+    "descriptionKey": "spell.chainExplosion.description",
+    "element": "fire",
+    "rarity": "rare",
+    "baseEnergyPenalty": 0.7,
+    "baseCooldownPenalty": 0.9,
+    "baseSpeed": 0,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["alliedMonster"]
+    },
+    "effects": [
+      {
+        "type": "captureStat",
+        "source": "selected",
+        "stat": "currentDamage"
+      },
+      {
+        "type": "destroyMonster",
+        "target": "selected"
+      },
+      {
+        "type": "dealDamageToAll",
+        "scope": "enemyMonsters",
+        "amountFromCapturedStat": "currentDamage",
+        "element": "fire"
+      }
+    ]
+  },
+  {
+    "id": "funeralBrand",
+    "nameKey": "spell.funeralBrand.name",
+    "descriptionKey": "spell.funeralBrand.description",
+    "element": "fire",
+    "rarity": "rare",
+    "baseEnergyPenalty": 0.6,
+    "baseCooldownPenalty": 0.8,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["enemyMonster"]
+    },
+    "effects": [
+      {
+        "type": "registerActionScopedTrigger",
+        "event": "selectedMonsterDestroyedDuringCurrentRingAction",
+        "effect": {
+          "type": "dealDamageToControllingHero",
+          "amountFrom": "destroyedMonsterCurrentDamage",
+          "element": "fire"
+        }
+      }
+    ]
+  },
+  {
+    "id": "lastBreath",
+    "nameKey": "spell.lastBreath.name",
+    "descriptionKey": "spell.lastBreath.description",
+    "element": "fire",
+    "rarity": "epic",
+    "baseEnergyPenalty": 0.9,
+    "baseCooldownPenalty": 1,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["alliedMonster"]
+    },
+    "effects": [
+      {
+        "type": "applyStatus",
+        "status": "lastBreath",
+        "duration": "endOfCurrentTurn",
+        "onDestroy": {
+          "type": "attackRandomLegalEnemyBeforeRemoval",
+          "ignoreCurrentCooldown": true
+        }
+      }
+    ]
+  },
+  {
+    "id": "shockI",
+    "nameKey": "spell.shockI.name",
+    "descriptionKey": "spell.shockI.description",
+    "element": "electric",
+    "rarity": "common",
+    "baseEnergyPenalty": 0.2,
+    "baseCooldownPenalty": 0.3,
+    "baseSpeed": 4,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
+    "effects": [
+      {
+        "type": "applyStatus",
+        "status": "shock",
+        "durationOwnerTurns": 1
+      }
+    ]
+  },
+  {
+    "id": "shockII",
+    "nameKey": "spell.shockII.name",
+    "descriptionKey": "spell.shockII.description",
+    "element": "electric",
+    "rarity": "refined",
+    "baseEnergyPenalty": 0.3,
+    "baseCooldownPenalty": 0.4,
+    "baseSpeed": 7,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
+    "effects": [
+      {
+        "type": "applyStatus",
+        "status": "shock",
+        "durationOwnerTurns": 2
+      }
+    ]
+  },
+  {
+    "id": "shockIII",
+    "nameKey": "spell.shockIII.name",
+    "descriptionKey": "spell.shockIII.description",
     "element": "electric",
     "rarity": "rare",
-    "baseEnergyPenalty": 0,
+    "baseEnergyPenalty": 0.5,
+    "baseCooldownPenalty": 0.6,
+    "baseSpeed": 10,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
+    "effects": [
+      {
+        "type": "applyStatus",
+        "status": "shock",
+        "durationOwnerTurns": 3
+      }
+    ]
+  },
+  {
+    "id": "electroshock",
+    "nameKey": "spell.electroshock.name",
+    "descriptionKey": "spell.electroshock.description",
+    "element": "electric",
+    "rarity": "refined",
+    "baseEnergyPenalty": 0.5,
+    "baseCooldownPenalty": 0.6,
+    "baseSpeed": 8,
+    "targeting": {
+      "selection": "none",
+      "allowedTargets": []
+    },
+    "effects": [
+      {
+        "type": "forEachMonster",
+        "scope": "allMonsters",
+        "effect": {
+          "type": "applyStatus",
+          "status": "shock",
+          "durationOwnerTurns": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "energyOnKill",
+    "nameKey": "spell.energyOnKill.name",
+    "descriptionKey": "spell.energyOnKill.description",
+    "element": "electric",
+    "rarity": "rare",
+    "baseEnergyPenalty": 0.3,
+    "baseCooldownPenalty": 0.5,
+    "baseSpeed": 9,
+    "targeting": {
+      "selection": "none",
+      "allowedTargets": []
+    },
+    "effects": [
+      {
+        "type": "registerTrigger",
+        "event": "supportedRingKilledMonster",
+        "effect": {
+          "type": "restoreCurrentTurnEnergy",
+          "amount": 1,
+          "cap": "currentTurnMaximum"
+        }
+      }
+    ]
+  },
+  {
+    "id": "sacrifice",
+    "nameKey": "spell.sacrifice.name",
+    "descriptionKey": "spell.sacrifice.description",
+    "element": "electric",
+    "rarity": "epic",
+    "baseEnergyPenalty": 0.8,
     "baseCooldownPenalty": 1,
+    "baseSpeed": 10,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["alliedMonster"]
+    },
+    "effects": [
+      {
+        "type": "destroyMonster",
+        "target": "selected"
+      },
+      {
+        "type": "randomTarget",
+        "scope": "enemyMonsters",
+        "onSuccess": {
+          "type": "destroyMonster",
+          "target": "random"
+        }
+      }
+    ]
+  },
+  {
+    "id": "copy",
+    "nameKey": "spell.copy.name",
+    "descriptionKey": "spell.copy.description",
+    "element": "electric",
+    "rarity": "epic",
+    "baseEnergyPenalty": 0.8,
+    "baseCooldownPenalty": 0.9,
+    "baseSpeed": 11,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
+    "effects": [
+      {
+        "type": "copyMonster",
+        "source": "selected",
+        "copyMode": "currentCombatStats",
+        "initialCooldown": 1,
+        "copyStatuses": false
+      }
+    ]
+  },
+  {
+    "id": "transmute",
+    "nameKey": "spell.transmute.name",
+    "descriptionKey": "spell.transmute.description",
+    "element": "electric",
+    "rarity": "common",
+    "baseEnergyPenalty": 0.4,
+    "baseCooldownPenalty": 0.5,
+    "baseSpeed": 4,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
+    "effects": [
+      {
+        "type": "transformMonster",
+        "target": "selected",
+        "result": {
+          "element": "electric",
+          "damage": 2,
+          "maxHealth": 2,
+          "currentHealth": 2,
+          "baseCooldown": 1,
+          "currentCooldown": 1,
+          "skill": null
+        }
+      }
+    ]
+  },
+  {
+    "id": "arcRelay",
+    "nameKey": "spell.arcRelay.name",
+    "descriptionKey": "spell.arcRelay.description",
+    "element": "electric",
+    "rarity": "common",
+    "baseEnergyPenalty": 0.2,
+    "baseCooldownPenalty": 0.3,
+    "baseSpeed": 5,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
     "effects": [
       {
         "type": "dealDamage",
-        "amount": 3,
-        "target": "any"
+        "amount": 2,
+        "element": "electric",
+        "target": "selected"
+      },
+      {
+        "type": "randomTarget",
+        "scope": "otherMonstersControlledBySelectedTargetOwner",
+        "onSuccess": {
+          "type": "dealDamage",
+          "amount": 1,
+          "element": "electric"
+        }
       }
-    ],
-    "baseSpeed": 0
+    ]
   },
   {
-    "id": "iceShard",
-    "nameKey": "spell.iceShard.name",
+    "id": "quickPulse",
+    "nameKey": "spell.quickPulse.name",
+    "descriptionKey": "spell.quickPulse.description",
+    "element": "electric",
+    "rarity": "refined",
+    "baseEnergyPenalty": 0.2,
+    "baseCooldownPenalty": 0.4,
+    "baseSpeed": 7,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["alliedMonster"]
+    },
+    "effects": [
+      {
+        "type": "setCurrentCooldown",
+        "target": "selected",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": "shortCircuit",
+    "nameKey": "spell.shortCircuit.name",
+    "descriptionKey": "spell.shortCircuit.description",
+    "element": "electric",
+    "rarity": "rare",
+    "baseEnergyPenalty": 0.4,
+    "baseCooldownPenalty": 0.6,
+    "baseSpeed": 8,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["enemyMonster"]
+    },
+    "effects": [
+      {
+        "type": "setCurrentCooldown",
+        "target": "selected",
+        "valueFrom": "resolvedBaseCooldown"
+      }
+    ]
+  },
+  {
+    "id": "zerakaiProtocol",
+    "nameKey": "spell.zerakaiProtocol.name",
+    "descriptionKey": "spell.zerakaiProtocol.description",
+    "element": "electric",
+    "rarity": "rare",
+    "baseEnergyPenalty": 0.5,
+    "baseCooldownPenalty": 0.7,
+    "baseSpeed": 9,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["alliedMonster"]
+    },
+    "effects": [
+      {
+        "type": "createTemporaryMonsterCopy",
+        "source": "selected",
+        "copyDamage": true,
+        "copyElement": true,
+        "maxHealth": 1,
+        "skill": null,
+        "initialCooldown": 0,
+        "expires": "endOfCurrentTurn"
+      }
+    ]
+  },
+  {
+    "id": "zeroInterval",
+    "nameKey": "spell.zeroInterval.name",
+    "descriptionKey": "spell.zeroInterval.description",
+    "element": "electric",
+    "rarity": "epic",
+    "baseEnergyPenalty": 0.8,
+    "baseCooldownPenalty": 1,
+    "baseSpeed": 12,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["alliedMonster"]
+    },
+    "effects": [
+      {
+        "type": "setCurrentCooldownForAll",
+        "scope": "alliedMonsters",
+        "value": 0
+      }
+    ]
+  },
+  {
+    "id": "giftMultiHit",
+    "nameKey": "spell.giftMultiHit.name",
+    "descriptionKey": "spell.giftMultiHit.description",
+    "element": "electric",
+    "rarity": "refined",
+    "baseEnergyPenalty": 0.4,
+    "baseCooldownPenalty": 0.6,
+    "baseSpeed": 6,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
+    "effects": [
+      {
+        "type": "grantSkill",
+        "skill": "multiHit",
+        "duration": "untilMonsterDestroyed",
+        "duplicateBehavior": "noEffect"
+      }
+    ]
+  },
+  {
+    "id": "freezeI",
+    "nameKey": "spell.freezeI.name",
+    "descriptionKey": "spell.freezeI.description",
     "element": "ice",
     "rarity": "common",
-    "baseEnergyPenalty": 1,
-    "baseCooldownPenalty": 0,
+    "baseEnergyPenalty": 0.5,
+    "baseCooldownPenalty": 0.2,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
     "effects": [
       {
-        "type": "dealDamage",
-        "amount": 3,
-        "target": "any"
+        "type": "applyStatus",
+        "status": "freeze",
+        "durationOwnerTurns": 1
       }
-    ],
-    "baseSpeed": 0
+    ]
   },
   {
-    "id": "glacialSpike",
-    "nameKey": "spell.glacialSpike.name",
+    "id": "freezeII",
+    "nameKey": "spell.freezeII.name",
+    "descriptionKey": "spell.freezeII.description",
     "element": "ice",
-    "rarity": "rare",
-    "baseEnergyPenalty": 2,
-    "baseCooldownPenalty": 0,
+    "rarity": "refined",
+    "baseEnergyPenalty": 0.7,
+    "baseCooldownPenalty": 0.3,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
     "effects": [
       {
-        "type": "dealDamage",
-        "amount": 5,
-        "target": "any"
+        "type": "applyStatus",
+        "status": "freeze",
+        "durationOwnerTurns": 2
       }
-    ],
-    "baseSpeed": 0
+    ]
+  },
+  {
+    "id": "freezeIII",
+    "nameKey": "spell.freezeIII.name",
+    "descriptionKey": "spell.freezeIII.description",
+    "element": "ice",
+    "rarity": "rare",
+    "baseEnergyPenalty": 0.9,
+    "baseCooldownPenalty": 0.4,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
+    "effects": [
+      {
+        "type": "applyStatus",
+        "status": "freeze",
+        "durationOwnerTurns": 3
+      }
+    ]
+  },
+  {
+    "id": "stompI",
+    "nameKey": "spell.stompI.name",
+    "descriptionKey": "spell.stompI.description",
+    "element": "ice",
+    "rarity": "common",
+    "baseEnergyPenalty": 0.6,
+    "baseCooldownPenalty": 0.2,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "none",
+      "allowedTargets": []
+    },
+    "effects": [
+      {
+        "type": "dealDamageToAll",
+        "scope": "enemyMonsters",
+        "amount": 2,
+        "element": "ice"
+      }
+    ]
+  },
+  {
+    "id": "stompII",
+    "nameKey": "spell.stompII.name",
+    "descriptionKey": "spell.stompII.description",
+    "element": "ice",
+    "rarity": "refined",
+    "baseEnergyPenalty": 0.8,
+    "baseCooldownPenalty": 0.3,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "none",
+      "allowedTargets": []
+    },
+    "effects": [
+      {
+        "type": "dealDamageToAll",
+        "scope": "enemyMonsters",
+        "amount": 3,
+        "element": "ice"
+      }
+    ]
+  },
+  {
+    "id": "stompIII",
+    "nameKey": "spell.stompIII.name",
+    "descriptionKey": "spell.stompIII.description",
+    "element": "ice",
+    "rarity": "rare",
+    "baseEnergyPenalty": 1,
+    "baseCooldownPenalty": 0.4,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "none",
+      "allowedTargets": []
+    },
+    "effects": [
+      {
+        "type": "dealDamageToAll",
+        "scope": "enemyMonsters",
+        "amount": 4,
+        "element": "ice"
+      }
+    ]
+  },
+  {
+    "id": "deepFreezing",
+    "nameKey": "spell.deepFreezing.name",
+    "descriptionKey": "spell.deepFreezing.description",
+    "element": "ice",
+    "rarity": "rare",
+    "baseEnergyPenalty": 1,
+    "baseCooldownPenalty": 0.4,
+    "baseSpeed": 0,
+    "targeting": {
+      "selection": "none",
+      "allowedTargets": []
+    },
+    "effects": [
+      {
+        "type": "forEachMonster",
+        "scope": "allMonsters",
+        "effect": {
+          "type": "applyStatus",
+          "status": "freeze",
+          "durationOwnerTurns": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "giftTaunt",
+    "nameKey": "spell.giftTaunt.name",
+    "descriptionKey": "spell.giftTaunt.description",
+    "element": "ice",
+    "rarity": "refined",
+    "baseEnergyPenalty": 0.7,
+    "baseCooldownPenalty": 0.3,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
+    "effects": [
+      {
+        "type": "grantSkill",
+        "skill": "taunt",
+        "duration": "untilMonsterDestroyed",
+        "duplicateBehavior": "noEffect"
+      }
+    ]
+  },
+  {
+    "id": "cooldownOnKill",
+    "nameKey": "spell.cooldownOnKill.name",
+    "descriptionKey": "spell.cooldownOnKill.description",
+    "element": "ice",
+    "rarity": "rare",
+    "baseEnergyPenalty": 0.8,
+    "baseCooldownPenalty": 0.3,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "none",
+      "allowedTargets": []
+    },
+    "effects": [
+      {
+        "type": "registerTrigger",
+        "event": "supportedRingKilledMonster",
+        "effect": {
+          "type": "modifySupportedRingCurrentCooldown",
+          "amount": -1,
+          "minimum": 0
+        }
+      }
+    ]
+  },
+  {
+    "id": "cleanse",
+    "nameKey": "spell.cleanse.name",
+    "descriptionKey": "spell.cleanse.description",
+    "element": "ice",
+    "rarity": "rare",
+    "baseEnergyPenalty": 0.8,
+    "baseCooldownPenalty": 0.3,
+    "baseSpeed": 2,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
+    "effects": [
+      {
+        "type": "removeStatuses",
+        "target": "selected",
+        "scope": "allTemporaryStatuses",
+        "removeSkills": false
+      }
+    ]
+  },
+  {
+    "id": "refresh",
+    "nameKey": "spell.refresh.name",
+    "descriptionKey": "spell.refresh.description",
+    "element": "ice",
+    "rarity": "rare",
+    "baseEnergyPenalty": 0.7,
+    "baseCooldownPenalty": 0.3,
+    "baseSpeed": 2,
+    "targeting": {
+      "selection": "none",
+      "allowedTargets": []
+    },
+    "effects": [
+      {
+        "type": "randomTarget",
+        "scope": "alliedRingsWithCooldownAboveZero",
+        "onSuccess": {
+          "type": "modifyRingCurrentCooldown",
+          "amount": -1,
+          "minimum": 0
+        }
+      }
+    ]
+  },
+  {
+    "id": "rimeLock",
+    "nameKey": "spell.rimeLock.name",
+    "descriptionKey": "spell.rimeLock.description",
+    "element": "ice",
+    "rarity": "common",
+    "baseEnergyPenalty": 0.5,
+    "baseCooldownPenalty": 0.2,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
+    "effects": [
+      {
+        "type": "modifyCurrentCooldown",
+        "target": "selected",
+        "amount": 1,
+        "maximumFrom": "resolvedBaseCooldown"
+      }
+    ]
+  },
+  {
+    "id": "crystalSkin",
+    "nameKey": "spell.crystalSkin.name",
+    "descriptionKey": "spell.crystalSkin.description",
+    "element": "ice",
+    "rarity": "refined",
+    "baseEnergyPenalty": 0.7,
+    "baseCooldownPenalty": 0.3,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["alliedMonster"]
+    },
+    "effects": [
+      {
+        "type": "grantTemporaryShield",
+        "target": "selected",
+        "expires": "startOfTargetControllerNextTurn",
+        "duplicateBehavior": "noEffect"
+      }
+    ]
+  },
+  {
+    "id": "giftShield",
+    "nameKey": "spell.giftShield.name",
+    "descriptionKey": "spell.giftShield.description",
+    "element": "ice",
+    "rarity": "epic",
+    "baseEnergyPenalty": 0.9,
+    "baseCooldownPenalty": 0.4,
+    "baseSpeed": 1,
+    "targeting": {
+      "selection": "one",
+      "allowedTargets": ["anyMonster"]
+    },
+    "effects": [
+      {
+        "type": "grantSkill",
+        "skill": "shield",
+        "duration": "untilMonsterDestroyed",
+        "activateImmediately": true,
+        "duplicateBehavior": "noEffect"
+      }
+    ]
   }
 ]

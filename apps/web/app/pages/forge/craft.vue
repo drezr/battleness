@@ -177,6 +177,14 @@
                     )
                   }}
                 </span>
+                <p v-if="selectedRecipe.outputDescription" class="muted">
+                  {{
+                    contentText(
+                      `spell.${selectedRecipe.outputDefinitionId}.description`,
+                      selectedRecipe.outputDescription,
+                    )
+                  }}
+                </p>
               </div>
               <div class="craft-ingredient-grid">
                 <article

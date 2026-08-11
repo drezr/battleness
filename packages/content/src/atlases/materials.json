@@ -1,0 +1,1486 @@
+{
+  "frames": [
+    {
+      "filename": "alexandrite.png",
+      "frame": {
+        "x": 1312,
+        "y": 975,
+        "w": 179,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 61,
+        "y": 17,
+        "w": 179,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "aluminium.png",
+      "frame": {
+        "x": 1623,
+        "y": 504,
+        "w": 239,
+        "h": 221
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 31,
+        "y": 39,
+        "w": 239,
+        "h": 221
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "amethyst.png",
+      "frame": {
+        "x": 795,
+        "y": 687,
+        "w": 211,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 45,
+        "y": 17,
+        "w": 211,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "argon.png",
+      "frame": {
+        "x": 1355,
+        "y": 656,
+        "w": 135,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 82,
+        "y": 17,
+        "w": 135,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "astatine.png",
+      "frame": {
+        "x": 1341,
+        "y": 1924,
+        "w": 102,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 99,
+        "y": 17,
+        "w": 102,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "azurite.png",
+      "frame": {
+        "x": 527,
+        "y": 577,
+        "w": 212,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 44,
+        "y": 17,
+        "w": 212,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "blackOpal.png",
+      "frame": {
+        "x": 1311,
+        "y": 1156,
+        "w": 235,
+        "h": 259
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 33,
+        "y": 21,
+        "w": 235,
+        "h": 259
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "bromine.png",
+      "frame": {
+        "x": 269,
+        "y": 477,
+        "w": 97,
+        "h": 265
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 102,
+        "y": 18,
+        "w": 97,
+        "h": 265
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "calcium.png",
+      "frame": {
+        "x": 818,
+        "y": 1,
+        "w": 266,
+        "h": 239
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 31,
+        "w": 266,
+        "h": 239
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "carbon.png",
+      "frame": {
+        "x": 1354,
+        "y": 1,
+        "w": 233,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 34,
+        "y": 17,
+        "w": 233,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "cellulose.png",
+      "frame": {
+        "x": 246,
+        "y": 1610,
+        "w": 254,
+        "h": 246
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 23,
+        "y": 27,
+        "w": 254,
+        "h": 246
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "chitin.png",
+      "frame": {
+        "x": 1,
+        "y": 531,
+        "w": 265,
+        "h": 256
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 22,
+        "w": 265,
+        "h": 256
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "chlorine.png",
+      "frame": {
+        "x": 1073,
+        "y": 1892,
+        "w": 103,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 99,
+        "y": 17,
+        "w": 103,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "chromite.png",
+      "frame": {
+        "x": 269,
+        "y": 1,
+        "w": 258,
+        "h": 265
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 21,
+        "y": 18,
+        "w": 258,
+        "h": 265
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "chromium.png",
+      "frame": {
+        "x": 1623,
+        "y": 236,
+        "w": 221,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 40,
+        "y": 17,
+        "w": 221,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "citrine.png",
+      "frame": {
+        "x": 253,
+        "y": 1203,
+        "w": 149,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 76,
+        "y": 17,
+        "w": 149,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "coal.png",
+      "frame": {
+        "x": 494,
+        "y": 1610,
+        "w": 254,
+        "h": 236
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 23,
+        "y": 32,
+        "w": 254,
+        "h": 236
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "cobalt.png",
+      "frame": {
+        "x": 1608,
+        "y": 793,
+        "w": 215,
+        "h": 241
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 43,
+        "y": 29,
+        "w": 215,
+        "h": 241
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "copper.png",
+      "frame": {
+        "x": 248,
+        "y": 1354,
+        "w": 260,
+        "h": 254
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 20,
+        "y": 23,
+        "w": 260,
+        "h": 254
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "diamond.png",
+      "frame": {
+        "x": 1,
+        "y": 1066,
+        "w": 250,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 25,
+        "y": 17,
+        "w": 250,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "emerald.png",
+      "frame": {
+        "x": 1428,
+        "y": 1624,
+        "w": 120,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 90,
+        "y": 17,
+        "w": 120,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "fluorine.png",
+      "frame": {
+        "x": 1181,
+        "y": 1585,
+        "w": 122,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 89,
+        "y": 17,
+        "w": 122,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "gold.png",
+      "frame": {
+        "x": 1355,
+        "y": 236,
+        "w": 228,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 36,
+        "y": 17,
+        "w": 228,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "graphene.png",
+      "frame": {
+        "x": 1,
+        "y": 1334,
+        "w": 245,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 28,
+        "y": 17,
+        "w": 245,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "helium.png",
+      "frame": {
+        "x": 805,
+        "y": 1862,
+        "w": 175,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 63,
+        "y": 17,
+        "w": 175,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "hydrogen.png",
+      "frame": {
+        "x": 510,
+        "y": 1507,
+        "w": 90,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 105,
+        "y": 17,
+        "w": 90,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "ink.png",
+      "frame": {
+        "x": 269,
+        "y": 1866,
+        "w": 166,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 67,
+        "y": 17,
+        "w": 166,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "iodine.png",
+      "frame": {
+        "x": 527,
+        "y": 791,
+        "w": 111,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 94,
+        "y": 17,
+        "w": 111,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "iridium.png",
+      "frame": {
+        "x": 1,
+        "y": 798,
+        "w": 252,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 24,
+        "y": 17,
+        "w": 252,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "iron.png",
+      "frame": {
+        "x": 259,
+        "y": 793,
+        "w": 266,
+        "h": 207
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 47,
+        "w": 266,
+        "h": 207
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "keratin.png",
+      "frame": {
+        "x": 795,
+        "y": 900,
+        "w": 201,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 50,
+        "y": 17,
+        "w": 201,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "krypton.png",
+      "frame": {
+        "x": 789,
+        "y": 1452,
+        "w": 133,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 84,
+        "y": 17,
+        "w": 133,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "lead.png",
+      "frame": {
+        "x": 269,
+        "y": 261,
+        "w": 265,
+        "h": 214
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 18,
+        "y": 43,
+        "w": 265,
+        "h": 214
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "magnesium.png",
+      "frame": {
+        "x": 1063,
+        "y": 1102,
+        "w": 246,
+        "h": 235
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 27,
+        "y": 32,
+        "w": 246,
+        "h": 235
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "manganese.png",
+      "frame": {
+        "x": 1,
+        "y": 1602,
+        "w": 243,
+        "h": 262
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 29,
+        "y": 19,
+        "w": 243,
+        "h": 262
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "mercury.png",
+      "frame": {
+        "x": 1550,
+        "y": 1656,
+        "w": 118,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 91,
+        "y": 17,
+        "w": 118,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "moonstone.png",
+      "frame": {
+        "x": 1340,
+        "y": 793,
+        "w": 180,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 60,
+        "y": 17,
+        "w": 180,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "neon.png",
+      "frame": {
+        "x": 259,
+        "y": 576,
+        "w": 215,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 42,
+        "y": 17,
+        "w": 215,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "neptunium.png",
+      "frame": {
+        "x": 819,
+        "y": 242,
+        "w": 230,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 35,
+        "y": 17,
+        "w": 230,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "nickel.png",
+      "frame": {
+        "x": 1622,
+        "y": 1,
+        "w": 222,
+        "h": 233
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 39,
+        "y": 33,
+        "w": 222,
+        "h": 233
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "nitrogen.png",
+      "frame": {
+        "x": 1670,
+        "y": 1656,
+        "w": 110,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 95,
+        "y": 17,
+        "w": 110,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "oil.png",
+      "frame": {
+        "x": 255,
+        "y": 1002,
+        "w": 199,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 51,
+        "y": 17,
+        "w": 199,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "opal.png",
+      "frame": {
+        "x": 527,
+        "y": 904,
+        "w": 202,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 52,
+        "y": 16,
+        "w": 202,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "oxygen.png",
+      "frame": {
+        "x": 536,
+        "y": 243,
+        "w": 110,
+        "h": 281
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 89,
+        "y": 10,
+        "w": 110,
+        "h": 281
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "pearl.png",
+      "frame": {
+        "x": 732,
+        "y": 1599,
+        "w": 186,
+        "h": 261
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 57,
+        "y": 20,
+        "w": 186,
+        "h": 261
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "phosphorus.png",
+      "frame": {
+        "x": 1054,
+        "y": 1587,
+        "w": 125,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 88,
+        "y": 17,
+        "w": 125,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "plasma.png",
+      "frame": {
+        "x": 1059,
+        "y": 1339,
+        "w": 244,
+        "h": 248
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 28,
+        "y": 26,
+        "w": 244,
+        "h": 248
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "platinum.png",
+      "frame": {
+        "x": 1,
+        "y": 1,
+        "w": 266,
+        "h": 260
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 20,
+        "w": 266,
+        "h": 260
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "plutonium.png",
+      "frame": {
+        "x": 1,
+        "y": 1866,
+        "w": 171,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 65,
+        "y": 17,
+        "w": 171,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "radium.png",
+      "frame": {
+        "x": 536,
+        "y": 1,
+        "w": 240,
+        "h": 280
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 30,
+        "y": 12,
+        "w": 240,
+        "h": 280
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "radon.png",
+      "frame": {
+        "x": 1087,
+        "y": 470,
+        "w": 185,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 58,
+        "y": 17,
+        "w": 185,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "redDiamond.png",
+      "frame": {
+        "x": 795,
+        "y": 1103,
+        "w": 173,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 63,
+        "y": 17,
+        "w": 173,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "rubber.png",
+      "frame": {
+        "x": 804,
+        "y": 474,
+        "w": 266,
+        "h": 211
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 45,
+        "w": 266,
+        "h": 211
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "ruby.png",
+      "frame": {
+        "x": 1087,
+        "y": 238,
+        "w": 230,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 35,
+        "y": 17,
+        "w": 230,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "sand.png",
+      "frame": {
+        "x": 1072,
+        "y": 657,
+        "w": 181,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 60,
+        "y": 17,
+        "w": 181,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "sapphire.png",
+      "frame": {
+        "x": 1063,
+        "y": 840,
+        "w": 247,
+        "h": 260
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 27,
+        "y": 20,
+        "w": 247,
+        "h": 260
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "silicon.png",
+      "frame": {
+        "x": 521,
+        "y": 1309,
+        "w": 196,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 52,
+        "y": 17,
+        "w": 196,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "silk.png",
+      "frame": {
+        "x": 523,
+        "y": 1108,
+        "w": 199,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 51,
+        "y": 17,
+        "w": 199,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "silver.png",
+      "frame": {
+        "x": 1,
+        "y": 263,
+        "w": 260,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 20,
+        "y": 17,
+        "w": 260,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "sodium.png",
+      "frame": {
+        "x": 537,
+        "y": 1866,
+        "w": 161,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 70,
+        "y": 17,
+        "w": 161,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "sulfur.png",
+      "frame": {
+        "x": 1550,
+        "y": 1424,
+        "w": 230,
+        "h": 232
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 35,
+        "y": 34,
+        "w": 230,
+        "h": 232
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "sunstone.png",
+      "frame": {
+        "x": 791,
+        "y": 1278,
+        "w": 172,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 64,
+        "y": 17,
+        "w": 172,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "titanium.png",
+      "frame": {
+        "x": 1086,
+        "y": 1,
+        "w": 266,
+        "h": 235
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 17,
+        "y": 32,
+        "w": 266,
+        "h": 235
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "topaz.png",
+      "frame": {
+        "x": 1305,
+        "y": 1624,
+        "w": 121,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 90,
+        "y": 17,
+        "w": 121,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "tungsten.png",
+      "frame": {
+        "x": 1580,
+        "y": 1010,
+        "w": 178,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 61,
+        "y": 17,
+        "w": 178,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "turquoise.png",
+      "frame": {
+        "x": 1309,
+        "y": 1393,
+        "w": 229,
+        "h": 239
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 36,
+        "y": 31,
+        "w": 229,
+        "h": 239
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "uranium.png",
+      "frame": {
+        "x": 1355,
+        "y": 466,
+        "w": 188,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 56,
+        "y": 17,
+        "w": 188,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "wax.png",
+      "frame": {
+        "x": 536,
+        "y": 355,
+        "w": 220,
+        "h": 266
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 40,
+        "y": 17,
+        "w": 220,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "xenon.png",
+      "frame": {
+        "x": 920,
+        "y": 1587,
+        "w": 132,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 84,
+        "y": 17,
+        "w": 132,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    {
+      "filename": "zinc.png",
+      "frame": {
+        "x": 1572,
+        "y": 1190,
+        "w": 258,
+        "h": 232
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 21,
+        "y": 34,
+        "w": 258,
+        "h": 232
+      },
+      "sourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    }
+  ],
+  "meta": {
+    "app": "https://www.codeandweb.com/texturepacker",
+    "version": "1.0",
+    "image": "materials.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 1850,
+      "h": 2038
+    },
+    "scale": "1",
+    "smartupdate": "$TexturePacker:SmartUpdate:f7cd9736a73c3722c0e14531a0441acd:974c8451001dd7c8a323312955bfe732:729adc6043343cfda41c447ce8f464d6$"
+  }
+}

@@ -14,7 +14,7 @@ export type DevelopmentInventory = {
   nextSequence: number;
 };
 
-const storageKey = "battleness.developmentInventory.v2";
+const storageKey = "battleness.developmentInventory.v3";
 const format = "battlenessDevelopmentInventory";
 
 export function createDefaultDevelopmentInventory(
@@ -55,7 +55,7 @@ export function serializeDevelopmentInventory(inventory: DevelopmentInventory): 
   return JSON.stringify(
     {
       format,
-      version: 2,
+      version: 3,
       credits: inventory.credits,
       stock: inventory.stock,
       craftedItems: inventory.craftedItems,
@@ -77,7 +77,7 @@ export function parseDevelopmentInventoryJson(
     throw new Error("Development inventory is not valid JSON.");
   }
 
-  if (!isRecord(parsed) || parsed.format !== format || parsed.version !== 2) {
+  if (!isRecord(parsed) || parsed.format !== format || parsed.version !== 3) {
     throw new Error("Development inventory format is not supported.");
   }
 

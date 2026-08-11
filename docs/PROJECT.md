@@ -130,10 +130,17 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 
 ### Item Artwork
 
-- The prototype uses generated sprite atlases for all current rings, gems, monsters, spells, and materials.
-- Atlas cell order is mapped to stable content definition IDs in `apps/prototype/src/itemAssets.ts`.
-- The prototype validates artwork coverage at startup so newly added definitions cannot silently ship without an asset mapping.
-- Ring, gem, and monster artwork is rendered in the current battle and setup cards. Spell and material artwork is ready for future inventory, forge, and shop views.
+- Rings, gems, monsters, and materials use production TexturePacker atlases with validated JSON-array
+  metadata under `packages/content/src/atlases/`. The retained test spells still use their legacy
+  grid atlas until the production spell collection is implemented.
+- A validated 42-frame production spell atlas and its proposal catalogue are preserved as dormant
+  artifacts under `assets/spells/atlas/` and `packages/content/sources/production-spells-v1.json`.
+  They are intentionally absent from public app assets until gameplay support and content migration
+  can activate the definitions and atlas atomically.
+- Stable definition IDs and packed-frame coordinates are resolved centrally by
+  `packages/content/src/itemAtlases.ts`. The renderer supports trimmed and rotated frames.
+- Shared startup and test validation prevents an active definition from shipping without artwork.
+- Ring, gem, monster, spell, and material artwork is available across the Dev Lab and Game App.
 - The setup screen includes a collapsible development collection that renders every current asset by category.
 
 ### Battle Lab
@@ -312,6 +319,48 @@ This section separates executable game rules from implementation decisions. It i
 - Spells do not directly add damage to the ring that triggers them. They resolve after ring and gem damage and can apply their own effects afterward.
 - All spell targets attached to a ring action are validated before energy is spent. If earlier ring or gem damage destroys a previously valid spell target during that same action, the dependent spell expires without an error and is not redirected automatically.
 
+#### Production Spell Collection V2
+
+- Status: approved for implementation.
+- The 42 production spells replace the six retained test spells under the global content version
+  `production-items-v2`; the retired collection remains available only through explicit legacy
+  handling. `burnI` replaces `firebolt` in the versioned starter loadout.
+- Ring commands retain the existing optional `enchantmentTargets` map keyed by socketed gem instance
+  ID. The primary ring target is reused when it satisfies a spell's targeting contract; otherwise
+  the complete command supplies the additional spell target before any mutation occurs. Spells with
+  no selection ignore explicit entries.
+- `pierceLegacy` and `funeralBrand` arm action-scoped preparation effects before ring-and-gem damage
+  so they can observe that damage. Ordinary enchantments still resolve in stable socket order after
+  ring-and-gem damage.
+- A monster has at most one natural skill but may receive multiple battle-only granted skills.
+  Natural and granted provenance remains distinct, duplicate grants have no effect, and compatible
+  attack and passive skills compose in the documented resolution order.
+- Setting a monster or ring's current cooldown to zero makes it immediately reusable in the current
+  turn, including after it was already used during that turn.
+- Burn ticks at the start of the affected monster controller's turn before its remaining duration
+  decreases. Shock and Freeze restrict exactly the next N complete owner turns and expire after the
+  last affected turn. Effects that expire at the start of a turn, including Crystal Skin, expire
+  before Burn ticks; status processing precedes normal cooldown decrements.
+- Taunt restricts attacks, ring damage, and selected spell damage. Selected transformation,
+  destruction, status, cleanse, and cooldown-control effects may bypass Taunt unless their own
+  targeting contract says otherwise.
+- Progression scales only literal damage amounts authored as direct spell damage. Periodic Burn
+  damage, stat bonuses, captured values, copied values, and destruction effects do not scale.
+- Shield instances retain source identity. One incoming damage instance consumes at most one active
+  Shield, while active Shields from different sources can protect against successive damage
+  instances. Crystal Skin has no effect while any Shield is active.
+- Last Breath reacts to destruction caused by damage or direct destruction. Copy duplicates current
+  combat statistics and permanent skills but not statuses, consumed skill state, or runtime identity.
+  Transmute replaces combat state while preserving controller and board position.
+- Implementation progress: all four inactive engine slices are complete, with one scenario for each
+  of the 42 production spells. Granted skills and Shields retain source provenance; all random
+  choices are deterministic and logged; supported-ring triggers persist without duplicates; and an
+  ephemeral action context carries preparation, capture, and destruction state. Direct destruction
+  reuses Last Breath/Funeral Brand settlement. Copy preserves current statistics and permanent
+  skills with fresh consumed state, Transmute preserves only controller/slot identity, and temporary
+  copies receive unique IDs and expire by direct destruction. Definitions and the atlas remain
+  dormant until the atomic content, persistence, localization, recipe, and asset cutover.
+
 ### Cooldowns
 
 - Rings and monsters can have cooldown values.
@@ -405,7 +454,8 @@ This section separates executable game rules from implementation decisions. It i
 - Ring definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseDamage`, `baseEnergyCost`, `baseCooldown`, and `baseSpeed`.
 - Gem definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseDamage`, `baseEnergyPenalty`, and `baseCooldownPenalty`.
 - Monster definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseHealth`, `baseDamage`, `baseCooldown`, `baseSpeed`, and an optional single `skill`.
-- Spell definitions should use this initial shape: `id`, `nameKey`, `element`, `rarity`, `baseEnergyPenalty`, `baseCooldownPenalty`, and `effects`.
+- Spell definitions use `id`, `nameKey`, `descriptionKey`, `element`, `rarity`, `baseSpeed`, decimal
+  energy/cooldown penalties, targeting, and strictly typed effects.
 - Material definitions use `id`, `nameKey`, `descriptionKey`, `rarity`, `craftingFamily`, `basePrice`, `realWorldType`, and optional `atomicNumber` and `chemicalSymbol`.
 - Material atomic metadata is required for chemical elements and forbidden for other real-world material types.
 - Spell `effects` should be an array of explicit typed effect objects. The first supported effect type is `dealDamage` with `amount` and `target` fields.
@@ -413,7 +463,9 @@ This section separates executable game rules from implementation decisions. It i
 - Inventory fixtures contain player-owned ring, gem, monster, and spell instances. Every item instance stores `id`, `definitionId`, `ownerId`, `experience`, and `quality`.
 - Ring instances additionally store `socketCount`, `socketedGemInstanceIds`, and `equipped`.
 - Gem instances may contain an enchantment with either `monsterInstanceId` or `spellInstanceId`.
-- Historical versions `prototype-2` through `prototype-6` introduced progression, rarity, recipes, and campaign fixtures. `production-items-v1` is the active collection version and replaces the prototype rings, gems, and monsters while retaining the six test spells.
+- Historical versions `prototype-2` through `prototype-6` introduced progression, rarity, recipes,
+  and campaign fixtures. `production-items-v2` is active and replaces the six test spells with the
+  approved 42-spell production catalogue.
 - The initial `BattleSetup` should contain `id`, `seed`, two players, resolved combat stats, equipped ring instances, socketed gem instances, referenced definitions, and optional initial status for first-player element choice.
 - The initial `BattleAction` union should include `chooseElement`, `useRing`, `useMonster`, `endTurn`, and `concede`.
 - The version 1 `BattleRecord` shape includes `format`, `formatVersion`, `rulesVersion`, `contentVersion`, `setup`, `actions`, `result`, and `finalStateChecksum`.
@@ -875,11 +927,11 @@ This section separates executable game rules from implementation decisions. It i
 - Status: decided.
 - Decision: Keep versioned JSON content definitions as the source of truth and import them into the database if runtime querying, admin tooling, or production operations require it. Player-owned instances and progression data belong in the database.
 - Authoring sources that generate active definitions belong under `packages/content/sources/`, while
-  generated runtime definitions remain under `packages/content/src/definitions/`. The production v1
-  item asset bible is `packages/content/sources/production-items-v1.asset-bible.json`.
-- The production v1 asset bible covers all 253 active definitions: 54 rings, 54 gems, 69 monsters,
-  six retained test spells, and 70 materials. Every entry includes atlas-ready visual direction even
-  when its production atlas has not been imported yet.
+  generated runtime definitions remain under `packages/content/src/definitions/`. The production v2
+  item asset bible is `packages/content/sources/production-items-v2.asset-bible.json`.
+- The production v2 asset bible covers all 289 active definitions: 54 rings, 54 gems, 69 monsters,
+  42 production spells, and 70 materials. Every entry includes atlas-ready visual direction.
+- Its `productionAtlases` manifest records all five item-family atlases as imported.
 - Reason: JSON definitions are easy to review, generate, diff, validate, and version. Database import can support production needs without making the database the design source.
 - Tradeoffs: This requires import tooling and content version tracking so saved player item instances and match records remain compatible with content changes.
 

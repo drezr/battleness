@@ -5,7 +5,18 @@ import { fileURLToPath } from "node:url";
 
 const sourceRoot = process.argv[2];
 if (!sourceRoot) {
-  throw new Error("Pass the directory containing rings/gems/monsters PNG and JSON files.");
+  throw new Error(
+    "Pass the directory containing production atlas PNG and JSON files, optionally followed by atlas kinds.",
+  );
+}
+
+const supportedKinds = ["rings", "gems", "monsters", "materials", "spells"];
+const requestedKinds = process.argv.slice(3);
+const kinds = requestedKinds.length > 0 ? requestedKinds : supportedKinds;
+for (const kind of kinds) {
+  if (!supportedKinds.includes(kind)) {
+    throw new Error(`Unsupported production atlas kind: ${kind}.`);
+  }
 }
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
@@ -13,12 +24,12 @@ const contentRoot = resolve(scriptDirectory, "..");
 const repositoryRoot = resolve(contentRoot, "..", "..");
 const atlasMetadataRoot = resolve(contentRoot, "src", "atlases");
 const bible = JSON.parse(
-  await readFile(resolve(contentRoot, "sources", "production-items-v1.asset-bible.json"), "utf8"),
+  await readFile(resolve(contentRoot, "sources", "production-items-v2.asset-bible.json"), "utf8"),
 );
 
 await mkdir(atlasMetadataRoot, { recursive: true });
 
-for (const kind of ["rings", "gems", "monsters"]) {
+for (const kind of kinds) {
   const sourceJsonPath = resolve(sourceRoot, `${kind}.json`);
   const sourcePngPath = resolve(sourceRoot, `${kind}.png`);
   const atlas = JSON.parse(await readFile(sourceJsonPath, "utf8"));

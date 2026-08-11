@@ -140,6 +140,9 @@ describe("live battle presentation", () => {
         cooldown: 2,
         currentCooldown: 0,
         skill: "taunt",
+        skills: ["taunt"],
+        statuses: [],
+        temporary: false,
         shieldActive: false,
         rageActive: false,
       },
@@ -155,6 +158,9 @@ describe("live battle presentation", () => {
         cooldown: 2,
         currentCooldown: 0,
         skill: null,
+        skills: [],
+        statuses: [],
+        temporary: false,
         shieldActive: false,
         rageActive: false,
       },
@@ -186,6 +192,39 @@ describe("live battle presentation", () => {
     ).toMatchObject({ blockedByTaunt: false, firstTurnProtected: false });
   });
 
+  it("uses granted skills and Freeze when presenting Taunt target legality", () => {
+    const battle = battleState();
+    battle.opponent.monsters = [
+      {
+        id: "opponent.monster.gifted.1",
+        definitionId: "emberImp",
+        label: "Gifted Imp",
+        element: "fire",
+        rarity: "normal",
+        health: 4,
+        maxHealth: 4,
+        damage: 3,
+        cooldown: 2,
+        currentCooldown: 0,
+        skill: null,
+        skills: ["taunt"],
+        statuses: [],
+        temporary: false,
+        shieldActive: false,
+        rageActive: false,
+      },
+    ];
+    expect(
+      battleTargets(battle).find((target) => target.id === battle.opponent.heroTargetId)
+        ?.blockedByTaunt,
+    ).toBe(true);
+    battle.opponent.monsters[0]!.statuses = ["freeze"];
+    expect(
+      battleTargets(battle).find((target) => target.id === battle.opponent.heroTargetId)
+        ?.blockedByTaunt,
+    ).toBe(false);
+  });
+
   it("presents combat events with player-facing parameters", () => {
     expect(
       presentBattleEvent(
@@ -202,6 +241,52 @@ describe("live battle presentation", () => {
       key: "battle.live.events.damageDealt",
       tone: "damage",
       params: { source: "Ember Loop", target: "Opponent Hero", amount: 6 },
+    });
+
+    expect(
+      presentBattleEvent(
+        { type: "spellCast", spellId: "stompI", sourceGemId: "gem.1" },
+        (id) => ({ stompI: "Stomp I" })[id] ?? id,
+      ),
+    ).toEqual({
+      key: "battle.live.events.spellCastNoTarget",
+      tone: "action",
+      params: { source: "Stomp I" },
+    });
+
+    expect(
+      presentBattleEvent(
+        {
+          type: "skillGranted",
+          monsterInstanceId: "viewer.monster.imp.1",
+          skill: "pierce",
+          sourceSpellId: "giftPierce",
+        },
+        (id) => ({ "viewer.monster.imp.1": "Ember Imp" })[id] ?? id,
+      ),
+    ).toEqual({
+      key: "battle.live.events.skillGranted",
+      tone: "status",
+      params: { monster: "Ember Imp", skill: "pierce" },
+    });
+
+    expect(
+      presentBattleEvent(
+        {
+          type: "lastBreathTriggered",
+          monsterInstanceId: "viewer.monster.imp.1",
+          targetId: "opponent.monster.guardian.1",
+        },
+        (id) =>
+          ({
+            "viewer.monster.imp.1": "Ember Imp",
+            "opponent.monster.guardian.1": "Guardian",
+          })[id] ?? id,
+      ),
+    ).toEqual({
+      key: "battle.live.events.lastBreathTriggered",
+      tone: "status",
+      params: { monster: "Ember Imp", target: "Guardian" },
     });
   });
 
@@ -235,6 +320,35 @@ describe("live battle presentation", () => {
     ).toEqual({
       sourceIds: ["ring.1", "spell.1"],
       targets: [{ id: "opponent.monster.imp.1", damage: 6, statuses: ["shieldBroken"] }],
+    });
+  });
+
+  it("aggregates structured status feedback", () => {
+    expect(
+      battleResolutionEffects([
+        {
+          type: "statusApplied",
+          monsterInstanceId: "opponent.monster.imp.1",
+          status: "burn",
+          sourceSpellId: "burnI",
+          remainingOwnerTurns: 1,
+        },
+        {
+          type: "statusRemoved",
+          monsterInstanceId: "opponent.monster.imp.1",
+          status: "burn",
+          reason: "expired",
+        },
+      ]),
+    ).toEqual({
+      sourceIds: [],
+      targets: [
+        {
+          id: "opponent.monster.imp.1",
+          damage: 0,
+          statuses: ["burn", "burnRemoved"],
+        },
+      ],
     });
   });
 });

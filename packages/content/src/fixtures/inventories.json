@@ -210,28 +210,28 @@
   "spells": [
     {
       "id": "playerOne.spell.firebolt",
-      "definitionId": "firebolt",
+      "definitionId": "carbonize",
       "ownerId": "playerOne",
       "experience": 100,
       "quality": 60
     },
     {
       "id": "playerOne.spell.spark",
-      "definitionId": "spark",
+      "definitionId": "electroshock",
       "ownerId": "playerOne",
       "experience": 100,
       "quality": 64
     },
     {
       "id": "playerTwo.spell.iceShard",
-      "definitionId": "iceShard",
+      "definitionId": "deepFreezing",
       "ownerId": "playerTwo",
       "experience": 100,
       "quality": 63
     },
     {
       "id": "playerFire.spell.firebolt",
-      "definitionId": "firebolt",
+      "definitionId": "carbonize",
       "ownerId": "playerFire",
       "experience": 100,
       "quality": 66

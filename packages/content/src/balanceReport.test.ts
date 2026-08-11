@@ -14,7 +14,7 @@ describe("content balance report", () => {
     );
 
     const ashenLoop = report.items.find((item) => item.id === "ashenLoop");
-    const firebolt = report.items.find((item) => item.id === "firebolt");
+    const arcRelay = report.items.find((item) => item.id === "arcRelay");
     const iceGuardian = report.items.find((item) => item.id === "iceGuardian");
 
     expect(ashenLoop?.profiles.find((profile) => profile.profileId === "base")?.stats.damage).toBe(
@@ -23,7 +23,7 @@ describe("content balance report", () => {
     expect(ashenLoop?.profiles.find((profile) => profile.profileId === "max")?.stats.damage).toBe(
       11,
     );
-    expect(firebolt?.profiles.find((profile) => profile.profileId === "mid")?.stats.damage).toBe(5);
+    expect(arcRelay?.profiles.find((profile) => profile.profileId === "mid")?.stats.damage).toBe(2);
     expect(iceGuardian?.profiles.find((profile) => profile.profileId === "max")?.stats.health).toBe(
       15,
     );

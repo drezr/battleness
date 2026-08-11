@@ -259,6 +259,9 @@ function validateLocalization(data: ContentReferenceData, issues: string[]): voi
   for (const material of data.definitions.materials) {
     requiredKeys.add(material.descriptionKey);
   }
+  for (const spell of data.definitions.spells) {
+    requiredKeys.add(spell.descriptionKey);
+  }
 
   for (const [localeId, locale] of Object.entries(data.locales)) {
     for (const key of requiredKeys) {

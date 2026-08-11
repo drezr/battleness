@@ -1,6 +1,6 @@
 {
-  "contentVersion": "production-items-v1",
-  "generatedAt": "2026-08-03",
+  "contentVersion": "production-items-v2",
+  "generatedAt": "2026-08-10",
   "assetStyle": {
     "id": "battlenessAssetStyleV1",
     "purpose": "Unified visual specification for AI-generated BattleNess inventory and summon assets.",
@@ -84,7 +84,7 @@
     "speedPrinciple": "Speed is a power budget component because total equipped speed influences which player starts.",
     "penaltyRange": {
       "minimum": 0.1,
-      "maximum": 1.0,
+      "maximum": 1,
       "appliesTo": ["gem", "monster"]
     },
     "monsterSkillOptional": true
@@ -93,9 +93,81 @@
     "rings": 54,
     "gems": 54,
     "monsters": 69,
-    "spells": 6,
+    "spells": 42,
     "materials": 70,
-    "total": 253
+    "total": 289
+  },
+  "productionAtlases": {
+    "rings": {
+      "status": "imported",
+      "image": "rings.png",
+      "metadata": "packages/content/src/atlases/rings.json",
+      "frameCount": 54,
+      "atlasSize": {
+        "w": 1879,
+        "h": 1826
+      },
+      "logicalSourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    "gems": {
+      "status": "imported",
+      "image": "gems.png",
+      "metadata": "packages/content/src/atlases/gems.json",
+      "frameCount": 54,
+      "atlasSize": {
+        "w": 2041,
+        "h": 1330
+      },
+      "logicalSourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    "monsters": {
+      "status": "imported",
+      "image": "monsters.png",
+      "metadata": "packages/content/src/atlases/monsters.json",
+      "frameCount": 69,
+      "atlasSize": {
+        "w": 1965,
+        "h": 1863
+      },
+      "logicalSourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    "materials": {
+      "status": "imported",
+      "image": "materials.png",
+      "metadata": "packages/content/src/atlases/materials.json",
+      "frameCount": 70,
+      "atlasSize": {
+        "w": 1850,
+        "h": 2038
+      },
+      "logicalSourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    },
+    "spells": {
+      "status": "imported",
+      "image": "spells.png",
+      "metadata": "packages/content/src/atlases/spells.json",
+      "frameCount": 42,
+      "atlasSize": {
+        "w": 1876,
+        "h": 1460
+      },
+      "logicalSourceSize": {
+        "w": 300,
+        "h": 300
+      }
+    }
   },
   "rings": [
     {
@@ -105,8 +177,8 @@
       "element": "fire",
       "rarity": "common",
       "damage": 5,
-      "energyCost": 2.0,
-      "cooldown": 2.0,
+      "energyCost": 2,
+      "cooldown": 2,
       "speed": 2,
       "intendedRole": "efficient pressure",
       "asset": {
@@ -132,8 +204,8 @@
       "element": "fire",
       "rarity": "common",
       "damage": 7,
-      "energyCost": 3.0,
-      "cooldown": 3.0,
+      "energyCost": 3,
+      "cooldown": 3,
       "speed": 0,
       "intendedRole": "heavy early strike",
       "asset": {
@@ -159,8 +231,8 @@
       "element": "fire",
       "rarity": "common",
       "damage": 4,
-      "energyCost": 1.0,
-      "cooldown": 3.0,
+      "energyCost": 1,
+      "cooldown": 3,
       "speed": 3,
       "intendedRole": "fast ember tempo",
       "asset": {
@@ -186,8 +258,8 @@
       "element": "fire",
       "rarity": "common",
       "damage": 6,
-      "energyCost": 2.0,
-      "cooldown": 4.0,
+      "energyCost": 2,
+      "cooldown": 4,
       "speed": 1,
       "intendedRole": "high cycle damage",
       "asset": {
@@ -213,8 +285,8 @@
       "element": "fire",
       "rarity": "common",
       "damage": 3,
-      "energyCost": 1.0,
-      "cooldown": 2.0,
+      "energyCost": 1,
+      "cooldown": 2,
       "speed": 4,
       "intendedRole": "initiative-focused fire",
       "asset": {
@@ -240,8 +312,8 @@
       "element": "fire",
       "rarity": "refined",
       "damage": 8,
-      "energyCost": 3.0,
-      "cooldown": 3.0,
+      "energyCost": 3,
+      "cooldown": 3,
       "speed": 1,
       "intendedRole": "reliable burst",
       "asset": {
@@ -267,8 +339,8 @@
       "element": "fire",
       "rarity": "refined",
       "damage": 6,
-      "energyCost": 2.0,
-      "cooldown": 2.0,
+      "energyCost": 2,
+      "cooldown": 2,
       "speed": 3,
       "intendedRole": "balanced aggression",
       "asset": {
@@ -294,8 +366,8 @@
       "element": "fire",
       "rarity": "refined",
       "damage": 10,
-      "energyCost": 4.0,
-      "cooldown": 4.0,
+      "energyCost": 4,
+      "cooldown": 4,
       "speed": 0,
       "intendedRole": "maximum common-cycle impact",
       "asset": {
@@ -321,8 +393,8 @@
       "element": "fire",
       "rarity": "refined",
       "damage": 5,
-      "energyCost": 1.0,
-      "cooldown": 3.0,
+      "energyCost": 1,
+      "cooldown": 3,
       "speed": 4,
       "intendedRole": "low-energy pressure",
       "asset": {
@@ -348,8 +420,8 @@
       "element": "fire",
       "rarity": "refined",
       "damage": 7,
-      "energyCost": 3.0,
-      "cooldown": 2.0,
+      "energyCost": 3,
+      "cooldown": 2,
       "speed": 1,
       "intendedRole": "short-cycle furnace",
       "asset": {
@@ -375,8 +447,8 @@
       "element": "fire",
       "rarity": "rare",
       "damage": 11,
-      "energyCost": 4.0,
-      "cooldown": 4.0,
+      "energyCost": 4,
+      "cooldown": 4,
       "speed": 1,
       "intendedRole": "large periodic burst",
       "asset": {
@@ -402,8 +474,8 @@
       "element": "fire",
       "rarity": "rare",
       "damage": 7,
-      "energyCost": 2.0,
-      "cooldown": 3.0,
+      "energyCost": 2,
+      "cooldown": 3,
       "speed": 5,
       "intendedRole": "speed-specialized fire",
       "asset": {
@@ -429,8 +501,8 @@
       "element": "fire",
       "rarity": "rare",
       "damage": 9,
-      "energyCost": 3.0,
-      "cooldown": 2.0,
+      "energyCost": 3,
+      "cooldown": 2,
       "speed": 2,
       "intendedRole": "rapid heavy pressure",
       "asset": {
@@ -456,8 +528,8 @@
       "element": "fire",
       "rarity": "rare",
       "damage": 6,
-      "energyCost": 1.0,
-      "cooldown": 4.0,
+      "energyCost": 1,
+      "cooldown": 4,
       "speed": 4,
       "intendedRole": "energy-efficient finisher",
       "asset": {
@@ -483,8 +555,8 @@
       "element": "fire",
       "rarity": "epic",
       "damage": 13,
-      "energyCost": 5.0,
-      "cooldown": 4.0,
+      "energyCost": 5,
+      "cooldown": 4,
       "speed": 1,
       "intendedRole": "supreme direct damage",
       "asset": {
@@ -510,8 +582,8 @@
       "element": "fire",
       "rarity": "epic",
       "damage": 8,
-      "energyCost": 2.0,
-      "cooldown": 2.0,
+      "energyCost": 2,
+      "cooldown": 2,
       "speed": 6,
       "intendedRole": "elite initiative fire",
       "asset": {
@@ -537,8 +609,8 @@
       "element": "fire",
       "rarity": "epic",
       "damage": 10,
-      "energyCost": 2.0,
-      "cooldown": 3.0,
+      "energyCost": 2,
+      "cooldown": 3,
       "speed": 3,
       "intendedRole": "premium efficiency",
       "asset": {
@@ -564,8 +636,8 @@
       "element": "fire",
       "rarity": "epic",
       "damage": 15,
-      "energyCost": 6.0,
-      "cooldown": 5.0,
+      "energyCost": 6,
+      "cooldown": 5,
       "speed": 0,
       "intendedRole": "singular catastrophic strike",
       "asset": {
@@ -591,8 +663,8 @@
       "element": "electric",
       "rarity": "common",
       "damage": 5,
-      "energyCost": 2.0,
-      "cooldown": 2.0,
+      "energyCost": 2,
+      "cooldown": 2,
       "speed": 4,
       "intendedRole": "fast general-purpose action",
       "asset": {
@@ -618,8 +690,8 @@
       "element": "electric",
       "rarity": "common",
       "damage": 3,
-      "energyCost": 1.0,
-      "cooldown": 1.0,
+      "energyCost": 1,
+      "cooldown": 1,
       "speed": 5,
       "intendedRole": "cheap repeated pressure",
       "asset": {
@@ -645,8 +717,8 @@
       "element": "electric",
       "rarity": "common",
       "damage": 2,
-      "energyCost": 1.0,
-      "cooldown": 2.0,
+      "energyCost": 1,
+      "cooldown": 2,
       "speed": 7,
       "intendedRole": "initiative engine",
       "asset": {
@@ -672,8 +744,8 @@
       "element": "electric",
       "rarity": "common",
       "damage": 6,
-      "energyCost": 3.0,
-      "cooldown": 2.0,
+      "energyCost": 3,
+      "cooldown": 2,
       "speed": 3,
       "intendedRole": "unusually heavy electric hit",
       "asset": {
@@ -699,8 +771,8 @@
       "element": "electric",
       "rarity": "common",
       "damage": 4,
-      "energyCost": 2.0,
-      "cooldown": 1.0,
+      "energyCost": 2,
+      "cooldown": 1,
       "speed": 4,
       "intendedRole": "rapid cadence",
       "asset": {
@@ -726,8 +798,8 @@
       "element": "electric",
       "rarity": "refined",
       "damage": 5,
-      "energyCost": 1.0,
-      "cooldown": 2.0,
+      "energyCost": 1,
+      "cooldown": 2,
       "speed": 6,
       "intendedRole": "efficient speed pressure",
       "asset": {
@@ -753,8 +825,8 @@
       "element": "electric",
       "rarity": "refined",
       "damage": 4,
-      "energyCost": 1.0,
-      "cooldown": 1.0,
+      "energyCost": 1,
+      "cooldown": 1,
       "speed": 5,
       "intendedRole": "premium cadence",
       "asset": {
@@ -780,8 +852,8 @@
       "element": "electric",
       "rarity": "refined",
       "damage": 3,
-      "energyCost": 2.0,
-      "cooldown": 1.0,
+      "energyCost": 2,
+      "cooldown": 1,
       "speed": 8,
       "intendedRole": "pure initiative",
       "asset": {
@@ -807,8 +879,8 @@
       "element": "electric",
       "rarity": "refined",
       "damage": 7,
-      "energyCost": 3.0,
-      "cooldown": 2.0,
+      "energyCost": 3,
+      "cooldown": 2,
       "speed": 4,
       "intendedRole": "electric bruiser",
       "asset": {
@@ -834,8 +906,8 @@
       "element": "electric",
       "rarity": "refined",
       "damage": 5,
-      "energyCost": 2.0,
-      "cooldown": 1.0,
+      "energyCost": 2,
+      "cooldown": 1,
       "speed": 6,
       "intendedRole": "sustained tempo",
       "asset": {
@@ -861,8 +933,8 @@
       "element": "electric",
       "rarity": "rare",
       "damage": 6,
-      "energyCost": 1.0,
-      "cooldown": 1.0,
+      "energyCost": 1,
+      "cooldown": 1,
       "speed": 7,
       "intendedRole": "high-efficiency tempo",
       "asset": {
@@ -888,8 +960,8 @@
       "element": "electric",
       "rarity": "rare",
       "damage": 4,
-      "energyCost": 1.0,
-      "cooldown": 2.0,
+      "energyCost": 1,
+      "cooldown": 2,
       "speed": 10,
       "intendedRole": "extreme initiative",
       "asset": {
@@ -915,8 +987,8 @@
       "element": "electric",
       "rarity": "rare",
       "damage": 8,
-      "energyCost": 2.0,
-      "cooldown": 2.0,
+      "energyCost": 2,
+      "cooldown": 2,
       "speed": 5,
       "intendedRole": "rare burst option",
       "asset": {
@@ -942,8 +1014,8 @@
       "element": "electric",
       "rarity": "rare",
       "damage": 5,
-      "energyCost": 2.0,
-      "cooldown": 1.0,
+      "energyCost": 2,
+      "cooldown": 1,
       "speed": 8,
       "intendedRole": "speed and cadence hybrid",
       "asset": {
@@ -969,8 +1041,8 @@
       "element": "electric",
       "rarity": "epic",
       "damage": 5,
-      "energyCost": 1.0,
-      "cooldown": 2.0,
+      "energyCost": 1,
+      "cooldown": 2,
       "speed": 12,
       "intendedRole": "supreme initiative",
       "asset": {
@@ -996,8 +1068,8 @@
       "element": "electric",
       "rarity": "epic",
       "damage": 7,
-      "energyCost": 1.0,
-      "cooldown": 1.0,
+      "energyCost": 1,
+      "cooldown": 1,
       "speed": 8,
       "intendedRole": "elite efficient pressure",
       "asset": {
@@ -1023,8 +1095,8 @@
       "element": "electric",
       "rarity": "epic",
       "damage": 9,
-      "energyCost": 2.0,
-      "cooldown": 2.0,
+      "energyCost": 2,
+      "cooldown": 2,
       "speed": 6,
       "intendedRole": "high-damage electric apex",
       "asset": {
@@ -1050,8 +1122,8 @@
       "element": "electric",
       "rarity": "epic",
       "damage": 3,
-      "energyCost": 1.0,
-      "cooldown": 1.0,
+      "energyCost": 1,
+      "cooldown": 1,
       "speed": 14,
       "intendedRole": "absolute speed specialization",
       "asset": {
@@ -1077,8 +1149,8 @@
       "element": "ice",
       "rarity": "common",
       "damage": 4,
-      "energyCost": 3.0,
-      "cooldown": 1.0,
+      "energyCost": 3,
+      "cooldown": 1,
       "speed": 1,
       "intendedRole": "repeatable ice pressure",
       "asset": {
@@ -1104,8 +1176,8 @@
       "element": "ice",
       "rarity": "common",
       "damage": 5,
-      "energyCost": 4.0,
-      "cooldown": 1.0,
+      "energyCost": 4,
+      "cooldown": 1,
       "speed": 0,
       "intendedRole": "high-energy cadence",
       "asset": {
@@ -1131,8 +1203,8 @@
       "element": "ice",
       "rarity": "common",
       "damage": 3,
-      "energyCost": 2.0,
-      "cooldown": 1.0,
+      "energyCost": 2,
+      "cooldown": 1,
       "speed": 2,
       "intendedRole": "lighter ice tempo",
       "asset": {
@@ -1158,8 +1230,8 @@
       "element": "ice",
       "rarity": "common",
       "damage": 6,
-      "energyCost": 4.0,
-      "cooldown": 2.0,
+      "energyCost": 4,
+      "cooldown": 2,
       "speed": 0,
       "intendedRole": "dense frozen strike",
       "asset": {
@@ -1185,8 +1257,8 @@
       "element": "ice",
       "rarity": "common",
       "damage": 2,
-      "energyCost": 2.0,
-      "cooldown": 1.0,
+      "energyCost": 2,
+      "cooldown": 1,
       "speed": 3,
       "intendedRole": "initiative-capable ice",
       "asset": {
@@ -1212,8 +1284,8 @@
       "element": "ice",
       "rarity": "refined",
       "damage": 6,
-      "energyCost": 4.0,
-      "cooldown": 1.0,
+      "energyCost": 4,
+      "cooldown": 1,
       "speed": 1,
       "intendedRole": "strong repeatable pressure",
       "asset": {
@@ -1239,8 +1311,8 @@
       "element": "ice",
       "rarity": "refined",
       "damage": 5,
-      "energyCost": 3.0,
-      "cooldown": 1.0,
+      "energyCost": 3,
+      "cooldown": 1,
       "speed": 2,
       "intendedRole": "balanced ice action",
       "asset": {
@@ -1266,8 +1338,8 @@
       "element": "ice",
       "rarity": "refined",
       "damage": 8,
-      "energyCost": 5.0,
-      "cooldown": 2.0,
+      "energyCost": 5,
+      "cooldown": 2,
       "speed": 0,
       "intendedRole": "heavy frozen impact",
       "asset": {
@@ -1293,8 +1365,8 @@
       "element": "ice",
       "rarity": "refined",
       "damage": 4,
-      "energyCost": 2.0,
-      "cooldown": 1.0,
+      "energyCost": 2,
+      "cooldown": 1,
       "speed": 3,
       "intendedRole": "efficient frost cadence",
       "asset": {
@@ -1320,8 +1392,8 @@
       "element": "ice",
       "rarity": "refined",
       "damage": 7,
-      "energyCost": 5.0,
-      "cooldown": 1.0,
+      "energyCost": 5,
+      "cooldown": 1,
       "speed": 0,
       "intendedRole": "high-energy relentless attack",
       "asset": {
@@ -1347,8 +1419,8 @@
       "element": "ice",
       "rarity": "rare",
       "damage": 8,
-      "energyCost": 5.0,
-      "cooldown": 1.0,
+      "energyCost": 5,
+      "cooldown": 1,
       "speed": 1,
       "intendedRole": "rare sustained damage",
       "asset": {
@@ -1374,8 +1446,8 @@
       "element": "ice",
       "rarity": "rare",
       "damage": 6,
-      "energyCost": 3.0,
-      "cooldown": 1.0,
+      "energyCost": 3,
+      "cooldown": 1,
       "speed": 4,
       "intendedRole": "speed-specialized ice",
       "asset": {
@@ -1401,8 +1473,8 @@
       "element": "ice",
       "rarity": "rare",
       "damage": 10,
-      "energyCost": 6.0,
-      "cooldown": 2.0,
+      "energyCost": 6,
+      "cooldown": 2,
       "speed": 0,
       "intendedRole": "glacial burst",
       "asset": {
@@ -1428,8 +1500,8 @@
       "element": "ice",
       "rarity": "rare",
       "damage": 7,
-      "energyCost": 4.0,
-      "cooldown": 1.0,
+      "energyCost": 4,
+      "cooldown": 1,
       "speed": 2,
       "intendedRole": "efficient repeated pressure",
       "asset": {
@@ -1455,8 +1527,8 @@
       "element": "ice",
       "rarity": "epic",
       "damage": 11,
-      "energyCost": 6.0,
-      "cooldown": 1.0,
+      "energyCost": 6,
+      "cooldown": 1,
       "speed": 1,
       "intendedRole": "supreme sustained ice",
       "asset": {
@@ -1482,8 +1554,8 @@
       "element": "ice",
       "rarity": "epic",
       "damage": 8,
-      "energyCost": 4.0,
-      "cooldown": 1.0,
+      "energyCost": 4,
+      "cooldown": 1,
       "speed": 5,
       "intendedRole": "elite initiative ice",
       "asset": {
@@ -1509,8 +1581,8 @@
       "element": "ice",
       "rarity": "epic",
       "damage": 13,
-      "energyCost": 7.0,
-      "cooldown": 2.0,
+      "energyCost": 7,
+      "cooldown": 2,
       "speed": 0,
       "intendedRole": "maximum frozen impact",
       "asset": {
@@ -1536,8 +1608,8 @@
       "element": "ice",
       "rarity": "epic",
       "damage": 7,
-      "energyCost": 3.0,
-      "cooldown": 1.0,
+      "energyCost": 3,
+      "cooldown": 1,
       "speed": 3,
       "intendedRole": "premium energy efficiency",
       "asset": {
@@ -1674,7 +1746,7 @@
       "rarity": "common",
       "damage": 3,
       "energyPenalty": 0.4,
-      "cooldownPenalty": 1.0,
+      "cooldownPenalty": 1,
       "speed": 0,
       "intendedRole": "cooldown-heavy power",
       "asset": {
@@ -1755,7 +1827,7 @@
       "rarity": "refined",
       "damage": 5,
       "energyPenalty": 0.9,
-      "cooldownPenalty": 1.0,
+      "cooldownPenalty": 1,
       "speed": 0,
       "intendedRole": "large damage enhancement",
       "asset": {
@@ -1836,7 +1908,7 @@
       "rarity": "rare",
       "damage": 6,
       "energyPenalty": 0.8,
-      "cooldownPenalty": 1.0,
+      "cooldownPenalty": 1,
       "speed": 1,
       "intendedRole": "rare burst enhancement",
       "asset": {
@@ -1916,8 +1988,8 @@
       "element": "fire",
       "rarity": "rare",
       "damage": 7,
-      "energyPenalty": 1.0,
-      "cooldownPenalty": 1.0,
+      "energyPenalty": 1,
+      "cooldownPenalty": 1,
       "speed": 0,
       "intendedRole": "maximum penalty burst",
       "asset": {
@@ -1944,7 +2016,7 @@
       "rarity": "epic",
       "damage": 8,
       "energyPenalty": 0.9,
-      "cooldownPenalty": 1.0,
+      "cooldownPenalty": 1,
       "speed": 1,
       "intendedRole": "supreme fire damage",
       "asset": {
@@ -2024,8 +2096,8 @@
       "element": "fire",
       "rarity": "epic",
       "damage": 10,
-      "energyPenalty": 1.0,
-      "cooldownPenalty": 1.0,
+      "energyPenalty": 1,
+      "cooldownPenalty": 1,
       "speed": 0,
       "intendedRole": "singular catastrophic enhancement",
       "asset": {
@@ -2645,7 +2717,7 @@
       "element": "ice",
       "rarity": "common",
       "damage": 2,
-      "energyPenalty": 1.0,
+      "energyPenalty": 1,
       "cooldownPenalty": 0.1,
       "speed": 0,
       "intendedRole": "energy-heavy stable carrier",
@@ -2726,7 +2798,7 @@
       "element": "ice",
       "rarity": "refined",
       "damage": 5,
-      "energyPenalty": 1.0,
+      "energyPenalty": 1,
       "cooldownPenalty": 0.2,
       "speed": 0,
       "intendedRole": "heavy ice enhancement",
@@ -2807,7 +2879,7 @@
       "element": "ice",
       "rarity": "rare",
       "damage": 6,
-      "energyPenalty": 1.0,
+      "energyPenalty": 1,
       "cooldownPenalty": 0.2,
       "speed": 1,
       "intendedRole": "rare high-energy boost",
@@ -2888,7 +2960,7 @@
       "element": "ice",
       "rarity": "rare",
       "damage": 7,
-      "energyPenalty": 1.0,
+      "energyPenalty": 1,
       "cooldownPenalty": 0.3,
       "speed": 0,
       "intendedRole": "glacial damage specialist",
@@ -2915,7 +2987,7 @@
       "element": "ice",
       "rarity": "epic",
       "damage": 8,
-      "energyPenalty": 1.0,
+      "energyPenalty": 1,
       "cooldownPenalty": 0.2,
       "speed": 1,
       "intendedRole": "supreme ice enhancement",
@@ -2996,7 +3068,7 @@
       "element": "ice",
       "rarity": "epic",
       "damage": 10,
-      "energyPenalty": 1.0,
+      "energyPenalty": 1,
       "cooldownPenalty": 0.4,
       "speed": 0,
       "intendedRole": "absolute frozen power",
@@ -3359,7 +3431,7 @@
       "cooldown": 4,
       "speed": 1,
       "energyPenalty": 0.5,
-      "cooldownPenalty": 1.0,
+      "cooldownPenalty": 1,
       "skill": null,
       "intendedRole": "heavy periodic attacker",
       "asset": {
@@ -3538,8 +3610,8 @@
       "damage": 10,
       "cooldown": 4,
       "speed": 0,
-      "energyPenalty": 1.0,
-      "cooldownPenalty": 1.0,
+      "energyPenalty": 1,
+      "cooldownPenalty": 1,
       "skill": "pierce",
       "intendedRole": "maximum burst specialist",
       "asset": {
@@ -3569,7 +3641,7 @@
       "cooldown": 4,
       "speed": 1,
       "energyPenalty": 0.9,
-      "cooldownPenalty": 1.0,
+      "cooldownPenalty": 1,
       "skill": "pierce",
       "intendedRole": "supreme single-target pressure",
       "asset": {
@@ -3688,8 +3760,8 @@
       "damage": 13,
       "cooldown": 5,
       "speed": 0,
-      "energyPenalty": 1.0,
-      "cooldownPenalty": 1.0,
+      "energyPenalty": 1,
+      "cooldownPenalty": 1,
       "skill": "rage",
       "intendedRole": "catastrophic endgame threat",
       "asset": {
@@ -4858,7 +4930,7 @@
       "damage": 2,
       "cooldown": 2,
       "speed": 0,
-      "energyPenalty": 1.0,
+      "energyPenalty": 1,
       "cooldownPenalty": 0.2,
       "skill": null,
       "intendedRole": "massive health specialist",
@@ -4948,7 +5020,7 @@
       "damage": 4,
       "cooldown": 1,
       "speed": 0,
-      "energyPenalty": 1.0,
+      "energyPenalty": 1,
       "cooldownPenalty": 0.1,
       "skill": "taunt",
       "intendedRole": "supreme defensive anchor",
@@ -5008,7 +5080,7 @@
       "damage": 2,
       "cooldown": 2,
       "speed": 0,
-      "energyPenalty": 1.0,
+      "energyPenalty": 1,
       "cooldownPenalty": 0.2,
       "skill": null,
       "intendedRole": "absolute health specialization",
@@ -5068,7 +5140,7 @@
       "damage": 5,
       "cooldown": 1,
       "speed": 1,
-      "energyPenalty": 1.0,
+      "energyPenalty": 1,
       "cooldownPenalty": 0.1,
       "skill": "shield",
       "intendedRole": "endgame resilient attacker",
@@ -5091,201 +5163,1670 @@
   ],
   "spells": [
     {
-      "id": "firebolt",
-      "name": "Firebolt",
+      "id": "burnI",
+      "name": "Burn I",
       "type": "spell",
       "element": "fire",
       "rarity": "common",
-      "energyPenalty": 1,
-      "cooldownPenalty": 0,
-      "speed": 0,
+      "energyPenalty": 0.3,
+      "cooldownPenalty": 0.4,
+      "speed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
       "effects": [
         {
-          "type": "dealDamage",
-          "amount": 4,
-          "target": "any"
+          "type": "applyStatus",
+          "status": "burn",
+          "damage": 3,
+          "durationOwnerTurns": 1,
+          "tickTiming": "startOfTargetControllerTurn"
         }
       ],
-      "intendedRole": "reliable direct fire burst",
+      "intendedRole": "Apply BURN to the targeted monster. BURN deals 3 fire damage at the start of that monster controller's next turn, then expires.",
       "asset": {
         "styleId": "battlenessAssetStyleV1",
-        "visualDescription": "Firebolt is a compact forward-pointing projectile with a black obsidian core wrapped in tightly spiraling orange flame. A short comet tail, a few controlled sparks and a sharp spearhead silhouette communicate a focused impact rather than a loose fireball. Volcanic fire palette of ember red, molten orange, charcoal black and white-hot gold. The rarity treatment uses a simple practical construction with one focal effect and modest magical spill. The isolated spell effect remains fully visible and readable at inventory-icon size.",
-        "generationPrompt": "Single isolated fantasy game spell asset named 'Firebolt': a compact forward-pointing projectile with a black obsidian core wrapped in tightly spiraling orange flame, short comet tail, controlled sparks, sharp spearhead silhouette. Volcanic fire palette of ember red, molten orange, charcoal black and white-hot gold. Visual gameplay role: reliable direct fire burst. Rarity common: a simple practical construction with one focal effect and modest magical spill. No caster and no environment. Dynamic front-biased three-quarter view, centered, fully visible, strong readable silhouette, AAA dark-fantasy action-RPG spell icon, highly detailed 3D magical-effect concept render, crisp edges, cinematic rim lighting, transparent alpha background.",
-        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, caster, hand, wand, weapon, multiple spells, duplicate effect, cropped effect, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, shapeless cloud, excessive bloom, excessive particles, glitter noise, lens flare covering the spell, unreadable silhouette",
+        "visualDescription": "A small crimson spell sigil shaped like a curling flame brand, suspended above a blackened metal seal. The flame should be compact and controlled rather than explosive, with one bright ember core and a short trail of smoke. Isolated game-item icon, centered, transparent background, no text, no border, readable at small size.",
+        "generationPrompt": "A small crimson spell sigil shaped like a curling flame brand, suspended above a blackened metal seal. The flame should be compact and controlled rather than explosive, with one bright ember core and a short trail of smoke. Isolated game-item icon, centered, transparent background, no text, no border, readable at small size.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
         "composition": {
           "format": "square",
           "background": "transparent",
           "subjectCount": 1,
           "framing": "centered with safe transparent margin",
-          "camera": "dynamic front-biased three-quarter view",
+          "camera": "front-biased three-quarter view",
           "atlasReady": true
         },
-        "visualTags": ["spell", "fire", "common", "direct-damage"]
+        "visualTags": ["spell", "fire", "common"]
       }
     },
     {
-      "id": "solarFlare",
-      "name": "Solar Flare",
+      "id": "burnII",
+      "name": "Burn II",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "refined",
+      "energyPenalty": 0.5,
+      "cooldownPenalty": 0.6,
+      "speed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "effects": [
+        {
+          "type": "applyStatus",
+          "status": "burn",
+          "damage": 3,
+          "durationOwnerTurns": 2,
+          "tickTiming": "startOfTargetControllerTurn"
+        }
+      ],
+      "intendedRole": "Apply BURN to the targeted monster. BURN deals 3 fire damage at the start of each of its controller's next 2 turns.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A refined double-loop flame glyph forged from glowing copper and red crystal, with two visible ember rings indicating two turns. Elegant magical craftsmanship, restrained sparks, transparent background, no text, no frame.",
+        "generationPrompt": "A refined double-loop flame glyph forged from glowing copper and red crystal, with two visible ember rings indicating two turns. Elegant magical craftsmanship, restrained sparks, transparent background, no text, no frame.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "fire", "refined"]
+      }
+    },
+    {
+      "id": "burnIII",
+      "name": "Burn III",
       "type": "spell",
       "element": "fire",
       "rarity": "rare",
-      "energyPenalty": 1,
-      "cooldownPenalty": 2,
-      "speed": 0,
+      "energyPenalty": 0.7,
+      "cooldownPenalty": 0.8,
+      "speed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
       "effects": [
         {
-          "type": "dealDamage",
-          "amount": 7,
-          "target": "any"
+          "type": "applyStatus",
+          "status": "burn",
+          "damage": 3,
+          "durationOwnerTurns": 3,
+          "tickTiming": "startOfTargetControllerTurn"
         }
       ],
-      "intendedRole": "heavy delayed fire burst",
+      "intendedRole": "Apply BURN to the targeted monster. BURN deals 3 fire damage at the start of each of its controller's next 3 turns.",
       "asset": {
         "styleId": "battlenessAssetStyleV1",
-        "visualDescription": "Solar Flare is a radiant miniature solar disc split by a bright white-gold core and surrounded by asymmetric red-orange prominences. Concentric heat rings and two sweeping flame arcs create rare relic-like complexity while keeping the circular blast silhouette readable. Volcanic fire palette of ember red, molten orange, charcoal black and white-hot gold. The rarity treatment uses named-relic complexity, unusual asymmetry, layered magical structure and strong controlled energy. The isolated spell effect remains fully visible and readable at inventory-icon size.",
-        "generationPrompt": "Single isolated fantasy game spell asset named 'Solar Flare': a radiant miniature solar disc with a white-gold core, asymmetric red-orange prominences, concentric heat rings and two sweeping flame arcs. Volcanic fire palette of ember red, molten orange, charcoal black and white-hot gold. Visual gameplay role: heavy delayed fire burst. Rarity rare: named-relic complexity, unusual asymmetry, layered magical structure and strong controlled energy. No caster and no environment. Dynamic front-biased three-quarter view, centered, fully visible, strong readable silhouette, AAA dark-fantasy action-RPG spell icon, highly detailed 3D magical-effect concept render, crisp edges, cinematic rim lighting, transparent alpha background.",
-        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, caster, hand, wand, weapon, multiple spells, duplicate effect, cropped effect, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, shapeless cloud, excessive bloom, excessive particles, glitter noise, lens flare covering the spell, unreadable silhouette",
+        "visualDescription": "A rare ruby-red occult brand with three concentric flame arcs orbiting a dark volcanic gemstone. The object should feel ancient and dangerous, with molten cracks and a clean silhouette, transparent background, no writing.",
+        "generationPrompt": "A rare ruby-red occult brand with three concentric flame arcs orbiting a dark volcanic gemstone. The object should feel ancient and dangerous, with molten cracks and a clean silhouette, transparent background, no writing.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
         "composition": {
           "format": "square",
           "background": "transparent",
           "subjectCount": 1,
           "framing": "centered with safe transparent margin",
-          "camera": "dynamic front-biased three-quarter view",
+          "camera": "front-biased three-quarter view",
           "atlasReady": true
         },
-        "visualTags": ["spell", "fire", "rare", "direct-damage"]
+        "visualTags": ["spell", "fire", "rare"]
       }
     },
     {
-      "id": "spark",
-      "name": "Spark",
+      "id": "carbonize",
+      "name": "Carbonize",
       "type": "spell",
-      "element": "electric",
-      "rarity": "common",
-      "energyPenalty": 0,
-      "cooldownPenalty": 0,
+      "element": "fire",
+      "rarity": "refined",
+      "energyPenalty": 0.7,
+      "cooldownPenalty": 0.8,
       "speed": 0,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "effects": [
+        {
+          "type": "forEachMonster",
+          "scope": "allMonsters",
+          "effect": {
+            "type": "applyStatus",
+            "status": "burn",
+            "damage": 3,
+            "durationOwnerTurns": 1
+          }
+        }
+      ],
+      "intendedRole": "Apply BURN for 1 turn to every monster currently in play, including allied monsters. Each Burn deals 3 fire damage at the start of that monster controller's next turn.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A charred spherical relic radiating a circular heat wave in every direction, surrounded by silhouettes of tiny burning motes. The center resembles compressed black coal with red-hot fractures. Wide but uncluttered composition, transparent background, no text.",
+        "generationPrompt": "A charred spherical relic radiating a circular heat wave in every direction, surrounded by silhouettes of tiny burning motes. The center resembles compressed black coal with red-hot fractures. Wide but uncluttered composition, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "fire", "refined"]
+      }
+    },
+    {
+      "id": "giftPierce",
+      "name": "Gift: Pierce",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "refined",
+      "energyPenalty": 0.5,
+      "cooldownPenalty": 0.7,
+      "speed": 2,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "effects": [
+        {
+          "type": "grantSkill",
+          "skill": "pierce",
+          "duration": "untilMonsterDestroyed",
+          "duplicateBehavior": "noEffect"
+        }
+      ],
+      "intendedRole": "Give PIERCE to the targeted monster for the rest of the battle. If it already has PIERCE, the spell resolves with no additional effect.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A sharp scarlet spearhead made of fire and obsidian passing through a cracked circular ward, clearly communicating penetration. Strong diagonal silhouette, minimal particles, transparent background, no text.",
+        "generationPrompt": "A sharp scarlet spearhead made of fire and obsidian passing through a cracked circular ward, clearly communicating penetration. Strong diagonal silhouette, minimal particles, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "fire", "refined"]
+      }
+    },
+    {
+      "id": "damageOnKill",
+      "name": "Damage on Kill",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "rare",
+      "energyPenalty": 0.6,
+      "cooldownPenalty": 0.8,
+      "speed": 1,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "effects": [
+        {
+          "type": "registerTrigger",
+          "event": "supportedRingKilledMonster",
+          "effect": {
+            "type": "modifySupportedRingDamage",
+            "amount": 2,
+            "duration": "battle"
+          }
+        }
+      ],
+      "intendedRole": "For the rest of the battle, whenever the supported ring kills a monster with its ring-and-gem damage, that ring gains +2 damage.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A flaming ring engraving consuming a defeated monster-shaped shadow and growing brighter. Show a circular red-gold ring with small upward power notches, dramatic but compact, transparent background, no text.",
+        "generationPrompt": "A flaming ring engraving consuming a defeated monster-shaped shadow and growing brighter. Show a circular red-gold ring with small upward power notches, dramatic but compact, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "fire", "rare"]
+      }
+    },
+    {
+      "id": "devotion",
+      "name": "Devotion",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "rare",
+      "energyPenalty": 0.7,
+      "cooldownPenalty": 0.8,
+      "speed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "effects": [
+        {
+          "type": "destroyMonster",
+          "target": "selected"
+        },
+        {
+          "type": "randomTarget",
+          "scope": "otherAlliedMonsters",
+          "onSuccess": {
+            "type": "modifyMonsterDamage",
+            "amountFrom": "destroyedTargetCurrentDamage",
+            "duration": "battle"
+          }
+        }
+      ],
+      "intendedRole": "Destroy the targeted allied monster. A random other allied monster permanently gains damage equal to the destroyed monster's current damage for the rest of the battle.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A solemn fire ritual: one crimson creature-shaped flame dissolves into a stream of light entering another shadowed creature. Use a ceremonial red-gold brazier motif, emotionally sacrificial rather than gruesome, transparent background, no text.",
+        "generationPrompt": "A solemn fire ritual: one crimson creature-shaped flame dissolves into a stream of light entering another shadowed creature. Use a ceremonial red-gold brazier motif, emotionally sacrificial rather than gruesome, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "fire", "rare"]
+      }
+    },
+    {
+      "id": "pierceLegacy",
+      "name": "Pierce",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "epic",
+      "energyPenalty": 0.8,
+      "cooldownPenalty": 0.9,
+      "speed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["enemyMonster"]
+      },
+      "effects": [
+        {
+          "type": "conditionalPierceForAction",
+          "target": "selectedEnemyMonster",
+          "source": "ringAndGemDamage"
+        }
+      ],
+      "intendedRole": "If the targeted enemy monster is destroyed by the ring-and-gem damage of this action, deal the overkill damage to its controlling hero.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "An epic lance of white-hot flame piercing through a shattered monster mask and continuing toward a distant red halo. High-impact straight trajectory, prestigious magical weapon styling, transparent background, no text.",
+        "generationPrompt": "An epic lance of white-hot flame piercing through a shattered monster mask and continuing toward a distant red halo. High-impact straight trajectory, prestigious magical weapon styling, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "fire", "epic"]
+      }
+    },
+    {
+      "id": "destruction",
+      "name": "Destruction",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "epic",
+      "energyPenalty": 1,
+      "cooldownPenalty": 1,
+      "speed": 0,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "effects": [
+        {
+          "type": "destroyAllMonsters",
+          "scope": "allMonsters"
+        }
+      ],
+      "intendedRole": "Destroy every monster currently in play, allied and enemy.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A catastrophic black-red magical core collapsing inward while monster silhouettes disintegrate around it. Avoid depicting gore; use ash, fractured armor fragments, and a powerful circular annihilation wave. Epic scale, transparent background, no text.",
+        "generationPrompt": "A catastrophic black-red magical core collapsing inward while monster silhouettes disintegrate around it. Avoid depicting gore; use ash, fractured armor fragments, and a powerful circular annihilation wave. Epic scale, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "fire", "epic"]
+      }
+    },
+    {
+      "id": "giftRage",
+      "name": "Gift: Rage",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "refined",
+      "energyPenalty": 0.4,
+      "cooldownPenalty": 0.6,
+      "speed": 2,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "effects": [
+        {
+          "type": "grantSkill",
+          "skill": "rage",
+          "duration": "untilMonsterDestroyed",
+          "duplicateBehavior": "noEffect"
+        }
+      ],
+      "intendedRole": "Give RAGE to the targeted monster for the rest of the battle. If it already has RAGE, the spell has no additional effect.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A jagged red war rune wrapped around a clenched beast claw, with a controlled burst of flame behind it. Aggressive angular design, transparent background, no text.",
+        "generationPrompt": "A jagged red war rune wrapped around a clenched beast claw, with a controlled burst of flame behind it. Aggressive angular design, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "fire", "refined"]
+      }
+    },
+    {
+      "id": "bloodflame",
+      "name": "Bloodflame",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "refined",
+      "energyPenalty": 0.5,
+      "cooldownPenalty": 0.7,
+      "speed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
       "effects": [
         {
           "type": "dealDamage",
           "amount": 2,
-          "target": "any"
+          "element": "fire",
+          "target": "selected"
+        },
+        {
+          "type": "ifTargetSurvives",
+          "effect": {
+            "type": "modifyMonsterDamage",
+            "amount": 2,
+            "duration": "battle"
+          }
         }
       ],
-      "intendedRole": "fast efficient electric strike",
+      "intendedRole": "Deal 2 fire damage to the targeted allied monster. If it survives, it permanently gains +2 damage for the rest of the battle.",
       "asset": {
         "styleId": "battlenessAssetStyleV1",
-        "visualDescription": "Spark is a small needle-like discharge jumping between two close fragments of stormglass that read as one unified magical phenomenon. One bright yellow-white zigzag and a restrained blue corona emphasize speed, precision and low power cost. Storm-electric palette of bright yellow, white-gold, dark gunmetal and limited blue accents. The rarity treatment uses a simple practical construction with one focal effect and modest magical spill. The isolated spell effect remains fully visible and readable at inventory-icon size.",
-        "generationPrompt": "Single isolated fantasy game spell asset named 'Spark': a small needle-like yellow-white electrical discharge jumping between two close stormglass fragments as one unified phenomenon, restrained blue corona, fast precise silhouette. Storm-electric palette of bright yellow, white-gold, dark gunmetal and limited blue accents. Visual gameplay role: fast efficient electric strike. Rarity common: a simple practical construction with one focal effect and modest magical spill. No caster and no environment. Dynamic front-biased three-quarter view, centered, fully visible, strong readable silhouette, AAA dark-fantasy action-RPG spell icon, highly detailed 3D magical-effect concept render, crisp edges, cinematic rim lighting, transparent alpha background.",
-        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, caster, hand, wand, weapon, multiple spells, duplicate effect, cropped effect, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, shapeless cloud, excessive bloom, excessive particles, glitter noise, lens flare covering the spell, unreadable silhouette",
+        "visualDescription": "A controlled blood-red flame flowing into a monster heart-shaped crystal, half dangerous and half empowering. No gore, use magical crimson liquid-light and ember veins, transparent background, no text.",
+        "generationPrompt": "A controlled blood-red flame flowing into a monster heart-shaped crystal, half dangerous and half empowering. No gore, use magical crimson liquid-light and ember veins, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
         "composition": {
           "format": "square",
           "background": "transparent",
           "subjectCount": 1,
           "framing": "centered with safe transparent margin",
-          "camera": "dynamic front-biased three-quarter view",
+          "camera": "front-biased three-quarter view",
           "atlasReady": true
         },
-        "visualTags": ["spell", "electric", "common", "direct-damage"]
+        "visualTags": ["spell", "fire", "refined"]
       }
     },
     {
-      "id": "arcPulse",
-      "name": "Arc Pulse",
+      "id": "chainExplosion",
+      "name": "Chain Explosion",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "rare",
+      "energyPenalty": 0.7,
+      "cooldownPenalty": 0.9,
+      "speed": 0,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "effects": [
+        {
+          "type": "captureStat",
+          "source": "selected",
+          "stat": "currentDamage"
+        },
+        {
+          "type": "destroyMonster",
+          "target": "selected"
+        },
+        {
+          "type": "dealDamageToAll",
+          "scope": "enemyMonsters",
+          "amountFromCapturedStat": "currentDamage",
+          "element": "fire"
+        }
+      ],
+      "intendedRole": "Destroy the targeted allied monster, then deal fire damage equal to its current damage to every enemy monster.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A sacrificed fiery creature collapsing into a ring of explosions that strikes three opposing silhouettes. Use a readable radial blast with separate fire trails, transparent background, no text.",
+        "generationPrompt": "A sacrificed fiery creature collapsing into a ring of explosions that strikes three opposing silhouettes. Use a readable radial blast with separate fire trails, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "fire", "rare"]
+      }
+    },
+    {
+      "id": "funeralBrand",
+      "name": "Funeral Brand",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "rare",
+      "energyPenalty": 0.6,
+      "cooldownPenalty": 0.8,
+      "speed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["enemyMonster"]
+      },
+      "effects": [
+        {
+          "type": "registerActionScopedTrigger",
+          "event": "selectedMonsterDestroyedDuringCurrentRingAction",
+          "effect": {
+            "type": "dealDamageToControllingHero",
+            "amountFrom": "destroyedMonsterCurrentDamage",
+            "element": "fire"
+          }
+        }
+      ],
+      "intendedRole": "Mark the targeted enemy monster for this action only. If it is destroyed during this complete ring action, deal damage equal to its current damage to its controlling hero.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A dark funerary seal burning beneath a monster silhouette, with a single flame thread linking it to a distant hero crown. Somber red-black aesthetic, transparent background, no text.",
+        "generationPrompt": "A dark funerary seal burning beneath a monster silhouette, with a single flame thread linking it to a distant hero crown. Somber red-black aesthetic, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "fire", "rare"]
+      }
+    },
+    {
+      "id": "lastBreath",
+      "name": "Last Breath",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "epic",
+      "energyPenalty": 0.9,
+      "cooldownPenalty": 1,
+      "speed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "effects": [
+        {
+          "type": "applyStatus",
+          "status": "lastBreath",
+          "duration": "endOfCurrentTurn",
+          "onDestroy": {
+            "type": "attackRandomLegalEnemyBeforeRemoval",
+            "ignoreCurrentCooldown": true
+          }
+        }
+      ],
+      "intendedRole": "Until the end of the current turn, if the targeted allied monster is destroyed, it performs one final attack against a random legal enemy target before being removed.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A fading phoenix-like ember creature delivering one final strike as its body turns to ash. Dynamic but clear silhouette, intense last spark, transparent background, no text.",
+        "generationPrompt": "A fading phoenix-like ember creature delivering one final strike as its body turns to ash. Dynamic but clear silhouette, intense last spark, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "fire", "epic"]
+      }
+    },
+    {
+      "id": "shockI",
+      "name": "Shock I",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "common",
+      "energyPenalty": 0.2,
+      "cooldownPenalty": 0.3,
+      "speed": 4,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "effects": [
+        {
+          "type": "applyStatus",
+          "status": "shock",
+          "durationOwnerTurns": 1
+        }
+      ],
+      "intendedRole": "Apply SHOCK to the targeted monster for 1 owner turn. A shocked monster cannot attack but can still use TAUNT.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A compact yellow electrical restraint made of one lightning loop around a small monster silhouette. Bright but clean icon, transparent background, no text.",
+        "generationPrompt": "A compact yellow electrical restraint made of one lightning loop around a small monster silhouette. Bright but clean icon, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "electric", "common"]
+      }
+    },
+    {
+      "id": "shockII",
+      "name": "Shock II",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "refined",
+      "energyPenalty": 0.3,
+      "cooldownPenalty": 0.4,
+      "speed": 7,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "effects": [
+        {
+          "type": "applyStatus",
+          "status": "shock",
+          "durationOwnerTurns": 2
+        }
+      ],
+      "intendedRole": "Apply SHOCK to the targeted monster for 2 owner turns.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A refined double electrical coil locking a monster emblem, with two visible yellow arcs and polished copper contacts. Transparent background, no text.",
+        "generationPrompt": "A refined double electrical coil locking a monster emblem, with two visible yellow arcs and polished copper contacts. Transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "electric", "refined"]
+      }
+    },
+    {
+      "id": "shockIII",
+      "name": "Shock III",
       "type": "spell",
       "element": "electric",
       "rarity": "rare",
-      "energyPenalty": 0,
-      "cooldownPenalty": 1,
-      "speed": 0,
+      "energyPenalty": 0.5,
+      "cooldownPenalty": 0.6,
+      "speed": 10,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
       "effects": [
         {
-          "type": "dealDamage",
-          "amount": 3,
-          "target": "any"
+          "type": "applyStatus",
+          "status": "shock",
+          "durationOwnerTurns": 3
         }
       ],
-      "intendedRole": "controlled electric pulse",
+      "intendedRole": "Apply SHOCK to the targeted monster for 3 owner turns.",
       "asset": {
         "styleId": "battlenessAssetStyleV1",
-        "visualDescription": "Arc Pulse is a rare concentric shockwave shaped like a tilted conductive torus, with a brilliant white-gold center and branching lightning racing around its rim. Layered copper arcs and a clean expanding pulse contour communicate measured area energy without visual noise. Storm-electric palette of bright yellow, white-gold, dark gunmetal and limited blue accents. The rarity treatment uses named-relic complexity, unusual asymmetry, layered magical structure and strong controlled energy. The isolated spell effect remains fully visible and readable at inventory-icon size.",
-        "generationPrompt": "Single isolated fantasy game spell asset named 'Arc Pulse': a tilted conductive torus forming a concentric electric shockwave, brilliant white-gold center, branching lightning around the rim, layered copper arcs, clean expanding pulse contour. Storm-electric palette of bright yellow, white-gold, dark gunmetal and limited blue accents. Visual gameplay role: controlled electric pulse. Rarity rare: named-relic complexity, unusual asymmetry, layered magical structure and strong controlled energy. No caster and no environment. Dynamic front-biased three-quarter view, centered, fully visible, strong readable silhouette, AAA dark-fantasy action-RPG spell icon, highly detailed 3D magical-effect concept render, crisp edges, cinematic rim lighting, transparent alpha background.",
-        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, caster, hand, wand, weapon, multiple spells, duplicate effect, cropped effect, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, shapeless cloud, excessive bloom, excessive particles, glitter noise, lens flare covering the spell, unreadable silhouette",
+        "visualDescription": "A rare tri-pronged lightning cage surrounding a dark creature glyph, with three electric rings and a luminous yellow crystal core. Transparent background, no text.",
+        "generationPrompt": "A rare tri-pronged lightning cage surrounding a dark creature glyph, with three electric rings and a luminous yellow crystal core. Transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
         "composition": {
           "format": "square",
           "background": "transparent",
           "subjectCount": 1,
           "framing": "centered with safe transparent margin",
-          "camera": "dynamic front-biased three-quarter view",
+          "camera": "front-biased three-quarter view",
           "atlasReady": true
         },
-        "visualTags": ["spell", "electric", "rare", "direct-damage"]
+        "visualTags": ["spell", "electric", "rare"]
       }
     },
     {
-      "id": "iceShard",
-      "name": "Ice Shard",
+      "id": "electroshock",
+      "name": "Electroshock",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "refined",
+      "energyPenalty": 0.5,
+      "cooldownPenalty": 0.6,
+      "speed": 8,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "effects": [
+        {
+          "type": "forEachMonster",
+          "scope": "allMonsters",
+          "effect": {
+            "type": "applyStatus",
+            "status": "shock",
+            "durationOwnerTurns": 1
+          }
+        }
+      ],
+      "intendedRole": "Apply SHOCK for 1 owner turn to every monster currently in play, allied and enemy.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A wide electric pulse sphere exploding from a central capacitor and surrounding several monster silhouettes with yellow arcs. Symmetrical field effect, transparent background, no text.",
+        "generationPrompt": "A wide electric pulse sphere exploding from a central capacitor and surrounding several monster silhouettes with yellow arcs. Symmetrical field effect, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "electric", "refined"]
+      }
+    },
+    {
+      "id": "energyOnKill",
+      "name": "Energy on Kill",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "rare",
+      "energyPenalty": 0.3,
+      "cooldownPenalty": 0.5,
+      "speed": 9,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "effects": [
+        {
+          "type": "registerTrigger",
+          "event": "supportedRingKilledMonster",
+          "effect": {
+            "type": "restoreCurrentTurnEnergy",
+            "amount": 1,
+            "cap": "currentTurnMaximum"
+          }
+        }
+      ],
+      "intendedRole": "For the rest of the battle, whenever the supported ring kills a monster with ring-and-gem damage, restore 1 energy to its hero during the current turn.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A yellow energy orb released from a defeated monster emblem and flowing into a hero-shaped lightning crest. Clean resource-transfer visual, transparent background, no text.",
+        "generationPrompt": "A yellow energy orb released from a defeated monster emblem and flowing into a hero-shaped lightning crest. Clean resource-transfer visual, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "electric", "rare"]
+      }
+    },
+    {
+      "id": "sacrifice",
+      "name": "Sacrifice",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "epic",
+      "energyPenalty": 0.8,
+      "cooldownPenalty": 1,
+      "speed": 10,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "effects": [
+        {
+          "type": "destroyMonster",
+          "target": "selected"
+        },
+        {
+          "type": "randomTarget",
+          "scope": "enemyMonsters",
+          "onSuccess": {
+            "type": "destroyMonster",
+            "target": "random"
+          }
+        }
+      ],
+      "intendedRole": "Destroy the targeted allied monster. Then destroy one random enemy monster.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "Two creature silhouettes connected by a violent yellow lightning exchange: one dissolves willingly, the other is struck by the transferred discharge. Mystical and non-gory, transparent background, no text.",
+        "generationPrompt": "Two creature silhouettes connected by a violent yellow lightning exchange: one dissolves willingly, the other is struck by the transferred discharge. Mystical and non-gory, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "electric", "epic"]
+      }
+    },
+    {
+      "id": "copy",
+      "name": "Copy",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "epic",
+      "energyPenalty": 0.8,
+      "cooldownPenalty": 0.9,
+      "speed": 11,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "effects": [
+        {
+          "type": "copyMonster",
+          "source": "selected",
+          "copyMode": "currentCombatStats",
+          "initialCooldown": 1,
+          "copyStatuses": false
+        }
+      ],
+      "intendedRole": "Create a duplicate of the targeted monster with the same current damage, current and maximum health, base cooldown, element and skill. The copy enters with cooldown 1.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A luminous electric mirror splitting one monster silhouette into two identical forms, with precise yellow-blue duplication lines. High-tech magical look, transparent background, no text.",
+        "generationPrompt": "A luminous electric mirror splitting one monster silhouette into two identical forms, with precise yellow-blue duplication lines. High-tech magical look, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "electric", "epic"]
+      }
+    },
+    {
+      "id": "transmute",
+      "name": "Transmute",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "common",
+      "energyPenalty": 0.4,
+      "cooldownPenalty": 0.5,
+      "speed": 4,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "effects": [
+        {
+          "type": "transformMonster",
+          "target": "selected",
+          "result": {
+            "element": "electric",
+            "damage": 2,
+            "maxHealth": 2,
+            "currentHealth": 2,
+            "baseCooldown": 1,
+            "currentCooldown": 1,
+            "skill": null
+          }
+        }
+      ],
+      "intendedRole": "Transform the targeted monster into a 2 damage, 2 health Electric monster with cooldown 1 and no skill.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A small creature passing through a yellow alchemical lightning prism and emerging as a simple geometric electric familiar. Clear before-and-after silhouette, transparent background, no text.",
+        "generationPrompt": "A small creature passing through a yellow alchemical lightning prism and emerging as a simple geometric electric familiar. Clear before-and-after silhouette, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "electric", "common"]
+      }
+    },
+    {
+      "id": "arcRelay",
+      "name": "Arc Relay",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "common",
+      "energyPenalty": 0.2,
+      "cooldownPenalty": 0.3,
+      "speed": 5,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "effects": [
+        {
+          "type": "dealDamage",
+          "amount": 2,
+          "element": "electric",
+          "target": "selected"
+        },
+        {
+          "type": "randomTarget",
+          "scope": "otherMonstersControlledBySelectedTargetOwner",
+          "onSuccess": {
+            "type": "dealDamage",
+            "amount": 1,
+            "element": "electric"
+          }
+        }
+      ],
+      "intendedRole": "Deal 2 electric damage to the targeted monster, then deal 1 electric damage to one random other monster controlled by the same player.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A yellow lightning bolt striking one creature and automatically arcing to a second smaller silhouette. The secondary arc should look spontaneous and uncontrolled, transparent background, no text.",
+        "generationPrompt": "A yellow lightning bolt striking one creature and automatically arcing to a second smaller silhouette. The secondary arc should look spontaneous and uncontrolled, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "electric", "common"]
+      }
+    },
+    {
+      "id": "quickPulse",
+      "name": "Quick Pulse",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "refined",
+      "energyPenalty": 0.2,
+      "cooldownPenalty": 0.4,
+      "speed": 7,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "effects": [
+        {
+          "type": "setCurrentCooldown",
+          "target": "selected",
+          "value": 0
+        }
+      ],
+      "intendedRole": "Set the targeted allied monster's current cooldown to 0.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A focused electric pulse striking a single allied monster emblem and resetting a circular timer to zero. Bright yellow speed lines, transparent background, no text.",
+        "generationPrompt": "A focused electric pulse striking a single allied monster emblem and resetting a circular timer to zero. Bright yellow speed lines, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "electric", "refined"]
+      }
+    },
+    {
+      "id": "shortCircuit",
+      "name": "Short Circuit",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "rare",
+      "energyPenalty": 0.4,
+      "cooldownPenalty": 0.6,
+      "speed": 8,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["enemyMonster"]
+      },
+      "effects": [
+        {
+          "type": "setCurrentCooldown",
+          "target": "selected",
+          "valueFrom": "resolvedBaseCooldown"
+        }
+      ],
+      "intendedRole": "Set the targeted enemy monster's current cooldown to its full resolved cooldown value.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A broken yellow circuit snapping around an enemy creature symbol while a cooldown dial jumps backward to full. Sharp electrical fault aesthetic, transparent background, no text.",
+        "generationPrompt": "A broken yellow circuit snapping around an enemy creature symbol while a cooldown dial jumps backward to full. Sharp electrical fault aesthetic, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "electric", "rare"]
+      }
+    },
+    {
+      "id": "zerakaiProtocol",
+      "name": "Zerakai Protocol",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "rare",
+      "energyPenalty": 0.5,
+      "cooldownPenalty": 0.7,
+      "speed": 9,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "effects": [
+        {
+          "type": "createTemporaryMonsterCopy",
+          "source": "selected",
+          "copyDamage": true,
+          "copyElement": true,
+          "maxHealth": 1,
+          "skill": null,
+          "initialCooldown": 0,
+          "expires": "endOfCurrentTurn"
+        }
+      ],
+      "intendedRole": "Create a temporary duplicate of the targeted allied monster with the same current damage, element and base cooldown, but 1 maximum health and no skill. It enters with cooldown 0 and is destroyed at the end of the current turn.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A sleek electric hologram of a monster emerging from a coded yellow sigil, visibly unstable with a single bright health crystal and a fading timer trail. Futuristic arcane protocol aesthetic, transparent background, no text.",
+        "generationPrompt": "A sleek electric hologram of a monster emerging from a coded yellow sigil, visibly unstable with a single bright health crystal and a fading timer trail. Futuristic arcane protocol aesthetic, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "electric", "rare"]
+      }
+    },
+    {
+      "id": "zeroInterval",
+      "name": "Zero Interval",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "epic",
+      "energyPenalty": 0.8,
+      "cooldownPenalty": 1,
+      "speed": 12,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "effects": [
+        {
+          "type": "setCurrentCooldownForAll",
+          "scope": "alliedMonsters",
+          "value": 0
+        }
+      ],
+      "intendedRole": "Target an allied monster. Set the current cooldown of every allied monster to 0.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A brilliant yellow zero symbol expanding as a time-reset wave across three allied monster silhouettes. Premium electric spell, clean radial geometry, transparent background, no text.",
+        "generationPrompt": "A brilliant yellow zero symbol expanding as a time-reset wave across three allied monster silhouettes. Premium electric spell, clean radial geometry, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "electric", "epic"]
+      }
+    },
+    {
+      "id": "giftMultiHit",
+      "name": "Gift: MultiHit",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "refined",
+      "energyPenalty": 0.4,
+      "cooldownPenalty": 0.6,
+      "speed": 6,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "effects": [
+        {
+          "type": "grantSkill",
+          "skill": "multiHit",
+          "duration": "untilMonsterDestroyed",
+          "duplicateBehavior": "noEffect"
+        }
+      ],
+      "intendedRole": "Give MULTIHIT to the targeted monster for the rest of the battle. If it already has MULTIHIT, the spell has no additional effect.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A branching yellow trident bolt splitting from one claw strike into three monster silhouettes. Strong multi-target readability, transparent background, no text.",
+        "generationPrompt": "A branching yellow trident bolt splitting from one claw strike into three monster silhouettes. Strong multi-target readability, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "electric", "refined"]
+      }
+    },
+    {
+      "id": "freezeI",
+      "name": "Freeze I",
       "type": "spell",
       "element": "ice",
       "rarity": "common",
-      "energyPenalty": 1,
-      "cooldownPenalty": 0,
-      "speed": 0,
+      "energyPenalty": 0.5,
+      "cooldownPenalty": 0.2,
+      "speed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
       "effects": [
         {
-          "type": "dealDamage",
-          "amount": 3,
-          "target": "any"
+          "type": "applyStatus",
+          "status": "freeze",
+          "durationOwnerTurns": 1
         }
       ],
-      "intendedRole": "reliable direct ice strike",
+      "intendedRole": "Apply FREEZE to the targeted monster for 1 owner turn. A frozen monster cannot attack and cannot provide TAUNT.",
       "asset": {
         "styleId": "battlenessAssetStyleV1",
-        "visualDescription": "Ice Shard is a single jagged pale-cyan projectile with a narrow armored tip, translucent blue core and frost-white fracture planes. A short trail of crystalline splinters remains attached to the main silhouette so the spell reads as one fast piercing object. Glacial palette of pale cyan, sapphire blue, frost white and cold silver. The rarity treatment uses a simple practical construction with one focal effect and modest magical spill. The isolated spell effect remains fully visible and readable at inventory-icon size.",
-        "generationPrompt": "Single isolated fantasy game spell asset named 'Ice Shard': a single jagged pale-cyan ice projectile with a narrow armored tip, translucent blue core, frost-white fracture planes and a short attached crystalline trail. Glacial palette of pale cyan, sapphire blue, frost white and cold silver. Visual gameplay role: reliable direct ice strike. Rarity common: a simple practical construction with one focal effect and modest magical spill. No caster and no environment. Dynamic front-biased three-quarter view, centered, fully visible, strong readable silhouette, AAA dark-fantasy action-RPG spell icon, highly detailed 3D magical-effect concept render, crisp edges, cinematic rim lighting, transparent alpha background.",
-        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, caster, hand, wand, weapon, multiple spells, duplicate effect, cropped effect, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, shapeless cloud, excessive bloom, excessive particles, glitter noise, lens flare covering the spell, unreadable silhouette",
+        "visualDescription": "A small pale-cyan ice crystal enclosing a monster silhouette, with one visible frost ring. Clear frozen-state icon, transparent background, no text.",
+        "generationPrompt": "A small pale-cyan ice crystal enclosing a monster silhouette, with one visible frost ring. Clear frozen-state icon, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
         "composition": {
           "format": "square",
           "background": "transparent",
           "subjectCount": 1,
           "framing": "centered with safe transparent margin",
-          "camera": "dynamic front-biased three-quarter view",
+          "camera": "front-biased three-quarter view",
           "atlasReady": true
         },
-        "visualTags": ["spell", "ice", "common", "direct-damage"]
+        "visualTags": ["spell", "ice", "common"]
       }
     },
     {
-      "id": "glacialSpike",
-      "name": "Glacial Spike",
+      "id": "freezeII",
+      "name": "Freeze II",
       "type": "spell",
       "element": "ice",
-      "rarity": "rare",
-      "energyPenalty": 2,
-      "cooldownPenalty": 0,
-      "speed": 0,
+      "rarity": "refined",
+      "energyPenalty": 0.7,
+      "cooldownPenalty": 0.3,
+      "speed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
       "effects": [
         {
-          "type": "dealDamage",
-          "amount": 5,
-          "target": "any"
+          "type": "applyStatus",
+          "status": "freeze",
+          "durationOwnerTurns": 2
         }
       ],
-      "intendedRole": "heavy efficient ice strike",
+      "intendedRole": "Apply FREEZE to the targeted monster for 2 owner turns.",
       "asset": {
         "styleId": "battlenessAssetStyleV1",
-        "visualDescription": "Glacial Spike is a massive asymmetric spear of ancient blue ice wrapped by two broken silver rune bands. Layered frost strata, a deep sapphire core and controlled freezing mist give it rare monumental weight while preserving a decisive pointed silhouette. Glacial palette of pale cyan, sapphire blue, frost white and cold silver. The rarity treatment uses named-relic complexity, unusual asymmetry, layered magical structure and strong controlled energy. The isolated spell effect remains fully visible and readable at inventory-icon size.",
-        "generationPrompt": "Single isolated fantasy game spell asset named 'Glacial Spike': a massive asymmetric spear of ancient blue ice wrapped by two broken silver rune bands, layered frost strata, deep sapphire core and controlled freezing mist. Glacial palette of pale cyan, sapphire blue, frost white and cold silver. Visual gameplay role: heavy efficient ice strike. Rarity rare: named-relic complexity, unusual asymmetry, layered magical structure and strong controlled energy. No caster and no environment. Dynamic front-biased three-quarter view, centered, fully visible, strong readable silhouette, AAA dark-fantasy action-RPG spell icon, highly detailed 3D magical-effect concept render, crisp edges, cinematic rim lighting, transparent alpha background.",
-        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, caster, hand, wand, weapon, multiple spells, duplicate effect, cropped effect, scenery, landscape, room, busy background, opaque black background, white background, flat 2D cartoon, pixel art, muddy details, shapeless cloud, excessive bloom, excessive particles, glitter noise, lens flare covering the spell, unreadable silhouette",
+        "visualDescription": "A refined double-layer ice prison around a creature glyph, with two concentric cyan frost bands. Transparent background, no text.",
+        "generationPrompt": "A refined double-layer ice prison around a creature glyph, with two concentric cyan frost bands. Transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
         "composition": {
           "format": "square",
           "background": "transparent",
           "subjectCount": 1,
           "framing": "centered with safe transparent margin",
-          "camera": "dynamic front-biased three-quarter view",
+          "camera": "front-biased three-quarter view",
           "atlasReady": true
         },
-        "visualTags": ["spell", "ice", "rare", "direct-damage"]
+        "visualTags": ["spell", "ice", "refined"]
+      }
+    },
+    {
+      "id": "freezeIII",
+      "name": "Freeze III",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "rare",
+      "energyPenalty": 0.9,
+      "cooldownPenalty": 0.4,
+      "speed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "effects": [
+        {
+          "type": "applyStatus",
+          "status": "freeze",
+          "durationOwnerTurns": 3
+        }
+      ],
+      "intendedRole": "Apply FREEZE to the targeted monster for 3 owner turns.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A rare deep-cyan crystal sarcophagus with three frost halos and a trapped monster shadow. Majestic, heavy, transparent background, no text.",
+        "generationPrompt": "A rare deep-cyan crystal sarcophagus with three frost halos and a trapped monster shadow. Majestic, heavy, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "ice", "rare"]
+      }
+    },
+    {
+      "id": "stompI",
+      "name": "Stomp I",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "common",
+      "energyPenalty": 0.6,
+      "cooldownPenalty": 0.2,
+      "speed": 1,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "effects": [
+        {
+          "type": "dealDamageToAll",
+          "scope": "enemyMonsters",
+          "amount": 2,
+          "element": "ice"
+        }
+      ],
+      "intendedRole": "Deal 2 ice damage to every enemy monster.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A compact ice hammer striking frozen ground and sending a low cyan shockwave toward three enemy silhouettes. Transparent background, no text.",
+        "generationPrompt": "A compact ice hammer striking frozen ground and sending a low cyan shockwave toward three enemy silhouettes. Transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "ice", "common"]
+      }
+    },
+    {
+      "id": "stompII",
+      "name": "Stomp II",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "refined",
+      "energyPenalty": 0.8,
+      "cooldownPenalty": 0.3,
+      "speed": 1,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "effects": [
+        {
+          "type": "dealDamageToAll",
+          "scope": "enemyMonsters",
+          "amount": 3,
+          "element": "ice"
+        }
+      ],
+      "intendedRole": "Deal 3 ice damage to every monster in play except monsters controlled by the spell caster.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A larger glacier hammer impact producing a broad cyan ground wave under multiple enemy silhouettes. Refined crystalline details, transparent background, no text.",
+        "generationPrompt": "A larger glacier hammer impact producing a broad cyan ground wave under multiple enemy silhouettes. Refined crystalline details, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "ice", "refined"]
+      }
+    },
+    {
+      "id": "stompIII",
+      "name": "Stomp III",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "rare",
+      "energyPenalty": 1,
+      "cooldownPenalty": 0.4,
+      "speed": 1,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "effects": [
+        {
+          "type": "dealDamageToAll",
+          "scope": "enemyMonsters",
+          "amount": 4,
+          "element": "ice"
+        }
+      ],
+      "intendedRole": "Deal 4 ice damage to every enemy monster.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A rare colossal frozen foot or hammer sigil slamming into a crystalline battlefield, with three distinct enemy silhouettes caught in the wave. Transparent background, no text.",
+        "generationPrompt": "A rare colossal frozen foot or hammer sigil slamming into a crystalline battlefield, with three distinct enemy silhouettes caught in the wave. Transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "ice", "rare"]
+      }
+    },
+    {
+      "id": "deepFreezing",
+      "name": "Deep Freezing",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "rare",
+      "energyPenalty": 1,
+      "cooldownPenalty": 0.4,
+      "speed": 0,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "effects": [
+        {
+          "type": "forEachMonster",
+          "scope": "allMonsters",
+          "effect": {
+            "type": "applyStatus",
+            "status": "freeze",
+            "durationOwnerTurns": 1
+          }
+        }
+      ],
+      "intendedRole": "Apply FREEZE for 1 owner turn to every monster currently in play, allied and enemy.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A battlefield-wide pale-cyan blizzard sphere encasing several allied and enemy monster silhouettes at once. Massive frost wave, transparent background, no text.",
+        "generationPrompt": "A battlefield-wide pale-cyan blizzard sphere encasing several allied and enemy monster silhouettes at once. Massive frost wave, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "ice", "rare"]
+      }
+    },
+    {
+      "id": "giftTaunt",
+      "name": "Gift: Taunt",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "refined",
+      "energyPenalty": 0.7,
+      "cooldownPenalty": 0.3,
+      "speed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "effects": [
+        {
+          "type": "grantSkill",
+          "skill": "taunt",
+          "duration": "untilMonsterDestroyed",
+          "duplicateBehavior": "noEffect"
+        }
+      ],
+      "intendedRole": "Give TAUNT to the targeted monster for the rest of the battle. If it already has TAUNT, the spell has no additional effect.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A heavy cyan guardian crest shaped like a shield and horned beast mask, radiating a challenge aura. Transparent background, no text.",
+        "generationPrompt": "A heavy cyan guardian crest shaped like a shield and horned beast mask, radiating a challenge aura. Transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "ice", "refined"]
+      }
+    },
+    {
+      "id": "cooldownOnKill",
+      "name": "Cooldown on Kill",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "rare",
+      "energyPenalty": 0.8,
+      "cooldownPenalty": 0.3,
+      "speed": 1,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "effects": [
+        {
+          "type": "registerTrigger",
+          "event": "supportedRingKilledMonster",
+          "effect": {
+            "type": "modifySupportedRingCurrentCooldown",
+            "amount": -1,
+            "minimum": 0
+          }
+        }
+      ],
+      "intendedRole": "For the rest of the battle, whenever the supported ring kills a monster with ring-and-gem damage, reduce that ring's current cooldown by 1.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A frozen ring dial absorbing energy from a defeated monster icon as one segment of ice melts away. Cyan timer motif, transparent background, no text.",
+        "generationPrompt": "A frozen ring dial absorbing energy from a defeated monster icon as one segment of ice melts away. Cyan timer motif, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "ice", "rare"]
+      }
+    },
+    {
+      "id": "cleanse",
+      "name": "Cleanse",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "rare",
+      "energyPenalty": 0.8,
+      "cooldownPenalty": 0.3,
+      "speed": 2,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "effects": [
+        {
+          "type": "removeStatuses",
+          "target": "selected",
+          "scope": "allTemporaryStatuses",
+          "removeSkills": false
+        }
+      ],
+      "intendedRole": "Remove all temporary positive and negative statuses from the targeted monster. Do not remove its natural or spell-granted skill.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A pure cyan cleansing crystal releasing a circular wave that strips red, yellow and dark status particles from a monster silhouette. Calm, precise, transparent background, no text.",
+        "generationPrompt": "A pure cyan cleansing crystal releasing a circular wave that strips red, yellow and dark status particles from a monster silhouette. Calm, precise, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "ice", "rare"]
+      }
+    },
+    {
+      "id": "refresh",
+      "name": "Refresh",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "rare",
+      "energyPenalty": 0.7,
+      "cooldownPenalty": 0.3,
+      "speed": 2,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "effects": [
+        {
+          "type": "randomTarget",
+          "scope": "alliedRingsWithCooldownAboveZero",
+          "onSuccess": {
+            "type": "modifyRingCurrentCooldown",
+            "amount": -1,
+            "minimum": 0
+          }
+        }
+      ],
+      "intendedRole": "Reduce the current cooldown of one random allied ring that is currently on cooldown by 1.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A pale-cyan circular clock surrounded by drifting frost, with one random ring silhouette illuminated among several. Transparent background, no text.",
+        "generationPrompt": "A pale-cyan circular clock surrounded by drifting frost, with one random ring silhouette illuminated among several. Transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "ice", "rare"]
+      }
+    },
+    {
+      "id": "rimeLock",
+      "name": "Rime Lock",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "common",
+      "energyPenalty": 0.5,
+      "cooldownPenalty": 0.2,
+      "speed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "effects": [
+        {
+          "type": "modifyCurrentCooldown",
+          "target": "selected",
+          "amount": 1,
+          "maximumFrom": "resolvedBaseCooldown"
+        }
+      ],
+      "intendedRole": "Increase the targeted monster's current cooldown by 1, up to its resolved cooldown value.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A cyan padlock formed from frost closing around a monster cooldown dial. Simple common-tier icon, transparent background, no text.",
+        "generationPrompt": "A cyan padlock formed from frost closing around a monster cooldown dial. Simple common-tier icon, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "ice", "common"]
+      }
+    },
+    {
+      "id": "crystalSkin",
+      "name": "Crystal Skin",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "refined",
+      "energyPenalty": 0.7,
+      "cooldownPenalty": 0.3,
+      "speed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "effects": [
+        {
+          "type": "grantTemporaryShield",
+          "target": "selected",
+          "expires": "startOfTargetControllerNextTurn",
+          "duplicateBehavior": "noEffect"
+        }
+      ],
+      "intendedRole": "Give the targeted allied monster a temporary SHIELD until the start of its controller's next turn. If it already has an active Shield, the spell has no additional effect.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "A monster silhouette coated in a thin faceted cyan crystal shell, with one visible intact shield plane. Protective but temporary appearance, transparent background, no text.",
+        "generationPrompt": "A monster silhouette coated in a thin faceted cyan crystal shell, with one visible intact shield plane. Protective but temporary appearance, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "ice", "refined"]
+      }
+    },
+    {
+      "id": "giftShield",
+      "name": "Gift: Shield",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "epic",
+      "energyPenalty": 0.9,
+      "cooldownPenalty": 0.4,
+      "speed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "effects": [
+        {
+          "type": "grantSkill",
+          "skill": "shield",
+          "duration": "untilMonsterDestroyed",
+          "activateImmediately": true,
+          "duplicateBehavior": "noEffect"
+        }
+      ],
+      "intendedRole": "Give SHIELD to the targeted monster for the rest of the battle. If it already has the SHIELD skill, the spell has no additional effect.",
+      "asset": {
+        "styleId": "battlenessAssetStyleV1",
+        "visualDescription": "An epic crystalline guardian sigil with a perfect cyan shield surrounding a monster core. Thick faceted ice, prestigious purple-tinged rarity accents without changing the Ice identity, transparent background, no text.",
+        "generationPrompt": "An epic crystalline guardian sigil with a perfect cyan shield surrounding a monster core. Thick faceted ice, prestigious purple-tinged rarity accents without changing the Ice identity, transparent background, no text.",
+        "negativePrompt": "text, letters, numbers, logo, watermark, UI frame, card border, atlas grid, cropped effect, opaque background",
+        "composition": {
+          "format": "square",
+          "background": "transparent",
+          "subjectCount": 1,
+          "framing": "centered with safe transparent margin",
+          "camera": "front-biased three-quarter view",
+          "atlasReady": true
+        },
+        "visualTags": ["spell", "ice", "epic"]
       }
     }
   ],

@@ -3,7 +3,7 @@ import process from "node:process";
 import { URL } from "node:url";
 import { PrismaClient } from "@prisma/client";
 
-const confirmationValue = "RESET battleness_staging FOR production-items-v1";
+const confirmationValue = "RESET battleness_staging FOR production-items-v2";
 const apply = process.argv.includes("--apply");
 const databaseUrl = process.env.BATTLENESS_DATABASE_URL;
 

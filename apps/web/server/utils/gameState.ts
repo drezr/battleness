@@ -89,7 +89,7 @@ const pvpTransactionOptions = {
   timeout: 30_000,
 } as const;
 const pvpTransactionAttempts = 4;
-const currentOnboardingVersion = 2;
+const currentOnboardingVersion = 3;
 
 async function runPvpTransaction<T>(
   client: PrismaClient,
@@ -129,6 +129,7 @@ type EquipmentSpellEnchantmentItem = {
   type: "spell";
   definitionId: string;
   label: string;
+  description: string;
   rarity: string;
   element: string;
   level: number;
@@ -137,6 +138,7 @@ type EquipmentSpellEnchantmentItem = {
   energyPenalty: number;
   cooldownPenalty: number;
   speed: number;
+  targeting?: SpellDefinition["targeting"];
 };
 
 type EquipmentMonsterEnchantmentItem = {
@@ -3526,10 +3528,10 @@ async function registerCurrentContentRelease(client: PrismaContext): Promise<voi
 
 export async function ensurePlayerOnboarding(client: PrismaClient): Promise<void> {
   const playerId = currentPlayerId();
-  const starterRingId = `${playerId}.starter.v2.ring`;
-  const starterGemId = `${playerId}.starter.v2.gem`;
-  const starterSpellId = `${playerId}.starter.v2.spell`;
-  const starterLoadoutId = `${playerId}.starter.v2.loadout`;
+  const starterRingId = `${playerId}.starter.v3.ring`;
+  const starterGemId = `${playerId}.starter.v3.gem`;
+  const starterSpellId = `${playerId}.starter.v3.spell`;
+  const starterLoadoutId = `${playerId}.starter.v3.loadout`;
 
   const granted = await client.$transaction(async (transaction) => {
     const claim = await transaction.player.updateMany({
@@ -3541,6 +3543,7 @@ export async function ensurePlayerOnboarding(client: PrismaClient): Promise<void
     }
 
     await registerCurrentContentRelease(transaction);
+    await migrateRetiredPlayerSpells(transaction, playerId);
     const [player, inventoryCount, materialCount, loadoutCount] = await Promise.all([
       transaction.player.findUniqueOrThrow({
         where: { id: playerId },
@@ -3591,7 +3594,7 @@ export async function ensurePlayerOnboarding(client: PrismaClient): Promise<void
           id: starterSpellId,
           playerId,
           type: "spell",
-          definitionId: "firebolt",
+          definitionId: "burnI",
           contentVersion,
           experience: 0,
           quality: 0,
@@ -3631,6 +3634,24 @@ export async function ensurePlayerOnboarding(client: PrismaClient): Promise<void
 
   if (granted) {
     await assertValidPlayerGameState(client, playerId);
+  }
+}
+
+async function migrateRetiredPlayerSpells(client: PrismaContext, playerId: string): Promise<void> {
+  const replacements = {
+    firebolt: "burnI",
+    solarFlare: "bloodflame",
+    spark: "shockI",
+    arcPulse: "arcRelay",
+    iceShard: "freezeI",
+    glacialSpike: "stompII",
+  } as const;
+
+  for (const [retiredId, replacementId] of Object.entries(replacements)) {
+    await client.inventoryItem.updateMany({
+      where: { playerId, type: "spell", definitionId: retiredId },
+      data: { definitionId: replacementId, contentVersion },
+    });
   }
 }
 
@@ -4133,6 +4154,7 @@ function toSocketEnchantmentTargetView(input: {
       type: "spell" as const,
       definitionId: input.target.definitionId,
       label: label(definition.nameKey),
+      description: label(definition.descriptionKey),
       rarity: definition.rarity,
       element: definition.element,
       experience: input.target.experience,
@@ -4141,6 +4163,8 @@ function toSocketEnchantmentTargetView(input: {
       damage,
       energyPenalty: definition.baseEnergyPenalty,
       cooldownPenalty: definition.baseCooldownPenalty,
+      baseSpeed: definition.baseSpeed,
+      targeting: definition.targeting,
       enchantedGemId: input.enchantment?.gemItemId ?? null,
     };
   }
@@ -4395,6 +4419,7 @@ function toEquipmentEnchantmentView(
       type: "spell",
       definitionId: target.definitionId,
       label: label(definition.nameKey),
+      description: label(definition.descriptionKey),
       rarity: definition.rarity,
       element: definition.element,
       level: spellLevel,
@@ -4403,6 +4428,7 @@ function toEquipmentEnchantmentView(
       energyPenalty: definition.baseEnergyPenalty,
       cooldownPenalty: definition.baseCooldownPenalty,
       speed: definition.baseSpeed ?? 0,
+      targeting: definition.targeting,
     };
   }
 
@@ -4479,6 +4505,9 @@ function toCraftedItemView(crafted: CraftedItemInstance) {
     type: crafted.type,
     definitionId: crafted.item.definitionId,
     label: label(definition.nameKey),
+    ...(crafted.type === "spell"
+      ? { description: label((definition as SpellDefinition).descriptionKey) }
+      : {}),
     rarity: definition.rarity,
     element: definition.element,
   };
@@ -4492,6 +4521,8 @@ function toRecipeView(recipe: RecipeDefinition, stock: MaterialStock) {
     outputType: recipe.outputType,
     outputDefinitionId: recipe.outputDefinitionId,
     outputLabel: label(output.nameKey),
+    outputDescription:
+      recipe.outputType === "spell" ? label((output as SpellDefinition).descriptionKey) : null,
     outputRarity: output.rarity,
     outputElement: output.element,
     craftedLevel: recipe.craftedLevel,
@@ -4912,6 +4943,7 @@ function advanceCampaignOpponent(
               playerId: opponent.id,
               ringInstanceId: ring.id,
               targetId,
+              enchantmentTargets: automatedCampaignSpellTargets(state, opponent.id, ring, targetId),
             }
           : { type: "endTurn", playerId: opponent.id };
     }
@@ -4926,6 +4958,63 @@ function advanceCampaignOpponent(
   }
 
   return { state, events };
+}
+
+function automatedCampaignSpellTargets(
+  state: BattleState,
+  playerId: string,
+  ring: BattleState["players"][number]["rings"][number],
+  primaryTargetId: TargetId,
+): Record<string, TargetId> {
+  const targetIds = state.players.flatMap((player) => [
+    `${player.id}.hero` as TargetId,
+    ...player.monsters.map((monster) => monster.id as TargetId),
+  ]);
+  return Object.fromEntries(
+    ring.gems.flatMap((gem) => {
+      if (gem.enchantment?.type !== "spell") return [];
+      const spell =
+        state.definitions.spells[gem.enchantment.resolvedDefinitionId ?? gem.enchantment.spellId];
+      if (!spell || spell.targeting?.selection === "none") return [];
+      const target = [primaryTargetId, ...targetIds.filter((id) => id !== primaryTargetId)].find(
+        (targetId) => campaignSpellTargetAllowed(state, playerId, spell, targetId),
+      );
+      return target ? [[gem.id, target] as const] : [];
+    }),
+  );
+}
+
+function campaignSpellTargetAllowed(
+  state: BattleState,
+  playerId: string,
+  spell: BattleState["definitions"]["spells"][string],
+  targetId: TargetId,
+): boolean {
+  const owner = state.players.find(
+    (player) =>
+      `${player.id}.hero` === targetId ||
+      player.monsters.some((monster) => monster.id === targetId),
+  );
+  if (!owner) return false;
+  const monster = owner.monsters.find((candidate) => candidate.id === targetId);
+  const allowed = (spell.targeting?.allowedTargets ?? ["anyCombatant"]).some((rule) => {
+    if (rule === "anyCombatant") return true;
+    if (!monster) return false;
+    if (rule === "anyMonster") return true;
+    return rule === "alliedMonster" ? owner.id === playerId : owner.id !== playerId;
+  });
+  if (!allowed || !spell.effects.some((effect) => effect.type === "dealDamage")) return allowed;
+  const taunts = owner.monsters.filter(
+    (candidate) =>
+      (candidate.skill === "taunt" ||
+        candidate.grantedSkills?.some((grant) => grant.skill === "taunt")) &&
+      !candidate.statuses?.some((status) => status.type === "freeze"),
+  );
+  return (
+    owner.id === playerId ||
+    taunts.length === 0 ||
+    taunts.some((candidate) => candidate.id === targetId)
+  );
 }
 
 function campaignOpponentElement(
@@ -4950,7 +5039,12 @@ function campaignOpponentTarget(state: BattleState, opponentId: string): TargetI
   if (!defender) {
     throw new Error(`Campaign opponent "${opponentId}" has no defender.`);
   }
-  const tauntMonster = defender.monsters.find((monster) => monster.skill === "taunt");
+  const tauntMonster = defender.monsters.find(
+    (monster) =>
+      (monster.skill === "taunt" ||
+        monster.grantedSkills?.some((grant) => grant.skill === "taunt")) &&
+      !monster.statuses?.some((status) => status.type === "freeze"),
+  );
   return (tauntMonster?.id ?? `${defender.id}.hero`) as TargetId;
 }
 
@@ -5859,6 +5953,12 @@ function toLiveBattlePlayerView(
       cooldown: monster.cooldown,
       currentCooldown: monster.currentCooldown,
       skill: monster.skill ?? null,
+      skills: [
+        ...(monster.skill ? [monster.skill] : []),
+        ...(monster.grantedSkills ?? []).map((grant) => grant.skill),
+      ],
+      statuses: (monster.statuses ?? []).map((status) => status.type),
+      temporary: monster.temporary !== undefined,
       shieldActive: monster.shieldActive,
       rageActive: monster.rageActive,
     })),
@@ -5925,8 +6025,14 @@ function toLiveBattleEnchantmentView(
       type: "spell" as const,
       definitionId: gem.enchantment.spellId,
       label: label(definition.nameKey),
+      description: label(`spell.${definition.id}.description`),
       element: definition.element,
       rarity: definition.rarity,
+      targeting: definition.targeting ?? {
+        selection: "one" as const,
+        allowedTargets: ["anyCombatant" as const],
+      },
+      requiresTauntTargeting: definition.effects.some((effect) => effect.type === "dealDamage"),
       damage: definition.effects.reduce(
         (total, effect) => total + (effect.type === "dealDamage" ? effect.amount : 0),
         0,

@@ -46,24 +46,365 @@ export const monsterDefinitionSchema = z
   })
   .strict();
 
-export const dealDamageEffectSchema = z.object({
-  type: z.literal("dealDamage"),
-  amount: z.number().int().positive(),
-  target: z.literal("any"),
-});
+export const spellAllowedTargetSchema = z.enum([
+  "anyCombatant",
+  "anyMonster",
+  "alliedMonster",
+  "enemyMonster",
+]);
 
-export const spellEffectSchema = dealDamageEffectSchema;
+export const spellTargetingSchema = z.discriminatedUnion("selection", [
+  z
+    .object({
+      selection: z.literal("none"),
+      allowedTargets: z.tuple([]),
+    })
+    .strict(),
+  z
+    .object({
+      selection: z.literal("one"),
+      allowedTargets: z.array(spellAllowedTargetSchema).min(1),
+    })
+    .strict(),
+]);
 
-export const spellDefinitionSchema = z.object({
-  id: z.string().min(1),
-  nameKey: z.string().min(1),
-  element: elementSchema,
-  rarity: raritySchema,
-  baseSpeed: z.number().int().nonnegative().default(0),
-  baseEnergyPenalty: z.number().int().nonnegative(),
-  baseCooldownPenalty: z.number().int().nonnegative(),
-  effects: z.array(spellEffectSchema).min(1),
-});
+export const dealDamageEffectSchema = z
+  .object({
+    type: z.literal("dealDamage"),
+    amount: z.number().int().positive(),
+    element: elementSchema.optional(),
+    target: z.enum(["any", "selected"]),
+  })
+  .strict();
+
+export const burnStatusEffectSchema = z
+  .object({
+    type: z.literal("applyStatus"),
+    status: z.literal("burn"),
+    damage: z.number().int().positive(),
+    durationOwnerTurns: z.number().int().positive(),
+    tickTiming: z.literal("startOfTargetControllerTurn").optional(),
+  })
+  .strict();
+
+export const controlStatusEffectSchema = z
+  .object({
+    type: z.literal("applyStatus"),
+    status: z.enum(["shock", "freeze"]),
+    durationOwnerTurns: z.number().int().positive(),
+  })
+  .strict();
+
+export const lastBreathStatusEffectSchema = z
+  .object({
+    type: z.literal("applyStatus"),
+    status: z.literal("lastBreath"),
+    duration: z.literal("endOfCurrentTurn"),
+    onDestroy: z
+      .object({
+        type: z.literal("attackRandomLegalEnemyBeforeRemoval"),
+        ignoreCurrentCooldown: z.literal(true),
+      })
+      .strict(),
+  })
+  .strict();
+
+export const applyStatusEffectSchema = z.union([
+  burnStatusEffectSchema,
+  controlStatusEffectSchema,
+  lastBreathStatusEffectSchema,
+]);
+
+export const forEachMonsterEffectSchema = z
+  .object({
+    type: z.literal("forEachMonster"),
+    scope: z.literal("allMonsters"),
+    effect: applyStatusEffectSchema,
+  })
+  .strict();
+
+export const dealDamageToAllEffectSchema = z
+  .object({
+    type: z.literal("dealDamageToAll"),
+    scope: z.literal("enemyMonsters"),
+    amount: z.number().int().positive().optional(),
+    amountFromCapturedStat: z.literal("currentDamage").optional(),
+    element: elementSchema,
+  })
+  .strict()
+  .refine(
+    (effect) => (effect.amount !== undefined) !== (effect.amountFromCapturedStat !== undefined),
+    { message: "Exactly one area-damage amount source is required." },
+  );
+
+export const modifyCurrentCooldownEffectSchema = z
+  .object({
+    type: z.literal("modifyCurrentCooldown"),
+    target: z.literal("selected"),
+    amount: z.number().int(),
+    maximumFrom: z.literal("resolvedBaseCooldown"),
+  })
+  .strict();
+
+export const removeStatusesEffectSchema = z
+  .object({
+    type: z.literal("removeStatuses"),
+    target: z.literal("selected"),
+    scope: z.literal("allTemporaryStatuses"),
+    removeSkills: z.literal(false),
+  })
+  .strict();
+
+export const grantSkillEffectSchema = z
+  .object({
+    type: z.literal("grantSkill"),
+    skill: z.enum(["multiHit", "pierce", "rage", "shield", "taunt"]),
+    duration: z.literal("untilMonsterDestroyed"),
+    activateImmediately: z.literal(true).optional(),
+    duplicateBehavior: z.literal("noEffect"),
+  })
+  .strict();
+
+export const grantTemporaryShieldEffectSchema = z
+  .object({
+    type: z.literal("grantTemporaryShield"),
+    target: z.literal("selected"),
+    expires: z.literal("startOfTargetControllerNextTurn"),
+    duplicateBehavior: z.literal("noEffect"),
+  })
+  .strict();
+
+export const setCurrentCooldownEffectSchema = z
+  .object({
+    type: z.literal("setCurrentCooldown"),
+    target: z.literal("selected"),
+    value: z.literal(0).optional(),
+    valueFrom: z.literal("resolvedBaseCooldown").optional(),
+  })
+  .strict()
+  .refine((effect) => (effect.value === 0) !== (effect.valueFrom !== undefined), {
+    message: "Exactly one cooldown value source is required.",
+  });
+
+export const setCurrentCooldownForAllEffectSchema = z
+  .object({
+    type: z.literal("setCurrentCooldownForAll"),
+    scope: z.literal("alliedMonsters"),
+    value: z.literal(0),
+  })
+  .strict();
+
+export const randomTargetEffectSchema = z.union([
+  z
+    .object({
+      type: z.literal("randomTarget"),
+      scope: z.literal("alliedRingsWithCooldownAboveZero"),
+      onSuccess: z
+        .object({
+          type: z.literal("modifyRingCurrentCooldown"),
+          amount: z.number().int(),
+          minimum: z.literal(0),
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("randomTarget"),
+      scope: z.literal("otherAlliedMonsters"),
+      onSuccess: z
+        .object({
+          type: z.literal("modifyMonsterDamage"),
+          amountFrom: z.literal("destroyedTargetCurrentDamage"),
+          duration: z.literal("battle"),
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("randomTarget"),
+      scope: z.literal("enemyMonsters"),
+      onSuccess: z
+        .object({ type: z.literal("destroyMonster"), target: z.literal("random") })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal("randomTarget"),
+      scope: z.literal("otherMonstersControlledBySelectedTargetOwner"),
+      onSuccess: z
+        .object({
+          type: z.literal("dealDamage"),
+          amount: z.number().int().positive(),
+          element: elementSchema,
+        })
+        .strict(),
+    })
+    .strict(),
+]);
+
+export const destroyMonsterEffectSchema = z
+  .object({ type: z.literal("destroyMonster"), target: z.literal("selected") })
+  .strict();
+
+export const destroyAllMonstersEffectSchema = z
+  .object({ type: z.literal("destroyAllMonsters"), scope: z.literal("allMonsters") })
+  .strict();
+
+export const captureStatEffectSchema = z
+  .object({
+    type: z.literal("captureStat"),
+    source: z.literal("selected"),
+    stat: z.literal("currentDamage"),
+  })
+  .strict();
+
+export const copyMonsterEffectSchema = z
+  .object({
+    type: z.literal("copyMonster"),
+    source: z.literal("selected"),
+    copyMode: z.literal("currentCombatStats"),
+    initialCooldown: z.literal(1),
+    copyStatuses: z.literal(false),
+  })
+  .strict();
+
+export const transformMonsterEffectSchema = z
+  .object({
+    type: z.literal("transformMonster"),
+    target: z.literal("selected"),
+    result: z
+      .object({
+        element: elementSchema,
+        damage: z.number().int().nonnegative(),
+        maxHealth: z.number().int().positive(),
+        currentHealth: z.number().int().positive(),
+        baseCooldown: z.number().int().positive(),
+        currentCooldown: z.number().int().nonnegative(),
+        skill: z.null(),
+      })
+      .strict(),
+  })
+  .strict();
+
+export const createTemporaryMonsterCopyEffectSchema = z
+  .object({
+    type: z.literal("createTemporaryMonsterCopy"),
+    source: z.literal("selected"),
+    copyDamage: z.literal(true),
+    copyElement: z.literal(true),
+    maxHealth: z.number().int().positive(),
+    skill: z.null(),
+    initialCooldown: z.literal(0),
+    expires: z.literal("endOfCurrentTurn"),
+  })
+  .strict();
+
+export const registerTriggerEffectSchema = z
+  .object({
+    type: z.literal("registerTrigger"),
+    event: z.literal("supportedRingKilledMonster"),
+    effect: z.union([
+      z
+        .object({
+          type: z.literal("modifySupportedRingDamage"),
+          amount: z.number().int(),
+          duration: z.literal("battle"),
+        })
+        .strict(),
+      z
+        .object({
+          type: z.literal("restoreCurrentTurnEnergy"),
+          amount: z.number().int().positive(),
+          cap: z.literal("currentTurnMaximum"),
+        })
+        .strict(),
+      z
+        .object({
+          type: z.literal("modifySupportedRingCurrentCooldown"),
+          amount: z.number().int(),
+          minimum: z.literal(0),
+        })
+        .strict(),
+    ]),
+  })
+  .strict();
+
+export const conditionalPierceForActionEffectSchema = z
+  .object({
+    type: z.literal("conditionalPierceForAction"),
+    target: z.literal("selectedEnemyMonster"),
+    source: z.literal("ringAndGemDamage"),
+  })
+  .strict();
+
+export const ifTargetSurvivesEffectSchema = z
+  .object({
+    type: z.literal("ifTargetSurvives"),
+    effect: z
+      .object({
+        type: z.literal("modifyMonsterDamage"),
+        amount: z.number().int(),
+        duration: z.literal("battle"),
+      })
+      .strict(),
+  })
+  .strict();
+
+export const registerActionScopedTriggerEffectSchema = z
+  .object({
+    type: z.literal("registerActionScopedTrigger"),
+    event: z.literal("selectedMonsterDestroyedDuringCurrentRingAction"),
+    effect: z
+      .object({
+        type: z.literal("dealDamageToControllingHero"),
+        amountFrom: z.literal("destroyedMonsterCurrentDamage"),
+        element: elementSchema,
+      })
+      .strict(),
+  })
+  .strict();
+
+export const spellEffectSchema = z.union([
+  dealDamageEffectSchema,
+  applyStatusEffectSchema,
+  forEachMonsterEffectSchema,
+  dealDamageToAllEffectSchema,
+  modifyCurrentCooldownEffectSchema,
+  removeStatusesEffectSchema,
+  grantSkillEffectSchema,
+  grantTemporaryShieldEffectSchema,
+  setCurrentCooldownEffectSchema,
+  setCurrentCooldownForAllEffectSchema,
+  randomTargetEffectSchema,
+  registerTriggerEffectSchema,
+  conditionalPierceForActionEffectSchema,
+  ifTargetSurvivesEffectSchema,
+  registerActionScopedTriggerEffectSchema,
+  destroyMonsterEffectSchema,
+  destroyAllMonstersEffectSchema,
+  captureStatEffectSchema,
+  copyMonsterEffectSchema,
+  transformMonsterEffectSchema,
+  createTemporaryMonsterCopyEffectSchema,
+]);
+
+export const spellDefinitionSchema = z
+  .object({
+    id: z.string().min(1),
+    nameKey: z.string().min(1),
+    descriptionKey: z.string().min(1),
+    element: elementSchema,
+    rarity: raritySchema,
+    baseSpeed: z.number().int().nonnegative().default(0),
+    baseEnergyPenalty: z.number().nonnegative().multipleOf(0.1),
+    baseCooldownPenalty: z.number().nonnegative().multipleOf(0.1),
+    targeting: spellTargetingSchema.optional(),
+    effects: z.array(spellEffectSchema).min(1),
+  })
+  .strict();
 
 export const materialCraftingFamilySchema = z.enum(["ring", "spell", "gem", "monster"]);
 export const materialRealWorldTypeSchema = z.enum([

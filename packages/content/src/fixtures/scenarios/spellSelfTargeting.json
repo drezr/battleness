@@ -20,7 +20,7 @@
   "expect": {
     "eventTypes": ["ringUsed", "spellCast", "damageDealt"],
     "health": {
-      "playerOne.hero": 28
+      "playerOne.hero": 30
     },
     "result": null
   }

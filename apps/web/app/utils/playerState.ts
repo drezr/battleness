@@ -526,6 +526,9 @@ export type LiveBattleMonsterView = {
   cooldown: number;
   currentCooldown: number;
   skill: string | null;
+  skills: string[];
+  statuses: string[];
+  temporary: boolean;
   shieldActive: boolean;
   rageActive: boolean;
 };
@@ -560,8 +563,14 @@ export type LiveBattleEnchantmentView =
       type: "spell";
       definitionId: string;
       label: string;
+      description: string;
       element: string;
       rarity: string;
+      targeting: {
+        selection: "none" | "one";
+        allowedTargets: ("anyCombatant" | "anyMonster" | "alliedMonster" | "enemyMonster")[];
+      };
+      requiresTauntTargeting: boolean;
       damage: number;
       energyPenalty: number;
       cooldownPenalty: number;
@@ -622,7 +631,12 @@ export type LiveBattleState = {
 
 export type LiveBattleActionCommand =
   | { type: "chooseElement"; element: "electric" | "fire" | "ice" }
-  | { type: "useRing"; ringInstanceId: string; targetId: string }
+  | {
+      type: "useRing";
+      ringInstanceId: string;
+      targetId: string;
+      enchantmentTargets?: Record<string, string>;
+    }
   | { type: "useMonster"; monsterInstanceId: string; targetId: string }
   | { type: "endTurn" }
   | { type: "concede" };
@@ -638,6 +652,7 @@ export type InventoryItemView = {
   definitionId: string;
   contentVersion: string;
   label: string;
+  description?: string;
   rarity: string;
   element: string;
   experience: number;
@@ -652,6 +667,11 @@ export type InventoryItemView = {
   energyPenalty?: number;
   cooldownPenalty?: number;
   cooldown?: number;
+  baseSpeed?: number;
+  targeting?: {
+    selection: "none" | "one";
+    allowedTargets: ("anyCombatant" | "anyMonster" | "alliedMonster" | "enemyMonster")[];
+  };
   skill?: string | null;
   socketedRingId?: string | null;
   socketedRingLabel?: string | null;
@@ -667,6 +687,7 @@ export type RecipeView = {
   outputType: string;
   outputDefinitionId: string;
   outputLabel: string;
+  outputDescription: string | null;
   outputRarity: string;
   outputElement: string;
   craftedLevel: number;

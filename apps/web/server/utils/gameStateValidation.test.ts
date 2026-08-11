@@ -15,7 +15,7 @@ const baseSnapshot = {
     }),
     item({ id: "playerOne.gem.emberShard", type: "gem", definitionId: "emberShard" }),
     item({ id: "playerOne.monster.emberImp", type: "monster", definitionId: "emberImp" }),
-    item({ id: "playerOne.spell.firebolt", type: "spell", definitionId: "firebolt" }),
+    item({ id: "playerOne.spell.carbonize", type: "spell", definitionId: "carbonize" }),
   ],
   materialStock: [{ playerId: "playerOne", materialId: "aluminium", quantity: 2 }],
   ringSockets: [
@@ -30,7 +30,7 @@ const baseSnapshot = {
     {
       playerId: "playerOne",
       gemItemId: "playerOne.gem.emberShard",
-      targetItemId: "playerOne.spell.firebolt",
+      targetItemId: "playerOne.spell.carbonize",
       targetType: "spell",
     },
   ],
@@ -81,14 +81,14 @@ describe("validatePlayerGameStateSnapshot", () => {
           definitionId: "ashenLoop",
           socketCount: 1,
         }),
-        item({ id: "playerOne.spell.firebolt", type: "spell", definitionId: "firebolt" }),
+        item({ id: "playerOne.spell.carbonize", type: "spell", definitionId: "carbonize" }),
       ],
       ringSockets: [
         {
           playerId: "playerTwo",
           ringItemId: "playerOne.ring.ashenLoop",
           socketIndex: 1,
-          gemItemId: "playerOne.spell.firebolt",
+          gemItemId: "playerOne.spell.carbonize",
         },
       ],
       gemEnchantments: [],
@@ -100,7 +100,7 @@ describe("validatePlayerGameStateSnapshot", () => {
       'Ring socket for ring "playerOne.ring.ashenLoop" is owned by "playerTwo".',
     );
     expect(issues).toContain('Ring socket index is invalid for ring "playerOne.ring.ashenLoop".');
-    expect(issues).toContain('Ring socket references non-gem item "playerOne.spell.firebolt".');
+    expect(issues).toContain('Ring socket references non-gem item "playerOne.spell.carbonize".');
   });
 
   it("reports invalid gem enchantment targets", () => {

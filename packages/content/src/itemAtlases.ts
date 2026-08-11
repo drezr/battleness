@@ -1,6 +1,8 @@
 import gemsAtlasJson from "./atlases/gems.json";
+import materialsAtlasJson from "./atlases/materials.json";
 import monstersAtlasJson from "./atlases/monsters.json";
 import ringsAtlasJson from "./atlases/rings.json";
+import spellsAtlasJson from "./atlases/spells.json";
 import gems from "./definitions/gems.json";
 import materials from "./definitions/materials.json";
 import monsters from "./definitions/monsters.json";
@@ -25,38 +27,15 @@ type PackedAtlas = {
   frames: ReadonlyMap<string, AtlasFrame>;
 };
 
-type GridAtlas = {
-  layout: "grid";
-  path: string;
-  columns: number;
-  rows: number;
-  ids: readonly string[];
-};
-
 const packedAtlases = {
   ring: createPackedAtlas("/assets/items/rings.png", ringsAtlasJson),
   gem: createPackedAtlas("/assets/items/gems.png", gemsAtlasJson),
   monster: createPackedAtlas("/assets/items/monsters.png", monstersAtlasJson),
+  material: createPackedAtlas("/assets/items/materials.png", materialsAtlasJson),
+  spell: createPackedAtlas("/assets/items/spells.png", spellsAtlasJson),
 } as const;
 
-const gridAtlases = {
-  spell: {
-    layout: "grid",
-    path: "/assets/items/spells-atlas.png",
-    columns: 3,
-    rows: 2,
-    ids: ["firebolt", "spark", "iceShard", "solarFlare", "arcPulse", "glacialSpike"],
-  },
-  material: {
-    layout: "grid",
-    path: "/assets/items/materials-atlas.png",
-    columns: 10,
-    rows: 7,
-    ids: materials.map((material) => material.id),
-  },
-} as const satisfies Record<string, GridAtlas>;
-
-const itemAtlases = { ...packedAtlases, ...gridAtlases };
+const itemAtlases = packedAtlases;
 
 const definitionIds = {
   ring: rings.map((definition) => definition.id),
@@ -71,7 +50,6 @@ export function itemArtworkStyleVariables(
   definitionId: string,
 ): Record<string, string> {
   const atlas = itemAtlases[kind];
-  if (atlas.layout === "grid") return gridArtworkStyle(atlas, definitionId);
   return packedArtworkStyle(atlas, definitionId);
 }
 
@@ -102,20 +80,6 @@ function createPackedAtlas(
     frames: new Map(
       json.frames.map((frame) => [frame.filename.replace(/\.png$/u, ""), frame] as const),
     ),
-  };
-}
-
-function gridArtworkStyle(atlas: GridAtlas, definitionId: string): Record<string, string> {
-  const index = atlas.ids.indexOf(definitionId);
-  if (index < 0) return {};
-  const column = index % atlas.columns;
-  const row = Math.floor(index / atlas.columns);
-  const x = atlas.columns === 1 ? 0 : (column / (atlas.columns - 1)) * 100;
-  const y = atlas.rows === 1 ? 0 : (row / (atlas.rows - 1)) * 100;
-  return {
-    "--item-atlas": `url('${atlas.path}')`,
-    "--item-atlas-size": `${atlas.columns * 100}% ${atlas.rows * 100}%`,
-    "--item-atlas-position": `${x}% ${y}%`,
   };
 }
 

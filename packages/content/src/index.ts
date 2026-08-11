@@ -43,7 +43,7 @@ import {
 import { validateCampaignReferences } from "./campaign";
 import { validateContentReferences } from "./references";
 
-export const contentVersion = "production-items-v1";
+export const contentVersion = "production-items-v2";
 
 export const definitions = {
   campaignOpponents: campaignOpponents as readonly CampaignOpponent[],

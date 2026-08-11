@@ -1,0 +1,128 @@
+[
+  {
+    "id": "craftSpellFirebolt",
+    "outputType": "spell",
+    "outputDefinitionId": "firebolt",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "hydrogen",
+        "quantity": 1
+      },
+      {
+        "materialId": "oxygen",
+        "quantity": 1
+      },
+      {
+        "materialId": "nitrogen",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellSolarFlare",
+    "outputType": "spell",
+    "outputDefinitionId": "solarFlare",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "argon",
+        "quantity": 1
+      },
+      {
+        "materialId": "bromine",
+        "quantity": 1
+      },
+      {
+        "materialId": "helium",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellSpark",
+    "outputType": "spell",
+    "outputDefinitionId": "spark",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "nitrogen",
+        "quantity": 1
+      },
+      {
+        "materialId": "helium",
+        "quantity": 1
+      },
+      {
+        "materialId": "hydrogen",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellArcPulse",
+    "outputType": "spell",
+    "outputDefinitionId": "arcPulse",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "neon",
+        "quantity": 1
+      },
+      {
+        "materialId": "fluorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "oxygen",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellIceShard",
+    "outputType": "spell",
+    "outputDefinitionId": "iceShard",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "hydrogen",
+        "quantity": 1
+      },
+      {
+        "materialId": "oxygen",
+        "quantity": 1
+      },
+      {
+        "materialId": "nitrogen",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellGlacialSpike",
+    "outputType": "spell",
+    "outputDefinitionId": "glacialSpike",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "iodine",
+        "quantity": 1
+      },
+      {
+        "materialId": "chlorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "helium",
+        "quantity": 1
+      }
+    ]
+  }
+]

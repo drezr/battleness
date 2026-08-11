@@ -741,24 +741,25 @@ describe("Nuxt Game App APIs", () => {
   it("returns seeded player state", async () => {
     const response = (await playerHandler({})) as PlayerApiResponse;
 
-    expect(response.content.version).toBe("production-items-v1");
+    expect(response.content.version).toBe("production-items-v2");
     expect(response.content.checksum).toMatch(/^[a-f0-9]{64}$/);
     expect(response.player).toMatchObject({ id: "devPlayer", credits: 1_000_000 });
     expect(response.materials).toHaveLength(70);
     expect(response.inventory).toHaveLength(0);
-    expect(response.recipes).toHaveLength(183);
+    expect(response.recipes).toHaveLength(219);
     expect(response.recipes.every((recipe) => recipe.canCraft)).toBe(true);
     expect(
-      response.materials.every((material) => material.contentVersion === "production-items-v1"),
+      response.materials.every((material) => material.contentVersion === "production-items-v2"),
     ).toBe(true);
 
     const release = await prisma.contentRelease.findUniqueOrThrow({
-      where: { version: "production-items-v1" },
+      where: { version: "production-items-v2" },
     });
     expect(release.checksum).toBe(response.content.checksum);
     expect(JSON.parse(release.manifestJson)).toMatchObject({
       materials: 70,
-      recipes: 183,
+      recipes: 219,
+      spells: 42,
     });
   });
 
@@ -799,7 +800,7 @@ describe("Nuxt Game App APIs", () => {
 
     expect(response.inventory).toEqual([]);
     expect(response.player.credits).toBe(1_000_000);
-    expect(player.onboardingVersion).toBe(2);
+    expect(player.onboardingVersion).toBe(3);
     expect(player.inventoryItems).toEqual([]);
     expect(player.materialStock).toHaveLength(70);
   });
@@ -819,7 +820,7 @@ describe("Nuxt Game App APIs", () => {
           playerId: "devPlayer",
           type: "ring",
           definitionId: "ashenLoop",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 25,
           socketCount: 1,
@@ -829,7 +830,7 @@ describe("Nuxt Game App APIs", () => {
           playerId: "devPlayer",
           type: "gem",
           definitionId: "cinderShard",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 10,
         },
@@ -838,7 +839,7 @@ describe("Nuxt Game App APIs", () => {
           playerId: "devPlayer",
           type: "spell",
           definitionId: "fireLance",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 5,
         },
@@ -871,7 +872,7 @@ describe("Nuxt Game App APIs", () => {
         price: 2_500,
         rootItemId: ringId,
         itemSnapshotJson: JSON.stringify({ rootItemId: ringId, itemIds: [ringId, gemId, spellId] }),
-        contentVersion: "production-items-v1",
+        contentVersion: "production-items-v2",
         escrowItems: {
           create: [
             { inventoryItemId: ringId, role: "root" },
@@ -917,7 +918,7 @@ describe("Nuxt Game App APIs", () => {
         rarity: "common",
         quantity: 12,
         price: 600,
-        contentVersion: "production-items-v1",
+        contentVersion: "production-items-v2",
       },
     });
     expect(materialListing).toMatchObject({
@@ -969,7 +970,7 @@ describe("Nuxt Game App APIs", () => {
           rarity: "rare",
           quantity: 5,
           price: 300,
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           createdAt: new Date("2026-07-15T10:00:00.000Z"),
         },
         {
@@ -980,7 +981,7 @@ describe("Nuxt Game App APIs", () => {
           rarity: "rare",
           quantity: 3,
           price: 200,
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           createdAt: new Date("2026-07-15T11:00:00.000Z"),
         },
         {
@@ -994,7 +995,7 @@ describe("Nuxt Game App APIs", () => {
           quality: 20,
           price: 100,
           itemSnapshotJson: "{}",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           createdAt: new Date("2026-07-15T12:00:00.000Z"),
         },
         {
@@ -1007,7 +1008,7 @@ describe("Nuxt Game App APIs", () => {
           rarity: "rare",
           quantity: 1,
           price: 150,
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           soldAt: new Date("2026-07-15T13:00:00.000Z"),
         },
       ],
@@ -1080,7 +1081,7 @@ describe("Nuxt Game App APIs", () => {
           playerId: "devPlayer",
           type: "ring",
           definitionId: "ashenLoop",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           experience: 400,
           quality: 25,
           socketCount: 1,
@@ -1090,7 +1091,7 @@ describe("Nuxt Game App APIs", () => {
           playerId: "devPlayer",
           type: "gem",
           definitionId: "emberShard",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           experience: 100,
           quality: 10,
         },
@@ -1098,8 +1099,8 @@ describe("Nuxt Game App APIs", () => {
           id: spellId,
           playerId: "devPlayer",
           type: "spell",
-          definitionId: "firebolt",
-          contentVersion: "production-items-v1",
+          definitionId: "carbonize",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 5,
         },
@@ -1219,7 +1220,7 @@ describe("Nuxt Game App APIs", () => {
         playerId: "devPlayer",
         type: "ring",
         definitionId: "ashenLoop",
-        contentVersion: "production-items-v1",
+        contentVersion: "production-items-v2",
         experience: 0,
         quality: 0,
         socketCount: 1,
@@ -1255,7 +1256,7 @@ describe("Nuxt Game App APIs", () => {
         rarity: "common",
         quantity: 1,
         price: 10 + index,
-        contentVersion: "production-items-v1",
+        contentVersion: "production-items-v2",
       })),
     });
     const stockBefore = await materialStockQuantity("iron");
@@ -1283,7 +1284,7 @@ describe("Nuxt Game App APIs", () => {
         playerId: "devPlayer",
         type: "ring",
         definitionId: "ashenLoop",
-        contentVersion: "production-items-v1",
+        contentVersion: "production-items-v2",
         experience: 0,
         quality: 0,
         socketCount: 1,
@@ -1392,7 +1393,7 @@ describe("Nuxt Game App APIs", () => {
         playerId: buyerId,
         materialId: "iron",
         quantity: 0,
-        contentVersion: "production-items-v1",
+        contentVersion: "production-items-v2",
       },
     });
     const sellerCreditsBefore = (
@@ -1453,7 +1454,7 @@ describe("Nuxt Game App APIs", () => {
       await prisma.materialStock.findUniqueOrThrow({
         where: { playerId_materialId: { playerId: buyerId, materialId: "iron" } },
       }),
-    ).toMatchObject({ quantity: buyerIronBefore + 1, contentVersion: "production-items-v1" });
+    ).toMatchObject({ quantity: buyerIronBefore + 1, contentVersion: "production-items-v2" });
     expect(
       await prisma.playerMarketListing.findUniqueOrThrow({ where: { id: creation.listingId } }),
     ).toMatchObject({
@@ -1518,7 +1519,7 @@ describe("Nuxt Game App APIs", () => {
           playerId: "devPlayer",
           type: "ring",
           definitionId: "ashenLoop",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 20,
           socketCount: 1,
@@ -1528,7 +1529,7 @@ describe("Nuxt Game App APIs", () => {
           playerId: "devPlayer",
           type: "gem",
           definitionId: "emberShard",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 10,
         },
@@ -1536,8 +1537,8 @@ describe("Nuxt Game App APIs", () => {
           id: spellId,
           playerId: "devPlayer",
           type: "spell",
-          definitionId: "firebolt",
-          contentVersion: "production-items-v1",
+          definitionId: "carbonize",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 5,
         },
@@ -1731,7 +1732,7 @@ describe("Nuxt Game App APIs", () => {
           quality: 30,
           price: 400,
           itemSnapshotJson: JSON.stringify({ items: [{}, {}, {}] }),
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           soldAt: new Date("2026-07-15T15:00:00.000Z"),
         },
         {
@@ -1744,7 +1745,7 @@ describe("Nuxt Game App APIs", () => {
           rarity: "rare",
           quantity: 2,
           price: 700,
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           soldAt: new Date("2026-07-15T14:00:00.000Z"),
         },
         {
@@ -1757,7 +1758,7 @@ describe("Nuxt Game App APIs", () => {
           rarity: "rare",
           quantity: 1,
           price: 900,
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           soldAt: new Date("2026-07-15T16:00:00.000Z"),
         },
         {
@@ -1769,7 +1770,7 @@ describe("Nuxt Game App APIs", () => {
           rarity: "common",
           quantity: 1,
           price: 100,
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           cancelledAt: new Date("2026-07-15T17:00:00.000Z"),
         },
       ],
@@ -2131,7 +2132,7 @@ describe("Nuxt Game App APIs", () => {
         winnerPlayerId: "devPlayer",
         seed: "ranked-settlement-seed",
         rulesVersion: "prototype-2",
-        contentVersion: "production-items-v1",
+        contentVersion: "production-items-v2",
         setupJson: "{}",
         actionLogJson: "[]",
         createdAt: new Date("2026-07-15T12:00:00.000Z"),
@@ -2358,7 +2359,7 @@ describe("Nuxt Game App APIs", () => {
           playerId: "devPlayer",
           type: "ring",
           definitionId: "furnaceLink",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 0,
           socketCount: 1,
@@ -2369,7 +2370,7 @@ describe("Nuxt Game App APIs", () => {
           playerId: guestId,
           type: "ring",
           definitionId: "furnaceLink",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 0,
           socketCount: 1,
@@ -2380,7 +2381,7 @@ describe("Nuxt Game App APIs", () => {
           playerId: guestId,
           type: "gem",
           definitionId: "cinderPearl",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 0,
           socketCount: null,
@@ -2390,8 +2391,8 @@ describe("Nuxt Game App APIs", () => {
           id: guestSpellId,
           playerId: guestId,
           type: "spell",
-          definitionId: "firebolt",
-          contentVersion: "production-items-v1",
+          definitionId: "carbonize",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 0,
           socketCount: null,
@@ -2533,7 +2534,7 @@ describe("Nuxt Game App APIs", () => {
     expect(guestBattle).toMatchObject({ mode: "private_pvp", viewer: { id: guestId } });
     expect(guestBattle.viewer.rings?.[0]?.gems[0]?.enchantment).toMatchObject({
       type: "spell",
-      definitionId: "firebolt",
+      definitionId: "carbonize",
     });
     expectHiddenPvpLiveLoadout(hostBattle, "private_pvp");
     expectHiddenPvpLiveLoadout(guestBattle, "private_pvp");
@@ -2748,7 +2749,7 @@ describe("Nuxt Game App APIs", () => {
           playerId: "devPlayer",
           type: "ring",
           definitionId: "furnaceLink",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 0,
           socketCount: 1,
@@ -2759,7 +2760,7 @@ describe("Nuxt Game App APIs", () => {
           playerId: "devPlayer",
           type: "ring",
           definitionId: "ashenLoop",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 0,
           socketCount: 1,
@@ -2770,7 +2771,7 @@ describe("Nuxt Game App APIs", () => {
           playerId: guestId,
           type: "ring",
           definitionId: "furnaceLink",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 0,
           socketCount: 1,
@@ -2968,7 +2969,7 @@ describe("Nuxt Game App APIs", () => {
           playerId: "devPlayer",
           type: "ring",
           definitionId: "furnaceLink",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 0,
           socketCount: 1,
@@ -2979,7 +2980,7 @@ describe("Nuxt Game App APIs", () => {
           playerId: guestId,
           type: "ring",
           definitionId: "furnaceLink",
-          contentVersion: "production-items-v1",
+          contentVersion: "production-items-v2",
           experience: 0,
           quality: 0,
           socketCount: 1,
@@ -3438,53 +3439,53 @@ describe("Nuxt Game App APIs", () => {
       });
       expect(identity.email).toBe("player@example.com");
       expect(identity.player.displayName).toBe("Google Player");
-      expect(identity.player.onboardingVersion).toBe(2);
+      expect(identity.player.onboardingVersion).toBe(3);
       expect(identity.player.inventoryItems).toEqual([
         expect.objectContaining({
-          id: `${identity.playerId}.starter.v2.gem`,
+          id: `${identity.playerId}.starter.v3.gem`,
           type: "gem",
           definitionId: "emberShard",
         }),
         expect.objectContaining({
-          id: `${identity.playerId}.starter.v2.ring`,
+          id: `${identity.playerId}.starter.v3.ring`,
           type: "ring",
           definitionId: "ashenLoop",
           equipped: true,
         }),
         expect.objectContaining({
-          id: `${identity.playerId}.starter.v2.spell`,
+          id: `${identity.playerId}.starter.v3.spell`,
           type: "spell",
-          definitionId: "firebolt",
+          definitionId: "burnI",
         }),
       ]);
       expect(identity.player.ringSockets).toEqual([
         expect.objectContaining({
-          ringItemId: `${identity.playerId}.starter.v2.ring`,
-          gemItemId: `${identity.playerId}.starter.v2.gem`,
+          ringItemId: `${identity.playerId}.starter.v3.ring`,
+          gemItemId: `${identity.playerId}.starter.v3.gem`,
           socketIndex: 0,
         }),
       ]);
       expect(identity.player.gemEnchantments).toEqual([
         expect.objectContaining({
-          gemItemId: `${identity.playerId}.starter.v2.gem`,
-          targetItemId: `${identity.playerId}.starter.v2.spell`,
+          gemItemId: `${identity.playerId}.starter.v3.gem`,
+          targetItemId: `${identity.playerId}.starter.v3.spell`,
           targetType: "spell",
         }),
       ]);
       expect(identity.player.equippedRings).toEqual([
         expect.objectContaining({
-          ringItemId: `${identity.playerId}.starter.v2.ring`,
+          ringItemId: `${identity.playerId}.starter.v3.ring`,
           slotIndex: 0,
         }),
       ]);
-      expect(identity.player.activeLoadoutId).toBe(`${identity.playerId}.starter.v2.loadout`);
+      expect(identity.player.activeLoadoutId).toBe(`${identity.playerId}.starter.v3.loadout`);
       expect(identity.player.loadouts).toEqual([
         expect.objectContaining({
-          id: `${identity.playerId}.starter.v2.loadout`,
+          id: `${identity.playerId}.starter.v3.loadout`,
           name: "Starter Loadout",
           rings: [
             expect.objectContaining({
-              ringItemId: `${identity.playerId}.starter.v2.ring`,
+              ringItemId: `${identity.playerId}.starter.v3.ring`,
               slotIndex: 0,
             }),
           ],
@@ -3525,10 +3526,10 @@ describe("Nuxt Game App APIs", () => {
       where: { id: "devPlayer" },
       include: { inventoryItems: true, materialStock: true },
     });
-    expect(after.onboardingVersion).toBe(2);
+    expect(after.onboardingVersion).toBe(3);
     expect(after.inventoryItems).toHaveLength(before.inventoryItems.length);
     expect(after.materialStock).toHaveLength(before.materialStock.length);
-    expect(after.inventoryItems.some((item) => item.id.includes(".starter.v2."))).toBe(false);
+    expect(after.inventoryItems.some((item) => item.id.includes(".starter.v3."))).toBe(false);
   });
 
   it("rejects reusing a content version for different definitions", async () => {
@@ -3540,7 +3541,7 @@ describe("Nuxt Game App APIs", () => {
 
     try {
       await expect(playerHandler({})).rejects.toThrow(
-        'Content version "production-items-v1" is already registered with different definitions.',
+        'Content version "production-items-v2" is already registered with different definitions.',
       );
     } finally {
       await prisma.contentRelease.update({
@@ -3804,7 +3805,7 @@ describe("Nuxt Game App APIs", () => {
           playerId_opponentId: { playerId: "devPlayer", opponentId: "emberTrial" },
         },
       }),
-    ).toMatchObject({ victoryCount: 1, contentVersion: "production-items-v1" });
+    ).toMatchObject({ victoryCount: 1, contentVersion: "production-items-v2" });
 
     const campaign = (await campaignGetHandler({})) as CampaignApiResponse;
     expect(campaign.progress).toEqual({ completedCount: 1, unlockedCount: 2, totalCount: 3 });
@@ -3885,7 +3886,7 @@ describe("Nuxt Game App APIs", () => {
     expect(response.state.inventory[0]).toMatchObject({
       type: "ring",
       definitionId: "ashenLoop",
-      contentVersion: "production-items-v1",
+      contentVersion: "production-items-v2",
     });
     expect(materialQuantity(response.state, "aluminium")).toBe(0);
     expect(materialQuantity(response.state, "iron")).toBe(3);
@@ -3902,7 +3903,7 @@ describe("Nuxt Game App APIs", () => {
     });
     expect(reloadedState.inventory[0]).toMatchObject({
       level: 1,
-      contentVersion: "production-items-v1",
+      contentVersion: "production-items-v2",
       bonusPercent: 0,
       progression: { nextLevelExperience: 400, progressPercent: 0 },
     });
@@ -3992,10 +3993,10 @@ describe("Nuxt Game App APIs", () => {
           equipped: false,
         },
         {
-          id: "devPlayer.spell.firebolt.metrics",
+          id: "devPlayer.spell.carbonize.metrics",
           playerId: "devPlayer",
           type: "spell",
-          definitionId: "firebolt",
+          definitionId: "carbonize",
           contentVersion: "prototype-5",
           experience: 10_000,
           quality: 40,
@@ -4016,7 +4017,7 @@ describe("Nuxt Game App APIs", () => {
       data: {
         playerId: "devPlayer",
         gemItemId: "devPlayer.gem.emberShard.metrics",
-        targetItemId: "devPlayer.spell.firebolt.metrics",
+        targetItemId: "devPlayer.spell.carbonize.metrics",
         targetType: "spell",
       },
     });
@@ -4028,35 +4029,35 @@ describe("Nuxt Game App APIs", () => {
 
     expect(ring).toMatchObject({
       id: "devPlayer.ring.ashenLoop.metrics",
-      damage: 13,
+      damage: 8,
       ringDamage: 6,
       gemDamage: 2,
-      spellDamage: 5,
+      spellDamage: 0,
       monsterDamage: 0,
       energyCost: 3,
-      cooldown: 2,
-      energyPenalty: 1.3,
-      cooldownPenalty: 0.5,
+      cooldown: 3,
+      energyPenalty: 1,
+      cooldownPenalty: 1.3,
     });
     expect(ring.gems[0]).toMatchObject({
       id: "devPlayer.gem.emberShard.metrics",
       damage: 2,
-      energyPenalty: 1.3,
-      cooldownPenalty: 0.5,
+      energyPenalty: 1,
+      cooldownPenalty: 1.3,
       enchantment: {
-        id: "devPlayer.spell.firebolt.metrics",
+        id: "devPlayer.spell.carbonize.metrics",
         type: "spell",
-        damage: 5,
+        damage: 0,
       },
     });
     expect(equipment.summary).toMatchObject({
-      totalDamage: 13,
+      totalDamage: 8,
       totalRingDamage: 6,
       totalGemDamage: 2,
-      totalSpellDamage: 5,
+      totalSpellDamage: 0,
       totalMonsterDamage: 0,
-      totalEnergyPenalty: 1.3,
-      totalCooldownPenalty: 0.5,
+      totalEnergyPenalty: 1,
+      totalCooldownPenalty: 1.3,
     });
   });
 
@@ -4327,7 +4328,7 @@ describe("Nuxt Game App APIs", () => {
       body: { recipeId: "craftGemEmberShard" },
     })) as CraftApiResponse;
     const spell = (await craftHandler({
-      body: { recipeId: "craftSpellFirebolt" },
+      body: { recipeId: "craftSpellCarbonize" },
     })) as CraftApiResponse;
 
     const enchanted = (await socketPostHandler({
@@ -4346,7 +4347,7 @@ describe("Nuxt Game App APIs", () => {
     expect(enchantedGem?.enchantment).toMatchObject({
       id: spell.crafted.id,
       type: "spell",
-      damage: 4,
+      damage: 0,
     });
     expect(usedTarget).toMatchObject({
       id: spell.crafted.id,
@@ -4371,7 +4372,7 @@ describe("Nuxt Game App APIs", () => {
       body: { recipeId: "craftGemEmberShard" },
     })) as CraftApiResponse;
     const spell = (await craftHandler({
-      body: { recipeId: "craftSpellFirebolt" },
+      body: { recipeId: "craftSpellCarbonize" },
     })) as CraftApiResponse;
     const monster = (await craftHandler({
       body: { recipeId: "craftMonsterEmberImp" },
@@ -4426,7 +4427,7 @@ describe("Nuxt Game App APIs", () => {
       body: { recipeId: "craftGemCinderPearl" },
     })) as CraftApiResponse;
     const spell = (await craftHandler({
-      body: { recipeId: "craftSpellFirebolt" },
+      body: { recipeId: "craftSpellCarbonize" },
     })) as CraftApiResponse;
 
     await socketPostHandler({
@@ -4536,7 +4537,7 @@ describe("Nuxt Game App APIs", () => {
     const response = (await marketGameGetHandler({})) as GameMarketApiResponse;
 
     expect(response.player).toMatchObject({ id: "devPlayer", credits: 1_000_000 });
-    expect(response.content.version).toBe("production-items-v1");
+    expect(response.content.version).toBe("production-items-v2");
     expect(response.materials).toHaveLength(70);
     expect(response.materials.find((material) => material.id === "aluminium")).toMatchObject({
       rarity: "common",
@@ -4571,7 +4572,7 @@ describe("Nuxt Game App APIs", () => {
     });
     expect(player.credits).toBe(999_970);
     expect(stock.quantity).toBe(6);
-    expect(stock.contentVersion).toBe("production-items-v1");
+    expect(stock.contentVersion).toBe("production-items-v2");
     expect(response.transactions[0]).toMatchObject({
       requestId: "buy-aluminium-3",
       action: "buy",
@@ -4579,7 +4580,7 @@ describe("Nuxt Game App APIs", () => {
       quantity: 3,
       unitPrice: 10,
       creditsDelta: -30,
-      contentVersion: "production-items-v1",
+      contentVersion: "production-items-v2",
     });
     expect(await prisma.marketTransaction.count()).toBe(1);
   });
@@ -4830,7 +4831,7 @@ describe("Nuxt Game App APIs", () => {
         playerId: "devPlayer",
         type: "ring",
         definitionId: "furnaceLink",
-        contentVersion: "production-items-v1",
+        contentVersion: "production-items-v2",
         experience: 0,
         quality: 0,
         socketCount: 1,
@@ -4886,7 +4887,7 @@ describe("Nuxt Game App APIs", () => {
 
     await socketPostHandler({ body: { action: "unsocket", gemItemId: gem.crafted.id } });
     const spell = (await craftHandler({
-      body: { recipeId: "craftSpellFirebolt" },
+      body: { recipeId: "craftSpellCarbonize" },
     })) as CraftApiResponse;
     await socketPostHandler({
       body: {
@@ -5331,11 +5332,11 @@ describe("Nuxt Game App APIs", () => {
     expect(finished.battle.summary).toMatchObject({
       actionCount: finished.battle.actionCount,
       players: expect.arrayContaining([
-        expect.objectContaining({ playerId: "devPlayer", damage: 11 }),
+        expect.objectContaining({ playerId: "devPlayer", damage: 7 }),
         expect.objectContaining({ playerId: "playerTwo", damage: 0 }),
       ]),
       ringsUsed: [expect.objectContaining({ id: ringItemId, label: "Ashen Loop", count: 1 })],
-      spellsCast: [expect.objectContaining({ id: "firebolt", label: "Firebolt", count: 1 })],
+      spellsCast: [expect.objectContaining({ id: "carbonize", label: "Carbonize", count: 1 })],
       monstersSummoned: [],
       monstersUsed: [],
     });
@@ -5654,7 +5655,7 @@ async function createAndActivateCampaignTestLoadout(): Promise<string> {
       playerId: "devPlayer",
       type: "ring",
       definitionId: "crownOfThyr",
-      contentVersion: "production-items-v1",
+      contentVersion: "production-items-v2",
       experience: 250_000,
       quality: 100,
       socketCount: 1,
@@ -5718,7 +5719,7 @@ async function createAndActivateEnchantedRingLoadout(): Promise<{
 }> {
   const ringItemId = "devPlayer.ring.ashenLoop.liveXp";
   const gemItemId = "devPlayer.gem.emberShard.liveXp";
-  const spellItemId = "devPlayer.spell.firebolt.liveXp";
+  const spellItemId = "devPlayer.spell.carbonize.liveXp";
 
   await prisma.inventoryItem.createMany({
     data: [
@@ -5747,7 +5748,7 @@ async function createAndActivateEnchantedRingLoadout(): Promise<{
         id: spellItemId,
         playerId: "devPlayer",
         type: "spell",
-        definitionId: "firebolt",
+        definitionId: "carbonize",
         contentVersion: "prototype-5",
         experience: 0,
         quality: 0,

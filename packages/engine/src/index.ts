@@ -12,11 +12,31 @@ import type {
   BattlePlayer,
   ElementType,
   FirstPlayerChoiceReason,
+  GemCombatInstance,
   MonsterCombatInstance,
+  RingCombatInstance,
+  SpellDefinition,
+  SpellEffect,
   TargetId,
+  TemporaryMonsterStatus,
 } from "./types";
 
-export const rulesVersion = "prototype-2";
+type RingActionResolutionContext = {
+  ringInstanceId: string;
+  actionPierces: Array<{ targetId: TargetId; sourceSpellId: string }>;
+  funeralBrands: Array<{
+    targetId: TargetId;
+    sourcePlayerId: string;
+    sourceSpellId: string;
+    activated: boolean;
+  }>;
+  capturedCurrentDamage: Map<string, number>;
+  destroyedTargetCurrentDamage: Map<string, number>;
+  selectedTargetOwnerIds: Map<string, string>;
+  destroyingMonsterIds: Set<string>;
+};
+
+export const rulesVersion = "production-spells-v1";
 
 export function createBattleState(setup: BattleSetup): BattleState {
   assertValidBattleSetup(setup);
@@ -561,13 +581,15 @@ function useRing(
     if (gem.enchantment?.type !== "spell") {
       continue;
     }
-    const spellTarget = action.enchantmentTargets?.[gem.id] ?? action.targetId;
-    requireValidTarget(state, player.id, spellTarget);
-    assertTauntAllowsTarget(state, player.id, spellTarget);
+    const spell = getSpellDefinition(state, gem);
+    const spellTarget = resolveSpellTarget(action, gem, spell);
+    validateSpellTarget(state, player.id, spell, spellTarget);
   }
 
   player.energy.current -= ring.energyCost;
   ring.currentCooldown = ring.cooldown;
+
+  const actionContext = prepareRingActionContext(state, player, ring, action);
 
   const events: BattleEvent[] = [
     {
@@ -585,11 +607,19 @@ function useRing(
   ];
 
   const ringDamage = ring.damage + ring.gems.reduce((sum, gem) => sum + gem.damage, 0);
+  events.push(...actionContext.events);
+  const ringTarget = getTarget(state, action.targetId);
+  const ringTargetMonsterId = ringTarget?.kind === "monster" ? ringTarget.monster.id : undefined;
   events.push(
     ...applyDamage(state, player.id, ring.id, action.targetId, ringDamage, ring.element, {
       blockFirstTurnHeroDamage: true,
+      isRingAndGemDamage: true,
+      actionContext: actionContext.context,
     }),
   );
+  if (ringTargetMonsterId && !getTarget(state, ringTargetMonsterId as TargetId)) {
+    events.push(...settleSupportedRingKillTriggers(player, ring, ringTargetMonsterId));
+  }
 
   for (const gem of ring.gems) {
     if (!gem.enchantment) {
@@ -608,14 +638,14 @@ function useRing(
       continue;
     }
 
-    const spellDefinitionId = gem.enchantment.resolvedDefinitionId ?? gem.enchantment.spellId;
-    const spell = state.definitions.spells[spellDefinitionId];
-    if (!spell) {
-      throw new Error(`Spell definition ${spellDefinitionId} was not found.`);
-    }
-
-    const spellTarget = action.enchantmentTargets?.[gem.id] ?? action.targetId;
-    if (!getTarget(state, spellTarget)) {
+    const spell = getSpellDefinition(state, gem);
+    const spellTarget = resolveSpellTarget(action, gem, spell);
+    const preparedForAction = spell.effects.some(
+      (effect) =>
+        effect.type === "conditionalPierceForAction" ||
+        effect.type === "registerActionScopedTrigger",
+    );
+    if (spellTarget && !getTarget(state, spellTarget) && !preparedForAction) {
       continue;
     }
 
@@ -623,29 +653,592 @@ function useRing(
       type: "spellCast",
       spellId: gem.enchantment.spellId,
       sourceGemId: gem.id,
-      targetId: spellTarget,
+      ...(spellTarget ? { targetId: spellTarget } : {}),
     });
 
     for (const effect of spell.effects) {
-      if (effect.type === "dealDamage") {
-        events.push(
-          ...applyDamage(
-            state,
-            player.id,
-            gem.enchantment.spellId,
-            spellTarget,
-            effect.amount,
-            spell.element,
-            {
-              blockFirstTurnHeroDamage: true,
-            },
-          ),
-        );
-      }
+      events.push(
+        ...resolveSpellEffect(
+          state,
+          player,
+          ring,
+          gem,
+          spell,
+          effect,
+          spellTarget,
+          actionContext.context,
+        ),
+      );
     }
   }
 
   return events;
+}
+
+function prepareRingActionContext(
+  state: BattleState,
+  player: BattlePlayer,
+  ring: RingCombatInstance,
+  action: Extract<BattleAction, { type: "useRing" }>,
+): { context: RingActionResolutionContext; events: BattleEvent[] } {
+  const context: RingActionResolutionContext = {
+    ringInstanceId: ring.id,
+    actionPierces: [],
+    funeralBrands: [],
+    capturedCurrentDamage: new Map(),
+    destroyedTargetCurrentDamage: new Map(),
+    selectedTargetOwnerIds: new Map(),
+    destroyingMonsterIds: new Set(),
+  };
+  const events: BattleEvent[] = [];
+
+  for (const gem of ring.gems) {
+    if (gem.enchantment?.type !== "spell") {
+      continue;
+    }
+    const spell = getSpellDefinition(state, gem);
+    const targetId = resolveSpellTarget(action, gem, spell);
+    if (!targetId) {
+      continue;
+    }
+    const selectedTarget = getTarget(state, targetId);
+    if (selectedTarget?.kind === "monster") {
+      context.selectedTargetOwnerIds.set(gem.id, selectedTarget.player.id);
+    }
+    for (const effect of spell.effects) {
+      if (effect.type === "conditionalPierceForAction") {
+        context.actionPierces.push({ targetId, sourceSpellId: gem.enchantment.spellId });
+      }
+      if (effect.type === "registerActionScopedTrigger") {
+        context.funeralBrands.push({
+          targetId,
+          sourcePlayerId: player.id,
+          sourceSpellId: gem.enchantment.spellId,
+          activated: false,
+        });
+        events.push({
+          type: "triggerRegistered",
+          sourceSpellId: gem.enchantment.spellId,
+          ringInstanceId: ring.id,
+          event: effect.event,
+        });
+      }
+    }
+  }
+
+  return { context, events };
+}
+
+function settleSupportedRingKillTriggers(
+  player: BattlePlayer,
+  ring: RingCombatInstance,
+  destroyedMonsterId: string,
+): BattleEvent[] {
+  const events: BattleEvent[] = [];
+  for (const trigger of ring.triggers ?? []) {
+    events.push({
+      type: "triggerActivated",
+      sourceSpellId: trigger.source.spellId,
+      sourceId: ring.id,
+      targetId: destroyedMonsterId,
+    });
+    switch (trigger.effect.type) {
+      case "modifySupportedRingDamage": {
+        const from = ring.damage;
+        ring.damage += trigger.effect.amount;
+        events.push({ type: "ringDamageChanged", ringInstanceId: ring.id, from, to: ring.damage });
+        break;
+      }
+      case "restoreCurrentTurnEnergy": {
+        const from = player.energy.current;
+        player.energy.current = Math.min(
+          player.energy.maxForTurn,
+          player.energy.current + trigger.effect.amount,
+        );
+        const amount = player.energy.current - from;
+        if (amount > 0) {
+          events.push({
+            type: "energyRestored",
+            playerId: player.id,
+            amount,
+            current: player.energy.current,
+          });
+        }
+        break;
+      }
+      case "modifySupportedRingCurrentCooldown":
+        events.push(
+          ...setCurrentCooldown(
+            ring.id,
+            ring,
+            Math.max(trigger.effect.minimum, ring.currentCooldown + trigger.effect.amount),
+          ),
+        );
+        break;
+    }
+  }
+  return events;
+}
+
+function getSpellDefinition(state: BattleState, gem: GemCombatInstance): SpellDefinition {
+  if (gem.enchantment?.type !== "spell") {
+    throw new Error(`Gem ${gem.id} does not contain a spell enchantment.`);
+  }
+
+  const spellDefinitionId = gem.enchantment.resolvedDefinitionId ?? gem.enchantment.spellId;
+  const spell = state.definitions.spells[spellDefinitionId];
+  if (!spell) {
+    throw new Error(`Spell definition ${spellDefinitionId} was not found.`);
+  }
+  return spell;
+}
+
+function resolveSpellTarget(
+  action: Extract<BattleAction, { type: "useRing" }>,
+  gem: GemCombatInstance,
+  spell: SpellDefinition,
+): TargetId | undefined {
+  if (spell.targeting?.selection === "none") {
+    return undefined;
+  }
+  return action.enchantmentTargets?.[gem.id] ?? action.targetId;
+}
+
+function validateSpellTarget(
+  state: BattleState,
+  sourcePlayerId: string,
+  spell: SpellDefinition,
+  targetId: TargetId | undefined,
+): void {
+  if (spell.targeting?.selection === "none") {
+    return;
+  }
+  if (!targetId) {
+    throw new Error(`Spell ${spell.id} requires a target.`);
+  }
+
+  requireValidTarget(state, sourcePlayerId, targetId);
+  const target = getTarget(state, targetId)!;
+  const allowedTargets = spell.targeting?.allowedTargets ?? ["anyCombatant"];
+  const allowed = allowedTargets.some((allowedTarget) => {
+    switch (allowedTarget) {
+      case "anyCombatant":
+        return true;
+      case "anyMonster":
+        return target.kind === "monster";
+      case "alliedMonster":
+        return target.kind === "monster" && target.player.id === sourcePlayerId;
+      case "enemyMonster":
+        return target.kind === "monster" && target.player.id !== sourcePlayerId;
+    }
+  });
+  if (!allowed) {
+    throw new Error(`Target ${targetId} is not legal for spell ${spell.id}.`);
+  }
+
+  if (spell.effects.some((effect) => effect.type === "dealDamage")) {
+    assertTauntAllowsTarget(state, sourcePlayerId, targetId);
+  }
+}
+
+function resolveSpellEffect(
+  state: BattleState,
+  player: BattlePlayer,
+  ring: RingCombatInstance,
+  gem: GemCombatInstance,
+  spell: SpellDefinition,
+  effect: SpellEffect,
+  selectedTargetId: TargetId | undefined,
+  actionContext: RingActionResolutionContext,
+): BattleEvent[] {
+  const spellSourceId = gem.enchantment?.type === "spell" ? gem.enchantment.spellId : spell.id;
+  switch (effect.type) {
+    case "dealDamage":
+      return selectedTargetId
+        ? applyDamage(
+            state,
+            player.id,
+            spellSourceId,
+            selectedTargetId,
+            effect.amount,
+            effect.element ?? spell.element,
+            { blockFirstTurnHeroDamage: true, actionContext },
+          )
+        : [];
+    case "applyStatus":
+      return selectedTargetId
+        ? applyTemporaryStatus(state, selectedTargetId, player.id, spellSourceId, gem.id, effect)
+        : [];
+    case "forEachMonster": {
+      const targetIds = state.players.flatMap((candidate) =>
+        candidate.monsters.map((monster) => monster.id as TargetId),
+      );
+      return targetIds.flatMap((targetId) =>
+        getTarget(state, targetId)
+          ? applyTemporaryStatus(state, targetId, player.id, spellSourceId, gem.id, effect.effect)
+          : [],
+      );
+    }
+    case "dealDamageToAll": {
+      const opponent = getOpponent(state, player.id);
+      const targetIds = opponent.monsters.map((monster) => monster.id as TargetId);
+      const amount = effect.amount ?? actionContext.capturedCurrentDamage.get(gem.id) ?? 0;
+      return targetIds.flatMap((targetId) =>
+        applyDamage(state, player.id, spellSourceId, targetId, amount, effect.element, {
+          blockFirstTurnHeroDamage: true,
+          actionContext,
+        }),
+      );
+    }
+    case "modifyCurrentCooldown": {
+      if (!selectedTargetId) {
+        return [];
+      }
+      const target = getTarget(state, selectedTargetId);
+      if (target?.kind !== "monster") {
+        return [];
+      }
+      const from = target.monster.currentCooldown;
+      target.monster.currentCooldown = Math.min(
+        target.monster.cooldown,
+        Math.max(0, target.monster.currentCooldown + effect.amount),
+      );
+      return from === target.monster.currentCooldown
+        ? []
+        : [
+            {
+              type: "cooldownChanged",
+              targetId: target.monster.id,
+              from,
+              to: target.monster.currentCooldown,
+            },
+          ];
+    }
+    case "removeStatuses": {
+      if (!selectedTargetId) {
+        return [];
+      }
+      const target = getTarget(state, selectedTargetId);
+      if (target?.kind !== "monster") {
+        return [];
+      }
+      const statuses = target.monster.statuses ?? [];
+      target.monster.statuses = [];
+      const shields = getActiveShields(target.monster);
+      const temporaryShields = shields.filter((shield) => shield.source.kind === "temporary");
+      target.monster.shields = shields.filter((shield) => shield.source.kind !== "temporary");
+      syncShieldActive(target.monster);
+      return [
+        ...statuses.map((status) => ({
+          type: "statusRemoved" as const,
+          monsterInstanceId: target.monster.id,
+          status: status.type,
+          reason: "cleansed" as const,
+        })),
+        ...temporaryShields.map(() => ({
+          type: "shieldExpired" as const,
+          monsterInstanceId: target.monster.id,
+        })),
+      ];
+    }
+    case "grantSkill": {
+      if (!selectedTargetId) {
+        return [];
+      }
+      const target = getTarget(state, selectedTargetId);
+      if (target?.kind !== "monster" || hasMonsterSkill(target.monster, effect.skill)) {
+        return [];
+      }
+      const source = { playerId: player.id, spellId: spellSourceId, gemId: gem.id };
+      (target.monster.grantedSkills ??= []).push({ skill: effect.skill, source });
+      const events: BattleEvent[] = [
+        {
+          type: "skillGranted",
+          monsterInstanceId: target.monster.id,
+          skill: effect.skill,
+          sourceSpellId: spellSourceId,
+        },
+      ];
+      if (effect.skill === "shield" && effect.activateImmediately) {
+        const shields = getActiveShields(target.monster);
+        shields.push({ source: { kind: "grantedSkill", ...source } });
+        target.monster.shields = shields;
+        syncShieldActive(target.monster);
+        events.push({
+          type: "shieldGranted",
+          monsterInstanceId: target.monster.id,
+          sourceSpellId: spellSourceId,
+          temporary: false,
+        });
+      }
+      events.push(...activateRageIfEligible(target.monster));
+      return events;
+    }
+    case "grantTemporaryShield": {
+      if (!selectedTargetId) {
+        return [];
+      }
+      const target = getTarget(state, selectedTargetId);
+      if (target?.kind !== "monster" || getActiveShields(target.monster).length > 0) {
+        return [];
+      }
+      target.monster.shields = [
+        {
+          source: {
+            kind: "temporary",
+            playerId: player.id,
+            spellId: spellSourceId,
+            gemId: gem.id,
+          },
+          expires: "startOfOwnerNextTurn",
+        },
+      ];
+      syncShieldActive(target.monster);
+      return [
+        {
+          type: "shieldGranted",
+          monsterInstanceId: target.monster.id,
+          sourceSpellId: spellSourceId,
+          temporary: true,
+        },
+      ];
+    }
+    case "setCurrentCooldown": {
+      if (!selectedTargetId) {
+        return [];
+      }
+      const target = getTarget(state, selectedTargetId);
+      if (target?.kind !== "monster") {
+        return [];
+      }
+      const value = effect.valueFrom === "resolvedBaseCooldown" ? target.monster.cooldown : 0;
+      return setCurrentCooldown(target.monster.id, target.monster, value);
+    }
+    case "setCurrentCooldownForAll":
+      return player.monsters.flatMap((monster) => setCurrentCooldown(monster.id, monster, 0));
+    case "randomTarget": {
+      switch (effect.scope) {
+        case "alliedRingsWithCooldownAboveZero": {
+          const eligible = player.rings.filter((candidate) => candidate.currentCooldown > 0);
+          if (eligible.length === 0) return [];
+          const chosen = chooseDeterministicRandomTarget(state, eligible, effect.scope);
+          return [
+            { type: "randomTargetSelected", sourceSpellId: spellSourceId, targetId: chosen.id },
+            ...setCurrentCooldown(
+              chosen.id,
+              chosen,
+              Math.max(effect.onSuccess.minimum, chosen.currentCooldown + effect.onSuccess.amount),
+            ),
+          ];
+        }
+        case "otherAlliedMonsters": {
+          const eligible = player.monsters.filter((candidate) => candidate.id !== selectedTargetId);
+          if (eligible.length === 0) return [];
+          const chosen = chooseDeterministicRandomTarget(state, eligible, effect.scope);
+          const amount = actionContext.destroyedTargetCurrentDamage.get(gem.id) ?? 0;
+          const from = chosen.damage;
+          chosen.damage += amount;
+          return [
+            { type: "randomTargetSelected", sourceSpellId: spellSourceId, targetId: chosen.id },
+            { type: "monsterDamageChanged", monsterInstanceId: chosen.id, from, to: chosen.damage },
+          ];
+        }
+        case "enemyMonsters": {
+          const opponent = getOpponent(state, player.id);
+          if (opponent.monsters.length === 0) return [];
+          const chosen = chooseDeterministicRandomTarget(state, opponent.monsters, effect.scope);
+          return [
+            { type: "randomTargetSelected", sourceSpellId: spellSourceId, targetId: chosen.id },
+            ...resolveMonsterDestruction(state, opponent, chosen, actionContext),
+          ];
+        }
+        case "otherMonstersControlledBySelectedTargetOwner": {
+          const ownerId = actionContext.selectedTargetOwnerIds.get(gem.id);
+          const owner = ownerId ? getPlayer(state, ownerId) : undefined;
+          const eligible =
+            owner?.monsters.filter((candidate) => candidate.id !== selectedTargetId) ?? [];
+          if (eligible.length === 0) return [];
+          const chosen = chooseDeterministicRandomTarget(state, eligible, effect.scope);
+          return [
+            { type: "randomTargetSelected", sourceSpellId: spellSourceId, targetId: chosen.id },
+            ...applyDamage(
+              state,
+              player.id,
+              spellSourceId,
+              chosen.id as TargetId,
+              effect.onSuccess.amount,
+              effect.onSuccess.element,
+              { blockFirstTurnHeroDamage: true, actionContext },
+            ),
+          ];
+        }
+      }
+      return [];
+    }
+    case "registerTrigger": {
+      const triggers = (ring.triggers ??= []);
+      if (triggers.some((trigger) => trigger.source.spellId === spellSourceId)) {
+        return [];
+      }
+      triggers.push({
+        event: effect.event,
+        source: { playerId: player.id, spellId: spellSourceId, gemId: gem.id },
+        effect: structuredClone(effect.effect),
+      });
+      return [
+        {
+          type: "triggerRegistered",
+          sourceSpellId: spellSourceId,
+          ringInstanceId: ring.id,
+          event: effect.event,
+        },
+      ];
+    }
+    case "conditionalPierceForAction":
+    case "registerActionScopedTrigger":
+      return [];
+    case "ifTargetSurvives": {
+      if (!selectedTargetId) {
+        return [];
+      }
+      const target = getTarget(state, selectedTargetId);
+      if (target?.kind !== "monster" || target.monster.health <= 0) {
+        return [];
+      }
+      const from = target.monster.damage;
+      target.monster.damage += effect.effect.amount;
+      return [
+        {
+          type: "monsterDamageChanged",
+          monsterInstanceId: target.monster.id,
+          from,
+          to: target.monster.damage,
+        },
+      ];
+    }
+    case "captureStat": {
+      if (!selectedTargetId) return [];
+      const target = getTarget(state, selectedTargetId);
+      if (target?.kind === "monster") {
+        actionContext.capturedCurrentDamage.set(gem.id, target.monster.damage);
+      }
+      return [];
+    }
+    case "destroyMonster": {
+      if (!selectedTargetId) return [];
+      const target = getTarget(state, selectedTargetId);
+      if (target?.kind !== "monster") return [];
+      actionContext.destroyedTargetCurrentDamage.set(gem.id, target.monster.damage);
+      return resolveMonsterDestruction(state, target.player, target.monster, actionContext);
+    }
+    case "destroyAllMonsters": {
+      const targetIds = state.players.flatMap((candidate) =>
+        candidate.monsters.map((monster) => monster.id as TargetId),
+      );
+      for (const targetId of targetIds) actionContext.destroyingMonsterIds.add(targetId);
+      return targetIds.flatMap((targetId) => {
+        const target = getTarget(state, targetId);
+        return target?.kind === "monster"
+          ? resolveMonsterDestruction(state, target.player, target.monster, actionContext)
+          : [];
+      });
+    }
+    case "copyMonster":
+      return selectedTargetId
+        ? copyMonsterForPlayer(state, player, selectedTargetId, spellSourceId, gem.id, false)
+        : [];
+    case "createTemporaryMonsterCopy":
+      return selectedTargetId
+        ? copyMonsterForPlayer(state, player, selectedTargetId, spellSourceId, gem.id, true)
+        : [];
+    case "transformMonster": {
+      if (!selectedTargetId) return [];
+      const target = getTarget(state, selectedTargetId);
+      if (target?.kind !== "monster") return [];
+      transformMonster(target.monster, effect.result);
+      return [
+        {
+          type: "monsterTransformed",
+          monsterInstanceId: target.monster.id,
+          sourceSpellId: spellSourceId,
+        },
+      ];
+    }
+  }
+
+  return [];
+}
+
+function applyTemporaryStatus(
+  state: BattleState,
+  targetId: TargetId,
+  sourcePlayerId: string,
+  spellId: string,
+  gemId: string,
+  effect: Extract<SpellEffect, { type: "applyStatus" }>,
+): BattleEvent[] {
+  const target = getTarget(state, targetId);
+  if (target?.kind !== "monster") {
+    return [];
+  }
+
+  const statuses = (target.monster.statuses ??= []);
+  const existing = statuses.find((status) => status.type === effect.status);
+  if (effect.status === "lastBreath") {
+    if (existing) {
+      return [];
+    }
+    const status: TemporaryMonsterStatus = {
+      type: "lastBreath",
+      source: { playerId: sourcePlayerId, spellId, gemId },
+      expires: "endOfCurrentTurn",
+    };
+    statuses.push(status);
+    return [
+      {
+        type: "statusApplied",
+        monsterInstanceId: target.monster.id,
+        status: "lastBreath",
+        sourceSpellId: spellId,
+        expires: status.expires,
+      },
+    ];
+  }
+  if (
+    existing &&
+    existing.type !== "lastBreath" &&
+    existing.remainingOwnerTurns >= effect.durationOwnerTurns
+  ) {
+    return [];
+  }
+
+  const source = { playerId: sourcePlayerId, spellId, gemId };
+  const status: TemporaryMonsterStatus =
+    effect.status === "burn"
+      ? {
+          type: "burn",
+          source,
+          remainingOwnerTurns: effect.durationOwnerTurns,
+          damage: effect.damage,
+          element: "fire",
+        }
+      : {
+          type: effect.status,
+          source,
+          remainingOwnerTurns: effect.durationOwnerTurns,
+        };
+
+  target.monster.statuses = statuses.filter((candidate) => candidate.type !== effect.status);
+  target.monster.statuses.push(status);
+  return [
+    {
+      type: "statusApplied",
+      monsterInstanceId: target.monster.id,
+      status: status.type,
+      sourceSpellId: spellId,
+      remainingOwnerTurns: status.remainingOwnerTurns,
+    },
+  ];
 }
 
 function useMonster(
@@ -660,6 +1253,15 @@ function useMonster(
 
   if (monster.currentCooldown > 0) {
     throw new Error(`Monster ${monster.id} is on cooldown.`);
+  }
+
+  const blockingStatus = monster.statuses?.find(
+    (status) => status.type === "shock" || status.type === "freeze",
+  );
+  if (blockingStatus) {
+    throw new Error(
+      `Monster ${monster.id} cannot attack while affected by ${blockingStatus.type}.`,
+    );
   }
 
   requireValidTarget(state, player.id, action.targetId);
@@ -677,7 +1279,7 @@ function useMonster(
   ];
   const target = getTarget(state, action.targetId);
 
-  if (monster.skill === "multiHit" && target?.kind === "monster") {
+  if (hasMonsterSkill(monster, "multiHit") && target?.kind === "monster") {
     const targetIds = target.player.monsters.map((candidate) => candidate.id as TargetId);
     events.push({
       type: "multiHitResolved",
@@ -699,7 +1301,7 @@ function useMonster(
   events.push(
     ...applyDamage(state, player.id, monster.id, action.targetId, monster.damage, monster.element, {
       blockFirstTurnHeroDamage: true,
-      pierceMonsterInstanceId: monster.skill === "pierce" ? monster.id : undefined,
+      pierceMonsterInstanceId: hasMonsterSkill(monster, "pierce") ? monster.id : undefined,
     }),
   );
 
@@ -711,10 +1313,15 @@ function endTurn(state: BattleState, playerId: string): BattleEvent[] {
   const opponent = getOpponent(state, player.id);
   const events: BattleEvent[] = [{ type: "turnEnded", playerId: player.id }];
 
+  events.push(...expireTemporaryMonsters(state, player));
+  events.push(...expireEndOfOwnerTurnStatuses(player));
+
   state.activePlayerId = opponent.id;
   opponent.energy.turnCount += 1;
   opponent.energy.maxForTurn = Math.min(8, opponent.energy.turnCount);
   opponent.energy.current = opponent.energy.maxForTurn;
+
+  events.push(...processStartOfOwnerTurnStatuses(state, opponent));
 
   for (const ring of opponent.rings) {
     events.push(...decrementCooldown(ring.id, ring));
@@ -730,6 +1337,131 @@ function endTurn(state: BattleState, playerId: string): BattleEvent[] {
     turnCount: opponent.energy.turnCount,
     energy: opponent.energy.current,
   });
+
+  return events;
+}
+
+function expireTemporaryMonsters(state: BattleState, player: BattlePlayer): BattleEvent[] {
+  const expiringIds = player.monsters
+    .filter((monster) => monster.temporary?.expires === "endOfCurrentTurn")
+    .map((monster) => monster.id as TargetId);
+  if (expiringIds.length === 0) return [];
+  const context = createEmptyRingActionContext("turn-end");
+  for (const id of expiringIds) context.destroyingMonsterIds.add(id);
+  return expiringIds.flatMap((id) => {
+    const target = getTarget(state, id);
+    return target?.kind === "monster"
+      ? resolveMonsterDestruction(state, target.player, target.monster, context)
+      : [];
+  });
+}
+
+function expireEndOfOwnerTurnStatuses(player: BattlePlayer): BattleEvent[] {
+  const events: BattleEvent[] = [];
+  for (const monster of player.monsters) {
+    const expired = (monster.statuses ?? []).filter((status) =>
+      status.type === "lastBreath"
+        ? status.expires === "endOfCurrentTurn"
+        : (status.type === "shock" || status.type === "freeze") &&
+          status.expiresAfterCurrentOwnerTurn,
+    );
+    if (expired.length === 0) {
+      continue;
+    }
+    monster.statuses = (monster.statuses ?? []).filter((status) => !expired.includes(status));
+    events.push(
+      ...expired.map((status) => ({
+        type: "statusRemoved" as const,
+        monsterInstanceId: monster.id,
+        status: status.type,
+        reason: "expired" as const,
+      })),
+    );
+  }
+  return events;
+}
+
+function processStartOfOwnerTurnStatuses(state: BattleState, player: BattlePlayer): BattleEvent[] {
+  const events: BattleEvent[] = [];
+  const monsterIds = player.monsters.map((monster) => monster.id as TargetId);
+
+  for (const monster of player.monsters) {
+    const shields = getActiveShields(monster);
+    const expired = shields.filter(
+      (shield) => shield.source.kind === "temporary" && shield.expires === "startOfOwnerNextTurn",
+    );
+    if (expired.length === 0) {
+      continue;
+    }
+    monster.shields = shields.filter((shield) => !expired.includes(shield));
+    syncShieldActive(monster);
+    events.push(
+      ...expired.map(() => ({
+        type: "shieldExpired" as const,
+        monsterInstanceId: monster.id,
+      })),
+    );
+  }
+
+  for (const monsterId of monsterIds) {
+    const target = getTarget(state, monsterId);
+    if (target?.kind !== "monster") {
+      continue;
+    }
+    const burn = target.monster.statuses?.find(
+      (status): status is Extract<TemporaryMonsterStatus, { type: "burn" }> =>
+        status.type === "burn",
+    );
+    if (!burn) {
+      continue;
+    }
+
+    events.push(
+      ...applyDamage(
+        state,
+        burn.source.playerId,
+        burn.source.spellId,
+        monsterId,
+        burn.damage,
+        burn.element,
+        { blockFirstTurnHeroDamage: true },
+      ),
+    );
+
+    const survivingTarget = getTarget(state, monsterId);
+    if (survivingTarget?.kind !== "monster") {
+      continue;
+    }
+    const currentBurn = survivingTarget.monster.statuses?.find(
+      (status): status is Extract<TemporaryMonsterStatus, { type: "burn" }> =>
+        status.type === "burn",
+    );
+    if (!currentBurn) {
+      continue;
+    }
+    currentBurn.remainingOwnerTurns -= 1;
+    if (currentBurn.remainingOwnerTurns === 0) {
+      survivingTarget.monster.statuses = (survivingTarget.monster.statuses ?? []).filter(
+        (status) => status !== currentBurn,
+      );
+      events.push({
+        type: "statusRemoved",
+        monsterInstanceId: survivingTarget.monster.id,
+        status: "burn",
+        reason: "expired",
+      });
+    }
+  }
+
+  for (const monster of player.monsters) {
+    for (const status of monster.statuses ?? []) {
+      if (status.type !== "shock" && status.type !== "freeze") {
+        continue;
+      }
+      status.remainingOwnerTurns -= 1;
+      status.expiresAfterCurrentOwnerTurn = status.remainingOwnerTurns === 0;
+    }
+  }
 
   return events;
 }
@@ -801,6 +1533,87 @@ function summonMonster(
   return events;
 }
 
+function copyMonsterForPlayer(
+  state: BattleState,
+  player: BattlePlayer,
+  sourceTargetId: TargetId,
+  spellId: string,
+  gemId: string,
+  temporary: boolean,
+): BattleEvent[] {
+  if (player.monsters.length >= 3) return [];
+  const sourceTarget = getTarget(state, sourceTargetId);
+  if (sourceTarget?.kind !== "monster") return [];
+  const source = sourceTarget.monster;
+  const instanceNumber = getNextMonsterInstanceNumber(state, player.id, source.definitionId);
+  const grantedSkills = temporary ? undefined : structuredClone(source.grantedSkills);
+  const grantedShield = grantedSkills?.find((grant) => grant.skill === "shield");
+  const copied: MonsterCombatInstance = {
+    id: `${player.id}.monster.${source.definitionId}.${instanceNumber}`,
+    definitionId: source.definitionId,
+    ownerId: player.id,
+    nameKey: source.nameKey,
+    element: source.element,
+    rarity: source.rarity,
+    health: temporary ? 1 : source.health,
+    maxHealth: temporary ? 1 : source.maxHealth,
+    baseDamage: source.baseDamage,
+    damage: source.damage,
+    cooldown: source.cooldown,
+    currentCooldown: temporary ? 0 : 1,
+    speed: source.speed,
+    ...(!temporary && source.skill ? { skill: source.skill } : {}),
+    ...(!temporary && grantedSkills ? { grantedSkills } : {}),
+    shieldActive: temporary ? false : hasMonsterSkill(source, "shield"),
+    ...(grantedShield
+      ? { shields: [{ source: { kind: "grantedSkill" as const, ...grantedShield.source } }] }
+      : {}),
+    rageActive: false,
+    ...(temporary
+      ? {
+          temporary: {
+            source: { playerId: player.id, spellId, gemId },
+            expires: "endOfCurrentTurn" as const,
+          },
+        }
+      : {}),
+  };
+  player.monsters.push(copied);
+  return [
+    {
+      type: "monsterCopied",
+      sourceMonsterInstanceId: source.id,
+      monsterInstanceId: copied.id,
+      playerId: player.id,
+      temporary,
+    },
+  ];
+}
+
+function transformMonster(
+  monster: MonsterCombatInstance,
+  result: Extract<SpellEffect, { type: "transformMonster" }>["result"],
+): void {
+  monster.definitionId = "transmutedElectric";
+  monster.nameKey = "monster.transmutedElectric.name";
+  monster.element = result.element;
+  monster.rarity = "common";
+  monster.health = result.currentHealth;
+  monster.maxHealth = result.maxHealth;
+  monster.baseDamage = result.damage;
+  monster.damage = result.damage;
+  monster.cooldown = result.baseCooldown;
+  monster.currentCooldown = result.currentCooldown;
+  monster.speed = 0;
+  delete monster.skill;
+  delete monster.grantedSkills;
+  monster.shieldActive = false;
+  delete monster.shields;
+  monster.rageActive = false;
+  delete monster.statuses;
+  delete monster.temporary;
+}
+
 function getNextMonsterInstanceNumber(
   state: BattleState,
   playerId: string,
@@ -837,6 +1650,9 @@ function getNextMonsterInstanceNumber(
     if (event.type === "monsterSummoned") {
       trackInstanceId(event.monsterInstanceId);
     }
+    if (event.type === "monsterCopied") {
+      trackInstanceId(event.monsterInstanceId);
+    }
   }
 
   return maxInstanceNumber + 1;
@@ -852,6 +1668,8 @@ function applyDamage(
   options: {
     blockFirstTurnHeroDamage: boolean;
     pierceMonsterInstanceId?: string;
+    isRingAndGemDamage?: boolean;
+    actionContext?: RingActionResolutionContext;
   },
 ): BattleEvent[] {
   const target = getTarget(state, targetId);
@@ -894,8 +1712,14 @@ function applyDamage(
     ];
   }
 
-  if (target.monster.shieldActive) {
-    target.monster.shieldActive = false;
+  const shields = getActiveShields(target.monster);
+  if (shields.length > 0) {
+    if (target.monster.shields) {
+      target.monster.shields = shields.slice(1);
+      syncShieldActive(target.monster);
+    } else {
+      target.monster.shieldActive = false;
+    }
     return [
       {
         type: "shieldBroken",
@@ -944,9 +1768,38 @@ function applyDamage(
     }
   }
 
+  if (options.isRingAndGemDamage && overflowAmount > 0) {
+    for (const actionPierce of options.actionContext?.actionPierces ?? []) {
+      if (actionPierce.targetId !== target.monster.id) {
+        continue;
+      }
+      const heroTargetId = `${target.player.id}.hero` as TargetId;
+      const overflowEvents = applyDamage(
+        state,
+        sourcePlayerId,
+        actionPierce.sourceSpellId,
+        heroTargetId,
+        overflowAmount,
+        element,
+        { blockFirstTurnHeroDamage: options.blockFirstTurnHeroDamage },
+      );
+      const heroDamageEvent = overflowEvents.find((event) => event.type === "damageDealt");
+      if (heroDamageEvent) {
+        events.push({
+          type: "actionPierceOverflow",
+          sourceSpellId: actionPierce.sourceSpellId,
+          targetMonsterInstanceId: target.monster.id,
+          targetHeroId: heroTargetId,
+          amount: heroDamageEvent.amount,
+        });
+        events.push(...overflowEvents);
+      }
+    }
+  }
+
   if (
     target.monster.health > 0 &&
-    target.monster.skill === "rage" &&
+    hasMonsterSkill(target.monster, "rage") &&
     !target.monster.rageActive &&
     target.monster.health * 2 < target.monster.maxHealth
   ) {
@@ -962,13 +1815,150 @@ function applyDamage(
   }
 
   if (target.monster.health === 0) {
-    target.player.monsters = target.player.monsters.filter(
-      (monster) => monster.id !== target.monster.id,
+    events.push(
+      ...resolveMonsterDestruction(state, target.player, target.monster, options.actionContext),
     );
-    events.push({ type: "monsterDestroyed", monsterInstanceId: target.monster.id });
   }
 
   return events;
+}
+
+function resolveMonsterDestruction(
+  state: BattleState,
+  owner: BattlePlayer,
+  monster: MonsterCombatInstance,
+  actionContext?: RingActionResolutionContext,
+): BattleEvent[] {
+  const events: BattleEvent[] = [];
+  actionContext?.destroyingMonsterIds.add(monster.id);
+  const destroyedDamage = monster.damage;
+  const lastBreath = monster.statuses?.find(
+    (status): status is Extract<TemporaryMonsterStatus, { type: "lastBreath" }> =>
+      status.type === "lastBreath" && !status.triggered,
+  );
+
+  if (lastBreath) {
+    lastBreath.triggered = true;
+    const legalTargets = legalEnemyTargets(state, owner.id, actionContext);
+    if (legalTargets.length > 0) {
+      const chosen = chooseDeterministicRandomTarget(state, legalTargets, "lastBreathLegalEnemies");
+      events.push({
+        type: "randomTargetSelected",
+        sourceSpellId: lastBreath.source.spellId,
+        targetId: chosen.id,
+      });
+      events.push({
+        type: "lastBreathTriggered",
+        monsterInstanceId: monster.id,
+        targetId: chosen.id,
+      });
+      events.push(...resolveTriggeredMonsterAttack(state, monster, chosen.id, actionContext));
+    } else {
+      events.push({ type: "lastBreathTriggered", monsterInstanceId: monster.id });
+    }
+  }
+
+  for (const brand of actionContext?.funeralBrands ?? []) {
+    if (brand.activated || brand.targetId !== monster.id) {
+      continue;
+    }
+    brand.activated = true;
+    const heroTargetId = `${owner.id}.hero` as TargetId;
+    events.push({
+      type: "triggerActivated",
+      sourceSpellId: brand.sourceSpellId,
+      sourceId: actionContext!.ringInstanceId,
+      targetId: monster.id,
+    });
+    events.push(
+      ...applyDamage(
+        state,
+        brand.sourcePlayerId,
+        brand.sourceSpellId,
+        heroTargetId,
+        destroyedDamage,
+        "fire",
+        { blockFirstTurnHeroDamage: true },
+      ),
+    );
+  }
+
+  owner.monsters = owner.monsters.filter((candidate) => candidate.id !== monster.id);
+  actionContext?.destroyingMonsterIds.delete(monster.id);
+  events.push({ type: "monsterDestroyed", monsterInstanceId: monster.id });
+  return events;
+}
+
+function legalEnemyTargets(
+  state: BattleState,
+  sourcePlayerId: string,
+  actionContext?: RingActionResolutionContext,
+): Array<{ id: TargetId }> {
+  const opponent = getOpponent(state, sourcePlayerId);
+  const livingMonsters = opponent.monsters.filter(
+    (monster) => monster.health > 0 && !actionContext?.destroyingMonsterIds.has(monster.id),
+  );
+  const taunts = livingMonsters.filter(hasTaunt);
+  if (taunts.length > 0) {
+    return taunts.map((monster) => ({ id: monster.id as TargetId }));
+  }
+  return [
+    ...(opponent.hero.health > 0 ? [{ id: `${opponent.id}.hero` as TargetId }] : []),
+    ...livingMonsters.map((monster) => ({ id: monster.id as TargetId })),
+  ];
+}
+
+function createEmptyRingActionContext(ringInstanceId: string): RingActionResolutionContext {
+  return {
+    ringInstanceId,
+    actionPierces: [],
+    funeralBrands: [],
+    capturedCurrentDamage: new Map(),
+    destroyedTargetCurrentDamage: new Map(),
+    selectedTargetOwnerIds: new Map(),
+    destroyingMonsterIds: new Set(),
+  };
+}
+
+function resolveTriggeredMonsterAttack(
+  state: BattleState,
+  monster: MonsterCombatInstance,
+  targetId: TargetId,
+  actionContext?: RingActionResolutionContext,
+): BattleEvent[] {
+  const target = getTarget(state, targetId);
+  if (hasMonsterSkill(monster, "multiHit") && target?.kind === "monster") {
+    const targetIds = target.player.monsters
+      .filter((candidate) => candidate.health > 0)
+      .map((candidate) => candidate.id as TargetId);
+    return [
+      { type: "multiHitResolved", monsterInstanceId: monster.id, targetIds },
+      ...targetIds.flatMap((candidateId) =>
+        applyDamage(
+          state,
+          monster.ownerId,
+          monster.id,
+          candidateId,
+          monster.damage,
+          monster.element,
+          { blockFirstTurnHeroDamage: true, actionContext },
+        ),
+      ),
+    ];
+  }
+  return applyDamage(
+    state,
+    monster.ownerId,
+    monster.id,
+    targetId,
+    monster.damage,
+    monster.element,
+    {
+      blockFirstTurnHeroDamage: true,
+      pierceMonsterInstanceId: hasMonsterSkill(monster, "pierce") ? monster.id : undefined,
+      actionContext,
+    },
+  );
 }
 
 function isFirstTurnHeroDamageBlocked(
@@ -1092,7 +2082,78 @@ function assertTauntAllowsTarget(
 }
 
 function hasTaunt(monster: MonsterCombatInstance): boolean {
-  return monster.skill === "taunt";
+  return (
+    hasMonsterSkill(monster, "taunt") &&
+    !monster.statuses?.some((status) => status.type === "freeze")
+  );
+}
+
+function hasMonsterSkill(
+  monster: MonsterCombatInstance,
+  skill: MonsterCombatInstance["skill"],
+): boolean {
+  return (
+    monster.skill === skill ||
+    monster.grantedSkills?.some((grant) => grant.skill === skill) === true
+  );
+}
+
+function getActiveShields(monster: MonsterCombatInstance) {
+  if (monster.shields) {
+    return monster.shields;
+  }
+  return monster.shieldActive ? [{ source: { kind: "natural" as const } }] : [];
+}
+
+function syncShieldActive(monster: MonsterCombatInstance): void {
+  monster.shieldActive = (monster.shields?.length ?? 0) > 0;
+}
+
+function activateRageIfEligible(monster: MonsterCombatInstance): BattleEvent[] {
+  if (
+    !hasMonsterSkill(monster, "rage") ||
+    monster.rageActive ||
+    monster.health * 2 >= monster.maxHealth
+  ) {
+    return [];
+  }
+  const previousDamage = monster.damage;
+  monster.rageActive = true;
+  monster.damage = Math.floor(monster.baseDamage * 1.2);
+  return [
+    {
+      type: "rageActivated",
+      monsterInstanceId: monster.id,
+      previousDamage,
+      damage: monster.damage,
+    },
+  ];
+}
+
+function setCurrentCooldown(
+  targetId: string,
+  target: { currentCooldown: number },
+  value: number,
+): BattleEvent[] {
+  const from = target.currentCooldown;
+  target.currentCooldown = value;
+  return from === value ? [] : [{ type: "cooldownChanged", targetId, from, to: value }];
+}
+
+function chooseDeterministicRandomTarget<T extends { id: string }>(
+  state: BattleState,
+  candidates: T[],
+  scope: string,
+): T {
+  const cursor = state.randomCursor ?? 0;
+  const input = `${state.seed}:spell-random:${cursor}:${scope}`;
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < input.length; index += 1) {
+    hash ^= input.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  state.randomCursor = cursor + 1;
+  return candidates[(hash >>> 0) % candidates.length]!;
 }
 
 function hasElementalAdvantage(attacker: ElementType, defender: ElementType): boolean {

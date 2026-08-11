@@ -467,7 +467,7 @@ function createDefaultBattleLabConfig(): BattleLabConfig {
                 quality: 0,
                 enchantment: {
                   type: "spell",
-                  definitionId: "spark",
+                  definitionId: "electroshock",
                   level: 1,
                   quality: 0,
                 },
@@ -492,7 +492,7 @@ function createDefaultBattleLabConfig(): BattleLabConfig {
                 quality: 0,
                 enchantment: {
                   type: "spell",
-                  definitionId: "iceShard",
+                  definitionId: "deepFreezing",
                   level: 1,
                   quality: 0,
                 },
@@ -4370,7 +4370,18 @@ function useManualRingOnTarget(ringInstanceId: string, targetId: TargetId): void
   }
 
   const enchantmentTargets = Object.fromEntries(
-    ring.gems.filter((gem) => gem.enchantment?.type === "spell").map((gem) => [gem.id, targetId]),
+    ring.gems
+      .filter((gem) => gem.enchantment?.type === "spell")
+      .flatMap((gem) => {
+        if (gem.enchantment?.type !== "spell") return [];
+        const spell =
+          state.definitions.spells[gem.enchantment.resolvedDefinitionId ?? gem.enchantment.spellId];
+        if (!spell || spell.targeting?.selection === "none") return [];
+        const selected = [targetId, ...allCombatTargetIds().filter((id) => id !== targetId)].find(
+          (candidate) => manualSpellTargetAllowed(activePlayer.id, spell, candidate),
+        );
+        return selected ? [[gem.id, selected] as const] : [];
+      }),
   );
 
   applyManualAction({
@@ -4380,6 +4391,34 @@ function useManualRingOnTarget(ringInstanceId: string, targetId: TargetId): void
     targetId,
     enchantmentTargets,
   });
+}
+
+function allCombatTargetIds(): TargetId[] {
+  return state.players.flatMap((player) => [
+    `${player.id}.hero` as TargetId,
+    ...player.monsters.map((monster) => monster.id as TargetId),
+  ]);
+}
+
+function manualSpellTargetAllowed(
+  sourcePlayerId: string,
+  spell: BattleState["definitions"]["spells"][string],
+  targetId: TargetId,
+): boolean {
+  const target = findTarget(targetId);
+  if (!target) return false;
+  const allowed = (spell.targeting?.allowedTargets ?? ["anyCombatant"]).some((rule) => {
+    if (rule === "anyCombatant") return true;
+    if (target.kind !== "monster") return false;
+    if (rule === "anyMonster") return true;
+    return rule === "alliedMonster"
+      ? target.player.id === sourcePlayerId
+      : target.player.id !== sourcePlayerId;
+  });
+  if (!allowed) return false;
+  return (
+    !spell.effects.some((effect) => effect.type === "dealDamage") || !targetDisabledReason(targetId)
+  );
 }
 
 function useManualMonster(monsterInstanceId: string): void {
@@ -4623,7 +4662,16 @@ function baseMonsterDamage(definitionId: string): number {
 
 function baseSpellDamage(definitionId: string): number {
   const spell = definitions.spells.find((candidate) => candidate.id === definitionId);
-  return spell?.effects.reduce((sum, effect) => sum + effect.amount, 0) ?? 0;
+  return (
+    spell?.effects.reduce(
+      (sum, effect) =>
+        sum +
+        (effect.type === "dealDamage" || effect.type === "dealDamageToAll"
+          ? (effect.amount ?? 0)
+          : 0),
+      0,
+    ) ?? 0
+  );
 }
 
 function renderResolvedValue(value: number, baseValue: number): string {
@@ -4748,7 +4796,23 @@ function eventMessage(event: BattleEvent): string {
     case "spellCast":
       return formatMessage("event.spellCast", {
         spell: spellLabel(event.spellId),
-        target: targetLabel(event.targetId),
+        target: event.targetId ? targetLabel(event.targetId) : t("ui.none"),
+      });
+    case "statusApplied":
+      return event.expires === "endOfCurrentTurn"
+        ? formatMessage("event.statusAppliedUntilEndOfTurn", {
+            monster: combatObjectLabel(event.monsterInstanceId),
+            status: t(`ui.status.${event.status}`),
+          })
+        : formatMessage("event.statusApplied", {
+            monster: combatObjectLabel(event.monsterInstanceId),
+            status: t(`ui.status.${event.status}`),
+            turns: String(event.remainingOwnerTurns),
+          });
+    case "statusRemoved":
+      return formatMessage(`event.statusRemoved.${event.reason}`, {
+        monster: combatObjectLabel(event.monsterInstanceId),
+        status: t(`ui.status.${event.status}`),
       });
     case "monsterSummoned":
       return formatMessage("event.monsterSummoned", {
@@ -4765,6 +4829,74 @@ function eventMessage(event: BattleEvent): string {
       return formatMessage("event.shieldBroken", {
         monster: combatObjectLabel(event.monsterInstanceId),
         source: combatObjectLabel(event.sourceId),
+      });
+    case "skillGranted":
+      return formatMessage("event.skillGranted", {
+        monster: combatObjectLabel(event.monsterInstanceId),
+        skill: event.skill,
+      });
+    case "shieldGranted":
+      return formatMessage("event.shieldGranted", {
+        monster: combatObjectLabel(event.monsterInstanceId),
+      });
+    case "shieldExpired":
+      return formatMessage("event.shieldExpired", {
+        monster: combatObjectLabel(event.monsterInstanceId),
+      });
+    case "randomTargetSelected":
+      return formatMessage("event.randomTargetSelected", {
+        target: combatObjectLabel(event.targetId),
+      });
+    case "triggerRegistered":
+      return formatMessage("event.triggerRegistered", {
+        spell: spellLabel(event.sourceSpellId),
+        ring: ringLabel(event.ringInstanceId),
+      });
+    case "triggerActivated":
+      return formatMessage("event.triggerActivated", {
+        spell: spellLabel(event.sourceSpellId),
+      });
+    case "ringDamageChanged":
+      return formatMessage("event.ringDamageChanged", {
+        ring: ringLabel(event.ringInstanceId),
+        from: String(event.from),
+        to: String(event.to),
+      });
+    case "monsterDamageChanged":
+      return formatMessage("event.monsterDamageChanged", {
+        monster: combatObjectLabel(event.monsterInstanceId),
+        from: String(event.from),
+        to: String(event.to),
+      });
+    case "energyRestored":
+      return formatMessage("event.energyRestored", {
+        player: playerLabel(event.playerId),
+        amount: String(event.amount),
+        current: String(event.current),
+      });
+    case "actionPierceOverflow":
+      return formatMessage("event.actionPierceOverflow", {
+        spell: spellLabel(event.sourceSpellId),
+        amount: String(event.amount),
+        hero: targetLabel(event.targetHeroId),
+      });
+    case "lastBreathTriggered":
+      return formatMessage("event.lastBreathTriggered", {
+        monster: combatObjectLabel(event.monsterInstanceId),
+        target: event.targetId ? targetLabel(event.targetId) : t("ui.none"),
+      });
+    case "monsterCopied":
+      return formatMessage(
+        event.temporary ? "event.monsterCopied.temporary" : "event.monsterCopied",
+        {
+          source: combatObjectLabel(event.sourceMonsterInstanceId),
+          monster: combatObjectLabel(event.monsterInstanceId),
+          player: playerLabel(event.playerId),
+        },
+      );
+    case "monsterTransformed":
+      return formatMessage("event.monsterTransformed", {
+        monster: combatObjectLabel(event.monsterInstanceId),
       });
     case "pierceOverflow":
       return formatMessage("event.pierceOverflow", {
@@ -4826,8 +4958,15 @@ function eventTechnicalDetails(event: BattleEvent): Array<[string, string]> {
       return [
         ["ui.spellId", event.spellId],
         ["ui.gemId", event.sourceGemId],
-        ["ui.targetId", event.targetId],
+        ...(event.targetId ? [["ui.targetId", event.targetId] as [string, string]] : []),
       ];
+    case "statusApplied":
+      return [
+        ["ui.monsterInstanceId", event.monsterInstanceId],
+        ["ui.spellId", event.sourceSpellId],
+      ];
+    case "statusRemoved":
+      return [["ui.monsterInstanceId", event.monsterInstanceId]];
     case "monsterSummoned":
       return [
         ["ui.monsterId", event.monsterId],
@@ -4842,6 +4981,52 @@ function eventTechnicalDetails(event: BattleEvent): Array<[string, string]> {
       return [
         ["ui.monsterInstanceId", event.monsterInstanceId],
         ["ui.sourceId", event.sourceId],
+      ];
+    case "skillGranted":
+    case "shieldGranted":
+      return [
+        ["ui.monsterInstanceId", event.monsterInstanceId],
+        ["ui.spellId", event.sourceSpellId],
+      ];
+    case "shieldExpired":
+      return [["ui.monsterInstanceId", event.monsterInstanceId]];
+    case "randomTargetSelected":
+      return [
+        ["ui.targetId", event.targetId],
+        ["ui.spellId", event.sourceSpellId],
+      ];
+    case "triggerRegistered":
+      return [
+        ["ui.spellId", event.sourceSpellId],
+        ["ui.ringId", event.ringInstanceId],
+      ];
+    case "triggerActivated":
+      return [
+        ["ui.spellId", event.sourceSpellId],
+        ["ui.sourceId", event.sourceId],
+        ...(event.targetId ? [["ui.targetId", event.targetId] as [string, string]] : []),
+      ];
+    case "ringDamageChanged":
+      return [["ui.ringId", event.ringInstanceId]];
+    case "monsterDamageChanged":
+    case "lastBreathTriggered":
+      return [["ui.monsterInstanceId", event.monsterInstanceId]];
+    case "monsterCopied":
+      return [
+        ["ui.monsterInstanceId", event.monsterInstanceId],
+        ["ui.sourceId", event.sourceMonsterInstanceId],
+      ];
+    case "monsterTransformed":
+      return [
+        ["ui.monsterInstanceId", event.monsterInstanceId],
+        ["ui.spellId", event.sourceSpellId],
+      ];
+    case "energyRestored":
+      return [];
+    case "actionPierceOverflow":
+      return [
+        ["ui.spellId", event.sourceSpellId],
+        ["ui.targetId", event.targetHeroId],
       ];
     case "pierceOverflow":
       return [

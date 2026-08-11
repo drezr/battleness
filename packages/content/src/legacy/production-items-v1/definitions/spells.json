@@ -1,0 +1,98 @@
+[
+  {
+    "id": "firebolt",
+    "nameKey": "spell.firebolt.name",
+    "element": "fire",
+    "rarity": "common",
+    "baseEnergyPenalty": 1,
+    "baseCooldownPenalty": 0,
+    "effects": [
+      {
+        "type": "dealDamage",
+        "amount": 4,
+        "target": "any"
+      }
+    ],
+    "baseSpeed": 0
+  },
+  {
+    "id": "solarFlare",
+    "nameKey": "spell.solarFlare.name",
+    "element": "fire",
+    "rarity": "rare",
+    "baseEnergyPenalty": 1,
+    "baseCooldownPenalty": 2,
+    "effects": [
+      {
+        "type": "dealDamage",
+        "amount": 7,
+        "target": "any"
+      }
+    ],
+    "baseSpeed": 0
+  },
+  {
+    "id": "spark",
+    "nameKey": "spell.spark.name",
+    "element": "electric",
+    "rarity": "common",
+    "baseEnergyPenalty": 0,
+    "baseCooldownPenalty": 0,
+    "effects": [
+      {
+        "type": "dealDamage",
+        "amount": 2,
+        "target": "any"
+      }
+    ],
+    "baseSpeed": 0
+  },
+  {
+    "id": "arcPulse",
+    "nameKey": "spell.arcPulse.name",
+    "element": "electric",
+    "rarity": "rare",
+    "baseEnergyPenalty": 0,
+    "baseCooldownPenalty": 1,
+    "effects": [
+      {
+        "type": "dealDamage",
+        "amount": 3,
+        "target": "any"
+      }
+    ],
+    "baseSpeed": 0
+  },
+  {
+    "id": "iceShard",
+    "nameKey": "spell.iceShard.name",
+    "element": "ice",
+    "rarity": "common",
+    "baseEnergyPenalty": 1,
+    "baseCooldownPenalty": 0,
+    "effects": [
+      {
+        "type": "dealDamage",
+        "amount": 3,
+        "target": "any"
+      }
+    ],
+    "baseSpeed": 0
+  },
+  {
+    "id": "glacialSpike",
+    "nameKey": "spell.glacialSpike.name",
+    "element": "ice",
+    "rarity": "rare",
+    "baseEnergyPenalty": 2,
+    "baseCooldownPenalty": 0,
+    "effects": [
+      {
+        "type": "dealDamage",
+        "amount": 5,
+        "target": "any"
+      }
+    ],
+    "baseSpeed": 0
+  }
+]

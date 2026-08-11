@@ -26,7 +26,7 @@ const config: BattleLabConfig = {
               quality: 55,
               enchantment: {
                 type: "spell",
-                definitionId: "spark",
+                definitionId: "electroshock",
                 level: 2,
                 quality: 50,
               },
@@ -71,7 +71,7 @@ describe("Battle Lab setup", () => {
     expect(setup.players[0].rings[0]?.definitionId).toBe("staticLoop");
     expect(setup.players[0].rings[0]?.gems[0]?.enchantment).toMatchObject({
       type: "spell",
-      spellId: "spark",
+      spellId: "electroshock",
     });
     expect(setup.players[1].rings[0]?.gems[0]?.enchantment).toMatchObject({
       type: "monster",

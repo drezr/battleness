@@ -45,7 +45,7 @@ describe("battle board interactions", () => {
   it("renders artwork for every current content definition in the setup collection", () => {
     const assets = document.querySelectorAll<HTMLElement>("[data-asset-kind][data-asset-id]");
 
-    expect(assets).toHaveLength(253);
+    expect(assets).toHaveLength(289);
     expect(
       getElement('[data-asset-kind="ring"][data-asset-id="ashenLoop"] .item-artwork').getAttribute(
         "style",
@@ -55,7 +55,7 @@ describe("battle board interactions", () => {
       getElement(
         '[data-asset-kind="material"][data-asset-id="graphene"] .item-artwork',
       ).getAttribute("style"),
-    ).toContain("/assets/items/materials-atlas.png");
+    ).toContain("/assets/items/materials.png");
   });
 
   it("shows the content balance report in the setup screen", () => {
@@ -170,7 +170,7 @@ describe("battle board interactions", () => {
       "forgePlayer.ring.ashenLoop.crafted.1",
     );
     expect(getElement(".forge-ingredients").textContent).toContain("0/3");
-    expect(localStorage.getItem("battleness.developmentInventory.v2")).toContain(
+    expect(localStorage.getItem("battleness.developmentInventory.v3")).toContain(
       "forgePlayer.ring.ashenLoop.crafted.1",
     );
 
@@ -252,7 +252,7 @@ describe("battle board interactions", () => {
     expect(
       getElement('[data-inventory-id="forgePlayer.ring.ashenLoop.crafted.1"]').textContent,
     ).toContain("Sockets: 2");
-    expect(localStorage.getItem("battleness.developmentInventory.v2")).toContain(
+    expect(localStorage.getItem("battleness.developmentInventory.v3")).toContain(
       '"socketCount": 2',
     );
 
@@ -275,7 +275,7 @@ describe("battle board interactions", () => {
     getButton("#craftSelectedRecipe").click();
     selectValue("#forgeRecipeSelect", "craftGemEmberShard");
     getButton("#craftSelectedRecipe").click();
-    selectValue("#forgeRecipeSelect", "craftSpellFirebolt");
+    selectValue("#forgeRecipeSelect", "craftSpellCarbonize");
     getButton("#craftSelectedRecipe").click();
     getButton('[data-socket-gem-ring-id="forgePlayer.ring.ashenLoop.crafted.1"]').click();
     getButton('[data-enchant-gem-id="forgePlayer.gem.emberShard.crafted.2"]').click();
@@ -285,7 +285,7 @@ describe("battle board interactions", () => {
     ).toContain("Ember Shard");
     expect(
       getElement('[data-inventory-id="forgePlayer.gem.emberShard.crafted.2"]').textContent,
-    ).toContain("Spell: Firebolt");
+    ).toContain("Spell: Carbonize");
 
     selectValue("#setupMode", "battleLab");
     selectValue("#battleLabItemSourceMode", "inventory");
@@ -304,7 +304,7 @@ describe("battle board interactions", () => {
       "forgePlayer.gem.emberShard.crafted.2",
     );
     expect(getElement(".battle-lab-editor").textContent).toContain(
-      "forgePlayer.spell.firebolt.crafted.3",
+      "forgePlayer.spell.carbonize.crafted.3",
     );
 
     getButton("#startBattle").click();
@@ -318,7 +318,7 @@ describe("battle board interactions", () => {
     getButton("#craftSelectedRecipe").click();
     selectValue("#forgeRecipeSelect", "craftGemEmberShard");
     getButton("#craftSelectedRecipe").click();
-    selectValue("#forgeRecipeSelect", "craftSpellFirebolt");
+    selectValue("#forgeRecipeSelect", "craftSpellCarbonize");
     getButton("#craftSelectedRecipe").click();
     getButton('[data-socket-gem-ring-id="forgePlayer.ring.ashenLoop.crafted.1"]').click();
     getButton('[data-enchant-gem-id="forgePlayer.gem.emberShard.crafted.2"]').click();
@@ -334,7 +334,7 @@ describe("battle board interactions", () => {
     loadoutName.value = "Fire starter";
     getButton("#saveDevelopmentLoadout").click();
 
-    expect(localStorage.getItem("battleness.developmentLoadouts.v2")).toContain("Fire starter");
+    expect(localStorage.getItem("battleness.developmentLoadouts.v3")).toContain("Fire starter");
 
     const selectedLoadoutRing = getInput(
       '[data-loadout-ring-id="forgePlayer.ring.ashenLoop.crafted.1"]',
@@ -357,7 +357,7 @@ describe("battle board interactions", () => {
       "forgePlayer.gem.emberShard.crafted.2",
     );
     expect(getElement(".battle-lab-editor").textContent).toContain(
-      "forgePlayer.spell.firebolt.crafted.3",
+      "forgePlayer.spell.carbonize.crafted.3",
     );
 
     getButton("#startBattle").click();
@@ -384,7 +384,7 @@ describe("battle board interactions", () => {
     ).toContain("Ember Shard");
     expect(
       getElement('[data-inventory-id="forgePlayer.gem.emberShard.crafted.2"]').textContent,
-    ).toContain("Spell: Firebolt");
+    ).toContain("Spell: Carbonize");
 
     selectValue("#setupMode", "battleLab");
     selectValue("#battleLabItemSourceMode", "inventory");
@@ -399,7 +399,7 @@ describe("battle board interactions", () => {
       ).value,
     ).toBe("5");
     expect(getElement(".battle-lab-editor").textContent).toContain(
-      "forgePlayer.spell.firebolt.crafted.3",
+      "forgePlayer.spell.carbonize.crafted.3",
     );
 
     getButton("#startBattle").click();
@@ -407,14 +407,14 @@ describe("battle board interactions", () => {
     getButton("#manualConcede").click();
 
     expect(getElement(".battle-result-summary").textContent).toContain("Ashen Loop");
-    expect(getElement(".battle-result-summary").textContent).toContain("Firebolt");
+    expect(getElement(".battle-result-summary").textContent).toContain("Carbonize");
     expect(getElement(".battle-rewards").textContent).toContain("Ashen Loop +28 XP");
     expect(getElement(".battle-rewards").textContent).toContain("Ember Shard +28 XP");
-    expect(getElement(".battle-rewards").textContent).toContain("Firebolt +28 XP");
+    expect(getElement(".battle-rewards").textContent).toContain("Carbonize +28 XP");
 
     getButton("#claimBattleRewards").click();
 
-    const persistedInventory = localStorage.getItem("battleness.developmentInventory.v2") ?? "";
+    const persistedInventory = localStorage.getItem("battleness.developmentInventory.v3") ?? "";
     expect(persistedInventory).toContain('"credits": 1125');
     expect(persistedInventory).toContain('"aluminium": 1');
 
@@ -467,8 +467,8 @@ describe("battle board interactions", () => {
     expect(getButton("#claimBattleRewards").disabled).toBe(true);
     expect(getButton("#claimBattleRewards").textContent).toContain("Rewards claimed");
     expect(getElement(".battle-result-summary").textContent).toContain("Rewards claimed");
-    expect(localStorage.getItem("battleness.developmentInventory.v2")).toContain('"credits": 1150');
-    expect(localStorage.getItem("battleness.developmentInventory.v2")).toContain('"aluminium": 4');
+    expect(localStorage.getItem("battleness.developmentInventory.v3")).toContain('"credits": 1150');
+    expect(localStorage.getItem("battleness.developmentInventory.v3")).toContain('"aluminium": 4');
 
     getButton("#backToSetup").click();
 
@@ -482,7 +482,7 @@ describe("battle board interactions", () => {
     getButton("#craftSelectedRecipe").click();
     selectValue("#forgeRecipeSelect", "craftGemEmberShard");
     getButton("#craftSelectedRecipe").click();
-    selectValue("#forgeRecipeSelect", "craftSpellFirebolt");
+    selectValue("#forgeRecipeSelect", "craftSpellCarbonize");
     getButton("#craftSelectedRecipe").click();
     getButton('[data-socket-gem-ring-id="forgePlayer.ring.ashenLoop.crafted.1"]').click();
     getButton('[data-enchant-gem-id="forgePlayer.gem.emberShard.crafted.2"]').click();
@@ -509,17 +509,17 @@ describe("battle board interactions", () => {
     expect(getElement(".battle-result-summary").textContent).toContain("Rings used");
     expect(getElement(".battle-result-summary").textContent).toContain("Ashen Loop");
     expect(getElement(".battle-result-summary").textContent).toContain("Spells cast");
-    expect(getElement(".battle-result-summary").textContent).toContain("Firebolt");
+    expect(getElement(".battle-result-summary").textContent).toContain("Carbonize");
     expect(getElement(".battle-result-summary").textContent).toContain("Item XP generated");
     expect(getElement(".battle-result-summary").textContent).toContain("Ashen Loop +28 XP");
     expect(getElement(".battle-rewards").textContent).toContain("Ashen Loop +28 XP");
     expect(getElement(".battle-rewards").textContent).toContain("Ember Shard +28 XP");
-    expect(getElement(".battle-rewards").textContent).toContain("Firebolt +28 XP");
+    expect(getElement(".battle-rewards").textContent).toContain("Carbonize +28 XP");
 
     getButton("#claimBattleRewards").click();
 
     const inventory = JSON.parse(
-      localStorage.getItem("battleness.developmentInventory.v2") ?? "{}",
+      localStorage.getItem("battleness.developmentInventory.v3") ?? "{}",
     ) as {
       craftedItems: Array<{
         item: {
@@ -541,7 +541,7 @@ describe("battle board interactions", () => {
     ).toBe(128);
     expect(
       inventory.craftedItems.find(
-        (crafted) => crafted.item.id === "forgePlayer.spell.firebolt.crafted.3",
+        (crafted) => crafted.item.id === "forgePlayer.spell.carbonize.crafted.3",
       )?.item.experience,
     ).toBe(128);
 
@@ -554,7 +554,7 @@ describe("battle board interactions", () => {
       getElement('[data-inventory-id="forgePlayer.gem.emberShard.crafted.2"]').textContent,
     ).toContain("XP 128/400");
     expect(
-      getElement('[data-inventory-id="forgePlayer.spell.firebolt.crafted.3"]').textContent,
+      getElement('[data-inventory-id="forgePlayer.spell.carbonize.crafted.3"]').textContent,
     ).toContain("XP 128/400");
   });
 
@@ -694,7 +694,7 @@ function craftStarterRingGemAndSpell(): void {
   getButton("#craftSelectedRecipe").click();
   selectValue("#forgeRecipeSelect", "craftGemEmberShard");
   getButton("#craftSelectedRecipe").click();
-  selectValue("#forgeRecipeSelect", "craftSpellFirebolt");
+  selectValue("#forgeRecipeSelect", "craftSpellCarbonize");
   getButton("#craftSelectedRecipe").click();
 }
 

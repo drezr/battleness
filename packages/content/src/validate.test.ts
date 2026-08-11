@@ -134,19 +134,19 @@ describe("content package", () => {
     ).toThrow();
   });
 
-  it("includes the initial direct-damage spells", () => {
+  it("includes the approved production spell collection", () => {
     const spellIds = definitions.spells.map((spell) => spell.id);
 
-    expect(spellIds).toEqual(expect.arrayContaining(["spark", "firebolt", "iceShard"]));
+    expect(spellIds).toEqual(expect.arrayContaining(["burnI", "arcRelay", "freezeIII"]));
   });
 
-  it("implements the production-items-v1 collection", () => {
+  it("implements the production-items-v2 collection", () => {
     expect(definitions.rings).toHaveLength(54);
     expect(definitions.gems).toHaveLength(54);
     expect(definitions.monsters).toHaveLength(69);
-    expect(definitions.spells).toHaveLength(6);
+    expect(definitions.spells).toHaveLength(42);
     expect(definitions.materials).toHaveLength(70);
-    expect(definitions.recipes).toHaveLength(183);
+    expect(definitions.recipes).toHaveLength(219);
 
     const elementRarityPairs = (items: readonly { element: string; rarity: string }[]) =>
       new Set(items.map((item) => `${item.element}:${item.rarity}`));
@@ -366,8 +366,8 @@ describe("content package", () => {
         "elementDuelStart",
       ]),
     );
-    expect(locales.en["spell.firebolt.name"]).toBe("Firebolt");
-    expect(locales.fr["spell.firebolt.name"]).toBe("Boule de feu");
+    expect(locales.en["spell.burnI.name"]).toBe("Burn I");
+    expect(locales.fr["spell.burnI.description"]).toContain("BRULURE");
   });
 
   it("creates a validated BattleSetup from prototype fixtures", () => {
@@ -380,7 +380,7 @@ describe("content package", () => {
     expect(staticLoop?.rarity).toBe("common");
     expect(staticLoop?.gems[1]?.rarity).toBe("common");
     expect(Object.keys(setup.definitions.spells)).toEqual(
-      expect.arrayContaining(["spark", "firebolt", "iceShard"]),
+      expect.arrayContaining(["carbonize", "electroshock", "deepFreezing"]),
     );
 
     const state = createBattleState(setup);

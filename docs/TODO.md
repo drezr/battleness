@@ -13,6 +13,35 @@ again. Its remaining acceptance, backup resilience, external notification, monit
 and production-promotion work is consolidated in the resume checklist at the end of the Phase 14
 section.
 
+## Production Spell Collection
+
+- [x] Preserve and validate the supplied 42-spell proposal catalogue, source artwork, and
+      TexturePacker atlas as dormant production artifacts without changing active gameplay or public
+      asset mappings.
+- [x] Approve the `production-items-v2` cutover, existing per-gem target map, preparation effects,
+      status timing, multi-skill, cooldown-reset, Taunt, scaling, Shield, destruction, copy, and
+      transformation contracts.
+- [x] Implement the inactive Slice A engine and schema foundation for Burn, Shock, Freeze, Stomp,
+      Carbonize, Electroshock, Deep Freezing, Rime Lock, and Cleanse, including one scenario per
+      spell and interaction coverage. The production catalogue and atlas remain inactive.
+- [x] Implement the inactive Slice B foundation for the five Skill gifts, Crystal Skin, Quick Pulse,
+      Short Circuit, Zero Interval, and Refresh. Granted skills and Shields retain source provenance,
+      cooldown zero restores same-turn readiness, and Refresh selection is deterministic and logged.
+- [x] Implement the inactive Slice C foundation for the three supported-ring kill triggers,
+      action-prepared Pierce and Funeral Brand, Bloodflame, and Last Breath. Trigger ownership,
+      lifetime, capture timing, first-turn protection, deterministic targeting, and non-recursive
+      destruction settlement are covered by focused scenarios.
+- [x] Implement the inactive Slice D foundation for Devotion, Sacrifice, Destruction, Chain
+      Explosion, Copy, Transmute, Arc Relay, and Zerakai Protocol. Direct destruction reuses trigger
+      settlement, random choices are deterministic and logged, copy inheritance is explicit, and
+      temporary runtime identities remain unique through end-of-turn expiration.
+- [x] Implement the production spell collection by following
+      `docs/SPELLS_IMPLEMENTATION_INSTRUCTIONS.md`, including target-contract approval, typed effect
+      primitives, deterministic engine behavior, localization, recipes, migration, atomic atlas
+      activation, and complete local validation.
+- [ ] Perform the coordinated staging backup/restore verification, guarded gameplay reset,
+      authenticated smoke tests, log review, and rollback drill before production promotion.
+
 ## Phase 1 - Game App Data Foundation
 
 - [x] Replace the temporary direct `node:sqlite` bootstrap store with a formal persistence layer.

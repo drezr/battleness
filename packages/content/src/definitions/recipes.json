@@ -3331,18 +3331,325 @@
     ]
   },
   {
-    "id": "craftSpellFirebolt",
+    "id": "craftSpellBurnI",
     "outputType": "spell",
-    "outputDefinitionId": "firebolt",
+    "outputDefinitionId": "burnI",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "helium",
+        "quantity": 3
+      }
+    ]
+  },
+  {
+    "id": "craftSpellShockI",
+    "outputType": "spell",
+    "outputDefinitionId": "shockI",
     "craftedLevel": 1,
     "craftedQuality": 0,
     "ingredients": [
       {
         "materialId": "hydrogen",
+        "quantity": 3
+      }
+    ]
+  },
+  {
+    "id": "craftSpellTransmute",
+    "outputType": "spell",
+    "outputDefinitionId": "transmute",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "nitrogen",
+        "quantity": 3
+      }
+    ]
+  },
+  {
+    "id": "craftSpellArcRelay",
+    "outputType": "spell",
+    "outputDefinitionId": "arcRelay",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "oxygen",
+        "quantity": 3
+      }
+    ]
+  },
+  {
+    "id": "craftSpellFreezeI",
+    "outputType": "spell",
+    "outputDefinitionId": "freezeI",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "helium",
+        "quantity": 2
+      },
+      {
+        "materialId": "hydrogen",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellStompI",
+    "outputType": "spell",
+    "outputDefinitionId": "stompI",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "nitrogen",
+        "quantity": 2
+      },
+      {
+        "materialId": "oxygen",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellRimeLock",
+    "outputType": "spell",
+    "outputDefinitionId": "rimeLock",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "hydrogen",
+        "quantity": 2
+      },
+      {
+        "materialId": "oxygen",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellBurnII",
+    "outputType": "spell",
+    "outputDefinitionId": "burnII",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "bromine",
+        "quantity": 1
+      },
+      {
+        "materialId": "helium",
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "id": "craftSpellCarbonize",
+    "outputType": "spell",
+    "outputDefinitionId": "carbonize",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "chlorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "nitrogen",
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "id": "craftSpellGiftPierce",
+    "outputType": "spell",
+    "outputDefinitionId": "giftPierce",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "fluorine",
         "quantity": 1
       },
       {
         "materialId": "oxygen",
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "id": "craftSpellGiftRage",
+    "outputType": "spell",
+    "outputDefinitionId": "giftRage",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "bromine",
+        "quantity": 1
+      },
+      {
+        "materialId": "hydrogen",
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "id": "craftSpellBloodflame",
+    "outputType": "spell",
+    "outputDefinitionId": "bloodflame",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "chlorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "helium",
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "id": "craftSpellShockII",
+    "outputType": "spell",
+    "outputDefinitionId": "shockII",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "fluorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "nitrogen",
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "id": "craftSpellElectroshock",
+    "outputType": "spell",
+    "outputDefinitionId": "electroshock",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "bromine",
+        "quantity": 1
+      },
+      {
+        "materialId": "oxygen",
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "id": "craftSpellQuickPulse",
+    "outputType": "spell",
+    "outputDefinitionId": "quickPulse",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "chlorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "hydrogen",
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "id": "craftSpellGiftMultiHit",
+    "outputType": "spell",
+    "outputDefinitionId": "giftMultiHit",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "fluorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "helium",
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "id": "craftSpellFreezeII",
+    "outputType": "spell",
+    "outputDefinitionId": "freezeII",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "bromine",
+        "quantity": 1
+      },
+      {
+        "materialId": "nitrogen",
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "id": "craftSpellStompII",
+    "outputType": "spell",
+    "outputDefinitionId": "stompII",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "chlorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "oxygen",
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "id": "craftSpellGiftTaunt",
+    "outputType": "spell",
+    "outputDefinitionId": "giftTaunt",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "fluorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "hydrogen",
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "id": "craftSpellCrystalSkin",
+    "outputType": "spell",
+    "outputDefinitionId": "crystalSkin",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "bromine",
+        "quantity": 1
+      },
+      {
+        "materialId": "helium",
         "quantity": 1
       },
       {
@@ -3352,9 +3659,9 @@
     ]
   },
   {
-    "id": "craftSpellSolarFlare",
+    "id": "craftSpellBurnIII",
     "outputType": "spell",
-    "outputDefinitionId": "solarFlare",
+    "outputDefinitionId": "burnIII",
     "craftedLevel": 1,
     "craftedQuality": 0,
     "ingredients": [
@@ -3363,7 +3670,28 @@
         "quantity": 1
       },
       {
-        "materialId": "bromine",
+        "materialId": "chlorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "oxygen",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellDamageOnKill",
+    "outputType": "spell",
+    "outputDefinitionId": "damageOnKill",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "iodine",
+        "quantity": 1
+      },
+      {
+        "materialId": "fluorine",
         "quantity": 1
       },
       {
@@ -3373,18 +3701,18 @@
     ]
   },
   {
-    "id": "craftSpellSpark",
+    "id": "craftSpellDevotion",
     "outputType": "spell",
-    "outputDefinitionId": "spark",
+    "outputDefinitionId": "devotion",
     "craftedLevel": 1,
     "craftedQuality": 0,
     "ingredients": [
       {
-        "materialId": "nitrogen",
+        "materialId": "neon",
         "quantity": 1
       },
       {
-        "materialId": "helium",
+        "materialId": "bromine",
         "quantity": 1
       },
       {
@@ -3394,14 +3722,35 @@
     ]
   },
   {
-    "id": "craftSpellArcPulse",
+    "id": "craftSpellChainExplosion",
     "outputType": "spell",
-    "outputDefinitionId": "arcPulse",
+    "outputDefinitionId": "chainExplosion",
     "craftedLevel": 1,
     "craftedQuality": 0,
     "ingredients": [
       {
-        "materialId": "neon",
+        "materialId": "argon",
+        "quantity": 1
+      },
+      {
+        "materialId": "chlorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "nitrogen",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellFuneralBrand",
+    "outputType": "spell",
+    "outputDefinitionId": "funeralBrand",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "iodine",
         "quantity": 1
       },
       {
@@ -3415,18 +3764,60 @@
     ]
   },
   {
-    "id": "craftSpellIceShard",
+    "id": "craftSpellShockIII",
     "outputType": "spell",
-    "outputDefinitionId": "iceShard",
+    "outputDefinitionId": "shockIII",
     "craftedLevel": 1,
     "craftedQuality": 0,
     "ingredients": [
       {
-        "materialId": "hydrogen",
+        "materialId": "neon",
         "quantity": 1
       },
       {
-        "materialId": "oxygen",
+        "materialId": "bromine",
+        "quantity": 1
+      },
+      {
+        "materialId": "helium",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellEnergyOnKill",
+    "outputType": "spell",
+    "outputDefinitionId": "energyOnKill",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "argon",
+        "quantity": 1
+      },
+      {
+        "materialId": "chlorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "hydrogen",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellShortCircuit",
+    "outputType": "spell",
+    "outputDefinitionId": "shortCircuit",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "iodine",
+        "quantity": 1
+      },
+      {
+        "materialId": "fluorine",
         "quantity": 1
       },
       {
@@ -3436,9 +3827,114 @@
     ]
   },
   {
-    "id": "craftSpellGlacialSpike",
+    "id": "craftSpellZerakaiProtocol",
     "outputType": "spell",
-    "outputDefinitionId": "glacialSpike",
+    "outputDefinitionId": "zerakaiProtocol",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "neon",
+        "quantity": 1
+      },
+      {
+        "materialId": "bromine",
+        "quantity": 1
+      },
+      {
+        "materialId": "oxygen",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellFreezeIII",
+    "outputType": "spell",
+    "outputDefinitionId": "freezeIII",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "argon",
+        "quantity": 1
+      },
+      {
+        "materialId": "chlorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "helium",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellStompIII",
+    "outputType": "spell",
+    "outputDefinitionId": "stompIII",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "iodine",
+        "quantity": 1
+      },
+      {
+        "materialId": "fluorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "hydrogen",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellDeepFreezing",
+    "outputType": "spell",
+    "outputDefinitionId": "deepFreezing",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "neon",
+        "quantity": 1
+      },
+      {
+        "materialId": "bromine",
+        "quantity": 1
+      },
+      {
+        "materialId": "nitrogen",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellCooldownOnKill",
+    "outputType": "spell",
+    "outputDefinitionId": "cooldownOnKill",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "argon",
+        "quantity": 1
+      },
+      {
+        "materialId": "fluorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "oxygen",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellCleanse",
+    "outputType": "spell",
+    "outputDefinitionId": "cleanse",
     "craftedLevel": 1,
     "craftedQuality": 0,
     "ingredients": [
@@ -3452,6 +3948,174 @@
       },
       {
         "materialId": "helium",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellRefresh",
+    "outputType": "spell",
+    "outputDefinitionId": "refresh",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "neon",
+        "quantity": 1
+      },
+      {
+        "materialId": "chlorine",
+        "quantity": 1
+      },
+      {
+        "materialId": "hydrogen",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellPierceLegacy",
+    "outputType": "spell",
+    "outputDefinitionId": "pierceLegacy",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "astatine",
+        "quantity": 1
+      },
+      {
+        "materialId": "argon",
+        "quantity": 1
+      },
+      {
+        "materialId": "bromine",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellDestruction",
+    "outputType": "spell",
+    "outputDefinitionId": "destruction",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "krypton",
+        "quantity": 1
+      },
+      {
+        "materialId": "iodine",
+        "quantity": 1
+      },
+      {
+        "materialId": "fluorine",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellLastBreath",
+    "outputType": "spell",
+    "outputDefinitionId": "lastBreath",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "radon",
+        "quantity": 1
+      },
+      {
+        "materialId": "neon",
+        "quantity": 1
+      },
+      {
+        "materialId": "bromine",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellSacrifice",
+    "outputType": "spell",
+    "outputDefinitionId": "sacrifice",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "xenon",
+        "quantity": 1
+      },
+      {
+        "materialId": "argon",
+        "quantity": 1
+      },
+      {
+        "materialId": "chlorine",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellCopy",
+    "outputType": "spell",
+    "outputDefinitionId": "copy",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "astatine",
+        "quantity": 1
+      },
+      {
+        "materialId": "iodine",
+        "quantity": 1
+      },
+      {
+        "materialId": "fluorine",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellZeroInterval",
+    "outputType": "spell",
+    "outputDefinitionId": "zeroInterval",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "krypton",
+        "quantity": 1
+      },
+      {
+        "materialId": "neon",
+        "quantity": 1
+      },
+      {
+        "materialId": "bromine",
+        "quantity": 1
+      }
+    ]
+  },
+  {
+    "id": "craftSpellGiftShield",
+    "outputType": "spell",
+    "outputDefinitionId": "giftShield",
+    "craftedLevel": 1,
+    "craftedQuality": 0,
+    "ingredients": [
+      {
+        "materialId": "radon",
+        "quantity": 1
+      },
+      {
+        "materialId": "argon",
+        "quantity": 1
+      },
+      {
+        "materialId": "chlorine",
         "quantity": 1
       }
     ]

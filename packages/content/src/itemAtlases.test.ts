@@ -15,5 +15,13 @@ describe("production item atlases", () => {
       "--item-atlas": "url('/assets/items/rings.png')",
       "--item-sprite-transform": "rotate(-90deg) translateX(-100%)",
     });
+    expect(itemArtworkStyleVariables("material", "calcium")).toMatchObject({
+      "--item-atlas": "url('/assets/items/materials.png')",
+      "--item-sprite-transform": "none",
+    });
+    expect(itemArtworkStyleVariables("material", "aluminium")).toMatchObject({
+      "--item-atlas": "url('/assets/items/materials.png')",
+      "--item-sprite-transform": "rotate(-90deg) translateX(-100%)",
+    });
   });
 });

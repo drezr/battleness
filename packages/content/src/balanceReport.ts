@@ -190,7 +190,14 @@ function createSpellReport(
   definition: SpellDefinition,
   profiles: readonly BalanceProfile[],
 ): BalanceItemReport {
-  const baseDamage = definition.effects.reduce((sum, effect) => sum + effect.amount, 0);
+  const baseDamage = definition.effects.reduce(
+    (sum, effect) =>
+      sum +
+      (effect.type === "dealDamage" || effect.type === "dealDamageToAll"
+        ? (effect.amount ?? 0)
+        : 0),
+    0,
+  );
   return {
     kind: "spell",
     id: definition.id,

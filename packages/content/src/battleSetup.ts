@@ -313,7 +313,8 @@ function resolveGemEnchantment(
     baseEnergyPenalty: definition.baseEnergyPenalty,
     baseCooldownPenalty: definition.baseCooldownPenalty,
     effects: definition.effects.map((effect) =>
-      effect.type === "dealDamage"
+      (effect.type === "dealDamage" || effect.type === "dealDamageToAll") &&
+      effect.amount !== undefined
         ? {
             ...effect,
             amount: resolveItemStat(effect.amount, level, instance.quality),
@@ -436,6 +437,7 @@ function toEngineSpellDefinition(definition: ContentSpellDefinition): SpellDefin
     baseSpeed: definition.baseSpeed,
     baseEnergyPenalty: definition.baseEnergyPenalty,
     baseCooldownPenalty: definition.baseCooldownPenalty,
+    targeting: definition.targeting,
     effects: definition.effects,
   };
 }

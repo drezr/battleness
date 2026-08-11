@@ -1,0 +1,1200 @@
+{
+  "contentVersion": "production-items-v2",
+  "status": "approved-for-production",
+  "sourceFiles": ["PROJECT.md", "spells(1).json"],
+  "designRules": {
+    "spellTerminology": "A spell is one of the two enchantment types that can be attached to a gem. Monsters are the other enchantment type.",
+    "triggerTiming": "A spell triggers after the supported ring has paid energy, entered cooldown, and applied ring-plus-gem damage.",
+    "targetSelection": "A spell requires at most one explicit player-selected target. Any secondary target is automatic or deterministic-random.",
+    "randomness": "All random choices use battle-seeded deterministic randomness and must be written to the event log.",
+    "shieldRule": "Shield negates only the first incoming damage instance. Shield does not prevent direct destruction, transformation, status application, or skill removal.",
+    "noHealing": true,
+    "statusRules": {
+      "sameStatusReapplication": "Replace only when the new remaining duration is longer.",
+      "tickAndDurationTiming": "At the start of the affected monster controller's turn; periodic damage resolves before duration decreases.",
+      "cleanse": "Removes all temporary positive and negative statuses, but not natural or spell-granted skills."
+    },
+    "monsterActionRule": "A monster whose cooldown is reset to 0 may attack again during the same turn, including after it already attacked.",
+    "penaltyRange": {
+      "minimum": 0.1,
+      "maximum": 1.0
+    },
+    "rarities": ["common", "refined", "rare", "epic"],
+    "elementProfiles": {
+      "fire": "High damage, sacrifice, direct destruction, aggressive permanent battle buffs, higher penalties and lower speed.",
+      "electric": "High speed, low penalties, cooldown reset, copying, transformation, chain and deterministic-random effects.",
+      "ice": "Control, status removal, Shield, cooldown manipulation, area pressure, higher energy penalty and lower speed."
+    }
+  },
+  "counts": {
+    "fire": 14,
+    "electric": 14,
+    "ice": 14,
+    "total": 42
+  },
+  "spells": [
+    {
+      "id": "burnI",
+      "name": "Burn I",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "common",
+      "baseEnergyPenalty": 0.3,
+      "baseCooldownPenalty": 0.4,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Apply BURN to the targeted monster. BURN deals 3 fire damage at the start of that monster controller's next turn, then expires.",
+      "effects": [
+        {
+          "type": "applyStatus",
+          "status": "burn",
+          "damage": 3,
+          "durationOwnerTurns": 1,
+          "tickTiming": "startOfTargetControllerTurn"
+        }
+      ],
+      "implementationDescription": "Validate one living monster before ring energy is spent. The spell resolves after ring and gem damage. If the selected monster was destroyed earlier in the same ring action, the spell expires without redirection. Burn damage is a normal damage instance: elemental advantage applies, Shield may negate it, Rage may activate on a surviving monster, and destruction occurs immediately at 0 health. Reapplying Burn follows the global status rule: replace the existing Burn only when the new remaining duration is longer.",
+      "assetDescription": "A small crimson spell sigil shaped like a curling flame brand, suspended above a blackened metal seal. The flame should be compact and controlled rather than explosive, with one bright ember core and a short trail of smoke. Isolated game-item icon, centered, transparent background, no text, no border, readable at small size.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "burnII",
+      "name": "Burn II",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "refined",
+      "baseEnergyPenalty": 0.5,
+      "baseCooldownPenalty": 0.6,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Apply BURN to the targeted monster. BURN deals 3 fire damage at the start of each of its controller's next 2 turns.",
+      "effects": [
+        {
+          "type": "applyStatus",
+          "status": "burn",
+          "damage": 3,
+          "durationOwnerTurns": 2,
+          "tickTiming": "startOfTargetControllerTurn"
+        }
+      ],
+      "implementationDescription": "Uses the same Burn rules as Burn I, but persists for two owner-turn ticks. Duration decreases after each tick. If Burn is cleansed before a tick, no damage is dealt. A stronger Burn application does not create a second stack; it replaces a shorter remaining Burn duration.",
+      "assetDescription": "A refined double-loop flame glyph forged from glowing copper and red crystal, with two visible ember rings indicating two turns. Elegant magical craftsmanship, restrained sparks, transparent background, no text, no frame.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "burnIII",
+      "name": "Burn III",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "rare",
+      "baseEnergyPenalty": 0.7,
+      "baseCooldownPenalty": 0.8,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Apply BURN to the targeted monster. BURN deals 3 fire damage at the start of each of its controller's next 3 turns.",
+      "effects": [
+        {
+          "type": "applyStatus",
+          "status": "burn",
+          "damage": 3,
+          "durationOwnerTurns": 3,
+          "tickTiming": "startOfTargetControllerTurn"
+        }
+      ],
+      "implementationDescription": "Uses the same Burn rules as the lower tiers and lasts for three owner-turn ticks. The effect is powerful because it repeatedly consumes Shield or health over time, but it never stacks multiple Burn instances on one monster.",
+      "assetDescription": "A rare ruby-red occult brand with three concentric flame arcs orbiting a dark volcanic gemstone. The object should feel ancient and dangerous, with molten cracks and a clean silhouette, transparent background, no writing.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "carbonize",
+      "name": "Carbonize",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "refined",
+      "baseEnergyPenalty": 0.7,
+      "baseCooldownPenalty": 0.8,
+      "baseSpeed": 0,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "gameplayDescription": "Apply BURN for 1 turn to every monster currently in play, including allied monsters. Each Burn deals 3 fire damage at the start of that monster controller's next turn.",
+      "effects": [
+        {
+          "type": "forEachMonster",
+          "scope": "allMonsters",
+          "effect": {
+            "type": "applyStatus",
+            "status": "burn",
+            "damage": 3,
+            "durationOwnerTurns": 1
+          }
+        }
+      ],
+      "implementationDescription": "No target is selected. Resolve against the snapshot of all living monsters present when the spell triggers. Monsters summoned later by another socket are not affected. Each affected monster receives an independent Burn status. Existing longer Burns are not shortened.",
+      "assetDescription": "A charred spherical relic radiating a circular heat wave in every direction, surrounded by silhouettes of tiny burning motes. The center resembles compressed black coal with red-hot fractures. Wide but uncluttered composition, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "giftPierce",
+      "name": "Gift: Pierce",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "refined",
+      "baseEnergyPenalty": 0.5,
+      "baseCooldownPenalty": 0.7,
+      "baseSpeed": 2,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Give PIERCE to the targeted monster for the rest of the battle. If it already has PIERCE, the spell resolves with no additional effect.",
+      "effects": [
+        {
+          "type": "grantSkill",
+          "skill": "pierce",
+          "duration": "untilMonsterDestroyed",
+          "duplicateBehavior": "noEffect"
+        }
+      ],
+      "implementationDescription": "The granted skill is a battle-state modifier and never changes the inventory definition. Pierce applies only to the monster's own attacks. Direct destruction and spell damage do not create Pierce overflow. Cleanse removes temporary statuses but does not remove this granted skill; only an explicit skill-removal effect can remove it.",
+      "assetDescription": "A sharp scarlet spearhead made of fire and obsidian passing through a cracked circular ward, clearly communicating penetration. Strong diagonal silhouette, minimal particles, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "damageOnKill",
+      "name": "Damage on Kill",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "rare",
+      "baseEnergyPenalty": 0.6,
+      "baseCooldownPenalty": 0.8,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "gameplayDescription": "For the rest of the battle, whenever the supported ring kills a monster with its ring-and-gem damage, that ring gains +2 damage.",
+      "effects": [
+        {
+          "type": "registerTrigger",
+          "event": "supportedRingKilledMonster",
+          "effect": {
+            "type": "modifySupportedRingDamage",
+            "amount": 2,
+            "duration": "battle"
+          }
+        }
+      ],
+      "implementationDescription": "This is a persistent trigger attached to the supported ring after the first successful cast. The trigger activates only when the initial ring-and-gem damage portion kills at least one monster, not when a later spell effect or summoned monster causes the kill. Multiple successful activations increase the ring's battle-only damage cumulatively. Recasting the same spell on later ring uses does not create duplicate trigger instances; it refreshes or preserves the single trigger.",
+      "assetDescription": "A flaming ring engraving consuming a defeated monster-shaped shadow and growing brighter. Show a circular red-gold ring with small upward power notches, dramatic but compact, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "devotion",
+      "name": "Devotion",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "rare",
+      "baseEnergyPenalty": 0.7,
+      "baseCooldownPenalty": 0.8,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "gameplayDescription": "Destroy the targeted allied monster. A random other allied monster permanently gains damage equal to the destroyed monster's current damage for the rest of the battle.",
+      "effects": [
+        {
+          "type": "destroyMonster",
+          "target": "selected"
+        },
+        {
+          "type": "randomTarget",
+          "scope": "otherAlliedMonsters",
+          "onSuccess": {
+            "type": "modifyMonsterDamage",
+            "amountFrom": "destroyedTargetCurrentDamage",
+            "duration": "battle"
+          }
+        }
+      ],
+      "implementationDescription": "The selected monster is destroyed directly, without dealing damage. Shield does not prevent direct destruction. Rage and Pierce do not trigger. The secondary recipient is selected deterministically from living allied monsters other than the destroyed target after destruction resolves. If no recipient exists, the target is still destroyed and the bonus is ignored. The random choice must be recorded in the combat event log.",
+      "assetDescription": "A solemn fire ritual: one crimson creature-shaped flame dissolves into a stream of light entering another shadowed creature. Use a ceremonial red-gold brazier motif, emotionally sacrificial rather than gruesome, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "pierceLegacy",
+      "name": "Pierce",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "epic",
+      "baseEnergyPenalty": 0.8,
+      "baseCooldownPenalty": 0.9,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["enemyMonster"]
+      },
+      "gameplayDescription": "If the targeted enemy monster is destroyed by the ring-and-gem damage of this action, deal the overkill damage to its controlling hero.",
+      "effects": [
+        {
+          "type": "conditionalPierceForAction",
+          "target": "selectedEnemyMonster",
+          "source": "ringAndGemDamage"
+        }
+      ],
+      "implementationDescription": "This spell modifies only the current ring action and does not grant a skill. The target must be an enemy monster. Calculate overflow as resolved ring-and-gem damage minus the target's health immediately before that damage. Shield preventing the hit produces no overflow. First-turn hero protection prevents the overflow from damaging the opposing hero. If the target survives or was destroyed before the ring damage step, no overflow occurs.",
+      "assetDescription": "An epic lance of white-hot flame piercing through a shattered monster mask and continuing toward a distant red halo. High-impact straight trajectory, prestigious magical weapon styling, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "destruction",
+      "name": "Destruction",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "epic",
+      "baseEnergyPenalty": 1.0,
+      "baseCooldownPenalty": 1.0,
+      "baseSpeed": 0,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "gameplayDescription": "Destroy every monster currently in play, allied and enemy.",
+      "effects": [
+        {
+          "type": "destroyAllMonsters",
+          "scope": "allMonsters"
+        }
+      ],
+      "implementationDescription": "Resolve simultaneously against all living monsters present when the spell triggers. This is direct destruction, not damage: Shield does not protect, elemental advantage does not apply, Rage and Pierce do not trigger, and health values are not reduced through damage events. Monsters summoned by later socket enchantments are unaffected. If both sides lose all monsters, combat continues normally.",
+      "assetDescription": "A catastrophic black-red magical core collapsing inward while monster silhouettes disintegrate around it. Avoid depicting gore; use ash, fractured armor fragments, and a powerful circular annihilation wave. Epic scale, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "giftRage",
+      "name": "Gift: Rage",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "refined",
+      "baseEnergyPenalty": 0.4,
+      "baseCooldownPenalty": 0.6,
+      "baseSpeed": 2,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Give RAGE to the targeted monster for the rest of the battle. If it already has RAGE, the spell has no additional effect.",
+      "effects": [
+        {
+          "type": "grantSkill",
+          "skill": "rage",
+          "duration": "untilMonsterDestroyed",
+          "duplicateBehavior": "noEffect"
+        }
+      ],
+      "implementationDescription": "The granted Rage uses the monster's current maximum health and base resolved damage. If the monster is already strictly below 50% maximum health when Rage is granted, Rage activates immediately. Once activated, the damage increase remains active until the monster is destroyed or the skill is explicitly removed.",
+      "assetDescription": "A jagged red war rune wrapped around a clenched beast claw, with a controlled burst of flame behind it. Aggressive angular design, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "bloodflame",
+      "name": "Bloodflame",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "refined",
+      "baseEnergyPenalty": 0.5,
+      "baseCooldownPenalty": 0.7,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "gameplayDescription": "Deal 2 fire damage to the targeted allied monster. If it survives, it permanently gains +2 damage for the rest of the battle.",
+      "effects": [
+        {
+          "type": "dealDamage",
+          "amount": 2,
+          "element": "fire",
+          "target": "selected"
+        },
+        {
+          "type": "ifTargetSurvives",
+          "effect": {
+            "type": "modifyMonsterDamage",
+            "amount": 2,
+            "duration": "battle"
+          }
+        }
+      ],
+      "implementationDescription": "The damage is a normal incoming damage instance and can be blocked by Shield. If Shield blocks it, the monster survives and still receives the +2 damage bonus. If the monster is destroyed, no bonus is granted. Rage may activate from the self-inflicted damage before the permanent bonus is added.",
+      "assetDescription": "A controlled blood-red flame flowing into a monster heart-shaped crystal, half dangerous and half empowering. No gore, use magical crimson liquid-light and ember veins, transparent background, no text.",
+      "conceptOrigin": "new-concept"
+    },
+    {
+      "id": "chainExplosion",
+      "name": "Chain Explosion",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "rare",
+      "baseEnergyPenalty": 0.7,
+      "baseCooldownPenalty": 0.9,
+      "baseSpeed": 0,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "gameplayDescription": "Destroy the targeted allied monster, then deal fire damage equal to its current damage to every enemy monster.",
+      "effects": [
+        {
+          "type": "captureStat",
+          "source": "selected",
+          "stat": "currentDamage"
+        },
+        {
+          "type": "destroyMonster",
+          "target": "selected"
+        },
+        {
+          "type": "dealDamageToAll",
+          "scope": "enemyMonsters",
+          "amountFromCapturedStat": "currentDamage",
+          "element": "fire"
+        }
+      ],
+      "implementationDescription": "Capture the selected monster's current damage before destroying it. Shield does not prevent the sacrifice. The area damage resolves as separate damage instances against each enemy monster; each Shield is checked independently, elemental advantage applies per target, Rage may activate on survivors, and destroyed monsters are removed immediately after the area effect. If there are no enemy monsters, the sacrifice still occurs.",
+      "assetDescription": "A sacrificed fiery creature collapsing into a ring of explosions that strikes three opposing silhouettes. Use a readable radial blast with separate fire trails, transparent background, no text.",
+      "conceptOrigin": "new-concept"
+    },
+    {
+      "id": "funeralBrand",
+      "name": "Funeral Brand",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "rare",
+      "baseEnergyPenalty": 0.6,
+      "baseCooldownPenalty": 0.8,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["enemyMonster"]
+      },
+      "gameplayDescription": "Mark the targeted enemy monster for this action only. If it is destroyed during this complete ring action, deal damage equal to its current damage to its controlling hero.",
+      "effects": [
+        {
+          "type": "registerActionScopedTrigger",
+          "event": "selectedMonsterDestroyedDuringCurrentRingAction",
+          "effect": {
+            "type": "dealDamageToControllingHero",
+            "amountFrom": "destroyedMonsterCurrentDamage",
+            "element": "fire"
+          }
+        }
+      ],
+      "implementationDescription": "This is not part of a reusable Mark system; it is an action-scoped conditional effect internal to this spell. The condition may be satisfied by ring damage or a later enchantment in the same ring action. Record the target's current damage immediately before destruction. First-turn hero protection can prevent the resulting hero damage. If the monster survives the full action, the temporary condition expires.",
+      "assetDescription": "A dark funerary seal burning beneath a monster silhouette, with a single flame thread linking it to a distant hero crown. Somber red-black aesthetic, transparent background, no text.",
+      "conceptOrigin": "new-concept"
+    },
+    {
+      "id": "lastBreath",
+      "name": "Last Breath",
+      "type": "spell",
+      "element": "fire",
+      "rarity": "epic",
+      "baseEnergyPenalty": 0.9,
+      "baseCooldownPenalty": 1.0,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "gameplayDescription": "Until the end of the current turn, if the targeted allied monster is destroyed, it performs one final attack against a random legal enemy target before being removed.",
+      "effects": [
+        {
+          "type": "applyStatus",
+          "status": "lastBreath",
+          "duration": "endOfCurrentTurn",
+          "onDestroy": {
+            "type": "attackRandomLegalEnemyBeforeRemoval",
+            "ignoreCurrentCooldown": true
+          }
+        }
+      ],
+      "implementationDescription": "The monster remains considered destroyed for win and board-state purposes after the final attack. Select one random legal enemy target using deterministic battle randomness and Taunt restrictions. The final attack uses the monster's damage and skill state at the moment before destruction. Shield, elemental advantage, MultiHit and Pierce resolve normally. If there is no legal enemy target, remove the monster without attacking. Last Breath cannot recursively trigger itself more than once.",
+      "assetDescription": "A fading phoenix-like ember creature delivering one final strike as its body turns to ash. Dynamic but clear silhouette, intense last spark, transparent background, no text.",
+      "conceptOrigin": "new-concept"
+    },
+    {
+      "id": "shockI",
+      "name": "Shock I",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "common",
+      "baseEnergyPenalty": 0.2,
+      "baseCooldownPenalty": 0.3,
+      "baseSpeed": 4,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Apply SHOCK to the targeted monster for 1 owner turn. A shocked monster cannot attack but can still use TAUNT.",
+      "effects": [
+        {
+          "type": "applyStatus",
+          "status": "shock",
+          "durationOwnerTurns": 1
+        }
+      ],
+      "implementationDescription": "Shock prevents monster attack actions but does not remove skills, change cooldowns, or disable Taunt. Duration decreases at the start of the target controller's turn and expires after that turn's restriction has been established. Reapplication replaces the current duration only if the new remaining duration is longer.",
+      "assetDescription": "A compact yellow electrical restraint made of one lightning loop around a small monster silhouette. Bright but clean icon, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "shockII",
+      "name": "Shock II",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "refined",
+      "baseEnergyPenalty": 0.3,
+      "baseCooldownPenalty": 0.4,
+      "baseSpeed": 7,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Apply SHOCK to the targeted monster for 2 owner turns.",
+      "effects": [
+        {
+          "type": "applyStatus",
+          "status": "shock",
+          "durationOwnerTurns": 2
+        }
+      ],
+      "implementationDescription": "Same behavior as Shock I with two affected owner turns. Shock does not prevent passive skills or Shield. A shocked monster may still be targeted and damaged normally.",
+      "assetDescription": "A refined double electrical coil locking a monster emblem, with two visible yellow arcs and polished copper contacts. Transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "shockIII",
+      "name": "Shock III",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "rare",
+      "baseEnergyPenalty": 0.5,
+      "baseCooldownPenalty": 0.6,
+      "baseSpeed": 10,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Apply SHOCK to the targeted monster for 3 owner turns.",
+      "effects": [
+        {
+          "type": "applyStatus",
+          "status": "shock",
+          "durationOwnerTurns": 3
+        }
+      ],
+      "implementationDescription": "Same behavior as lower tiers, lasting three owner turns. This is long-duration action denial but still preserves Taunt and passive board utility.",
+      "assetDescription": "A rare tri-pronged lightning cage surrounding a dark creature glyph, with three electric rings and a luminous yellow crystal core. Transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "electroshock",
+      "name": "Electroshock",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "refined",
+      "baseEnergyPenalty": 0.5,
+      "baseCooldownPenalty": 0.6,
+      "baseSpeed": 8,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "gameplayDescription": "Apply SHOCK for 1 owner turn to every monster currently in play, allied and enemy.",
+      "effects": [
+        {
+          "type": "forEachMonster",
+          "scope": "allMonsters",
+          "effect": {
+            "type": "applyStatus",
+            "status": "shock",
+            "durationOwnerTurns": 1
+          }
+        }
+      ],
+      "implementationDescription": "No target selection. Resolve against all monsters currently present when the spell triggers. Monsters summoned by later sockets are not shocked. Existing longer Shock durations are not shortened.",
+      "assetDescription": "A wide electric pulse sphere exploding from a central capacitor and surrounding several monster silhouettes with yellow arcs. Symmetrical field effect, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "energyOnKill",
+      "name": "Energy on Kill",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "rare",
+      "baseEnergyPenalty": 0.3,
+      "baseCooldownPenalty": 0.5,
+      "baseSpeed": 9,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "gameplayDescription": "For the rest of the battle, whenever the supported ring kills a monster with ring-and-gem damage, restore 1 energy to its hero during the current turn.",
+      "effects": [
+        {
+          "type": "registerTrigger",
+          "event": "supportedRingKilledMonster",
+          "effect": {
+            "type": "restoreCurrentTurnEnergy",
+            "amount": 1,
+            "cap": "currentTurnMaximum"
+          }
+        }
+      ],
+      "implementationDescription": "The hero's energy cannot exceed that turn's current maximum. The trigger counts a kill caused by the supported ring's initial ring-and-gem damage only. It does not activate for kills caused by spells or summoned monsters. The trigger persists on the supported ring for the battle and does not stack duplicate copies from repeated casts.",
+      "assetDescription": "A yellow energy orb released from a defeated monster emblem and flowing into a hero-shaped lightning crest. Clean resource-transfer visual, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "sacrifice",
+      "name": "Sacrifice",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "epic",
+      "baseEnergyPenalty": 0.8,
+      "baseCooldownPenalty": 1.0,
+      "baseSpeed": 10,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "gameplayDescription": "Destroy the targeted allied monster. Then destroy one random enemy monster.",
+      "effects": [
+        {
+          "type": "destroyMonster",
+          "target": "selected"
+        },
+        {
+          "type": "randomTarget",
+          "scope": "enemyMonsters",
+          "onSuccess": {
+            "type": "destroyMonster",
+            "target": "random"
+          }
+        }
+      ],
+      "implementationDescription": "Both removals are direct destruction, not damage. Shield does not protect either monster. If there is no enemy monster after the allied sacrifice, only the allied monster is destroyed. The enemy selection uses deterministic seeded randomness and is recorded. Taunt does not restrict random destruction unless the effect explicitly says it targets through normal attack rules.",
+      "assetDescription": "Two creature silhouettes connected by a violent yellow lightning exchange: one dissolves willingly, the other is struck by the transferred discharge. Mystical and non-gory, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "copy",
+      "name": "Copy",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "epic",
+      "baseEnergyPenalty": 0.8,
+      "baseCooldownPenalty": 0.9,
+      "baseSpeed": 11,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Create a duplicate of the targeted monster with the same current damage, current and maximum health, base cooldown, element and skill. The copy enters with cooldown 1.",
+      "effects": [
+        {
+          "type": "copyMonster",
+          "source": "selected",
+          "copyMode": "currentCombatStats",
+          "initialCooldown": 1,
+          "copyStatuses": false
+        }
+      ],
+      "implementationDescription": "The copy is controlled by the spell caster, even when copying an enemy monster. It occupies one of the three allied monster slots. If the allied board is full, the copy fails and the rest of the ring action continues. Do not copy temporary statuses, activated Rage state, broken Shield state, or runtime instance identity. A copied Shield skill starts active because it is a newly created monster.",
+      "assetDescription": "A luminous electric mirror splitting one monster silhouette into two identical forms, with precise yellow-blue duplication lines. High-tech magical look, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "transmute",
+      "name": "Transmute",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "common",
+      "baseEnergyPenalty": 0.4,
+      "baseCooldownPenalty": 0.5,
+      "baseSpeed": 4,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Transform the targeted monster into a 2 damage, 2 health Electric monster with cooldown 1 and no skill.",
+      "effects": [
+        {
+          "type": "transformMonster",
+          "target": "selected",
+          "result": {
+            "element": "electric",
+            "damage": 2,
+            "maxHealth": 2,
+            "currentHealth": 2,
+            "baseCooldown": 1,
+            "currentCooldown": 1,
+            "skill": null
+          }
+        }
+      ],
+      "implementationDescription": "Transformation preserves controller and runtime board slot but replaces combat statistics, element, statuses and skill. Shield does not prevent transformation because it is not damage or destruction. The transformed monster receives a fresh 2/2 state and is not considered newly summoned for summon triggers.",
+      "assetDescription": "A small creature passing through a yellow alchemical lightning prism and emerging as a simple geometric electric familiar. Clear before-and-after silhouette, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "arcRelay",
+      "name": "Arc Relay",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "common",
+      "baseEnergyPenalty": 0.2,
+      "baseCooldownPenalty": 0.3,
+      "baseSpeed": 5,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Deal 2 electric damage to the targeted monster, then deal 1 electric damage to one random other monster controlled by the same player.",
+      "effects": [
+        {
+          "type": "dealDamage",
+          "amount": 2,
+          "element": "electric",
+          "target": "selected"
+        },
+        {
+          "type": "randomTarget",
+          "scope": "otherMonstersControlledBySelectedTargetOwner",
+          "onSuccess": {
+            "type": "dealDamage",
+            "amount": 1,
+            "element": "electric"
+          }
+        }
+      ],
+      "implementationDescription": "Only one target is selected by the player. Resolve the primary damage first. Then choose a living secondary monster controlled by the same player, excluding the primary target. If none exists, ignore the secondary effect. Random selection is deterministic and logged. Shield and elemental advantage resolve independently for both hits.",
+      "assetDescription": "A yellow lightning bolt striking one creature and automatically arcing to a second smaller silhouette. The secondary arc should look spontaneous and uncontrolled, transparent background, no text.",
+      "conceptOrigin": "new-concept"
+    },
+    {
+      "id": "quickPulse",
+      "name": "Quick Pulse",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "refined",
+      "baseEnergyPenalty": 0.2,
+      "baseCooldownPenalty": 0.4,
+      "baseSpeed": 7,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "gameplayDescription": "Set the targeted allied monster's current cooldown to 0.",
+      "effects": [
+        {
+          "type": "setCurrentCooldown",
+          "target": "selected",
+          "value": 0
+        }
+      ],
+      "implementationDescription": "The monster may attack immediately after the ring action completes. If it already attacked earlier in the same turn, setting cooldown to 0 allows it to attack again according to the selected V1 rule. Shock or Freeze can still prevent the action even at cooldown 0.",
+      "assetDescription": "A focused electric pulse striking a single allied monster emblem and resetting a circular timer to zero. Bright yellow speed lines, transparent background, no text.",
+      "conceptOrigin": "new-concept"
+    },
+    {
+      "id": "shortCircuit",
+      "name": "Short Circuit",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "rare",
+      "baseEnergyPenalty": 0.4,
+      "baseCooldownPenalty": 0.6,
+      "baseSpeed": 8,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["enemyMonster"]
+      },
+      "gameplayDescription": "Set the targeted enemy monster's current cooldown to its full resolved cooldown value.",
+      "effects": [
+        {
+          "type": "setCurrentCooldown",
+          "target": "selected",
+          "valueFrom": "resolvedBaseCooldown"
+        }
+      ],
+      "implementationDescription": "This delays a ready or partially cooled enemy monster. It does not alter the monster's base cooldown and does not apply a status. If the monster is already at or above its resolved cooldown, no numerical change occurs.",
+      "assetDescription": "A broken yellow circuit snapping around an enemy creature symbol while a cooldown dial jumps backward to full. Sharp electrical fault aesthetic, transparent background, no text.",
+      "conceptOrigin": "new-concept"
+    },
+    {
+      "id": "zerakaiProtocol",
+      "name": "Zerakai Protocol",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "rare",
+      "baseEnergyPenalty": 0.5,
+      "baseCooldownPenalty": 0.7,
+      "baseSpeed": 9,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "gameplayDescription": "Create a temporary duplicate of the targeted allied monster with the same current damage, element and base cooldown, but 1 maximum health and no skill. It enters with cooldown 0 and is destroyed at the end of the current turn.",
+      "effects": [
+        {
+          "type": "createTemporaryMonsterCopy",
+          "source": "selected",
+          "copyDamage": true,
+          "copyElement": true,
+          "maxHealth": 1,
+          "skill": null,
+          "initialCooldown": 0,
+          "expires": "endOfCurrentTurn"
+        }
+      ],
+      "implementationDescription": "The clone occupies one allied monster slot. If all three slots are occupied, creation fails without cancelling the ring action. The clone can attack immediately and may attack again if another effect resets its cooldown before turn end. It copies no statuses, Shield, Rage state or runtime identity. End-of-turn expiration is direct destruction, cannot be prevented by Shield, and does not trigger Rage or Pierce.",
+      "assetDescription": "A sleek electric hologram of a monster emerging from a coded yellow sigil, visibly unstable with a single bright health crystal and a fading timer trail. Futuristic arcane protocol aesthetic, transparent background, no text.",
+      "conceptOrigin": "new-concept"
+    },
+    {
+      "id": "zeroInterval",
+      "name": "Zero Interval",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "epic",
+      "baseEnergyPenalty": 0.8,
+      "baseCooldownPenalty": 1.0,
+      "baseSpeed": 12,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "gameplayDescription": "Target an allied monster. Set the current cooldown of every allied monster to 0.",
+      "effects": [
+        {
+          "type": "setCurrentCooldownForAll",
+          "scope": "alliedMonsters",
+          "value": 0
+        }
+      ],
+      "implementationDescription": "The selected allied monster is required only to validate and aim the spell. After resolution, every allied monster currently in play becomes ready unless prevented from attacking by Shock, Freeze or another restriction. Monsters that already attacked this turn may attack again because cooldown reset explicitly restores readiness under the selected V1 rule. Monsters summoned by later sockets are unaffected.",
+      "assetDescription": "A brilliant yellow zero symbol expanding as a time-reset wave across three allied monster silhouettes. Premium electric spell, clean radial geometry, transparent background, no text.",
+      "conceptOrigin": "new-concept"
+    },
+    {
+      "id": "giftMultiHit",
+      "name": "Gift: MultiHit",
+      "type": "spell",
+      "element": "electric",
+      "rarity": "refined",
+      "baseEnergyPenalty": 0.4,
+      "baseCooldownPenalty": 0.6,
+      "baseSpeed": 6,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Give MULTIHIT to the targeted monster for the rest of the battle. If it already has MULTIHIT, the spell has no additional effect.",
+      "effects": [
+        {
+          "type": "grantSkill",
+          "skill": "multiHit",
+          "duration": "untilMonsterDestroyed",
+          "duplicateBehavior": "noEffect"
+        }
+      ],
+      "implementationDescription": "The granted skill follows normal MultiHit rules. Against a hero it behaves as a single normal attack. When the monster targets another monster, its attack expands to every monster controlled by that target's owner. Taunt restricts only the initial target. Skill removal may remove the granted MultiHit.",
+      "assetDescription": "A branching yellow trident bolt splitting from one claw strike into three monster silhouettes. Strong multi-target readability, transparent background, no text.",
+      "conceptOrigin": "new-concept"
+    },
+    {
+      "id": "freezeI",
+      "name": "Freeze I",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "common",
+      "baseEnergyPenalty": 0.5,
+      "baseCooldownPenalty": 0.2,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Apply FREEZE to the targeted monster for 1 owner turn. A frozen monster cannot attack and cannot provide TAUNT.",
+      "effects": [
+        {
+          "type": "applyStatus",
+          "status": "freeze",
+          "durationOwnerTurns": 1
+        }
+      ],
+      "implementationDescription": "Freeze prevents attack actions and temporarily disables Taunt while active. Other skills remain present unless explicitly incompatible. Duration decreases at the start of the target controller's turn. Reapplication replaces the remaining duration only when the new duration is longer.",
+      "assetDescription": "A small pale-cyan ice crystal enclosing a monster silhouette, with one visible frost ring. Clear frozen-state icon, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "freezeII",
+      "name": "Freeze II",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "refined",
+      "baseEnergyPenalty": 0.7,
+      "baseCooldownPenalty": 0.3,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Apply FREEZE to the targeted monster for 2 owner turns.",
+      "effects": [
+        {
+          "type": "applyStatus",
+          "status": "freeze",
+          "durationOwnerTurns": 2
+        }
+      ],
+      "implementationDescription": "Same behavior as Freeze I, lasting two owner turns. A frozen monster may still be damaged, transformed, cleansed or directly destroyed.",
+      "assetDescription": "A refined double-layer ice prison around a creature glyph, with two concentric cyan frost bands. Transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "freezeIII",
+      "name": "Freeze III",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "rare",
+      "baseEnergyPenalty": 0.9,
+      "baseCooldownPenalty": 0.4,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Apply FREEZE to the targeted monster for 3 owner turns.",
+      "effects": [
+        {
+          "type": "applyStatus",
+          "status": "freeze",
+          "durationOwnerTurns": 3
+        }
+      ],
+      "implementationDescription": "Same behavior as lower tiers, lasting three owner turns. This is strong control with high energy penalty and low cooldown penalty, matching the Ice profile.",
+      "assetDescription": "A rare deep-cyan crystal sarcophagus with three frost halos and a trapped monster shadow. Majestic, heavy, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "stompI",
+      "name": "Stomp I",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "common",
+      "baseEnergyPenalty": 0.6,
+      "baseCooldownPenalty": 0.2,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "gameplayDescription": "Deal 2 ice damage to every enemy monster.",
+      "effects": [
+        {
+          "type": "dealDamageToAll",
+          "scope": "enemyMonsters",
+          "amount": 2,
+          "element": "ice"
+        }
+      ],
+      "implementationDescription": "No target selection. Resolve one independent damage instance against each enemy monster currently in play. Shield, elemental advantage, Rage and destruction resolve separately for every target. Allied monsters are unaffected.",
+      "assetDescription": "A compact ice hammer striking frozen ground and sending a low cyan shockwave toward three enemy silhouettes. Transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "stompII",
+      "name": "Stomp II",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "refined",
+      "baseEnergyPenalty": 0.8,
+      "baseCooldownPenalty": 0.3,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "gameplayDescription": "Deal 3 ice damage to every monster in play except monsters controlled by the spell caster.",
+      "effects": [
+        {
+          "type": "dealDamageToAll",
+          "scope": "enemyMonsters",
+          "amount": 3,
+          "element": "ice"
+        }
+      ],
+      "implementationDescription": "This normalized production version affects enemy monsters only, matching Stomp I and avoiding ambiguous 'all other monsters' wording. Resolve each hit independently.",
+      "assetDescription": "A larger glacier hammer impact producing a broad cyan ground wave under multiple enemy silhouettes. Refined crystalline details, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "stompIII",
+      "name": "Stomp III",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "rare",
+      "baseEnergyPenalty": 1.0,
+      "baseCooldownPenalty": 0.4,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "gameplayDescription": "Deal 4 ice damage to every enemy monster.",
+      "effects": [
+        {
+          "type": "dealDamageToAll",
+          "scope": "enemyMonsters",
+          "amount": 4,
+          "element": "ice"
+        }
+      ],
+      "implementationDescription": "Same resolution as the lower tiers with higher damage. This effect never targets heroes and therefore ignores Taunt selection restrictions.",
+      "assetDescription": "A rare colossal frozen foot or hammer sigil slamming into a crystalline battlefield, with three distinct enemy silhouettes caught in the wave. Transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "deepFreezing",
+      "name": "Deep Freezing",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "rare",
+      "baseEnergyPenalty": 1.0,
+      "baseCooldownPenalty": 0.4,
+      "baseSpeed": 0,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "gameplayDescription": "Apply FREEZE for 1 owner turn to every monster currently in play, allied and enemy.",
+      "effects": [
+        {
+          "type": "forEachMonster",
+          "scope": "allMonsters",
+          "effect": {
+            "type": "applyStatus",
+            "status": "freeze",
+            "durationOwnerTurns": 1
+          }
+        }
+      ],
+      "implementationDescription": "Resolve against all living monsters present when the spell triggers. Later summons are not affected. Existing longer Freeze durations are preserved. Because allied Taunt is disabled while frozen, the battlefield may become temporarily open.",
+      "assetDescription": "A battlefield-wide pale-cyan blizzard sphere encasing several allied and enemy monster silhouettes at once. Massive frost wave, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "giftTaunt",
+      "name": "Gift: Taunt",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "refined",
+      "baseEnergyPenalty": 0.7,
+      "baseCooldownPenalty": 0.3,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Give TAUNT to the targeted monster for the rest of the battle. If it already has TAUNT, the spell has no additional effect.",
+      "effects": [
+        {
+          "type": "grantSkill",
+          "skill": "taunt",
+          "duration": "untilMonsterDestroyed",
+          "duplicateBehavior": "noEffect"
+        }
+      ],
+      "implementationDescription": "The granted Taunt immediately affects legal enemy targeting after the current ring action completes. Freeze temporarily disables Taunt but does not remove the granted skill. An explicit skill-removal effect may remove it for the remainder of the battle.",
+      "assetDescription": "A heavy cyan guardian crest shaped like a shield and horned beast mask, radiating a challenge aura. Transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "cooldownOnKill",
+      "name": "Cooldown on Kill",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "rare",
+      "baseEnergyPenalty": 0.8,
+      "baseCooldownPenalty": 0.3,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "gameplayDescription": "For the rest of the battle, whenever the supported ring kills a monster with ring-and-gem damage, reduce that ring's current cooldown by 1.",
+      "effects": [
+        {
+          "type": "registerTrigger",
+          "event": "supportedRingKilledMonster",
+          "effect": {
+            "type": "modifySupportedRingCurrentCooldown",
+            "amount": -1,
+            "minimum": 0
+          }
+        }
+      ],
+      "implementationDescription": "The trigger checks only kills caused by the supported ring's initial ring-and-gem damage. It resolves after the ring has already been placed on cooldown. The current cooldown cannot go below 0. Repeated casting does not stack duplicate trigger instances.",
+      "assetDescription": "A frozen ring dial absorbing energy from a defeated monster icon as one segment of ice melts away. Cyan timer motif, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "cleanse",
+      "name": "Cleanse",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "rare",
+      "baseEnergyPenalty": 0.8,
+      "baseCooldownPenalty": 0.3,
+      "baseSpeed": 2,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Remove all temporary positive and negative statuses from the targeted monster. Do not remove its natural or spell-granted skill.",
+      "effects": [
+        {
+          "type": "removeStatuses",
+          "target": "selected",
+          "scope": "allTemporaryStatuses",
+          "removeSkills": false
+        }
+      ],
+      "implementationDescription": "Remove Burn, Shock, Freeze, Last Breath and other temporary status instances. Do not restore health, repair a broken Shield, remove permanent battle stat changes, or remove natural and granted skills. The spell may target allies or enemies.",
+      "assetDescription": "A pure cyan cleansing crystal releasing a circular wave that strips red, yellow and dark status particles from a monster silhouette. Calm, precise, transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "refresh",
+      "name": "Refresh",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "rare",
+      "baseEnergyPenalty": 0.7,
+      "baseCooldownPenalty": 0.3,
+      "baseSpeed": 2,
+      "targeting": {
+        "selection": "none",
+        "allowedTargets": []
+      },
+      "gameplayDescription": "Reduce the current cooldown of one random allied ring that is currently on cooldown by 1.",
+      "effects": [
+        {
+          "type": "randomTarget",
+          "scope": "alliedRingsWithCooldownAboveZero",
+          "onSuccess": {
+            "type": "modifyRingCurrentCooldown",
+            "amount": -1,
+            "minimum": 0
+          }
+        }
+      ],
+      "implementationDescription": "No target is selected. Choose one eligible allied ring using deterministic seeded randomness. If no allied ring is on cooldown, the spell has no cooldown-reduction effect. The supported ring may be selected if it is eligible after being put on cooldown. Record the chosen ring in the event log.",
+      "assetDescription": "A pale-cyan circular clock surrounded by drifting frost, with one random ring silhouette illuminated among several. Transparent background, no text.",
+      "conceptOrigin": "existing-concept"
+    },
+    {
+      "id": "rimeLock",
+      "name": "Rime Lock",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "common",
+      "baseEnergyPenalty": 0.5,
+      "baseCooldownPenalty": 0.2,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Increase the targeted monster's current cooldown by 1, up to its resolved cooldown value.",
+      "effects": [
+        {
+          "type": "modifyCurrentCooldown",
+          "target": "selected",
+          "amount": 1,
+          "maximumFrom": "resolvedBaseCooldown"
+        }
+      ],
+      "implementationDescription": "This is an immediate cooldown modification, not a status. It may target allies or enemies. If the monster is already at its resolved cooldown, the spell has no numerical effect. It cannot increase cooldown beyond the monster's normal resolved maximum.",
+      "assetDescription": "A cyan padlock formed from frost closing around a monster cooldown dial. Simple common-tier icon, transparent background, no text.",
+      "conceptOrigin": "new-concept"
+    },
+    {
+      "id": "crystalSkin",
+      "name": "Crystal Skin",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "refined",
+      "baseEnergyPenalty": 0.7,
+      "baseCooldownPenalty": 0.3,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["alliedMonster"]
+      },
+      "gameplayDescription": "Give the targeted allied monster a temporary SHIELD until the start of its controller's next turn. If it already has an active Shield, the spell has no additional effect.",
+      "effects": [
+        {
+          "type": "grantTemporaryShield",
+          "target": "selected",
+          "expires": "startOfTargetControllerNextTurn",
+          "duplicateBehavior": "noEffect"
+        }
+      ],
+      "implementationDescription": "Shield negates only the first incoming damage instance. It does not prevent direct destruction, transformation or skill removal. If unused, the temporary Shield expires at the defined turn boundary. If the monster has a natural Shield skill whose shield is already broken, Crystal Skin may grant this separate temporary Shield because there is no active Shield instance.",
+      "assetDescription": "A monster silhouette coated in a thin faceted cyan crystal shell, with one visible intact shield plane. Protective but temporary appearance, transparent background, no text.",
+      "conceptOrigin": "new-concept"
+    },
+    {
+      "id": "giftShield",
+      "name": "Gift: Shield",
+      "type": "spell",
+      "element": "ice",
+      "rarity": "epic",
+      "baseEnergyPenalty": 0.9,
+      "baseCooldownPenalty": 0.4,
+      "baseSpeed": 1,
+      "targeting": {
+        "selection": "one",
+        "allowedTargets": ["anyMonster"]
+      },
+      "gameplayDescription": "Give SHIELD to the targeted monster for the rest of the battle. If it already has the SHIELD skill, the spell has no additional effect.",
+      "effects": [
+        {
+          "type": "grantSkill",
+          "skill": "shield",
+          "duration": "untilMonsterDestroyed",
+          "activateImmediately": true,
+          "duplicateBehavior": "noEffect"
+        }
+      ],
+      "implementationDescription": "Grant the Shield skill and create one active Shield instance immediately. The Shield negates the first incoming damage instance only and then breaks permanently. It does not block direct destruction. If the skill is later removed after the Shield has broken, no extra state change is needed.",
+      "assetDescription": "An epic crystalline guardian sigil with a perfect cyan shield surrounding a monster core. Thick faceted ice, prestigious purple-tinged rarity accents without changing the Ice identity, transparent background, no text.",
+      "conceptOrigin": "new-concept"
+    }
+  ]
+}

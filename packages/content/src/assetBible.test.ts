@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import bible from "../sources/production-items-v1.asset-bible.json";
+import bible from "../sources/production-items-v2.asset-bible.json";
+import materialsAtlas from "./atlases/materials.json";
 import { definitions, locales } from "./index";
 
 describe("production item asset bible", () => {
@@ -82,12 +83,14 @@ describe("production item asset bible", () => {
       bible.spells.map((item) => ({
         id: item.id,
         nameKey: `spell.${item.id}.name`,
+        descriptionKey: `spell.${item.id}.description`,
         element: item.element,
         rarity: item.rarity,
         baseEnergyPenalty: item.energyPenalty,
         baseCooldownPenalty: item.cooldownPenalty,
         effects: item.effects,
         baseSpeed: item.speed,
+        targeting: item.targeting,
       })),
     ).toEqual(definitions.spells);
     expect(
@@ -114,5 +117,16 @@ describe("production item asset bible", () => {
     ]) {
       expect(englishNames[`${item.type}.${item.id}.name`]).toBe(item.name);
     }
+  });
+
+  it("records the imported production materials atlas", () => {
+    expect(bible.productionAtlases.materials).toEqual({
+      status: "imported",
+      image: materialsAtlas.meta.image,
+      metadata: "packages/content/src/atlases/materials.json",
+      frameCount: materialsAtlas.frames.length,
+      atlasSize: materialsAtlas.meta.size,
+      logicalSourceSize: { w: 300, h: 300 },
+    });
   });
 });

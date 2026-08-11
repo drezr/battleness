@@ -110,7 +110,7 @@ describe("battle setup stat resolution", () => {
           quality: 60,
           enchantment: {
             type: "spell",
-            spellInstanceId: "progressedPlayer.spell.firebolt",
+            spellInstanceId: "progressedPlayer.spell.carbonize",
           },
         },
         {
@@ -136,8 +136,8 @@ describe("battle setup stat resolution", () => {
       ],
       spells: [
         {
-          id: "progressedPlayer.spell.firebolt",
-          definitionId: "firebolt",
+          id: "progressedPlayer.spell.carbonize",
+          definitionId: "carbonize",
           ownerId: "progressedPlayer",
           experience: 10_000,
           quality: 60,
@@ -150,7 +150,7 @@ describe("battle setup stat resolution", () => {
     const ring = player.rings[0];
     const spellGem = ring.gems[0];
     const monsterGem = ring.gems[1];
-    const spell = setup.definitions.spells["progressedPlayer.spell.firebolt"];
+    const spell = setup.definitions.spells["progressedPlayer.spell.carbonize"];
     const monster = setup.definitions.monsters["progressedPlayer.monster.iceGuardian"];
 
     expect(player.level).toBe(10);
@@ -160,16 +160,16 @@ describe("battle setup stat resolution", () => {
     expect(spellGem.damage).toBe(2);
     expect(spellGem.enchantment).toEqual({
       type: "spell",
-      spellId: "firebolt",
-      resolvedDefinitionId: "progressedPlayer.spell.firebolt",
+      spellId: "carbonize",
+      resolvedDefinitionId: "progressedPlayer.spell.carbonize",
     });
     expect(monsterGem.enchantment).toEqual({
       type: "monster",
       monsterId: "iceGuardian",
       resolvedDefinitionId: "progressedPlayer.monster.iceGuardian",
     });
-    expect(spell.baseEnergyPenalty).toBe(1);
-    expect(spell.effects[0]?.amount).toBe(5);
+    expect(spell.baseEnergyPenalty).toBe(0.7);
+    expect(spell.effects[0]).toMatchObject({ type: "forEachMonster" });
     expect(monster.baseHealth).toBe(9);
     expect(monster.baseDamage).toBe(2);
 

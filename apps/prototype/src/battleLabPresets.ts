@@ -9,7 +9,7 @@ export type BattleLabPreset = {
   config: BattleLabConfig;
 };
 
-const storageKey = "battleness.battleLab.presets.v2";
+const storageKey = "battleness.battleLab.presets.v3";
 
 export function listBattleLabPresets(storage: Storage = localStorage): BattleLabPreset[] {
   const rawValue = storage.getItem(storageKey);
