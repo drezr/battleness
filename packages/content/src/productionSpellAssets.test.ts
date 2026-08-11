@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import spellAtlas from "../../../assets/spells/atlas/spells.json";
 import assetBible from "../sources/production-items-v2.asset-bible.json";
 import productionSpells from "../sources/production-spells-v1.json";
+import spellAtlas from "./atlases/spells.json";
 import { definitions } from "./index";
 import { itemArtworkStyleVariables } from "./itemAtlases";
 

@@ -130,13 +130,12 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 
 ### Item Artwork
 
-- Rings, gems, monsters, and materials use production TexturePacker atlases with validated JSON-array
-  metadata under `packages/content/src/atlases/`. The retained test spells still use their legacy
-  grid atlas until the production spell collection is implemented.
-- A validated 42-frame production spell atlas and its proposal catalogue are preserved as dormant
-  artifacts under `assets/spells/atlas/` and `packages/content/sources/production-spells-v1.json`.
-  They are intentionally absent from public app assets until gameplay support and content migration
-  can activate the definitions and atlas atomically.
+- Rings, gems, monsters, materials, and spells use production TexturePacker atlases with validated
+  metadata under `packages/content/src/atlases/`. Their PNGs are shipped under
+  `apps/web/public/assets/items/` and `apps/prototype/public/assets/items/`.
+- The approved 42-spell catalogue is preserved under
+  `packages/content/sources/production-spells-v1.json`; its active atlas follows the same structure
+  as every other production item atlas.
 - Stable definition IDs and packed-frame coordinates are resolved centrally by
   `packages/content/src/itemAtlases.ts`. The renderer supports trimmed and rotated frames.
 - Shared startup and test validation prevents an active definition from shipping without artwork.

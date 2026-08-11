@@ -4,6 +4,11 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- The repository-root `assets/` authoring archive was removed after its spell atlas was verified
+  against the active copies. Spell atlas metadata lives beside the other item metadata under
+  `packages/content/src/atlases/`, while identical runtime PNGs live in each application's
+  `public/assets/items/` directory. Automated coverage validates the active metadata, PNG format and
+  dimensions, and byte-for-byte parity between applications without depending on authoring files.
 - Local production-spell acceptance now executes every one of the 42 active definitions directly
   from `definitions/spells.json`, checks the emitted spell event and a mechanic-specific result
   event, and guards exact one-to-one coverage between active IDs and behavioral expectations. This
@@ -115,12 +120,8 @@ This file records modifications made to the project during agent-assisted work.
 - The 54 production ring, 54 gem, and 69 monster source images were generated and validated as
   transparent native-resolution PNGs before being packed. Active app delivery now uses the three
   TexturePacker atlases instead of shipping every source PNG under the public application tree.
-- The 70 production material source images are generated under `assets/materials/large` as
-  transparent, square, native-resolution PNGs with safe atlas margins. Their TexturePacker atlas
-  remains intentionally pending for the user-managed packing step.
-- The 42 production spell source images are generated under `assets/spells` as transparent,
-  square, native-resolution PNGs with safe atlas margins. They cover all 14 Fire, 14 Electric, and
-  14 Ice definitions from the supplied production collection; their atlas remains pending.
+- Production source images are maintained outside the repository. The application keeps only the
+  normalized atlas metadata and public runtime PNGs needed to build and render item artwork.
 - The PvP Hub's Private, Casual, and Ranked mode cards are now full-card links like the other hub
   destinations. Their redundant footer buttons, reserved action row, and fixed 420/330/270-pixel
   heights are removed; cards size from their content while retaining mode artwork, feature details,
