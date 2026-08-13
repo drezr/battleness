@@ -7,6 +7,9 @@ This is the centralized working TODO for BattleNess. It focuses on what remains 
 - [x] Replace the prototype ring, gem, and monster collection with `production-items-v1`, import the
       TexturePacker atlases, retain test spells, generate stable three-unit recipes, migrate
       fixtures/onboarding, and archive the former `prototype-6` content.
+- [x] Refocus `apps/prototype` as a stateless internal Dev Lab for deterministic combat, Battle Lab
+      configuration, replay diagnostics, simulations, balance analysis, content, and assets. Remove
+      its fake player inventory, forge, loadout, progression, and reward loops.
 
 The game-wide visual iteration is complete, and Phase 14 production and operations work is active
 again. Its remaining acceptance, backup resilience, external notification, monitoring, hardening,
@@ -97,7 +100,7 @@ section.
 - [x] Add deterministic mode-owned campaign opponent behavior. The separate development training opponent remains passive by design.
 - [x] Persist verified development battle action history, deterministic seed, result, and final-state checksum. The future live server lifecycle must reuse this record model.
 - [x] Add a player-facing result/reward screen separate from Dev Lab diagnostics.
-- [x] Create deterministic live battle reward grants atomically with the finishing action and expose claim controls directly in the live view.
+- [x] Create and deliver deterministic live battle rewards atomically with the finishing action, with no separate player claim step.
 - [x] Derive a verified combat summary from persisted actions and engine events, and reuse it in live and historical result views.
 - [x] Keep Dev Lab replay/debug tools out of the player-facing battle UI.
 
@@ -109,7 +112,7 @@ section.
 - [x] Build campaign content validation.
 - [x] Implement `/battle/campaign` opponent selection from the server catalogue.
 - [x] Generate battle setups for campaign opponents from validated game-owned content loadouts.
-- [x] Persist campaign progress and issue first-clear or repeat-victory reward claims atomically when a battle ends.
+- [x] Persist campaign progress and deliver first-clear or repeat-victory rewards atomically when a battle ends.
 - [x] Add campaign tests for opponent references, unlocks, setup conversion, rewards, deterministic opponent turns, and battle start.
 
 ## Phase 6 - Rewards And Progression
@@ -118,7 +121,7 @@ section.
 - [x] Implement initial deterministic Game App hero XP reward formulas for development results. Campaign and PvP formulas remain mode-specific future work.
 - [x] Move participation and action-based item XP rewards from Dev Lab localStorage behavior into Game App persistence. Live settlement grants 8 participation XP and 20 XP for each effective ring, gem, spell, summon, or monster use.
 - [x] Persist material and credit rewards.
-- [x] Prevent duplicate reward claims with an atomic claim transition.
+- [x] Prevent duplicate reward delivery with an atomic transition and reconcile legacy pending battle grants automatically.
 - [x] Add reward history to profile and battle history views.
 - [x] Add progression UI for hero level, item level, XP to next level, and quality bonuses.
 
@@ -406,7 +409,8 @@ Required before public production promotion:
 
 ## Keep Explicitly
 
-- [ ] Keep `apps/prototype` as the Dev Lab.
+- [ ] Keep `apps/prototype` as a technical Dev Lab with no player-owned inventory, economy,
+      progression, or reward state.
 - [ ] Keep the pure combat engine independent from UI, database, sockets, and framework code.
 - [ ] Keep JSON content definitions as source of truth unless a later explicit decision changes that.
 - [ ] Keep all new documentation content in English.

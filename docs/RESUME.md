@@ -53,6 +53,14 @@ separate permanent Dev Lab prototype.
 
 ## Immediate Handoff
 
+- `apps/prototype` is now a stateless internal Dev Lab. It retains deterministic scenarios, direct
+  Battle Lab configuration, all 42 active spells and all monsters, presets, import/export, replay
+  checksum verification, raw events, simulations, balance reports, content definitions, and assets.
+  It no longer contains a fake forge, inventory, loadout builder, credits, materials, item or hero
+  progression, or combat reward loop.
+- The Prisma-backed Game App is the only owner of player inventory, economy, crafting, improvements,
+  loadouts, progression, and battle rewards. Game App battle rewards are delivered automatically and
+  atomically at settlement; ranked season rewards keep their separate manual claim flow.
 - `production-items-v2` is active with 54 rings, 54 gems, 69 monsters, 42 spells, 70 materials, and
   219 recipes. All five packed atlases are active in both apps with exact definition coverage. The
   former six-spell grid is archived under `packages/content/src/legacy/production-items-v1/`.
@@ -70,8 +78,9 @@ separate permanent Dev Lab prototype.
   speed now flows from rings, gems, monsters, and spells (the retained spells currently have zero
   speed). All 219 active objects have stable three-unit recipes, with repeated materials aggregated
   and unique recipe multisets within each craftable item type.
-- Dev Lab local persistence is v3 and explicitly clears incompatible v1/v2 data. Account onboarding
-  is v3 with `ashenLoop`, `emberShard`, and `burnI`. Before deploying the content cutover to staging,
+- Dev Lab local persistence is limited to versioned Battle Lab presets and startup cleanup of obsolete
+  fake inventory/loadout keys. Account onboarding is v3 with `ashenLoop`, `emberShard`, and `burnI`.
+  Before deploying the content cutover to staging,
   take and verify a database backup, then follow the guarded staging gameplay reset procedure in
   `docs/DEPLOYMENT.md`; the reset script has not been run remotely.
 - Child-view return links now appear as visible 44-pixel rounded cyan-accented controls beside page
@@ -153,6 +162,11 @@ separate permanent Dev Lab prototype.
 
 ## Current Project State
 
+- Non-replay battle rewards are delivered automatically when the authoritative battle-finishing
+  transaction commits. Credits, materials, hero XP, and eligible item XP update atomically with the
+  audit grant; legacy unclaimed battle grants reconcile idempotently on the next battle-state or
+  history read. Live results, result pages, and battle-history rows no longer expose a claim action.
+  Ranked season rewards remain explicitly claimable and are the only entries counted as pending.
 - The dark tactical Game App redesign and the subsequent game-first immersion rollout are complete.
   Major workflows now use restrained environmental identities and purpose-built game surfaces while
   preserving their existing data and behavior. `docs/PROJECT.md` records the visual decisions and
@@ -301,7 +315,9 @@ separate permanent Dev Lab prototype.
 - User intent: clean rebuild of an already-started game.
 - A TypeScript monorepo is in place with `packages/engine`, `packages/content`, `apps/prototype`, and `apps/web`.
 - The prototype includes deterministic combat state creation, ring and monster actions, direct-damage spells, summons, all six current monster skills, first-turn protection, battle end checks, combat-start resolution, JSON scenarios, versioned battle-record export/import and replay, a battle setup screen, a first sketch-inspired battle board with prepare-action-then-target interaction for rings and monsters, both players' rings visible for development testing, manual browser controls, localized event-log rendering, Taunt-aware target selection, and DOM interaction tests for critical board flows.
-- `apps/prototype` should stay as a permanent Dev Lab for engine, content, inventory, reward, and combat diagnostics.
+- `apps/prototype` should stay as a permanent stateless Dev Lab for engine, content, replay,
+  simulation, balance, asset, and combat diagnostics. Player inventory, economy, progression, and
+  rewards remain exclusively in the Game App.
 - `apps/web` is the Nuxt Game App. It has Prisma-backed player state, inventory, forge, game market, campaign, authenticated live battles, Google OAuth support, private PvP invitation lobbies, casual matchmaking, and ranked matchmaking with Glicko-2 seasons and rewards. PvP queue, lobby, and battle changes use authenticated WebSocket invalidations with HTTP polling fallback. Critical queue, acceptance, discipline, action, and timeout transitions use optimistic or serializable single-writer guards with concurrent integration coverage. Casual and private PvP currently grant no rewards.
 - PvP information visibility is implemented consistently for private, casual, and ranked modes. Search reveals nothing; pre-combat reveals only display name, hero level, visible rank, and readiness; loadouts and ring counts remain hidden. This pre-combat boundary is enforced in server DTOs, including own-only private-lobby loadout metadata and no opponent ring count in live battle responses. In combat, reveal state is reconstructed from the persisted setup and journal: first use permanently reveals a ring and its contributing gems, while a spell or monster enchantment remains omitted until it actually casts or summons. The live UI renders only revealed opponent items. Summoned monsters expose complete combat data. Finished participant results and replays expose both complete resolved loadout snapshots from the immutable initial setup, including rings, gems, and enchantments. Public PvP profiles expose only current-season rank, rating, peak rank, wins, losses, and match count; inventory and loadouts remain omitted. Private leaderboard identities remain anonymous and private profile requests return not found, while owners can preview their own profile. A shared presentation-policy matrix and API integration assertions now lock every visibility phase for all three PvP modes.
 - The confirmed Game App presentation is dark-first and tactical competitive. Completed redesign and audit slices include the persistent application shell, local authentication, home, all four functional section hubs, collection inventory, all Battle and PvP surfaces, history/results, Equipment/Loadouts, Forge, Game Market, Player Market, private market history, Profile, Progression, and Settings. Battle summarizes campaign, history, performance, rewards, modes, and the active loadout; Forge reports recipe and workshop readiness; Inventory combines collection and combat-kit status; Market separates fixed and player economies with account-level exchange context. Preserve the separate Dev Lab diagnostics while selecting the next production, operations, infrastructure, or open-design task.
@@ -574,36 +590,29 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - Yellow selection outlines and red blocked-state indicators remain distinct from the rarity border.
 - Localized elemental badges appear in the top-right corner of ring, gem, and monster cards across those same views.
 - Socketed gem markers use elemental fill colors and rarity border colors simultaneously.
-- TexturePacker atlases cover every active ring, gem, monster, and material; only the retained test
-  spells use a grid atlas. Stable ID mappings and startup coverage validation live in
+- TexturePacker atlases cover every active ring, gem, monster, spell, and material. Stable ID mappings
+  and startup coverage validation live in
   `packages/content/src/itemAtlases.ts`.
 - The battle and setup interfaces render ring, gem, and monster atlas crops. Spell and material crops are mapped for future forge, inventory, and shop interfaces.
-- The setup screen exposes all 253 active definitions in a localized, collapsible development collection.
+- The setup screen exposes all 289 active definitions in a localized, collapsible development collection.
 - The setup screen now supports a Battle Lab mode for editing two loadouts and launching an unscripted battle.
 - Battle Lab configurations support 1 to 10 rings per player, up to 3 gems per ring, editable levels and qualities, and optional spell or monster enchantments.
-- `packages/content/src/battleLab.ts` resolves temporary editor instances through the same setup and progression path used by fixture-backed content. Loadout persistence is intentionally deferred.
-- Battle Lab loadouts support strict JSON import/export and named browser-local presets. These presets are development-only and do not replace future account persistence.
+- `packages/content/src/battleLab.ts` resolves temporary battle-scoped editor instances through the same setup and progression path used by fixture-backed content. These are test inputs, not player inventory.
+- Battle Lab configurations support strict JSON import/export and named browser-local presets. These presets are technical reproducibility aids and do not replace account-backed Game App loadouts.
 - The editor includes resolved stat comparisons and diagnostic warnings for efficiency differences of at least 50% or speed differences of at least 4.
 - The Battle Lab can run two deterministic greedy simulations that vary the preferred element-duel winner, respect current targeting and action constraints, and report timeouts at 500 actions.
 - Content version `production-items-v2` has 219 recipes: one for every active ring, gem, monster, and spell.
 - Content version `prototype-5` renames the highest rarity tier from `legendary` to `epic`.
 - Recipes use exactly three material units from the matching crafting family and aggregate repeated materials. Common outputs use three common units; refined outputs use one refined and two common units; rare outputs use one rare, one refined, and one common unit; epic outputs use one epic, one rare, and one refined unit.
-- Crafted prototype items are level 1 and quality 0. Crafted rings start with one socket. The setup screen includes a development forge panel with material stock controls, real consumption, restock, improvement actions, and crafted-instance output.
-- The development forge persists credits, material stock, crafted item output, and the next crafted-instance sequence in browser `localStorage`.
-- Development inventory starts with 1000 prototype credits. Quality improvement spends credits to add 5 quality points to a crafted item up to 100. Ring socket improvement spends credits to increase crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
-- Development inventory JSON can be exported, imported, and reset from the setup screen.
-- Battle Lab supports both free-edit definitions and a development-inventory item source mode. The inventory-backed mode selects crafted ring, gem, spell, and monster instances and derives level, quality, and ring socket count from those instances.
-- The setup screen includes a complete development inventory view with counters, all material quantities, crafted item cards, and type, rarity, and element filters.
-- Development inventory rings can socket crafted gems up to their socket count. A crafted gem can be socketed into only one ring at a time.
-- Development inventory gems can be enchanted by one crafted spell or monster. A crafted spell or monster can be used as only one gem enchantment at a time.
-- Selecting a configured development inventory ring in Battle Lab automatically imports its socketed gems and gem enchantments.
-- The setup screen includes a development loadout builder that selects up to 10 crafted rings, previews resolved speed, damage, energy, and cooldown efficiency, saves named loadouts in browser `localStorage`, and sends the current loadout to either Battle Lab player.
-- Finished non-replay battles show claimable deterministic prototype rewards. Winner rewards add 150 credits plus `aluminium`, `hydrogen`, `pearl`, and `sand`; draw rewards add 90 credits plus `aluminium` and `pearl`. Claimed rewards are persisted into the browser-local development inventory.
-- Source-backed Battle Lab items also gain XP when rewards are claimed. Equipped source-backed items gain 8 XP, and each actual ring use, socketed gem use, spell trigger, monster summon, or monster attack adds 20 XP to the matching crafted item instance. Hero XP is deferred.
-- Finished battles show a deterministic result summary derived from the battle log: result, turn count, actions played, damage by player, rings used, spells cast, monsters summoned or used, item XP generated, and reward claim status. Imported replays can show the summary but cannot claim rewards.
-- Development inventory cards show item level, XP toward the next level, and a progress bar. Loadout builder ring options and selected-ring summaries also show level and XP progress.
+- Battle Lab directly edits ring and gem definitions, levels, qualities, socket counts, and spell or
+  monster enchantments. It does not select player-owned instances or carry source instance IDs.
+- Dev Lab battles and imported replays produce deterministic technical summaries without credits,
+  materials, hero XP, item XP, reward status, or any player-state mutation.
+- Forge, inventory, socketing, enchantment ownership, saved player loadouts, item progression, and
+  reward delivery live exclusively in the Prisma-backed Game App.
 - Prototype combat stats render in green when their resolved value is above the base definition value, with a tooltip showing the base value.
-- A full starter development loop DOM regression test now covers crafting a ring, gem, and spell; improving quality; socketing and enchanting; sending the inventory-backed ring to Battle Lab; using it in combat; claiming rewards; and verifying persisted credits, materials, item XP, quality, and combat summary output.
+- Dev Lab DOM regression tests cover direct Battle Lab levels, qualities, socket counts, gems, and
+  enchantments, deterministic combat summaries, and the absence of fake player-loop state and panels.
 - Stat colors: Damage uses pink-red, Health uses red, Energy uses green, Energy Penalty uses pale green, Cooldown uses light cyan, Cooldown Penalty uses cyan, Quality uses orange, Speed uses yellow, Skill uses magenta, and Rarity uses purple.
 
 ## Battle Layout Direction
@@ -619,9 +628,10 @@ These questions are listed in `docs/PROJECT.md` and can remain deferred while th
 - Ready cooldowns use localized green text. Active cooldown values and unaffordable energy costs use
   orange text while the complete card remains fully opaque.
 - Finished live battles replace the arena with a scroll-free result surface: the outcome is large,
-  exit and claim actions are immediate, credits/hero XP/item XP form the primary reward row, and
-  material rewards render their artwork below. An accessible internally scrollable Battle Info modal
-  contains player contribution, complete Battle Loadouts, Combat Activity, and reward detail.
+  exit and detail actions are immediate, credits/hero XP/item XP form the primary reward row, and
+  material rewards render their artwork below. Rewards are already delivered automatically when the
+  result appears. An accessible internally scrollable Battle Info modal contains player contribution,
+  complete Battle Loadouts, Combat Activity, and reward detail.
 - The live battle page should remain a focused combat surface without global navigation, visible
   diagnostics, or page scroll. Future animation work should make same-action destruction and summon
   sequences visually distinct.

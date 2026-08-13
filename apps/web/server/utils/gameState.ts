@@ -231,6 +231,22 @@ type RewardGrantViewSource = {
   }[];
 };
 
+type RewardGrantSettlementSource = {
+  id: string;
+  playerId: string;
+  status: string;
+  credits: number;
+  heroExperience: number;
+  contentVersion: string | null;
+  materials: readonly { materialId: string; quantity: number }[];
+  items: readonly { inventoryItemId: string; experience: number }[];
+  rankedSeasonReward: null | {
+    seasonId: string;
+    badgeCosmeticId: string;
+    titleCosmeticId: string;
+  };
+};
+
 type RankedSeasonRewardViewSource = {
   seasonId: string;
   tier: string;
@@ -704,6 +720,7 @@ export async function getBattleHistoryState() {
   const prisma = usePrisma();
 
   await seedDevelopmentPlayer(prisma);
+  await grantPendingBattleRewards(prisma, currentPlayerId());
   await assertValidPlayerGameState(prisma, currentPlayerId());
 
   const [player, records, seasonRewards] = await Promise.all([
@@ -2120,6 +2137,7 @@ export async function getLiveBattleState(battleId: string) {
   const prisma = usePrisma();
 
   await seedDevelopmentPlayer(prisma);
+  await grantPendingBattleRewards(prisma, currentPlayerId());
   await settleExpiredPrivateBattle(prisma, battleId);
   await settleFinishedRankedBattle(prisma, battleId);
 
@@ -2316,7 +2334,7 @@ export async function submitLiveBattleAction(
           : battleRewardDefinition(outcome);
       const itemExperience = liveBattleItemExperience(nextState);
 
-      await transaction.rewardGrant.create({
+      const rewardGrant = await transaction.rewardGrant.create({
         data: {
           playerId: currentPlayerId(),
           sourceType: record.mode === "campaign" ? "campaignBattle" : "battle",
@@ -2329,7 +2347,9 @@ export async function submitLiveBattleAction(
           materials: { create: reward.materials },
           items: { create: itemExperience },
         },
+        include: { materials: true, items: true, rankedSeasonReward: true },
       });
+      await applyRewardGrant(transaction, rewardGrant);
     }
 
     return {
@@ -2438,7 +2458,7 @@ export async function createDevelopmentBattleResult(
         turnCount,
       },
     });
-    await transaction.rewardGrant.create({
+    const rewardGrant = await transaction.rewardGrant.create({
       data: {
         playerId: currentPlayerId(),
         sourceType: "battle",
@@ -2458,7 +2478,9 @@ export async function createDevelopmentBattleResult(
           })),
         },
       },
+      include: { materials: true, items: true, rankedSeasonReward: true },
     });
+    await applyRewardGrant(transaction, rewardGrant);
   });
 
   await assertValidPlayerGameState(prisma, currentPlayerId());
@@ -2483,84 +2505,126 @@ export async function claimBattleReward(rewardGrantId: string) {
       throw new Error(`Reward grant "${rewardGrantId}" is not available for this player.`);
     }
 
-    if (reward.status === "claimed") {
-      return;
-    }
-
-    const claimed = await transaction.rewardGrant.updateMany({
-      where: { id: rewardGrantId, playerId: currentPlayerId(), status: "unclaimed" },
-      data: { status: "claimed", claimedAt: new Date() },
-    });
-
-    if (claimed.count !== 1) {
-      return;
-    }
-
-    await transaction.player.update({
-      where: { id: currentPlayerId() },
-      data: {
-        credits: { increment: reward.credits },
-        experience: { increment: reward.heroExperience },
-      },
-    });
-
-    for (const material of reward.materials) {
-      await transaction.materialStock.upsert({
-        where: {
-          playerId_materialId: {
-            playerId: currentPlayerId(),
-            materialId: material.materialId,
-          },
-        },
-        create: {
-          playerId: currentPlayerId(),
-          materialId: material.materialId,
-          quantity: material.quantity,
-          contentVersion,
-        },
-        update: { quantity: { increment: material.quantity }, contentVersion },
-      });
-    }
-
-    for (const itemReward of reward.items) {
-      const updated = await transaction.inventoryItem.updateMany({
-        where: { id: itemReward.inventoryItemId, playerId: currentPlayerId() },
-        data: { experience: { increment: itemReward.experience } },
-      });
-
-      if (updated.count !== 1) {
-        throw new Error(`Reward item "${itemReward.inventoryItemId}" is not available.`);
-      }
-    }
-
-    if (reward.rankedSeasonReward) {
-      const cosmeticUnlocks = [
-        { cosmeticId: reward.rankedSeasonReward.badgeCosmeticId, type: "badge" },
-        { cosmeticId: reward.rankedSeasonReward.titleCosmeticId, type: "title" },
-      ];
-      for (const cosmetic of cosmeticUnlocks) {
-        await transaction.playerCosmeticUnlock.upsert({
-          where: {
-            playerId_cosmeticId: {
-              playerId: currentPlayerId(),
-              cosmeticId: cosmetic.cosmeticId,
-            },
-          },
-          create: {
-            playerId: currentPlayerId(),
-            cosmeticId: cosmetic.cosmeticId,
-            type: cosmetic.type,
-            sourceType: "rankedSeason",
-            sourceId: reward.rankedSeasonReward.seasonId,
-          },
-          update: {},
-        });
-      }
-    }
+    await applyRewardGrant(transaction, reward);
   });
 
   await assertValidPlayerGameState(prisma, currentPlayerId());
   return getBattleHistoryState();
+}
+
+async function grantPendingBattleRewards(client: PrismaClient, playerId: string): Promise<void> {
+  const hasPendingBattleReward = await client.rewardGrant.findFirst({
+    where: {
+      playerId,
+      status: "unclaimed",
+      sourceType: { in: ["battle", "campaignBattle"] },
+    },
+    select: { id: true },
+  });
+  if (!hasPendingBattleReward) {
+    return;
+  }
+
+  await client.$transaction(async (transaction) => {
+    const rewards = await transaction.rewardGrant.findMany({
+      where: {
+        playerId,
+        status: "unclaimed",
+        sourceType: { in: ["battle", "campaignBattle"] },
+      },
+      include: { materials: true, items: true, rankedSeasonReward: true },
+    });
+
+    for (const reward of rewards) {
+      await applyRewardGrant(transaction, reward);
+    }
+  });
+}
+
+async function applyRewardGrant(
+  transaction: Prisma.TransactionClient,
+  reward: RewardGrantSettlementSource,
+): Promise<boolean> {
+  if (reward.status === "claimed") {
+    return false;
+  }
+
+  const claimedAt = new Date();
+  const claimed = await transaction.rewardGrant.updateMany({
+    where: { id: reward.id, playerId: reward.playerId, status: "unclaimed" },
+    data: { status: "claimed", claimedAt },
+  });
+
+  if (claimed.count !== 1) {
+    return false;
+  }
+
+  await transaction.player.update({
+    where: { id: reward.playerId },
+    data: {
+      credits: { increment: reward.credits },
+      experience: { increment: reward.heroExperience },
+    },
+  });
+
+  for (const material of reward.materials) {
+    await transaction.materialStock.upsert({
+      where: {
+        playerId_materialId: {
+          playerId: reward.playerId,
+          materialId: material.materialId,
+        },
+      },
+      create: {
+        playerId: reward.playerId,
+        materialId: material.materialId,
+        quantity: material.quantity,
+        contentVersion: reward.contentVersion ?? contentVersion,
+      },
+      update: {
+        quantity: { increment: material.quantity },
+        contentVersion: reward.contentVersion ?? contentVersion,
+      },
+    });
+  }
+
+  for (const itemReward of reward.items) {
+    const updated = await transaction.inventoryItem.updateMany({
+      where: { id: itemReward.inventoryItemId, playerId: reward.playerId },
+      data: { experience: { increment: itemReward.experience } },
+    });
+
+    if (updated.count !== 1) {
+      throw new Error(`Reward item "${itemReward.inventoryItemId}" is not available.`);
+    }
+  }
+
+  if (reward.rankedSeasonReward) {
+    const cosmeticUnlocks = [
+      { cosmeticId: reward.rankedSeasonReward.badgeCosmeticId, type: "badge" },
+      { cosmeticId: reward.rankedSeasonReward.titleCosmeticId, type: "title" },
+    ];
+    for (const cosmetic of cosmeticUnlocks) {
+      await transaction.playerCosmeticUnlock.upsert({
+        where: {
+          playerId_cosmeticId: {
+            playerId: reward.playerId,
+            cosmeticId: cosmetic.cosmeticId,
+          },
+        },
+        create: {
+          playerId: reward.playerId,
+          cosmeticId: cosmetic.cosmeticId,
+          type: cosmetic.type,
+          sourceType: "rankedSeason",
+          sourceId: reward.rankedSeasonReward.seasonId,
+        },
+        update: {},
+      });
+    }
+  }
+
+  return true;
 }
 
 export async function craftPlayerRecipe(recipeId: string) {

@@ -673,16 +673,7 @@
           <NuxtLink class="button-link secondary-button" :to="`/battle/result/${battle.id}`">{{
             t("battle.live.resultDetails")
           }}</NuxtLink>
-          <button
-            v-if="battle.reward?.status === 'unclaimed'"
-            type="button"
-            :disabled="claimingReward"
-            @click="claimReward"
-          >
-            <Gift :size="18" aria-hidden="true" />
-            {{ t(claimingReward ? "battle.live.claiming" : "battle.live.claimRewards") }}
-          </button>
-          <span v-else-if="battle.reward" class="live-finished-claimed">
+          <span v-if="battle.reward" class="live-finished-claimed">
             <CheckCircle2 :size="18" aria-hidden="true" />
             {{ t("battle.result.rewardSecured") }}
           </span>
@@ -697,7 +688,6 @@ import {
   Bug,
   CheckCircle2,
   Flag,
-  Gift,
   Heart,
   LogOut,
   Scale,
@@ -763,7 +753,6 @@ const pendingSpellTargets = ref<SpellTargetRequest[]>([]);
 const ringEnchantmentTargets = ref<Record<string, string>>({});
 const totalSpellTargetCount = ref(0);
 const submitting = ref(false);
-const claimingReward = ref(false);
 const showDeveloperModal = ref(false);
 const actionError = ref("");
 const lastEvents = ref<LiveBattleActionResponse["events"]>([]);
@@ -1156,22 +1145,6 @@ function endTurn(): Promise<void> {
 function concede(): Promise<void> {
   return submitAction({ type: "concede" });
 }
-async function claimReward(): Promise<void> {
-  const rewardGrantId = battle.value?.reward?.id;
-  if (!rewardGrantId || claimingReward.value) return;
-  claimingReward.value = true;
-  actionError.value = "";
-  try {
-    await $fetch("/api/battle/rewards/claim", { method: "POST", body: { rewardGrantId } });
-    await refresh();
-    await refreshNuxtData();
-  } catch (error) {
-    actionError.value = error instanceof Error ? error.message : t("battle.live.rewardError");
-  } finally {
-    claimingReward.value = false;
-  }
-}
-
 let privateBattlePoll: ReturnType<typeof setInterval> | undefined;
 let battleClock: ReturnType<typeof setInterval> | undefined;
 let resolutionTimer: ReturnType<typeof setTimeout> | undefined;

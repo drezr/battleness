@@ -75,21 +75,6 @@
         <NuxtLink class="button-link secondary-button" :to="`/battle/result/${record.id}`">
           {{ t("common.details") }} <ArrowRight :size="16" />
         </NuxtLink>
-        <button
-          v-if="record.reward?.status === 'unclaimed'"
-          :disabled="claimingRewardId === record.reward.id"
-          type="button"
-          @click="$emit('claim', record.reward.id)"
-        >
-          <Gift :size="16" />
-          {{
-            t(
-              claimingRewardId === record.reward.id
-                ? "battle.live.claiming"
-                : "battle.live.claimRewards",
-            )
-          }}
-        </button>
       </div>
     </article>
   </section>
@@ -114,14 +99,9 @@ import type { BattleHistoryRecordView, BattleRewardView } from "~/utils/playerSt
 
 defineProps<{
   records: BattleHistoryRecordView[];
-  claimingRewardId?: string;
 }>();
 const { t, locale } = useI18n();
 const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
-
-defineEmits<{
-  claim: [rewardGrantId: string];
-}>();
 
 function totalMaterials(reward: BattleRewardView): number {
   return reward.materials.reduce((total, material) => total + material.quantity, 0);

@@ -81,11 +81,7 @@
             </button>
           </div>
         </div>
-        <BattleHistoryList
-          :records="filteredRecords"
-          :claiming-reward-id="claimingRewardId"
-          @claim="claimReward"
-        />
+        <BattleHistoryList :records="filteredRecords" />
       </section>
     </template>
   </main>
@@ -105,8 +101,7 @@ const activeFilter = ref<HistoryFilter>("all");
 
 const unclaimedCount = computed(
   () =>
-    (state.value?.records.filter((record) => record.reward?.status === "unclaimed").length ?? 0) +
-    (state.value?.seasonRewards.filter((entry) => entry.reward.status === "unclaimed").length ?? 0),
+    state.value?.seasonRewards.filter((entry) => entry.reward.status === "unclaimed").length ?? 0,
 );
 const winCount = computed(
   () => state.value?.records.filter((record) => record.outcome === "win").length ?? 0,

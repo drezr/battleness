@@ -147,9 +147,9 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - The prototype setup screen can switch between scripted scenario fixtures and an editable Battle Lab.
 - The Battle Lab supports two configurable players, 1 to 10 rings per player, up to 3 gems per ring, and optional spell or monster enchantments for each gem.
 - Player, ring, gem, spell, and monster levels and qualities are editable within the progression limits.
-- `packages/content/src/battleLab.ts` converts the editor configuration into temporary player and inventory instances, then resolves them through the regular `createBattleSetup` pipeline.
+- `packages/content/src/battleLab.ts` converts the editor configuration into temporary battle-scoped instances, then resolves them through the regular `createBattleSetup` pipeline. These instances are test inputs, not player inventory.
 - Battle Lab configurations can be serialized to and imported from strictly validated JSON. Imports also resolve content references before replacing the active configuration.
-- Named Battle Lab presets are stored in browser `localStorage` under a versioned key. This is development convenience only; account-backed saved loadouts remain part of future inventory and backend work.
+- Named Battle Lab presets are stored in browser `localStorage` under a versioned key. This is a technical reproducibility convenience only and is separate from account-backed Game App loadouts.
 - The Battle Lab comparison view reports resolved health, speed, total ring damage, total energy cost, damage per energy, and damage per cooldown.
 - Current balance warnings are diagnostic heuristics, not game rules: they flag a relative efficiency difference of at least 50% or a speed difference of at least 4.
 - The Battle Lab batch runner executes two deterministic variants, each favoring a different player if an element duel is required to choose the starting player.
@@ -183,9 +183,10 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - Compact socketed gems use their elemental fill color while retaining rarity on the surrounding border.
 - Development-only battle diagnostics and last-resolution details should stay available through an explicit developer modal rather than being visible in the main combat layout.
 - Finished live battles replace the arena with a scroll-free outcome screen that prioritizes a large
-  result, compact reward totals, explicit exit and claim actions, and a reward layout with credits,
-  hero XP, and item XP above material artwork. Complete loadout snapshots and combat activity remain
-  available through an explicit Battle Info modal with its own internal scrolling.
+  result, compact reward totals, explicit exit and detail actions, and a reward layout with credits,
+  hero XP, and item XP above material artwork. Rewards are already delivered automatically when this
+  screen appears. Complete loadout snapshots and combat activity remain available through an
+  explicit Battle Info modal with its own internal scrolling.
 - The current Nuxt live battle background uses the public asset
   `apps/web/public/assets/backgrounds/live-battle-elemental-arena.jpg`, rendered as a covered
   full-screen arena backdrop with translucent combat overlays.
@@ -204,16 +205,10 @@ This glossary is a proposal based on the current rules page. Terms should be cor
 - Production recipes consume exactly three material units from the matching crafting family. A recipe may repeat a material, represented canonically by an aggregated quantity.
 - Material rarities scale by crafted item rarity: common items use three common materials; refined items use one refined and two common materials; rare items use one rare, one refined, and one common material; epic items use one epic, one rare, and one refined material.
 - Initial crafted items are level 1 and quality 0. Crafted rings start with one socket.
-- The prototype development forge persists credits, material stock, crafted item instances, and the next crafted-instance sequence in browser `localStorage`.
-- Development inventory starts with 1000 prototype credits. Quality improvement spends credits to add 5 quality points to a crafted item up to 100. Ring socket improvement spends credits to increase crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
-- Development inventory JSON can be exported, imported, or reset from the setup screen. This is a prototype tool and does not replace future account inventory persistence.
-- Battle Lab can use either free-edit definitions or development inventory instances as its item source. When development inventory is selected, ring, gem, spell, and monster selections are made from crafted instances, and level, quality, and ring socket count are derived from those instances.
-- The setup screen exposes a complete development inventory view with total counters, all material stock quantities, crafted item cards, and type, rarity, and element filters.
-- Development inventory rings can socket crafted gems up to their socket count. A crafted gem can be socketed into only one ring at a time.
-- Development inventory gems can be enchanted by one crafted spell or monster. A crafted spell or monster can be used as only one gem enchantment at a time.
-- When Battle Lab uses a development inventory ring, its socketed gems and those gems' enchantments are imported automatically into the loadout.
-- The setup screen includes a development loadout builder for choosing up to 10 crafted rings, previewing resolved speed, damage, energy, and cooldown efficiency, saving named loadouts in browser `localStorage`, and sending the selected loadout to either Battle Lab player.
-- Development inventory crafted item cards display derived level, current XP, next-level XP, and an XP progress bar. Loadout builder ring rows and selected-ring summaries also expose level and XP progress.
+- The Prisma-backed Game App is the exclusive owner of player credits, material stock, inventory item instances, crafting, improvements, socketing, enchantments, saved loadouts, progression, and reward settlement.
+- The Dev Lab does not emulate or persist a player profile, inventory, economy, progression loop, or reward loop. Its startup removes obsolete browser-local development inventory and loadout keys left by older builds.
+- Battle Lab rings, gems, levels, qualities, socket counts, and enchantments are edited directly as battle-scoped test data. They never reference or mutate Game App inventory instances.
+- The Dev Lab may inspect recipe, item, locale, and artwork definitions for content validation, but crafting and all player-owned mutations remain Game App workflows.
 
 ## Proposed Game Rules Specification
 
@@ -497,19 +492,15 @@ This section separates executable game rules from implementation decisions. It i
 
 - After combat, rewards may include experience, credits, and materials.
 - Equipped items gain experience after combat.
-- The current prototype implements claimable deterministic rewards for credits, materials, and source-backed item XP. Replays do not grant rewards.
-- The Nuxt Game App implements the same initial deterministic settlement values through persisted `BattleRecord` and `RewardGrant` rows. Development result generation remains available for focused testing, while authoritative live battles now create their reward grant in the same transaction as the finishing action, final result, and replay checksum.
+- Dev Lab battles and imported replays never grant credits, materials, hero XP, or item XP and never mutate player state. Their result summaries are technical diagnostics only.
+- The Nuxt Game App implements deterministic settlement values through persisted `BattleRecord` and `RewardGrant` rows. Authoritative live battles create and deliver their reward grant in the same transaction as the finishing action, final result, and replay checksum.
 - Live battles snapshot the development player's active Prisma loadout into an engine `BattleSetup`, including normalized ring sockets and gem enchantments, and persist the setup plus action log in a `BattleRecord`. Training retains its fixture-backed passive opponent, while campaign mode resolves its selected game-owned content loadout into deterministic engine instances. The live API hides opponent ring identities, statistics, and count until use reveals them. PvP matchmaking responses enforce the limited public identity projection described below.
 - Live clients submit commands without a player ID. The server assigns the development-player identity, verifies the client's expected action count, applies the command through the pure engine, and conditionally replaces the persisted journal so concurrent or duplicate submissions cannot overwrite a newer state. Finished battles receive their deterministic result JSON and replay checksum. Campaign opponents choose deterministic legal actions server-side; the development training adapter remains passive.
-- Prototype winner rewards grant 150 credits plus one common material from each crafting family: `aluminium`, `hydrogen`, `pearl`, and `sand`.
-- Prototype draw rewards grant 90 credits plus `aluminium` and `pearl`.
 - Nuxt Game App development victories grant 150 credits, 100 hero XP, and one each of `aluminium`, `hydrogen`, `pearl`, and `sand`. Draw settlement is defined as 90 credits, 60 hero XP, `aluminium`, and `pearl`; losses grant 30 credits and 25 hero XP without materials.
-- Nuxt reward claims are atomic and idempotent. Claiming a persisted reward updates player credits, material stock, hero experience, and eligible inventory item experience exactly once.
-- Each ring in the active persisted loadout, its socketed gems, and their spell or monster enchantments receive 8 participation XP. Authoritative live settlement also grants 20 XP for each effective ring and socketed-gem use, spell trigger, successful monster summon, and monster attack. Rewards remain unclaimed until the player explicitly claims them.
-- Prototype item XP applies only to crafted development inventory instances referenced by Battle Lab `sourceInstanceId` values, regardless of whether those source-backed items are assigned to Player One or Player Two.
-- Source-backed equipped rings, socketed gems, and gem enchantments gain 8 XP when rewards are claimed. Each ring use adds 20 XP to the ring and each of its socketed gems. Each spell trigger adds 20 XP to the spell. Each monster summon and monster attack adds 20 XP to the matching monster source instance.
+- Nuxt battle reward delivery is atomic and idempotent. The finishing transaction creates the audit grant, updates player credits, material stock, hero experience, and eligible inventory item experience, then records the grant as delivered exactly once. Legacy unclaimed battle grants are reconciled automatically on the next battle-state or history read.
+- Each ring in the active persisted loadout, its socketed gems, and their spell or monster enchantments receive 8 participation XP. Authoritative live settlement also grants 20 XP for each effective ring and socketed-gem use, spell trigger, successful monster summon, and monster attack. These gains are applied automatically when the battle finishes.
 - Hero XP is persisted on the Nuxt `Player` model and is awarded by Game App development battle settlement. Campaign uses content-owned fixed rewards, casual PvP currently grants no rewards, and ranked formulas remain a future decision.
-- The prototype and Nuxt Game App show deterministic result summaries after finished battles. Nuxt summaries are reconstructed from persisted actions through the engine and cover turns, actions played, damage and action contribution by player, rings used, spells cast, monsters summoned or used, item XP generated, reward claim status, and both complete resolved loadout snapshots. Result equipment comes from the immutable initial setup rather than current inventory state. Imported Dev Lab replays can show the summary but cannot claim rewards.
+- The Dev Lab and Nuxt Game App show deterministic result summaries after finished battles. Dev Lab summaries cover technical combat facts without rewards. Nuxt summaries are reconstructed from persisted actions through the engine and cover turns, actions played, damage and action contribution by player, rings used, spells cast, monsters summoned or used, item XP generated, reward delivery status, and both complete resolved loadout snapshots. Result equipment comes from the immutable initial setup rather than current inventory state.
 - In solo campaign, each opponent defines its fixed victory rewards in content data and victory unlocks the next opponent.
 - The initial campaign track is linear: `emberTrial` at recommended level 1, `stormInitiate` at level 3, and `frostGate` at level 5. Each opponent is repeatable and owns a validated content loadout plus separate first-clear and repeat-victory rewards.
 - Campaign completion is persisted as one `CampaignProgress` row per player and opponent. Victory count distinguishes first-clear from repeat settlement, and the selected opponent ID is stored as the battle mode reference.
@@ -571,7 +562,7 @@ This section separates executable game rules from implementation decisions. It i
 - The collection contains 12 collectible rings, 12 collectible gems, 18 monsters, 6 direct-damage spells, and 70 materials.
 - `trainingFlameBand` and `plainQuartz` are removed from active content and retained only in the technical `prototype-6` archive.
 - The collection contains 48 initial recipes: one recipe for every collectible ring, gem, monster, and spell. Development-only definitions are intentionally excluded.
-- The prototype setup screen can craft these recipes into local development inventory instances, and Battle Lab can use those crafted instances as a development item source.
+- The Dev Lab can inspect these recipe definitions alongside the active content and artwork, but it does not craft or persist player-owned instances. Crafting is a Game App workflow.
 - The material collection is detailed in `docs/MATERIAL_COLLECTION_PROPOSAL.md` and is derived from the historical 70-row SQLite `mats` table.
 - The material model preserves four crafting families and rarity prices, adds chemical metadata where applicable, and replaces eight fictional resources with real substances or elements.
 

@@ -326,9 +326,7 @@ const winRate = computed(() =>
 );
 const unclaimedRewardCount = computed(
   () =>
-    (history.value?.records.filter((record) => record.reward?.status === "unclaimed").length ?? 0) +
-    (history.value?.seasonRewards.filter((entry) => entry.reward.status === "unclaimed").length ??
-      0),
+    history.value?.seasonRewards.filter((entry) => entry.reward.status === "unclaimed").length ?? 0,
 );
 
 async function startTrainingBattle(): Promise<void> {

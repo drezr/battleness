@@ -3790,7 +3790,7 @@ describe("Nuxt Game App APIs", () => {
       status: "finished",
       result: { type: "winner", winnerId: "devPlayer" },
       reward: {
-        status: "unclaimed",
+        status: "claimed",
         credits: 200,
         heroExperience: 150,
         materials: expect.arrayContaining([
@@ -3817,7 +3817,7 @@ describe("Nuxt Game App APIs", () => {
     })) as LiveBattleApiResponse;
     const repeatedVictory = await finishCampaignBattle(repeatedStart, ringItemId);
     expect(repeatedVictory.reward).toMatchObject({
-      status: "unclaimed",
+      status: "claimed",
       credits: 80,
       heroExperience: 60,
       materials: [{ materialId: "aluminium", quantity: 1 }],
@@ -5216,7 +5216,7 @@ describe("Nuxt Game App APIs", () => {
       actionCount: started.actionCount + 1,
       result: { type: "winner", winnerId: "playerTwo", loserId: "devPlayer" },
       reward: {
-        status: "unclaimed",
+        status: "claimed",
         credits: 30,
         heroExperience: 25,
         materials: [],
@@ -5265,7 +5265,7 @@ describe("Nuxt Game App APIs", () => {
       outcome: "loss",
       replayAvailable: true,
       reward: {
-        status: "unclaimed",
+        status: "claimed",
         credits: 30,
         heroExperience: 25,
         items: [{ inventoryItemId: ringItemId, experience: 8 }],
@@ -5285,7 +5285,7 @@ describe("Nuxt Game App APIs", () => {
     });
   });
 
-  it("settles live participation and ring-use XP exactly once when claimed", async () => {
+  it("automatically settles live participation and ring-use XP exactly once", async () => {
     const { ringItemId, gemItemId, spellItemId } = await createAndActivateEnchantedRingLoadout();
     let battle = (await battleStartHandler({
       body: { requestId: "live-item-experience" },
@@ -5320,7 +5320,7 @@ describe("Nuxt Game App APIs", () => {
     const reward = finished.battle.reward;
 
     expect(reward).toMatchObject({
-      status: "unclaimed",
+      status: "claimed",
       credits: 30,
       heroExperience: 25,
       items: expect.arrayContaining([
@@ -5343,9 +5343,6 @@ describe("Nuxt Game App APIs", () => {
     if (!reward) {
       throw new Error("Expected a live battle reward.");
     }
-
-    await battleRewardClaimHandler({ body: { rewardGrantId: reward.id } });
-    await battleRewardClaimHandler({ body: { rewardGrantId: reward.id } });
 
     const [player, rewardedItems, claimedReward] = await Promise.all([
       prisma.player.findUniqueOrThrow({ where: { id: "devPlayer" } }),
@@ -5396,7 +5393,7 @@ describe("Nuxt Game App APIs", () => {
     expect(await prisma.rewardGrant.count()).toBe(0);
   });
 
-  it("persists a verified battle record and an unclaimed deterministic reward", async () => {
+  it("persists a verified battle record and automatically granted deterministic reward", async () => {
     const { ringItemId } = await createAndActivateRingLoadout();
 
     const response = (await developmentBattleResultHandler({
@@ -5412,10 +5409,10 @@ describe("Nuxt Game App APIs", () => {
       actionCount: 1,
       replayAvailable: true,
       reward: {
-        status: "unclaimed",
+        status: "claimed",
         credits: 150,
         heroExperience: 100,
-        claimedAt: null,
+        claimedAt: expect.any(String),
         materials: expect.arrayContaining([
           expect.objectContaining({ materialId: "aluminium", quantity: 1 }),
           expect.objectContaining({ materialId: "hydrogen", quantity: 1 }),
@@ -5437,30 +5434,26 @@ describe("Nuxt Game App APIs", () => {
     expect(await prisma.rewardGrant.count()).toBe(1);
   });
 
-  it("claims a battle reward exactly once and persists every progression currency", async () => {
+  it("automatically grants a battle reward exactly once and persists every progression currency", async () => {
     const { ringItemId } = await createAndActivateRingLoadout();
+    const playerBefore = await prisma.player.findUniqueOrThrow({ where: { id: "devPlayer" } });
+    const ringBefore = await prisma.inventoryItem.findUniqueOrThrow({ where: { id: ringItemId } });
+    const aluminiumBefore = await materialStockQuantity("aluminium");
+    const hydrogenBefore = await materialStockQuantity("hydrogen");
+
     const created = (await developmentBattleResultHandler({
       body: { outcome: "win", requestId: "claimable-development-win" },
     })) as DevelopmentBattleResultApiResponse;
     const rewardId = created.state.records[0]?.reward?.id;
     expect(rewardId).toBeTruthy();
 
-    const playerBefore = await prisma.player.findUniqueOrThrow({ where: { id: "devPlayer" } });
-    const ringBefore = await prisma.inventoryItem.findUniqueOrThrow({ where: { id: ringItemId } });
-    const aluminiumBefore = await materialStockQuantity("aluminium");
-    const hydrogenBefore = await materialStockQuantity("hydrogen");
-
-    const claimed = (await battleRewardClaimHandler({
-      body: { rewardGrantId: rewardId },
-    })) as BattleHistoryApiResponse;
-
-    expect(claimed.player).toMatchObject({
+    expect(created.state.player).toMatchObject({
       credits: playerBefore.credits + 150,
       experience: playerBefore.experience + 100,
       level: 1,
     });
-    expect(claimed.records[0]?.reward).toMatchObject({ status: "claimed" });
-    expect(claimed.records[0]?.reward?.claimedAt).not.toBeNull();
+    expect(created.state.records[0]?.reward).toMatchObject({ status: "claimed" });
+    expect(created.state.records[0]?.reward?.claimedAt).not.toBeNull();
 
     const ringAfterFirstClaim = await prisma.inventoryItem.findUniqueOrThrow({
       where: { id: ringItemId },
@@ -5469,7 +5462,9 @@ describe("Nuxt Game App APIs", () => {
     expect(await materialStockQuantity("aluminium")).toBe(aluminiumBefore + 1);
     expect(await materialStockQuantity("hydrogen")).toBe(hydrogenBefore + 1);
 
-    await battleRewardClaimHandler({ body: { rewardGrantId: rewardId } });
+    await developmentBattleResultHandler({
+      body: { outcome: "win", requestId: "claimable-development-win" },
+    });
 
     const playerAfterSecondClaim = await prisma.player.findUniqueOrThrow({
       where: { id: "devPlayer" },
@@ -5493,7 +5488,7 @@ describe("Nuxt Game App APIs", () => {
     expect(response.state.records[0]).toMatchObject({
       outcome: "loss",
       reward: {
-        status: "unclaimed",
+        status: "claimed",
         credits: 30,
         heroExperience: 25,
         materials: [],
@@ -5522,6 +5517,40 @@ describe("Nuxt Game App APIs", () => {
       statusCode: 400,
       statusMessage: "requestId was already used for a different battle result.",
     });
+  });
+
+  it("automatically reconciles legacy unclaimed battle rewards", async () => {
+    const { ringItemId } = await createAndActivateRingLoadout();
+    const playerBefore = await prisma.player.findUniqueOrThrow({ where: { id: "devPlayer" } });
+    const ringBefore = await prisma.inventoryItem.findUniqueOrThrow({ where: { id: ringItemId } });
+    const aluminiumBefore = await materialStockQuantity("aluminium");
+    const reward = await prisma.rewardGrant.create({
+      data: {
+        playerId: "devPlayer",
+        sourceType: "battle",
+        sourceId: "legacy-unclaimed-battle",
+        status: "unclaimed",
+        credits: 17,
+        heroExperience: 11,
+        contentVersion: "production-items-v2",
+        materials: { create: [{ materialId: "aluminium", quantity: 2 }] },
+        items: { create: [{ inventoryItemId: ringItemId, experience: 5 }] },
+      },
+    });
+
+    await battleHistoryGetHandler({});
+    await battleHistoryGetHandler({});
+
+    const [playerAfter, ringAfter, rewardAfter] = await Promise.all([
+      prisma.player.findUniqueOrThrow({ where: { id: "devPlayer" } }),
+      prisma.inventoryItem.findUniqueOrThrow({ where: { id: ringItemId } }),
+      prisma.rewardGrant.findUniqueOrThrow({ where: { id: reward.id } }),
+    ]);
+    expect(playerAfter.credits).toBe(playerBefore.credits + 17);
+    expect(playerAfter.experience).toBe(playerBefore.experience + 11);
+    expect(ringAfter.experience).toBe(ringBefore.experience + 5);
+    expect(await materialStockQuantity("aluminium")).toBe(aluminiumBefore + 2);
+    expect(rewardAfter).toMatchObject({ status: "claimed", claimedAt: expect.any(Date) });
   });
 
   it("rejects claiming a missing battle reward", async () => {

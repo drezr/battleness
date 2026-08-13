@@ -9,14 +9,12 @@ export type BattleLabEnchantmentConfig = {
   definitionId: string;
   level: number;
   quality: number;
-  sourceInstanceId?: string;
 };
 
 export type BattleLabGemConfig = {
   definitionId: string;
   level: number;
   quality: number;
-  sourceInstanceId?: string;
   enchantment?: BattleLabEnchantmentConfig;
 };
 
@@ -25,7 +23,6 @@ export type BattleLabRingConfig = {
   level: number;
   quality: number;
   socketCount?: number;
-  sourceInstanceId?: string;
   gems: BattleLabGemConfig[];
 };
 
@@ -48,7 +45,6 @@ const battleLabEnchantmentConfigSchema = z
     definitionId: z.string().min(1),
     level: z.number().int().min(1).max(MAX_LEVEL),
     quality: z.number().int().min(0).max(MAX_QUALITY),
-    sourceInstanceId: z.string().min(1).optional(),
   })
   .strict();
 
@@ -57,7 +53,6 @@ const battleLabGemConfigSchema = z
     definitionId: z.string().min(1),
     level: z.number().int().min(1).max(MAX_LEVEL),
     quality: z.number().int().min(0).max(MAX_QUALITY),
-    sourceInstanceId: z.string().min(1).optional(),
     enchantment: battleLabEnchantmentConfigSchema.optional(),
   })
   .strict();
@@ -68,7 +63,6 @@ const battleLabRingConfigSchema = z
     level: z.number().int().min(1).max(MAX_LEVEL),
     quality: z.number().int().min(0).max(MAX_QUALITY),
     socketCount: z.number().int().min(1).max(3).optional(),
-    sourceInstanceId: z.string().min(1).optional(),
     gems: z.array(battleLabGemConfigSchema).max(3),
   })
   .strict();

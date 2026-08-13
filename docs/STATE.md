@@ -39,7 +39,8 @@ This file records modifications made to the project during agent-assisted work.
   `packages/content/src/legacy/production-items-v1/`.
 - Account onboarding version 3 grants `ashenLoop`, `emberShard`, and `burnI`. Existing owned copies
   of the six retired spells are deterministically mapped to supported production definitions before
-  player-state validation. Dev Lab persistence uses v3 keys and clears incompatible v1/v2 data.
+  player-state validation. Dev Lab Battle Lab presets use a versioned technical key; obsolete fake
+  inventory and loadout keys are removed at startup.
 - Live ring actions collect additional spell targets per socketed gem when the primary ring target
   does not satisfy a spell rule. The server validates the complete atomic `enchantmentTargets` map
   before mutation; direct spell damage respects Taunt while non-damage hostile effects do not.
@@ -74,9 +75,9 @@ This file records modifications made to the project during agent-assisted work.
 - Production recipes consume exactly three material units and aggregate repeated materials. Every
   active object has one recipe, and ring, gem, and monster recipes have unique material multisets
   within their item type. Development starting stock is three units per material.
-- Dev Lab persistence uses v3 keys. Incompatible v1/v2 inventory, loadout, and preset data is removed
-  at startup with an explicit UI notice. Account onboarding is version 3 and grants `ashenLoop`,
-  `emberShard`, and `burnI`.
+- Dev Lab persistence is limited to versioned Battle Lab presets. Obsolete v1/v2/v3 fake inventory
+  and loadout keys are removed at startup without exposing a player-state reset workflow. Account
+  onboarding remains a Game App concern.
 - A guarded staging-only gameplay reset command is available as
   `pnpm --filter @battleness/web staging:reset-gameplay -- --apply`. It requires the exact staging
   database name, a verified backup identifier, and explicit confirmation; it preserves accounts,
@@ -223,11 +224,12 @@ This file records modifications made to the project during agent-assisted work.
   controls expose explicit localized names. The permanent Dev Lab and full-screen live battle remain
   separate from the shared Game App shell.
 - Finished live battles now replace the arena with a responsive, scroll-free result surface. The
-  outcome is displayed prominently; exit and claim actions remain immediately available; credits,
+  outcome is displayed prominently; exit and detail actions remain immediately available; credits,
   hero XP, and item XP form the first reward row; and material rewards use their real artwork below.
-  Complete Battle Loadouts plus Combat Activity move into an internally scrollable Battle Info modal.
-  The same summary component keeps detailed historical result data accessible without crowding its
-  default view.
+  Battle rewards are delivered automatically before the result appears, while complete Battle
+  Loadouts plus Combat Activity remain in an internally scrollable Battle Info modal. The same
+  summary component keeps detailed historical result data accessible without crowding its default
+  view.
 - The Nuxt live battle ring presentation now composes artwork below rarity-specific transparent frame
   assets and renders titles, values, gems, and interaction feedback above them. Ring sockets use the
   standalone `apps/web/public/assets/cards/ring-socket.png` asset and render exactly
@@ -450,7 +452,7 @@ This file records modifications made to the project during agent-assisted work.
 - Campaign content version `prototype-6` defines a validated linear starter track with three game-owned opponents, nested ring/gem/enchantment loadouts, explicit visibility, recommended levels, prerequisites, repeatability, and fixed first-clear and repeat-victory rewards. The Nuxt `/battle/campaign` view reads this catalogue from `/api/campaign`, starts authoritative campaign battles from the active Prisma loadout, and displays persisted completion state.
 - Campaign battles resolve game-owned content loadouts into deterministic engine instances, hide opponent rings in the live player view, execute a deterministic server-side opponent that respects energy, cooldown, and Taunt, and atomically persist victory count plus the correct first-clear or repeat reward. Clearing an opponent unlocks the next content record immediately; defeats preserve only the normal participation and usage item XP.
 - The Nuxt Game App can now start a persistent live training battle from the development player's active Prisma loadout. The server snapshots owned rings, sockets, gems, and enchantments into an engine setup, reconstructs current state from the persisted setup and action log, and exposes a player-facing live view without opponent ring details.
-- The Nuxt Game App now persists verified development battle records and deterministic reward grants. Battle and profile history views expose replay metadata and atomic reward claims that update credits, materials, hero XP, and active-loadout item XP exactly once.
+- The Nuxt Game App now persists verified development battle records and deterministic reward grants. Battle and profile history views expose replay metadata, and authoritative finishing transactions deliver credits, materials, hero XP, and active-loadout item XP exactly once.
 - The Nuxt Game Market supports persistent material purchasing plus material and crafted-item
   buyback, fixed recipe-based previews, eligibility validation, atomic Prisma updates, persistent
   transaction history, and idempotent request IDs that prevent duplicate economic operations.
@@ -484,27 +486,22 @@ This file records modifications made to the project during agent-assisted work.
 - The confirmed prototype collection is implemented as content version `prototype-5` with `common`, `refined`, `rare`, and `epic` rarity tiers.
 - Combat instances now retain rarity, and the prototype frames rings, gems, and monsters with their rarity color across board, setup, detail, and manual-action views.
 - Rings, gems, and monsters now show localized top-right elemental badges, and compact gem sockets combine elemental fill with rarity borders.
-- The content package now includes 48 forge recipes for the collectible rings, gems, monsters, and spells. Development-only `trainingFlameBand` and `plainQuartz` stay outside the recipe pool.
-- Prototype recipes always use exactly three quantity-1 materials from the matching crafting family. Material rarities scale by crafted item rarity: common uses three common materials, refined uses one refined and two common materials, rare uses one rare, one refined, and one common material, and epic uses one epic, one rare, and one refined material.
-- Crafted prototype items are created at level 1 and quality 0. Crafted rings start with one socket.
-- The setup screen now includes a development forge panel with recipe selection, required material stock controls, real material consumption, restock, and a list of crafted instances.
-- The development forge now persists credits, material stock, crafted item instances, and next crafted-instance sequence in browser `localStorage`.
-- Development inventory starts with 1000 prototype credits. Quality improvement raises one crafted item by 5 quality points up to 100, and ring socket improvement raises crafted rings up to 3 sockets. Improvement costs scale by rarity and current item state.
-- The setup screen supports development inventory export, import, and reset through a versioned JSON format.
-- Battle Lab now supports a development-inventory item source mode. In that mode, rings, gems, and spell or monster enchantments can be selected from crafted inventory instances, and level, quality, and ring socket count are derived from the selected instances.
-- The setup screen now includes a complete development inventory view with total counters, all material stock quantities, crafted item cards, and type, rarity, and element filters.
-- Development inventory crafted rings can now socket crafted gems up to their socket count, and socketed gems can be removed.
-- Development inventory crafted gems can now be enchanted with one crafted spell or monster, and enchantments can be removed.
-- The prototype prevents reusing a gem in multiple rings and prevents reusing the same spell or monster as multiple gem enchantments.
-- Battle Lab inventory-backed ring selection now imports the selected ring's socketed gems and gem enchantments automatically.
-- The setup screen now includes a development loadout builder that selects up to 10 crafted rings, summarizes resolved speed, damage, energy, and cooldown efficiency, saves named loadouts in browser `localStorage`, and can send the selected loadout to either Battle Lab player.
-- Finished non-replay battles now show deterministic prototype rewards. Claiming rewards adds credits, common materials, and item XP to the browser-local development inventory. Winner rewards grant 150 credits plus one common material from each crafting family; draw rewards grant 90 credits plus two common materials. Source-backed equipped items gain 8 XP, and each ring use, socketed gem use, spell trigger, monster summon, or monster attack adds 20 XP to the matching crafted item instance.
-- Finished battles now show a result summary derived from the battle log, including result, turn count, actions played, damage by player, rings used, spells cast, monsters summoned or used, item XP generated, and reward claim status.
-- Crafted item cards now show derived level, current XP, next-level XP, and a progress bar. Loadout builder ring rows and selected-ring summaries also show level and XP progress.
+- The Dev Lab is a stateless internal tool for deterministic scenarios, direct Battle Lab
+  configuration, all active spell and monster behavior, battle records, replay checksums, raw events,
+  simulations, balance reports, content definitions, and artwork coverage.
+- Battle Lab edits battle-scoped ring and gem definitions, levels, qualities, socket counts, and spell
+  or monster enchantments directly. It has no player inventory source mode and no source instance IDs.
+- The Dev Lab no longer exposes a forge, development inventory, player loadout builder, credits,
+  material stock, item improvement, item XP, hero progression, or combat rewards. Dev Lab battles and
+  imported replays produce technical summaries only and never mutate player state.
+- The Prisma-backed Game App is the exclusive owner of player inventory, crafting, improvements,
+  loadouts, progression, economy, and battle reward delivery.
 - Scaled combat stats now render in green in the prototype when their resolved value is above the base definition value.
 - Added a content balance report that compares rings, gems, spells, and monsters across base, mid, and max progression profiles and flags high primary-metric outliers by item type and rarity. The setup screen now exposes this report for development review.
-- Added a full starter development loop DOM regression test covering craft, quality improvement, socketing, enchanting, Battle Lab inventory-backed combat, reward claiming, persisted credits and materials, item XP, and combat summary output.
-- The Vite prototype in `apps/prototype` is now treated as the permanent Dev Lab for engine, content, inventory, and combat diagnostics.
+- Added DOM regression coverage for direct ring, gem, socket, and enchantment configuration, plus the
+  absence of fake player-loop panels, rewards, and browser-local player state.
+- The Vite prototype in `apps/prototype` is the permanent internal Dev Lab for engine, content,
+  replay, simulation, balance, asset, and combat diagnostics.
 - Added a separate Nuxt Game App scaffold in `apps/web` for the future player-facing application, keeping it parallel to the Dev Lab instead of replacing it.
 - The Nuxt app currently includes a Prisma-backed local SQLite development player state, player API, forge craft API, inventory view, material view, and basic forge UI.
 - BattleNess brand assets are copied into the Nuxt app so the new Game App can run independently from the prototype asset directory.
@@ -516,6 +513,29 @@ This file records modifications made to the project during agent-assisted work.
 - Added a centralized project TODO in `docs/TODO.md` covering Game App persistence, inventory, forge, battle integration, campaign, rewards, market, profile, authentication, PvP, player market, presentation, production, and open design questions.
 
 ## Change Log
+
+### 2026-08-13
+
+- Refocused `apps/prototype` as a stateless internal Dev Lab. Removed its fake forge, inventory,
+  loadout, progression, item-XP, and reward loops; made Battle Lab socket counts and content
+  composition directly editable; retained deterministic scenarios, all active spell/monster testing,
+  presets, JSON import/export, replay verification, simulations, balance diagnostics, and assets.
+- Established the architectural boundary that only the Prisma-backed Game App owns player inventory,
+  economy, progression, loadouts, crafting, and reward settlement. Dev Lab battles and imported
+  replays never grant rewards or mutate player state.
+- Removed the manual post-battle reward claim step from the Game App. Authoritative battle
+  settlement now creates its audit grant and applies credits, materials, hero XP, and eligible item
+  XP in the same atomic finishing transaction, while ranked season rewards retain their separate
+  explicit claim flow.
+- Added idempotent reconciliation for legacy unclaimed battle and campaign grants on battle-state or
+  history reads. Removed battle claim controls from live results, historical results, and battle
+  history; pending counters now represent only manually claimable ranked season rewards.
+- Updated Game App reward status copy to describe received or added rewards and added integration
+  coverage for automatic delivery, repeated result requests, and legacy
+  pending-grant reconciliation.
+- Browser-verified live results at 1440-by-900, 390-by-844, and 844-by-390 viewports with no document
+  overflow, no claim control, no console warning, and immediate credit delivery. Verified the mobile
+  battle history presents received rewards without per-battle claim actions.
 
 ### 2026-08-11
 

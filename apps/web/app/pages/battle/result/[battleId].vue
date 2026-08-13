@@ -48,8 +48,6 @@
         </NuxtLink>
       </section>
 
-      <p v-if="feedback" class="feedback">{{ feedback }}</p>
-
       <section v-if="record.reward" class="battle-result-reward-banner">
         <div class="battle-result-reward-icon"><Gift :size="25" /></div>
         <div>
@@ -64,22 +62,7 @@
             }}
           </p>
         </div>
-        <button
-          v-if="record.reward.status === 'unclaimed'"
-          type="button"
-          :disabled="claimingRewardId === record.reward.id"
-          @click="claimReward(record.reward.id)"
-        >
-          <Gift :size="17" />
-          {{
-            t(
-              claimingRewardId === record.reward.id
-                ? "battle.live.claiming"
-                : "battle.live.claimRewards",
-            )
-          }}
-        </button>
-        <span v-else class="battle-result-reward-claimed"
+        <span class="battle-result-reward-claimed"
           ><Check :size="16" /> {{ t("battle.result.rewardSecured") }}</span
         >
       </section>
@@ -146,8 +129,6 @@ const route = useRoute();
 const { t, locale } = useI18n();
 const { formatDateTime: formatLocalizedDateTime } = useDateTimeFormatter();
 const { data: state, error, pending } = await useFetch<BattleHistoryState>("/api/battle/history");
-const claimingRewardId = ref("");
-const feedback = ref("");
 const battleId = computed(() => String(route.params.battleId));
 const record = computed(
   () => state.value?.records.find((entry) => entry.id === battleId.value) ?? null,
@@ -159,24 +140,5 @@ function formatDate(value: string): string {
 
 function battleMode(mode: string): string {
   return t(`battle.mode.${mode.toLowerCase()}`, mode);
-}
-
-async function claimReward(rewardGrantId: string): Promise<void> {
-  claimingRewardId.value = rewardGrantId;
-  feedback.value = "";
-
-  try {
-    state.value = await $fetch<BattleHistoryState>("/api/battle/rewards/claim", {
-      method: "POST",
-      body: { rewardGrantId },
-    });
-    feedback.value = t("profile.history.claimed");
-    await refreshNuxtData();
-  } catch (claimError) {
-    feedback.value =
-      claimError instanceof Error ? claimError.message : t("profile.history.claimError");
-  } finally {
-    claimingRewardId.value = "";
-  }
 }
 </script>

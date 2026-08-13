@@ -244,7 +244,7 @@
       "notFound": "Résultat du combat introuvable.",
       "backToHistory": "Retour à l'historique",
       "rewardSummary": "+{credits} crédits et +{experience} XP de héros",
-      "rewardSecured": "Récompenses récupérées",
+      "rewardSecured": "Récompenses ajoutées",
       "verification": "Vérification de l’enregistrement",
       "recordId": "ID de l’enregistrement",
       "seed": "Graine",
@@ -288,7 +288,6 @@
       "concede": "Abandonner",
       "resultDetails": "Détails du résultat",
       "claiming": "Récupération...",
-      "claimRewards": "Récupérer les récompenses",
       "submitting": "Envoi de l’action...",
       "finished": "Combat terminé",
       "chooseAction": "Choisissez une action",
@@ -302,7 +301,6 @@
       "yourTurnStatus": "C’est votre tour.",
       "opponentTurnStatus": "C’est le tour de l’adversaire.",
       "actionError": "Échec de l’action de combat.",
-      "rewardError": "Échec de la récupération des récompenses.",
       "healthValue": "{current}/{maximum} PV",
       "monsterStats": "{damage} DGT - {current}/{maximum} REC",
       "experienceReward": "+{experience} XP",
@@ -451,7 +449,7 @@
     },
     "rewardStatus": {
       "unclaimed": "En attente",
-      "claimed": "Récupérées"
+      "claimed": "Reçues"
     },
     "mode": {
       "training": "Entraînement",

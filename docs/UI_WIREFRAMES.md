@@ -23,14 +23,11 @@ flowchart TD
   DevLab --> Setup["Setup Screen"]
   Setup --> ScenarioMode["Scenario Setup Mode"]
   Setup --> BattleLabMode["Battle Lab Mode"]
-  Setup --> DevForge["Development Forge"]
-  Setup --> DevInventory["Development Inventory"]
-  Setup --> Loadouts["Development Loadouts"]
   Setup --> Balance["Balance Report"]
   Setup --> Collection["Content Collection"]
   ScenarioMode --> Battle["Battle Screen"]
   BattleLabMode --> Battle
-  Battle --> Result["Result Summary / Rewards"]
+  Battle --> Result["Technical Result Summary"]
   Battle --> Replay["Replay Controls"]
 
   GameApp --> AppDashboard["Current Game App Dashboard"]
@@ -133,7 +130,7 @@ sequenceDiagram
 
 Status: implemented in `apps/prototype`.
 
-Purpose: technical launcher and diagnostics hub for scenarios, Battle Lab, forge, inventory, loadouts, collection, and balance checks.
+Purpose: technical launcher and diagnostics hub for deterministic scenarios, Battle Lab, simulations, collection, and balance checks.
 
 ```text
 +--------------------------------------------------------------------------------+
@@ -142,7 +139,6 @@ Purpose: technical launcher and diagnostics hub for scenarios, Battle Lab, forge
 | [Setup Controls]                                                                |
 | - {Mode Select: Scenario | Battle Lab}                                          |
 | - if Scenario: {Scenario Select}                                                |
-| - if Battle Lab: {Item Source Mode: Free Edit | Development Inventory}          |
 +--------------------------------------------------------------------------------+
 | [Setup Summary]                                                                 |
 | - battle id / scenario description / players / seed                             |
@@ -155,9 +151,6 @@ Purpose: technical launcher and diagnostics hub for scenarios, Battle Lab, forge
 +--------------------------------------------------------------------------------+
 | [Development Panels]                                                            |
 | - Battle Lab Editor                                                             |
-| - Development Forge                                                             |
-| - Development Inventory                                                         |
-| - Development Loadout Builder                                                   |
 | - Content Balance Report                                                        |
 | - Content Collection                                                            |
 +--------------------------------------------------------------------------------+
@@ -195,12 +188,11 @@ Purpose: select deterministic scenario fixtures and preview resolved setup befor
 
 Status: implemented in `apps/prototype`.
 
-Purpose: editable two-player combat configuration for testing loadouts, source-backed inventory items, and balance.
+Purpose: editable two-player battle-scoped configuration for testing engine behavior and balance without player inventory state.
 
 ```text
 +--------------------------------------------------------------------------------+
 | [Battle Lab Toolbar]                                                            |
-| - {Item Source Mode}                                                            |
 | - {Preset Name} {Save} {Load} {Delete}                                          |
 | - {Export JSON} {Import JSON}                                                   |
 | - {Run Batch Simulation}                                                        |
@@ -215,15 +207,15 @@ Purpose: editable two-player combat configuration for testing loadouts, source-b
 | - warnings                                                                      |
 +--------------------------------------------------------------------------------+
 | [Player One Editor]                         [Player Two Editor]                |
-| - player id / username / XP                 - player id / username / XP         |
+| - player id / username / level              - player id / username / level      |
 | - ring rows                                - ring rows                         |
-|   - definition or inventory instance         - definition or inventory instance |
+|   - direct definition                        - direct definition                |
 |   - level / quality                          - level / quality                 |
-|   - sockets                                  - sockets                         |
+|   - socket count: 1 to 3                     - socket count: 1 to 3            |
 |   - gem rows                                 - gem rows                        |
-|     - definition or inventory instance       - definition or inventory instance |
+|     - direct definition                      - direct definition              |
 |     - level / quality                        - level / quality                 |
-|     - enchantment type + source              - enchantment type + source        |
+|     - direct spell or monster enchantment    - direct spell or monster enchantment |
 +--------------------------------------------------------------------------------+
 | [Simulation Results]                                                            |
 | - deterministic variants                                                        |
@@ -231,105 +223,6 @@ Purpose: editable two-player combat configuration for testing loadouts, source-b
 | - result                                                                        |
 | - actions / turns                                                               |
 | - final health                                                                  |
-+--------------------------------------------------------------------------------+
-```
-
-## Dev Lab Development Forge
-
-Status: implemented in `apps/prototype`.
-
-Purpose: local-storage forge for creating crafted item instances and testing recipe/material rules.
-
-```text
-+--------------------------------------------------------------------------------+
-| [Forge Header]                                                                  |
-| - credits                                                                       |
-| - {Recipe Select}                                                               |
-+--------------------------------------------------------------------------------+
-| [Forge Layout]                                                                  |
-| [Output Card]                                   [Ingredients]                  |
-| - output item name                             - material 1                    |
-| - type / rarity / element                      - material 2                    |
-| - level / quality                              - material 3                    |
-| - ring sockets when applicable                 - each: required / available    |
-|                                                 - stock +/- controls            |
-+--------------------------------------------------------------------------------+
-| [Forge Actions]                                                                 |
-| {Craft} {Restock Materials}                                                     |
-+--------------------------------------------------------------------------------+
-| [Inventory JSON Tools]                                                          |
-| {Export} {Import} {Reset}                                                       |
-| [Versioned JSON Textarea]                                                       |
-+--------------------------------------------------------------------------------+
-| [Crafted Output List]                                                           |
-| - crafted item cards                                                            |
-| - technical instance IDs                                                        |
-+--------------------------------------------------------------------------------+
-```
-
-## Dev Lab Development Inventory
-
-Status: implemented in `apps/prototype`.
-
-Purpose: complete browser-local inventory diagnostics, filters, progression, improvement, socketing, and enchantment controls.
-
-```text
-+--------------------------------------------------------------------------------+
-| [Inventory Summary]                                                             |
-| - credits                                                                       |
-| - material count                                                                |
-| - crafted item count                                                            |
-+--------------------------------------------------------------------------------+
-| [Filters]                                                                       |
-| {Type: all/ring/gem/monster/spell} {Rarity} {Element}                           |
-+--------------------------------------------------------------------------------+
-| [Materials Section]                                                             |
-| - material stock cards                                                          |
-|   - name / family / rarity / quantity                                           |
-+--------------------------------------------------------------------------------+
-| [Crafted Items Section]                                                         |
-| - item cards                                                                    |
-|   - artwork slot                                                                |
-|   - name / type / rarity / element                                              |
-|   - quality                                                                     |
-|   - XP / level / next-level progress                                            |
-|   - technical instance ID                                                       |
-|   - combat stats                                                                |
-|   - improvement controls                                                        |
-|     - {Improve Quality}                                                         |
-|     - if ring: {Improve Sockets}                                                |
-|   - if ring: socket controls                                                    |
-|     - gem select                                                                |
-|     - {Socket Gem} / {Remove Gem}                                               |
-|   - if gem: enchantment controls                                                |
-|     - spell or monster select                                                   |
-|     - {Enchant} / {Remove Enchantment}                                          |
-+--------------------------------------------------------------------------------+
-```
-
-## Dev Lab Development Loadout Builder
-
-Status: implemented in `apps/prototype`.
-
-Purpose: build reusable sets of crafted rings and send them into Battle Lab.
-
-```text
-+--------------------------------------------------------------------------------+
-| [Loadout Header]                                                                |
-| - selected rings count                                                          |
-| - resolved metrics summary                                                      |
-+--------------------------------------------------------------------------------+
-| [Loadout Controls]                                                              |
-| {Loadout Name} {Save} {Load Existing} {Delete}                                  |
-+--------------------------------------------------------------------------------+
-| [Ring Candidate List]                         [Selected Rings]                  |
-| - checkbox per crafted ring                   - selected ring cards             |
-| - item name / rarity / element                - sockets and gems                |
-| - level / XP progress                         - resolved stats                  |
-| - technical ID                                - technical IDs                   |
-+--------------------------------------------------------------------------------+
-| [Actions]                                                                       |
-| {Send To Player One} {Send To Player Two}                                       |
 +--------------------------------------------------------------------------------+
 ```
 
@@ -443,15 +336,15 @@ stateDiagram-v2
   AwaitingAction --> TurnEnded: end turn
   TurnEnded --> AwaitingAction: next player turn starts
   AwaitingAction --> BattleEnded: hero reaches 0
-  BattleEnded --> RewardsAvailable: non-replay battle
-  BattleEnded --> ReplayOnlySummary: replay battle
+  BattleEnded --> TechnicalSummary: live Dev Lab battle
+  BattleEnded --> ReplayVerifiedSummary: imported replay
 ```
 
-## Dev Lab Result Summary And Rewards
+## Dev Lab Technical Result Summary
 
 Status: implemented in `apps/prototype`.
 
-Purpose: deterministic post-battle reporting and reward claiming for development inventory.
+Purpose: deterministic post-battle reporting without player rewards or state mutations.
 
 ```text
 +--------------------------------------------------------------------------------+
@@ -459,19 +352,11 @@ Purpose: deterministic post-battle reporting and reward claiming for development
 | - result                                                                        |
 | - turn count                                                                    |
 | - actions played                                                                |
-| - rewards status                                                                |
 | - damage by player                                                              |
 | - rings used                                                                    |
 | - spells cast                                                                   |
 | - monsters summoned                                                             |
 | - monsters used                                                                 |
-| - item XP generated                                                             |
-+--------------------------------------------------------------------------------+
-| [Battle Rewards]                                                                |
-| - credits                                                                       |
-| - materials                                                                     |
-| - item XP                                                                       |
-| - {Claim Rewards} / disabled when claimed                                       |
 +--------------------------------------------------------------------------------+
 ```
 
@@ -501,7 +386,7 @@ Purpose: export, import, step, and verify deterministic battle records.
 
 ## Future Split Recommendation
 
-The current Dev Lab combines many panels on one setup page because it is optimized for technical testing. The Game App should split those concepts into route-level views:
+The Dev Lab is an internal technical surface; the Game App owns all player-facing routes and persistent player state:
 
 ```text
 /                  -> Main menu / dashboard
@@ -515,4 +400,4 @@ The current Dev Lab combines many panels on one setup page because it is optimiz
 /dev-lab           -> optional link or separate build pointing to apps/prototype
 ```
 
-This split keeps the player-facing UI simpler while preserving the existing Dev Lab detail for implementation and debugging.
+This boundary keeps player inventory, crafting, progression, and rewards exclusively in the Game App while preserving focused Dev Lab tools for engine, content, replay, simulation, balance, and asset work.
