@@ -610,6 +610,12 @@ This section separates executable game rules from implementation decisions. It i
 - Status: decided.
 - Decision: Use a dark-first tactical competitive interface. Desktop uses a persistent left sidebar and compact resource top bar; mobile uses a fixed bottom navigation bar. The home view acts as a command center rather than a marketing page.
 - Decision: Use medium-density item cards, a distinct display treatment for headings with a neutral sans-serif UI face, restrained rarity borders and glows, element badges with targeted color accents, and fast functional motion with reduced-motion support.
+- Decision: Redesign Inventory Items as an artwork-first collection with compact category and filter
+  controls, selectable tiles, and one authoritative inspector. Repeated item-card tables and Inspect
+  actions should not dominate the collection. Desktop uses a persistent inspector where space
+  permits; compact layouts retain accessible modal inspection. The first slice reuses current data,
+  artwork, progression, Forge routes, and Equipment rules without inventing mutations or capacity
+  limits. See `docs/INVENTORY_ITEMS_REDESIGN.md`.
 - Decision: Use familiar Lucide icons for navigation and tools, text or icon-plus-text controls for explicit commands, the full BattleNess logo on the home view, and the compact BattleNess icon in the application shell.
 - Decision: Standard player-view titles reuse the Forge Hub title treatment and the Battle Hub
   vertical rhythm. Their short localized descriptions move into a shared question-mark help dialog

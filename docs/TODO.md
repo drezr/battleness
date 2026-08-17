@@ -248,6 +248,16 @@ section.
 - [x] Audit Market Hub, Game Market, Player Market, and private Market History across desktop and mobile layouts, including touch targets, expandable panels, filters, pagination, selection state, contextual listing actions, overflow, and runtime localization warnings.
 - [x] Audit Home, Profile Overview, Profile History, Progression, Settings, authentication, and the global application shell across desktop and mobile layouts, including touch targets, navigation state, preference controls, reduced motion, sign-out/sign-in restoration, overflow, and runtime localization warnings.
 - [x] Perform a final accessibility, responsive layout, reduced-motion, and localization visual audit.
+- [x] Approve and document the production Inventory Items direction around artwork-first tiles and a
+      dedicated inspector in `docs/INVENTORY_ITEMS_REDESIGN.md`.
+- [x] Implement Inventory Items redesign slice 1: category tabs, localized search, element filter,
+      sorting, counts, artwork-first selectable tiles, approved type-specific combat statistics, and
+      preserved modal inspection.
+- [x] Implement Inventory Items redesign slice 2: persistent desktop inspector with responsive modal
+      fallback and authoritative item details.
+- [x] Evaluate Inventory Items slice 3 against the existing Equipment API; keep Equipment as the
+      authoritative mutation surface and expose contextual navigation rather than duplicate direct
+      equip or comparison behavior in Items.
 
 ## Game-Wide UI Immersion Iteration
 

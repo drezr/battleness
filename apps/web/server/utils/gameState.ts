@@ -3944,7 +3944,13 @@ function toInventoryDetailView(input: {
       sockets: input.sockets,
       enchantmentByGemId: input.enchantmentByGemId,
     });
-    return { ...inventory, gems: ring.gems };
+    return {
+      ...inventory,
+      damage: ring.damage,
+      energyCost: ring.energyCost,
+      cooldown: ring.cooldown,
+      gems: ring.gems,
+    };
   }
 
   if (input.item.type === "gem") {

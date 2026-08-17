@@ -4,6 +4,13 @@ This file records modifications made to the project during agent-assisted work.
 
 ## Current State
 
+- `/inventory/items` now implements the approved production collection documented in
+  `docs/INVENTORY_ITEMS_REDESIGN.md`. Artwork-first selectable tiles replace repeated data-heavy
+  cards; category counts, localized search, element filtering, and sorting lead into a persistent
+  wide-screen inspector or the existing accessible compact-layout modal. Ring tiles show resolved
+  damage, energy cost, and cooldown; Gem tiles show added damage; Monster tiles show damage, health,
+  and cooldown. Ring values reuse the authoritative Equipment calculation. Contextual actions route
+  to existing Equipment and Forge surfaces without adding mutations or capacity rules.
 - The repository-root `assets/` authoring archive was removed after its spell atlas was verified
   against the active copies. Spell atlas metadata lives beside the other item metadata under
   `packages/content/src/atlases/`, while identical runtime PNGs live in each application's
@@ -516,6 +523,22 @@ This file records modifications made to the project during agent-assisted work.
 
 ### 2026-08-13
 
+- Implemented the approved Inventory Items production redesign. Added localized collection tabs,
+  search, element filtering, sort choices, counts, artwork-first single-target tiles, type-specific
+  combat statistics, sparse-collection staging, and a persistent desktop inspector with contextual
+  Equipment and Forge routes. Compact layouts retain the accessible shared modal. Extended the
+  player inventory projection with authoritative resolved Ring damage, energy cost, and cooldown,
+  with API coverage proving parity with Equipment. Browser checks covered desktop, portrait mobile,
+  and short landscape without horizontal overflow or console warnings.
+- Refined the prepared Inventory Items specification so tiles retain immediate combat comparison:
+  Rings show damage, energy cost, and cooldown; Gems show added damage; Monsters show damage, health,
+  and cooldown; Spells receive no additional tile statistic yet. Ring values must reuse the
+  authoritative Equipment projection rather than client-side calculations.
+- Approved and prepared the production Inventory Items redesign. Added a repository reference
+  mockup and an implementation specification covering current-state findings, product hierarchy,
+  responsive layouts, item-tile semantics, collection controls, inspector content, current API
+  mapping, component boundaries, localization, implementation slices, and acceptance checks. The
+  implementation was subsequently completed in the same iteration.
 - Refocused `apps/prototype` as a stateless internal Dev Lab. Removed its fake forge, inventory,
   loadout, progression, item-XP, and reward loops; made Battle Lab socket counts and content
   composition directly editable; retained deterministic scenarios, all active spell/monster testing,

@@ -20,155 +20,189 @@
     <p v-else-if="error" class="panel">{{ t("inventory.items.loadError") }}</p>
 
     <template v-else-if="state">
-      <div class="filter-bar">
-        <label>
-          <span class="field-label">{{ t("common.type") }}</span>
-          <select v-model="typeFilter">
-            <option value="all">{{ t("common.all") }}</option>
-            <option value="ring">{{ t("common.rings") }}</option>
-            <option value="gem">{{ t("common.gems") }}</option>
-            <option value="monster">{{ t("common.monsters") }}</option>
-            <option value="spell">{{ t("common.spells") }}</option>
-          </select>
-        </label>
-        <label>
-          <span class="field-label">{{ t("common.element") }}</span>
-          <select v-model="elementFilter">
-            <option value="all">{{ t("common.all") }}</option>
-            <option value="electric">{{ t("element.electric") }}</option>
-            <option value="fire">{{ t("element.fire") }}</option>
-            <option value="ice">{{ t("element.ice") }}</option>
-          </select>
-        </label>
-      </div>
-
-      <section class="detail-layout">
-        <div>
-          <p v-if="filteredItems.length === 0" class="panel">
-            {{ t("inventory.items.noMatches") }}
-          </p>
-
-          <section v-else class="item-grid">
-            <article
-              v-for="item in filteredItems"
-              :key="item.id"
-              :class="[
-                'card',
-                'item-card',
-                `rarity-border-${item.rarity}`,
-                { selected: selectedDetailItem?.id === item.id },
-              ]"
-            >
-              <ItemArtwork :definition-id="item.definitionId" :kind="item.type" />
-              <div class="item-card-body">
-                <div class="card-heading">
-                  <h3>{{ itemName(item.type, item.definitionId, item.label) }}</h3>
-                  <span :class="['pill', `element-${item.element}`]">{{
-                    t(`element.${item.element}`)
-                  }}</span>
-                </div>
-                <dl class="summary-grid">
-                  <div class="stat">
-                    <dt>{{ t("common.type") }}</dt>
-                    <dd>{{ t(`itemType.${item.type}`) }}</dd>
-                  </div>
-                  <div class="stat">
-                    <dt>{{ t("common.quality") }}</dt>
-                    <dd>{{ item.quality }}</dd>
-                  </div>
-                  <div class="stat">
-                    <dt>{{ t("common.level") }}</dt>
-                    <dd>{{ item.level }}</dd>
-                  </div>
-                  <div v-if="item.socketCount" class="stat">
-                    <dt>{{ t("stats.sockets") }}</dt>
-                    <dd>{{ item.socketCount }}</dd>
-                  </div>
-                </dl>
-                <ExperienceProgress
-                  :progress="item.progression"
-                  :label="
-                    t('progression.itemExperience', {
-                      item: itemName(item.type, item.definitionId, item.label),
-                    })
-                  "
-                />
-                <small>{{
-                  t("inventory.items.bonusSummary", {
-                    quality: item.quality,
-                    bonus: item.bonusPercent,
-                  })
-                }}</small>
-                <div class="control-row">
-                  <button
-                    class="secondary-button"
-                    :aria-label="
-                      t('common.inspectItem', {
-                        item: itemName(item.type, item.definitionId, item.label),
-                      })
-                    "
-                    @click="selectedDetailItemId = item.id"
-                  >
-                    {{ t("common.inspect") }}
-                  </button>
-                </div>
-                <code>{{ item.id }}</code>
-              </div>
-            </article>
-          </section>
-        </div>
-
-        <ItemDetailPanel
-          :item="selectedDetailItem"
-          :title="t('inventory.items.detail')"
-          :manage-to="selectedDetailManageTo"
-          @clear="selectedDetailItemId = ''"
+      <section class="inventory-collection-command" :aria-label="t('inventory.items.collection')">
+        <InventoryCategoryTabs v-model="typeFilter" :counts="categoryCounts" />
+        <InventoryCollectionToolbar
+          v-model:search-query="searchQuery"
+          v-model:element-filter="elementFilter"
+          v-model:sort-order="sortOrder"
+          :filtered-count="filteredItems.length"
+          :total-count="state.inventory.length"
         />
       </section>
+
+      <section class="inventory-collection-layout">
+        <div class="inventory-collection-floor">
+          <div class="inventory-collection-heading">
+            <div>
+              <span class="eyebrow">{{ t("inventory.items.ownedArsenal") }}</span>
+              <h2>{{ activeCategoryLabel }}</h2>
+            </div>
+            <span>{{ t("inventory.items.visibleCount", { count: filteredItems.length }) }}</span>
+          </div>
+
+          <div v-if="filteredItems.length === 0" class="inventory-empty-collection">
+            <SearchX :size="36" aria-hidden="true" />
+            <strong>{{ t("inventory.items.noMatchesTitle") }}</strong>
+            <p>{{ t("inventory.items.noMatches") }}</p>
+            <button type="button" class="secondary-button" @click="resetFilters">
+              {{ t("inventory.items.resetFilters") }}
+            </button>
+          </div>
+
+          <div v-else class="inventory-item-grid">
+            <InventoryItemTile
+              v-for="item in filteredItems"
+              :key="item.id"
+              :item="item"
+              :selected="selectedItem?.id === item.id"
+              @select="selectItem(item.id)"
+            />
+          </div>
+        </div>
+
+        <InventoryItemInspector :item="selectedItem" />
+      </section>
+
+      <ItemDetailPanel
+        :item="mobileInspectorItem"
+        :title="t('inventory.items.detail')"
+        :manage-to="mobileManageTo"
+        @clear="mobileInspectorItemId = ''"
+      />
     </template>
   </main>
 </template>
 
 <script setup lang="ts">
-import type { PlayerState } from "~/utils/playerState";
-const { t } = useI18n();
+import { SearchX } from "@lucide/vue";
+import type { InventoryCategory } from "~/components/InventoryCategoryTabs.vue";
+import type { InventoryItemView, PlayerState } from "~/utils/playerState";
+
+type InventorySortOrder = "current" | "levelDesc" | "qualityDesc" | "rarityDesc" | "nameAsc";
+
+const { t, locale } = useI18n();
 const contentText = useContentText();
 const { data: state, error, pending } = await useFetch<PlayerState>("/api/player");
-const typeFilter = ref("all");
+const typeFilter = ref<InventoryCategory>("all");
 const elementFilter = ref("all");
-const selectedDetailItemId = ref("");
+const searchQuery = ref("");
+const sortOrder = ref<InventorySortOrder>("current");
+const selectedItemId = ref("");
+const mobileInspectorItemId = ref("");
+const compactInspector = ref(false);
+let inspectorMediaQuery: MediaQueryList | null = null;
 
-const filteredItems = computed(() =>
-  (state.value?.inventory ?? []).filter((item) => {
+const rarityRank: Record<string, number> = {
+  common: 0,
+  refined: 1,
+  rare: 2,
+  epic: 3,
+};
+
+const categoryCounts = computed<Record<InventoryCategory, number>>(() => {
+  const items = state.value?.inventory ?? [];
+  return {
+    all: items.length,
+    ring: items.filter((item) => item.type === "ring").length,
+    gem: items.filter((item) => item.type === "gem").length,
+    monster: items.filter((item) => item.type === "monster").length,
+    spell: items.filter((item) => item.type === "spell").length,
+  };
+});
+
+const activeCategoryLabel = computed(() =>
+  typeFilter.value === "all" ? t("inventory.items.allItems") : t(`itemType.${typeFilter.value}`),
+);
+
+const filteredItems = computed(() => {
+  const normalizedQuery = searchQuery.value.trim().toLocaleLowerCase(locale.value);
+  const indexed = (state.value?.inventory ?? []).map((item, index) => ({
+    item,
+    index,
+    name: itemName(item).toLocaleLowerCase(locale.value),
+  }));
+  const matches = indexed.filter(({ item, name }) => {
     const matchesType = typeFilter.value === "all" || item.type === typeFilter.value;
     const matchesElement = elementFilter.value === "all" || item.element === elementFilter.value;
-    return matchesType && matchesElement;
-  }),
+    const matchesSearch = !normalizedQuery || name.includes(normalizedQuery);
+    return matchesType && matchesElement && matchesSearch;
+  });
+
+  matches.sort((left, right) => {
+    if (sortOrder.value === "levelDesc")
+      return right.item.level - left.item.level || left.index - right.index;
+    if (sortOrder.value === "qualityDesc")
+      return right.item.quality - left.item.quality || left.index - right.index;
+    if (sortOrder.value === "rarityDesc") {
+      return (
+        (rarityRank[right.item.rarity] ?? 0) - (rarityRank[left.item.rarity] ?? 0) ||
+        left.index - right.index
+      );
+    }
+    if (sortOrder.value === "nameAsc") return left.name.localeCompare(right.name, locale.value);
+    return left.index - right.index;
+  });
+
+  return matches.map(({ item }) => item);
+});
+
+const selectedItem = computed(
+  () => state.value?.inventory.find((item) => item.id === selectedItemId.value) ?? null,
 );
-const selectedDetailItem = computed(
-  () => state.value?.inventory.find((item) => item.id === selectedDetailItemId.value) ?? null,
+const mobileInspectorItem = computed(
+  () => state.value?.inventory.find((item) => item.id === mobileInspectorItemId.value) ?? null,
 );
-const selectedDetailManageTo = computed(() => {
-  const item = selectedDetailItem.value;
+const mobileManageTo = computed(() => manageRoute(mobileInspectorItem.value));
+
+watchEffect(() => {
+  const visibleItems = filteredItems.value;
+  if (visibleItems.length === 0) {
+    selectedItemId.value = "";
+    mobileInspectorItemId.value = "";
+    return;
+  }
+  if (!visibleItems.some((item) => item.id === selectedItemId.value)) {
+    selectedItemId.value = visibleItems[0]?.id ?? "";
+    mobileInspectorItemId.value = "";
+  }
+});
+
+onMounted(() => {
+  inspectorMediaQuery = window.matchMedia("(max-width: 1179px)");
+  updateInspectorMode(inspectorMediaQuery);
+  inspectorMediaQuery.addEventListener("change", updateInspectorMode);
+});
+
+onBeforeUnmount(() => {
+  inspectorMediaQuery?.removeEventListener("change", updateInspectorMode);
+});
+
+function itemName(item: InventoryItemView): string {
+  return contentText(`${item.type}.${item.definitionId}.name`, item.label);
+}
+
+function selectItem(itemId: string): void {
+  selectedItemId.value = itemId;
+  if (compactInspector.value) mobileInspectorItemId.value = itemId;
+}
+
+function resetFilters(): void {
+  typeFilter.value = "all";
+  elementFilter.value = "all";
+  searchQuery.value = "";
+  sortOrder.value = "current";
+}
+
+function updateInspectorMode(event: MediaQueryList | MediaQueryListEvent): void {
+  compactInspector.value = event.matches;
+  if (!event.matches) mobileInspectorItemId.value = "";
+}
+
+function manageRoute(item: InventoryItemView | null): string | undefined {
   if (!item) return undefined;
   if (item.type === "ring") return `/forge/socket?ringId=${encodeURIComponent(item.id)}`;
   if (item.type === "gem") return `/forge/enchant?gemId=${encodeURIComponent(item.id)}`;
-  if (item.type === "spell" || item.type === "monster") {
-    return `/forge/enchant?targetId=${encodeURIComponent(item.id)}`;
-  }
-  return undefined;
-});
-
-function itemName(type: string, definitionId: string, fallback: string): string {
-  return contentText(`${type}.${definitionId}.name`, fallback);
+  return `/forge/enchant?targetId=${encodeURIComponent(item.id)}`;
 }
-
-watchEffect(() => {
-  if (
-    selectedDetailItemId.value &&
-    !filteredItems.value.some((item) => item.id === selectedDetailItemId.value)
-  ) {
-    selectedDetailItemId.value = "";
-  }
-});
 </script>

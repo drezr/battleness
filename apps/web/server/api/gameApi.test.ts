@@ -52,6 +52,10 @@ type PlayerApiResponse = {
     contentVersion: string;
     level: number;
     bonusPercent: number;
+    damage?: number;
+    energyCost?: number;
+    health?: number;
+    cooldown?: number;
     progression: { nextLevelExperience: number | null; progressPercent: number };
     enchantment?: null | { id: string; type: "spell" | "monster" };
     enchantedGemId?: string | null;
@@ -74,6 +78,9 @@ type EquipmentApiResponse = {
     equipped: boolean;
     baseDamage: number;
     baseSpeed: number;
+    damage: number;
+    energyCost: number;
+    cooldown: number;
   }[];
   summary: {
     ringCount: number;
@@ -3887,6 +3894,9 @@ describe("Nuxt Game App APIs", () => {
       type: "ring",
       definitionId: "ashenLoop",
       contentVersion: "production-items-v2",
+      damage: 5,
+      energyCost: 2,
+      cooldown: 2,
     });
     expect(materialQuantity(response.state, "aluminium")).toBe(0);
     expect(materialQuantity(response.state, "iron")).toBe(3);
@@ -3953,6 +3963,13 @@ describe("Nuxt Game App APIs", () => {
       equipped: true,
       baseDamage: 5,
       baseSpeed: 2,
+    });
+    const inventoryRing = (await playerHandler({})) as PlayerApiResponse;
+    expect(inventoryRing.inventory[0]).toMatchObject({
+      id: crafted.crafted.id,
+      damage: reloaded.availableRings[0]?.damage,
+      energyCost: reloaded.availableRings[0]?.energyCost,
+      cooldown: reloaded.availableRings[0]?.cooldown,
     });
 
     const unequipped = (await equipmentPostHandler({

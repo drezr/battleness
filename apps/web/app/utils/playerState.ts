@@ -663,6 +663,7 @@ export type InventoryItemView = {
   socketCount: number | null;
   equipped: boolean;
   damage?: number;
+  energyCost?: number;
   health?: number;
   energyPenalty?: number;
   cooldownPenalty?: number;
