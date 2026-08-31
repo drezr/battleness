@@ -164,6 +164,22 @@ Create an Inventory-specific inspector backed by `InventoryItemView`. It should 
 - equipment state for rings;
 - contextual actions using existing routes and behavior.
 
+The inspector is also the read-only composition map for owned combat items. A Ring compares raw
+definition values, its level-and-quality-resolved values, and final values after socketed Gems and
+enchantments. It exposes speed and separates Ring, Gem, Monster, and Spell damage contributions.
+Its socket tree includes empty sockets and nests each Gem's Monster or Spell enchantment.
+
+Gems expose speed, their enchantment, and the containing Ring and socket when present. Monsters and
+Spells expose speed plus energy and cooldown penalties, and link back to the Gem they enchant. Every
+parent or child object in these relationships is a real selection control with artwork and localized
+identity. Selecting one updates the current inspector, switches the collection category when needed,
+and keeps the compact modal open. Both desktop and compact inspectors reset to the top after related
+item navigation.
+
+All resolved values and relationships come from the server Inventory projection. The client never
+recalculates combat values. The relationship remains one-to-one for enchantments because persistence
+uniquely constrains both the Gem and target item.
+
 Contextual actions:
 
 - ring: Equipment, Quality, and Socket;
@@ -285,6 +301,10 @@ visible item while keeping the mobile modal closed. Empty results clear selectio
   damage, health, and cooldown; no unapproved statistics are added to Spell tiles.
 - Ring tile values match the authoritative Equipment projection rather than a client-side formula.
 - Complete authoritative item data remains available.
+- Rings compare base, Ring-only, and final damage, energy, cooldown, and speed values and expose a
+  navigable socket and enchantment tree.
+- Gems, Monsters, and Spells expose the requested speed and penalty values plus navigable parent or
+  child relationships with artwork.
 - Desktop selection does not open a blocking modal.
 - Compact layouts preserve accessible modal behavior.
 - Item tiles contain no nested interactive controls.

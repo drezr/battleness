@@ -3946,9 +3946,20 @@ function toInventoryDetailView(input: {
     });
     return {
       ...inventory,
+      baseDamage: ring.baseDamage,
+      ringDamage: ring.ringDamage,
+      gemDamage: ring.gemDamage,
+      spellDamage: ring.spellDamage,
+      monsterDamage: ring.monsterDamage,
       damage: ring.damage,
+      baseEnergyCost: ring.baseEnergyCost,
       energyCost: ring.energyCost,
+      baseCooldown: ring.baseCooldown,
       cooldown: ring.cooldown,
+      baseSpeed: ring.baseSpeed,
+      speed: ring.speed,
+      energyPenalty: ring.energyPenalty,
+      cooldownPenalty: ring.cooldownPenalty,
       gems: ring.gems,
     };
   }
@@ -3965,9 +3976,13 @@ function toInventoryDetailView(input: {
       damage: gem.damage,
       energyPenalty: gem.energyPenalty,
       cooldownPenalty: gem.cooldownPenalty,
+      speed: gem.speed,
       socketedRingId: gem.socketedRingId,
       socketedRingLabel: input.socket
         ? inventoryItemLabel(input.inventoryById.get(input.socket.ringItemId))
+        : null,
+      socketedRing: input.socket
+        ? toInventoryItemReference(input.inventoryById.get(input.socket.ringItemId))
         : null,
       socketIndex: gem.socketIndex,
       enchantment: gem.enchantment,
@@ -3979,12 +3994,31 @@ function toInventoryDetailView(input: {
     enchantment: input.enchantmentByTargetId.get(input.item.id) ?? null,
   });
   const enchantedGemId = input.enchantmentByTargetId.get(input.item.id)?.gemItemId ?? null;
+  const enchantedGem = enchantedGemId
+    ? toInventoryItemReference(input.inventoryById.get(enchantedGemId))
+    : null;
   return {
     ...inventory,
     ...target,
+    speed: target.baseSpeed,
     enchantedGemLabel: enchantedGemId
       ? inventoryItemLabel(input.inventoryById.get(enchantedGemId))
       : null,
+    enchantedGem,
+  };
+}
+
+function toInventoryItemReference(item: InventoryItem | undefined) {
+  if (!item) return null;
+  const type = item.type as CraftableItemType;
+  const definition = getCraftableDefinition(type, item.definitionId);
+  return {
+    id: item.id,
+    type,
+    definitionId: item.definitionId,
+    label: label(definition.nameKey),
+    rarity: definition.rarity,
+    element: definition.element,
   };
 }
 
@@ -4234,6 +4268,7 @@ function toSocketEnchantmentTargetView(input: {
       energyPenalty: definition.baseEnergyPenalty,
       cooldownPenalty: definition.baseCooldownPenalty,
       baseSpeed: definition.baseSpeed,
+      speed: definition.baseSpeed,
       targeting: definition.targeting,
       enchantedGemId: input.enchantment?.gemItemId ?? null,
     };
@@ -4255,6 +4290,10 @@ function toSocketEnchantmentTargetView(input: {
     damage: resolveItemStat(definition.baseDamage, monsterLevel, input.target.quality),
     health: resolveItemStat(definition.baseHealth, monsterLevel, input.target.quality),
     cooldown: definition.baseCooldown,
+    energyPenalty: definition.baseEnergyPenalty ?? 0,
+    cooldownPenalty: definition.baseCooldownPenalty ?? 0,
+    baseSpeed: definition.baseSpeed,
+    speed: definition.baseSpeed,
     skill: definition.skill ?? null,
     enchantedGemId: input.enchantment?.gemItemId ?? null,
   };

@@ -821,6 +821,230 @@
   grid-column: 1 / -1;
 }
 
+.inventory-stat-comparison {
+  overflow: hidden;
+  display: grid;
+  border: 1px solid rgb(119 210 223 / 18%);
+  border-radius: 9px;
+  background: rgb(3 12 17 / 72%);
+}
+
+.inventory-stat-comparison > div {
+  display: grid;
+  grid-template-columns: minmax(82px, 1.4fr) repeat(3, minmax(48px, 0.7fr));
+  align-items: center;
+  border-bottom: 1px solid rgb(119 210 223 / 12%);
+}
+
+.inventory-stat-comparison > div:last-child {
+  border-bottom: 0;
+}
+
+.inventory-stat-comparison span,
+.inventory-stat-comparison strong {
+  min-width: 0;
+  border-right: 1px solid rgb(119 210 223 / 10%);
+  padding: 7px 6px;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.inventory-stat-comparison span:first-child {
+  color: var(--app-muted);
+  font-weight: 800;
+  text-align: left;
+}
+
+.inventory-stat-comparison strong {
+  border-right: 0;
+  color: var(--app-cyan-bright);
+}
+
+.inventory-stat-comparison-head {
+  color: var(--app-muted);
+  background: rgb(24 52 62 / 58%);
+  text-transform: uppercase;
+}
+
+.inventory-stat-comparison-head span {
+  font-size: 0.56rem;
+  font-weight: 900;
+}
+
+.inventory-damage-breakdown {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid rgb(119 210 223 / 10%);
+  padding-top: 8px;
+}
+
+.inventory-damage-breakdown > div {
+  min-width: 0;
+  border-right: 1px solid rgb(119 210 223 / 11%);
+  padding: 2px 7px;
+}
+
+.inventory-damage-breakdown > div:last-child {
+  border-right: 0;
+}
+
+.inventory-damage-breakdown dt {
+  overflow: hidden;
+  font-size: 0.55rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inventory-damage-breakdown dd {
+  margin-top: 2px;
+  color: #fff2d4;
+  font-size: 0.84rem;
+}
+
+.inventory-composition-tree {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inventory-socket-branch {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  padding-left: 15px;
+}
+
+.inventory-tree-connector {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 9px;
+  border-bottom: 1px solid rgb(79 205 224 / 30%);
+  border-left: 1px solid rgb(79 205 224 / 30%);
+  border-bottom-left-radius: 6px;
+}
+
+.inventory-related-item,
+.inventory-empty-socket {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 52px;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  gap: 9px;
+  align-items: center;
+  border: 1px solid rgb(115 207 220 / 18%);
+  border-radius: 8px;
+  padding: 5px 8px;
+  color: var(--app-text);
+  background: linear-gradient(100deg, rgb(24 65 76 / 48%), rgb(5 18 24 / 86%));
+  text-align: left;
+}
+
+button.inventory-related-item {
+  width: 100%;
+  cursor: pointer;
+  transition:
+    border-color var(--app-motion-fast) ease,
+    background var(--app-motion-fast) ease;
+}
+
+button.inventory-related-item:hover {
+  border-color: rgb(78 218 238 / 58%);
+  background: linear-gradient(100deg, rgb(27 86 101 / 64%), rgb(5 22 29 / 94%));
+}
+
+button.inventory-related-item:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 2px;
+}
+
+.inventory-related-item > .item-artwork {
+  width: 42px;
+  border-radius: 6px;
+  background-color: rgb(2 10 14 / 72%);
+}
+
+.inventory-related-item > span,
+.inventory-empty-socket > span {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.inventory-related-item small,
+.inventory-empty-socket small {
+  overflow: hidden;
+  color: var(--app-muted);
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.inventory-related-item strong,
+.inventory-empty-socket strong {
+  overflow: hidden;
+  color: #fff2d4;
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inventory-related-item > svg {
+  color: var(--app-cyan-bright);
+}
+
+.inventory-empty-socket {
+  grid-template-columns: 42px minmax(0, 1fr);
+  border-style: dashed;
+  color: var(--app-muted);
+  background: rgb(3 12 17 / 45%);
+}
+
+.inventory-empty-socket > svg {
+  justify-self: center;
+}
+
+.inventory-enchantment-branch {
+  width: calc(100% - 20px);
+  justify-self: end;
+}
+
+.inventory-enchantment-branch::before {
+  position: absolute;
+  left: -13px;
+  width: 12px;
+  border-top: 1px solid rgb(79 205 224 / 28%);
+  content: "";
+}
+
+.inventory-relationship-empty {
+  border: 1px dashed rgb(115 207 220 / 16%);
+  border-radius: 8px;
+  padding: 12px;
+  background: rgb(3 12 17 / 45%);
+}
+
+.inventory-item-inspector.compact {
+  position: static;
+  overflow: visible;
+  max-height: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.inventory-inspector-modal {
+  width: min(620px, calc(100vw - 24px));
+}
+
 @media (max-width: 1179px) {
   .inventory-collection-layout {
     grid-template-columns: minmax(0, 1fr);
@@ -828,6 +1052,10 @@
 
   .inventory-item-inspector {
     display: none;
+  }
+
+  .inventory-item-inspector.compact {
+    display: grid;
   }
 
   .inventory-item-grid {
@@ -935,7 +1163,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .inventory-item-tile {
+  .inventory-item-tile,
+  button.inventory-related-item {
     transition: none;
   }
 

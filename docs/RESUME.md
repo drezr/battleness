@@ -56,9 +56,12 @@ separate permanent Dev Lab prototype.
 - `/inventory/items` now matches its approved production direction from
   `mockups/13-inventory-items-production-v2.png` and `docs/INVENTORY_ITEMS_REDESIGN.md`. The view uses
   localized category tabs, search, element filtering, sorting, counts, artwork-first selectable
-  tiles, and a persistent inspector at wide widths; compact layouts keep the accessible shared
-  modal. Ring, Gem, and Monster tiles expose only their approved combat statistics. Resolved Ring
-  values come from the authoritative Equipment calculation, while Equipment and Forge remain the
+  tiles, and a persistent inspector at wide widths; compact layouts use an accessible
+  Inventory-specific modal. Ring, Gem, and Monster tiles expose only their approved combat
+  statistics. The inspector compares base, Ring-only, and final Ring values, shows speed and
+  penalties, renders socketed Gems and nested enchantments, and lets every related Ring, Gem,
+  Monster, or Spell select the corresponding owned item in place. Resolved values and relationship
+  references come from the authoritative server projections, while Equipment and Forge remain the
   mutation surfaces reached through contextual links.
 - `apps/prototype` is now a stateless internal Dev Lab. It retains deterministic scenarios, direct
   Battle Lab configuration, all 42 active spells and all monsters, presets, import/export, replay

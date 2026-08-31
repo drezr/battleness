@@ -53,9 +53,33 @@ type PlayerApiResponse = {
     level: number;
     bonusPercent: number;
     damage?: number;
+    baseDamage?: number;
+    ringDamage?: number;
+    gemDamage?: number;
+    spellDamage?: number;
+    monsterDamage?: number;
     energyCost?: number;
+    baseEnergyCost?: number;
     health?: number;
     cooldown?: number;
+    baseCooldown?: number;
+    baseSpeed?: number;
+    speed?: number;
+    energyPenalty?: number;
+    cooldownPenalty?: number;
+    socketedRing?: null | {
+      id: string;
+      type: string;
+      definitionId: string;
+      label: string;
+    };
+    enchantedGem?: null | {
+      id: string;
+      type: string;
+      definitionId: string;
+      label: string;
+    };
+    gems?: EquipmentRingResponse["gems"];
     progression: { nextLevelExperience: number | null; progressPercent: number };
     enchantment?: null | { id: string; type: "spell" | "monster" };
     enchantedGemId?: string | null;
@@ -102,7 +126,10 @@ type EquipmentRingResponse = {
   slotIndex: number | null;
   socketCount: number | null;
   baseDamage: number;
+  baseEnergyCost: number;
+  baseCooldown: number;
   baseSpeed: number;
+  speed: number;
   damage: number;
   ringDamage: number;
   gemDamage: number;
@@ -118,11 +145,15 @@ type EquipmentRingResponse = {
     damage: number;
     energyPenalty: number;
     cooldownPenalty: number;
+    speed: number;
     enchantment: null | {
       id: string;
       type: "spell" | "monster";
       definitionId: string;
       damage: number;
+      energyPenalty: number;
+      cooldownPenalty: number;
+      speed: number;
     };
   }[];
 };
@@ -172,6 +203,12 @@ type SocketApiResponse = {
     type: "spell" | "monster";
     definitionId: string;
     damage: number;
+    health?: number;
+    cooldown?: number;
+    energyPenalty: number;
+    cooldownPenalty: number;
+    baseSpeed: number;
+    speed: number;
     enchantedGemId: string | null;
   }[];
 };
@@ -4076,6 +4113,64 @@ describe("Nuxt Game App APIs", () => {
       totalEnergyPenalty: 1,
       totalCooldownPenalty: 1.3,
     });
+
+    const inventory = (await playerHandler({})) as PlayerApiResponse;
+    const inventoryRing = inventory.inventory.find(
+      (item) => item.id === "devPlayer.ring.ashenLoop.metrics",
+    );
+    const inventoryGem = inventory.inventory.find(
+      (item) => item.id === "devPlayer.gem.emberShard.metrics",
+    );
+    const inventorySpell = inventory.inventory.find(
+      (item) => item.id === "devPlayer.spell.carbonize.metrics",
+    );
+
+    expect(inventoryRing).toMatchObject({
+      baseDamage: ring.baseDamage,
+      ringDamage: ring.ringDamage,
+      gemDamage: ring.gemDamage,
+      spellDamage: ring.spellDamage,
+      monsterDamage: ring.monsterDamage,
+      damage: ring.damage,
+      baseEnergyCost: ring.baseEnergyCost,
+      energyCost: ring.energyCost,
+      baseCooldown: ring.baseCooldown,
+      cooldown: ring.cooldown,
+      baseSpeed: ring.baseSpeed,
+      speed: ring.speed,
+      gems: [
+        expect.objectContaining({
+          id: "devPlayer.gem.emberShard.metrics",
+          speed: ring.gems[0]?.speed,
+          enchantment: expect.objectContaining({
+            id: "devPlayer.spell.carbonize.metrics",
+            speed: ring.gems[0]?.enchantment?.speed,
+          }),
+        }),
+      ],
+    });
+    expect(inventoryGem).toMatchObject({
+      speed: ring.gems[0]?.speed,
+      socketIndex: 0,
+      socketedRing: {
+        id: "devPlayer.ring.ashenLoop.metrics",
+        type: "ring",
+        definitionId: "ashenLoop",
+        label: "Ashen Loop",
+      },
+      enchantment: expect.objectContaining({ id: "devPlayer.spell.carbonize.metrics" }),
+    });
+    expect(inventorySpell).toMatchObject({
+      speed: ring.gems[0]?.enchantment?.speed,
+      energyPenalty: ring.gems[0]?.enchantment?.energyPenalty,
+      cooldownPenalty: ring.gems[0]?.enchantment?.cooldownPenalty,
+      enchantedGem: {
+        id: "devPlayer.gem.emberShard.metrics",
+        type: "gem",
+        definitionId: "emberShard",
+        label: "Ember Shard",
+      },
+    });
   });
 
   it("rejects missing and invalid equipment actions", async () => {
@@ -4434,6 +4529,22 @@ describe("Nuxt Game App APIs", () => {
     expect(
       inventory.inventory.find((item) => item.id === monster.crafted.id)?.enchantedGemLabel,
     ).toBe("Ember Shard");
+    const inventoryMonster = inventory.inventory.find((item) => item.id === monster.crafted.id);
+    const socketMonster = replaced.enchantmentTargets.find(
+      (target) => target.id === monster.crafted.id,
+    );
+    expect(inventoryMonster).toMatchObject({
+      cooldown: socketMonster?.cooldown,
+      energyPenalty: socketMonster?.energyPenalty,
+      cooldownPenalty: socketMonster?.cooldownPenalty,
+      speed: socketMonster?.speed,
+      enchantedGem: {
+        id: gem.crafted.id,
+        type: "gem",
+        definitionId: "emberShard",
+        label: "Ember Shard",
+      },
+    });
   });
 
   it("rejects reusing an enchantment target on multiple gems", async () => {

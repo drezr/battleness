@@ -646,6 +646,15 @@ export type LiveBattleActionResponse = {
   events: BattleEvent[];
 };
 
+export type InventoryItemReferenceView = {
+  id: string;
+  type: "ring" | "gem" | "monster" | "spell";
+  definitionId: string;
+  label: string;
+  rarity: string;
+  element: string;
+};
+
 export type InventoryItemView = {
   id: string;
   type: string;
@@ -663,12 +672,20 @@ export type InventoryItemView = {
   socketCount: number | null;
   equipped: boolean;
   damage?: number;
+  baseDamage?: number;
+  ringDamage?: number;
+  gemDamage?: number;
+  spellDamage?: number;
+  monsterDamage?: number;
   energyCost?: number;
+  baseEnergyCost?: number;
   health?: number;
   energyPenalty?: number;
   cooldownPenalty?: number;
   cooldown?: number;
+  baseCooldown?: number;
   baseSpeed?: number;
+  speed?: number;
   targeting?: {
     selection: "none" | "one";
     allowedTargets: ("anyCombatant" | "anyMonster" | "alliedMonster" | "enemyMonster")[];
@@ -676,9 +693,11 @@ export type InventoryItemView = {
   skill?: string | null;
   socketedRingId?: string | null;
   socketedRingLabel?: string | null;
+  socketedRing?: InventoryItemReferenceView | null;
   socketIndex?: number | null;
   enchantedGemId?: string | null;
   enchantedGemLabel?: string | null;
+  enchantedGem?: InventoryItemReferenceView | null;
   gems?: EquipmentGemView[];
   enchantment?: EquipmentEnchantmentView | null;
 };
@@ -718,6 +737,7 @@ export type EquipmentRingView = {
   baseEnergyCost: number;
   baseCooldown: number;
   baseSpeed: number;
+  speed: number;
   damage: number;
   ringDamage: number;
   gemDamage: number;
@@ -743,6 +763,7 @@ export type EquipmentGemView = {
   damage: number;
   energyPenalty: number;
   cooldownPenalty: number;
+  speed: number;
   enchantment: EquipmentEnchantmentView | null;
 };
 
@@ -759,6 +780,7 @@ export type EquipmentEnchantmentView =
       damage: number;
       energyPenalty: number;
       cooldownPenalty: number;
+      speed: number;
     }
   | {
       id: string;
@@ -772,6 +794,9 @@ export type EquipmentEnchantmentView =
       damage: number;
       health: number;
       cooldown: number;
+      energyPenalty: number;
+      cooldownPenalty: number;
+      speed: number;
       skill: string | null;
     };
 
@@ -858,6 +883,8 @@ export type SocketEnchantmentTargetView =
       damage: number;
       energyPenalty: number;
       cooldownPenalty: number;
+      baseSpeed: number;
+      speed: number;
       enchantedGemId: string | null;
     }
   | {
@@ -873,6 +900,10 @@ export type SocketEnchantmentTargetView =
       damage: number;
       health: number;
       cooldown: number;
+      energyPenalty: number;
+      cooldownPenalty: number;
+      baseSpeed: number;
+      speed: number;
       skill: string | null;
       enchantedGemId: string | null;
     };

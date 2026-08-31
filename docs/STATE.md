@@ -7,10 +7,13 @@ This file records modifications made to the project during agent-assisted work.
 - `/inventory/items` now implements the approved production collection documented in
   `docs/INVENTORY_ITEMS_REDESIGN.md`. Artwork-first selectable tiles replace repeated data-heavy
   cards; category counts, localized search, element filtering, and sorting lead into a persistent
-  wide-screen inspector or the existing accessible compact-layout modal. Ring tiles show resolved
+  wide-screen inspector or an accessible Inventory-specific compact-layout modal. Ring tiles show resolved
   damage, energy cost, and cooldown; Gem tiles show added damage; Monster tiles show damage, health,
   and cooldown. Ring values reuse the authoritative Equipment calculation. Contextual actions route
-  to existing Equipment and Forge surfaces without adding mutations or capacity rules.
+  to existing Equipment and Forge surfaces without adding mutations or capacity rules. The
+  inspector compares base, Ring-only, and final Ring values, includes speed and penalty statistics,
+  renders a socket and enchantment tree, and supports in-place navigation between related Rings,
+  Gems, Monsters, and Spells while preserving the modal on compact layouts.
 - The repository-root `assets/` authoring archive was removed after its spell atlas was verified
   against the active copies. Spell atlas metadata lives beside the other item metadata under
   `packages/content/src/atlases/`, while identical runtime PNGs live in each application's
@@ -520,6 +523,18 @@ This file records modifications made to the project during agent-assisted work.
 - Added a centralized project TODO in `docs/TODO.md` covering Game App persistence, inventory, forge, battle integration, campaign, rewards, market, profile, authentication, PvP, player market, presentation, production, and open design questions.
 
 ## Change Log
+
+### 2026-08-17
+
+- Expanded the Inventory Items inspector into an authoritative composition view. Ring details now
+  compare base, level-and-quality-resolved, and final equipped statistics, expose damage-source
+  totals and speed, and render every owned socket with its Gem and optional Monster or Spell child.
+  Gem details expose speed, enchantment, and containing Ring; Monster and Spell details expose
+  energy/cooldown penalties, speed, and their enchanted Gem. Rich API references provide artwork
+  identity without client calculations. Every related object is keyboard-accessible and selects the
+  linked item in place, automatically changing category and resetting inspector scroll. Added a
+  dedicated accessible compact modal and verified desktop, portrait, and short-landscape layouts
+  without horizontal overflow or console warnings.
 
 ### 2026-08-13
 

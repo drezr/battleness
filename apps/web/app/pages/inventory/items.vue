@@ -61,14 +61,13 @@
           </div>
         </div>
 
-        <InventoryItemInspector :item="selectedItem" />
+        <InventoryItemInspector :item="selectedItem" @select-item="navigateToItem" />
       </section>
 
-      <ItemDetailPanel
+      <InventoryItemInspectorModal
         :item="mobileInspectorItem"
-        :title="t('inventory.items.detail')"
-        :manage-to="mobileManageTo"
         @clear="mobileInspectorItemId = ''"
+        @select-item="navigateToItem"
       />
     </template>
   </main>
@@ -153,7 +152,6 @@ const selectedItem = computed(
 const mobileInspectorItem = computed(
   () => state.value?.inventory.find((item) => item.id === mobileInspectorItemId.value) ?? null,
 );
-const mobileManageTo = computed(() => manageRoute(mobileInspectorItem.value));
 
 watchEffect(() => {
   const visibleItems = filteredItems.value;
@@ -187,6 +185,16 @@ function selectItem(itemId: string): void {
   if (compactInspector.value) mobileInspectorItemId.value = itemId;
 }
 
+function navigateToItem(itemId: string): void {
+  const relatedItem = state.value?.inventory.find((item) => item.id === itemId);
+  if (!relatedItem) return;
+  typeFilter.value = relatedItem.type as InventoryCategory;
+  elementFilter.value = "all";
+  searchQuery.value = "";
+  selectedItemId.value = itemId;
+  if (compactInspector.value) mobileInspectorItemId.value = itemId;
+}
+
 function resetFilters(): void {
   typeFilter.value = "all";
   elementFilter.value = "all";
@@ -197,12 +205,5 @@ function resetFilters(): void {
 function updateInspectorMode(event: MediaQueryList | MediaQueryListEvent): void {
   compactInspector.value = event.matches;
   if (!event.matches) mobileInspectorItemId.value = "";
-}
-
-function manageRoute(item: InventoryItemView | null): string | undefined {
-  if (!item) return undefined;
-  if (item.type === "ring") return `/forge/socket?ringId=${encodeURIComponent(item.id)}`;
-  if (item.type === "gem") return `/forge/enchant?gemId=${encodeURIComponent(item.id)}`;
-  return `/forge/enchant?targetId=${encodeURIComponent(item.id)}`;
 }
 </script>

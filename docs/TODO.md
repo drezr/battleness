@@ -258,6 +258,9 @@ section.
 - [x] Evaluate Inventory Items slice 3 against the existing Equipment API; keep Equipment as the
       authoritative mutation surface and expose contextual navigation rather than duplicate direct
       equip or comparison behavior in Items.
+- [x] Extend the Inventory inspector with authoritative base-to-final Ring statistics, speed and
+      penalty details, a socket/enchantment tree, and bidirectional in-place navigation between
+      related Rings, Gems, Monsters, and Spells.
 
 ## Game-Wide UI Immersion Iteration
 
